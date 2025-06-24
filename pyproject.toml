@@ -1,9 +1,9 @@
 [project]
-name = "notebooks"
+name = "ai-notebooks"
 version = "0.1.0"
-description = "Add your description here"
+description = "Notes on machine learning & AI related things."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "jupyter>=1.1.1",
     "jupyterlab>=4.4.3",

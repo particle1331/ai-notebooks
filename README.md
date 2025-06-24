@@ -1,8 +1,8 @@
 # AI notebooks
 
-Some jupyter notebooks containing notes and implementation of AI models, algorithms, & applications. 
+Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. 
 
-Or generally stuff I try to learn. Adding AI slop for good measure:
+... or generally, related stuff that I try to learn. AI slop for good measure:
 
 <img src="./ai.png">
 
@@ -11,11 +11,11 @@ Or generally stuff I try to learn. Adding AI slop for good measure:
 The venv used to run the notebooks can be re-created easily using [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
-uv venv  # python version in pyproject.toml, else use --python=3.{x} to specify
+uv venv --python 3.13
 uv sync
 ```
 
-**NOTE:** You may have to add the venv as Jupyter kernel. But in VSCode it should be detected immediately.
+**NOTE:** You may have to add the `.venv` as Jupyter kernel. But in VSCode it should be detected immediately.
 
 ## the notebooks
 
