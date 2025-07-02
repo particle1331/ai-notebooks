@@ -1,8 +1,6 @@
 # AI notebooks
 
-Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. 
-
-... or generally, related stuff that I try to learn. 
+Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. Or generally AI / ML related stuff like chess engines. Ultimately, our goal is to learn how to build computationally efficient, sustainable, and [aligned](https://en.wikipedia.org/wiki/AI_alignment) intelligent systems: 🤖 = 🧠 + ⌛ + ♻️ + 🚊.
 
 <img src="./ai.png">
 
