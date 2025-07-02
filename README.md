@@ -1,8 +1,8 @@
 # AI notebooks
 
-Jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. 
+Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. 
 
-... or generally, related stuff that I try to learn. AI slop for good measure:
+... or generally, related stuff that I try to learn. 
 
 <img src="./ai.png">
 
@@ -15,12 +15,12 @@ uv venv --python 3.13
 uv sync
 ```
 
-**NOTE:** You may have to add the `.venv` as ipykernel in JupyterLab. But in VSCode it should be detected immediately.
-
+**NOTE:** You may have to add the `.venv` as ipykernel in JupyterLab:
 ```bash
 uv add ipykernel
 uv run python -m ipykernel install --user --name=ai-notebooks
 ```
+
 
 ## the notebooks
 
