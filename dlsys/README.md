@@ -18,16 +18,16 @@ implement many common architectures in the library.
 
 - [01 Introduction](./01.ipynb)
 - [02 Softmax Regression](./02.ipynb)
+- [03 "Manual" Neural Networks](./03.ipynb)
 
 ## Prerequisites
 
 - Systems programming 
 - Linear algebra
 - Other mathematical background: e.g., calculus, probability, basic proofs
-- Python and C++ development $^{[1]}$
-- Basic prior experience with ML
+- Python and C++ development ([C++ crash course](https://www.youtube.com/watch?v=9Myk2vcK8s8))
+- Prior experience with basic ML (overfitting, model validation)
 
-[1] [C++ crash course](https://www.youtube.com/watch?v=9Myk2vcK8s8)
 
 ## Learning objectives
 
