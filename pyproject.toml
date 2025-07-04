@@ -16,6 +16,8 @@ dependencies = [
     "scikit-learn>=1.7.0",
     "torchvision>=0.22.1",
     "tqdm>=4.67.1",
+    "torchviz>=0.0.3",
+    "torchview>=0.2.7",
 ]
 
 [build-system]

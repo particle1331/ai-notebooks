@@ -19,6 +19,7 @@ implement many common architectures in the library.
 - [01 Introduction](./01.ipynb)
 - [02 Softmax Regression](./02.ipynb)
 - [03 "Manual" Neural Networks](./03.ipynb)
+- [04 Automatic Differentiation](./04.ipynb)
 
 ## Prerequisites
 
@@ -39,7 +40,7 @@ concepts like automatic differentiation, gradient-based optimization
 - Understand how hardware acceleration (e.g., on GPUs) works under the hood
 - Be able to develop your own highly efficient code for modern DL
 
-## Course instructors
+<!-- ## Course instructors
 
 <img src="img/01-7.png">
-<img src="img/01-8.png">
+<img src="img/01-8.png"> -->
