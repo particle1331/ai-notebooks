@@ -13,7 +13,7 @@ int main(){
         cout << "                __     " << endl;
         cout << "              <(o )___-" << endl;
         cout << "               ( .__> /" << endl;
-        cout << "                `----' " << endl;    
+        cout << "                `----' " << endl;
     }
 
     return 0;

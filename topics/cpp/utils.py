@@ -1,18 +1,28 @@
-from IPython.display import display, HTML
-from IPython import get_ipython
-from pathlib import Path
+import shlex
+import argparse
+import subprocess
+from IPython.core.magic import register_cell_magic
 
-def get_latest_file(folder: str):
-    p = Path(folder)
-    fn = max(p.glob("**/*.cpp"), key=lambda f: f.stat().st_mtime)
-    return fn.name.replace(".cpp", "")
+def parse_args(line):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", nargs="?", default="tmp.cpp")
+    parser.add_argument("--run", type=lambda x: x.lower() != "false", default=True)
+    parser.add_argument("--exitcode", type=lambda x: x.lower() == "true", default=False)
+    args = parser.parse_args(shlex.split(line))
+    return args
 
-def run(fn: str=None, comp: bool=True):
-    fn = get_latest_file("./code") if fn is None else fn
-    cmd = f"!./code/{fn}"
-    if comp:
-        cmd = f"!g++-15 ./code/{fn}.cpp -o ./code/{fn}\n" + cmd
+@register_cell_magic
+def runcpp(line, cell):
+    args = parse_args(line)
+    with open(f"./code/{args.filename}", "w") as file:
+        file.write(cell)
 
-    # run
-    print((cmd + "\n").replace("!", "$ "))
-    get_ipython().run_cell(cmd)
+    # compile and run
+    fn = args.filename.split(".")[0]
+    run = f"\n./code/{fn}" * int(args.run)
+    cmd = f"g++-15 ./code/{fn}.cpp -o ./code/{fn}" + run
+
+    print(cmd + "\n")
+    ret = subprocess.run(cmd, shell=True)
+    if args.exitcode:
+        print(ret.returncode)
