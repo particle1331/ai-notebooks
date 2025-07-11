@@ -28,9 +28,4 @@ The notebooks for each topic can be found in separate folders in the `/topics` d
 | :-- | :-- | :-- | :-- |
 | Deep Learning Systems | `/dlsys` | [CMU 9-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/). Fall 2024 + 2022 video lectures | `#algorithms`, `#implementation` |
 
-**Setup.** The notebooks are intended to be viewed locally using Jupyterlab or VS Code. I maintain the ff. settings for better QoL in Jupyter lab:
-
-```bash
-mkdir -p ~/.jupyter/lab/user-settings
-cp -r .jupyterlab-settings/* ~/.jupyter/lab/user-settings/
-```
+**Setup.** The notebooks are intended to be viewed and run using Jupyterlab or VS Code.
