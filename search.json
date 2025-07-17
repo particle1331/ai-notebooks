@@ -98,88 +98,46 @@
     "text": "Elements of deep learning systems\n\nCompose multiple tensor operations to build modern ML models.\nTransform a sequence of operations (automatic differentiation).\nAccelerate computation via specialized hardware.\nExtend to more hardware backends, and more operators."
   },
   {
-    "objectID": "topics/cpp/04.html",
-    "href": "topics/cpp/04.html",
-    "title": "Functions",
+    "objectID": "topics/cpp/05.html",
+    "href": "topics/cpp/05.html",
+    "title": "Collection Data Types",
     "section": "",
-    "text": "Functions in C++ require a return type and a body. It may return a variable, value or nothing (void). A void return type means that assigning the function output to a variable results in an erorr. This behavior is different from Python which allows assignment of None which is the default return value whenever none is specified.\nfrom utils import *\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint add_one(int x) {\n    return x + 1;\n}\n\nvoid hello() {\n    cout &lt;&lt; \"hello\\n\";\n}\n\nint main() {\n    cout &lt;&lt; add_one(3) &lt;&lt; endl;\n    hello();\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n4\nhello"
+    "text": "In addition to the primitive types, C++ also offers built-in collection types. A collection data type is a grouping of some number of items (possibly 1 or 0) that have some shared significance or need to be operated upon together.\nArrays, vectors, strings, sets, and hash tables are among these useful C++ collection types."
   },
   {
-    "objectID": "topics/cpp/04.html#newtons-method",
-    "href": "topics/cpp/04.html#newtons-method",
-    "title": "Functions",
-    "section": "Newton’s method",
-    "text": "Newton’s method\nExample. Let’s define an actual meaningful function. Recall Newton’s Method for getting the zero of \\(f\\):\n\\[x_{k+1} = x_k - \\frac{f(x)}{f^\\prime(x)}\\]\nGiven a number \\(a &gt; 0\\) we want to solve for its square root using \\(f(x) = x^2 - a.\\)\n\\[\nx_{k + 1} = x_k - \\frac{x_k^2 - a}{2 x_k} = \\frac{1}{2} \\left( x_k + \\frac{a}{x_k} \\right).\n\\]\n\n%%runcpp 04_newton_sqrt.cpp --run=false\n#include &lt;iostream&gt;\n#include &lt;iomanip&gt;\nusing namespace std;\n\ndouble squareroot(float a, int n_steps = 10) {\n    int i;\n    double x = a / 2;\n    cout &lt;&lt; fixed &lt;&lt; setprecision(10);\n    \n    for (i = 0; i &lt; n_steps; i++) {\n        x = 0.5 * (x + a / x);\n        cout &lt;&lt; x &lt;&lt; \"\\t\" &lt;&lt; \"| err: \" &lt;&lt; x * x - a &lt;&lt; endl;\n    }\n    \n    return x;\n}\n\nint main() {\n    double a; cin &gt;&gt; a;\n    double x;\n    x = squareroot(a);\n    cout &lt;&lt; \"\\noutput: \" &lt;&lt; x;\n    return 0;\n}\n\ng++ -std=c++23 ./code/04_newton_sqrt.cpp -o ./code/04_newton_sqrt\n\n\n\nNOTE: Here we use &lt;iomanip&gt; for std::fixed and std::setprecision. To increase cout precision from 6 to 8;\n\n!echo 1011.25 | ./code/04_newton_sqrt\n\n253.8125000000  | err: 63409.5351562500\n128.8983701674  | err: 15603.5398318240\n68.3718491123   | err: 3663.4597510372\n41.5811465161   | err: 717.7417455967\n32.9505313728   | err: 74.4875177519\n31.8202382539   | err: 1.2775625347\n31.8001635687   | err: 0.0004029930\n31.8001572323   | err: 0.0000000000\n31.8001572323   | err: -0.0000000000\n31.8001572323   | err: -0.0000000000\n\noutput: 31.8001572323\n\n\n\nround(1011.25 ** 0.5, 10)\n\n31.8001572323"
+    "objectID": "topics/cpp/05.html#arrays",
+    "href": "topics/cpp/05.html#arrays",
+    "title": "Collection Data Types",
+    "section": "Arrays",
+    "text": "Arrays\nAn array data structure is an ordered arrangement of values located at equally spaced addresses in contiguous computer memory. The fact that array elements are stored in memory in contiguous memory locations making look-up via index very, very fast. In computing, a word is the unit of data used by a particular processor design, such as 32 or 64 bits. For example, an array of 100 integer variables, with indices 0 through 99, might be stored as 100 words at memory addresses 20000, 20004, 20008, … 20396. The element with index i would be located at the address 20000 + 4 × i.\nC++ arrays can be allocated in two different ways:\n\n\n\n\n\n\n\n\nAllocation\nDescription\nUse case\n\n\n\n\nStatic\nThe array size is fixed at compile-time and cannot change\nSpeed is essential or where hardware constraints exist (real-time or low-level processing)\n\n\nDynamic\nPointers are used in the allocation process so the size can change at run-time\nTypically used when more flexibility is required\n\n\n\nRemark. As a Python programmer, you can think of the array as the ancestor of the Python list, and you might remember that Python lists are actually implemented via an underlying array consisting of references.\nStatic arrays. This can be initialized by indicating both type and size (explicit or implicit):\ndouble a[10];\nstring s[] = {\"this\", \"is\", \"an\", \"array\", \"of\", \"strings\"};\nNote that as tradeoff for efficiency, C++ arrays dont offer the same protections as Python:\n\nfrom utils import runcpp\n\nHere we did out of bounds access:\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int A[] = {1, 2, 3, 4, 5};\n    cout &lt;&lt; A[4] &lt;&lt; \" \" &lt;&lt; &A[4] &lt;&lt; endl;\n    cout &lt;&lt; A[5] &lt;&lt; \" \" &lt;&lt; &A[5] &lt;&lt; endl;      // out of bounds access\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n\n\n./code/tmp.cpp:7:13: warning: array index 5 is past the end of the array (that has type 'int[5]') [-Warray-bounds]\n    7 |     cout &lt;&lt; A[5] &lt;&lt; \" \" &lt;&lt; &A[5] &lt;&lt; endl;      // out of bounds access\n      |             ^ ~\n./code/tmp.cpp:5:5: note: array 'A' declared here\n    5 |     int A[] = {1, 2, 3, 4, 5};\n      |     ^\n1 warning generated.\n\n\n5 0x16b7ae930\n1 0x16b7ae934\n0\n\n\nIt’s nice that we get a warning from our compiler. But the exit code is still 0.\nRemark. Observe that the addresses are spaced 4 apart. These are bytes which are the basic addressable unit of memory in most modern computer architectures. A byte consist of 8 bits (0 or 1). Primary data tpes are stored in multiple bytes:\n\nchar: 1 byte = 8 bits\nint / float: 4 bytes = 32 bits\ndouble: 8 bytes = 64 bits"
   },
   {
-    "objectID": "topics/cpp/04.html#parameter-passing",
-    "href": "topics/cpp/04.html#parameter-passing",
-    "title": "Functions",
-    "section": "Parameter passing",
-    "text": "Parameter passing\nCalling a function by value involves copying the contents of the arguments into the memory locations of the corresponding formal parameters. If the function changes the values of the parameters, the original contents in the memory referenced by the arguments of the calling function do not change. This is analogous to local variables in Python functions.\nIn C++, we can pass a reference to a location in memory which allows changing the value in that location. To let the compiler know that you intend to use pass by reference, you attach an & to the end of the type name in the formal parameter list in the function declaration and header.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid add_one(int& x) {\n    x = x + 1;\n}\n\nint main() {\n    int u = 41; \n    add_one(u);\n    cout &lt;&lt; u &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n42\n\n\nRemark. Removing the & in add_one results in u being the same."
-  },
-  {
-    "objectID": "topics/cpp/04.html#arrays-as-parameters-in-functions",
-    "href": "topics/cpp/04.html#arrays-as-parameters-in-functions",
-    "title": "Functions",
-    "section": "Arrays as Parameters in Functions",
-    "text": "Arrays as Parameters in Functions\nAn array is a collection data type that is the ancestor of the Python list. We will discuss arrays in more detail in the next chapter. Functions can be used with array parameters to maintain a structured design. However, a formal parameter for an array is neither a call-by-value nor a call-by-reference, but a new type of parameter pass called an array parameter:\nfloat f(int arr[]) {\n    ...\n} \nMoreover, an array is defined using the same notation.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\ndouble avg(int arr[], int n) {\n    double s = 0;\n    for (int i = 0; i &lt; n; i++) {\n        s += arr[i];\n    }\n    return s / n;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    cout &lt;&lt; avg(arr, 2) &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1.5\n\n\nNOTE: The functions with array parameters do not make private copies of the arrays. Instead, the reference is passed to reduce the impact on memory. Arrays can therefore always be permanently changed when passed as arguments to functions. ⚠️\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid zero(int arr[]) {\n    arr[0] = 0;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    println(\"{}, {}\", arr[0], arr[1]);\n    zero(arr);\n    println(\"{}, {}\", arr[0], arr[1]);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1, 2\n0, 2\n\n\nTo prevent ourselves from accidentally modifying any of these arrays, we can add the modifier const in the function head. The compiler will then raise an error if any statement within the function’s definition modifies the elements of the const array:\n\n!rm ./code/tmp\n\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid zero(const int arr[]) {\n    arr[0] = 0;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    println(\"{}, {}\", arr[0], arr[1]);\n    zero(arr);\n    println(\"{}, {}\", arr[0], arr[1]);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n127\n\n\n./code/tmp.cpp:5:12: error: read-only variable is not assignable\n    5 |     arr[0] = 0;\n      |     ~~~~~~ ^\n1 error generated.\n/bin/sh: line 1: ./code/tmp: No such file or directory"
-  },
-  {
-    "objectID": "topics/cpp/04.html#function-overloading",
-    "href": "topics/cpp/04.html#function-overloading",
-    "title": "Functions",
-    "section": "Function Overloading",
-    "text": "Function Overloading\nFunction overloading is a unique feature of C++ (not present in Python) where functions of the same name but with different implementations can be defined. The functions are distinguished based on their parameters. Note that assigning different return types result in a warning:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid f(int n) {\n    println(\"1 params: {}\", n);\n}\n\nvoid f(int n, int m) {\n    println(\"2 params: {}, {}\", n, m);\n}\n\nint main() {\n    f(4);\n    f(5, 6);\n    f(0);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1 params: 4\n2 params: 5, 6\n1 params: 0"
-  },
-  {
-    "objectID": "topics/cpp/02.html",
-    "href": "topics/cpp/02.html",
-    "title": "Atomic C++ Data Types",
+    "objectID": "topics/cpp/03.html",
+    "href": "topics/cpp/03.html",
+    "title": "Control Structures",
     "section": "",
-    "text": "Recall that C++ requires users to specify the data type of each variable. The primary built-in data types in C++ are: int, float, double, bool, and char. There is also a special type called pointer which holds a memory location. C++ also has a collection of compound data types."
+    "text": "from utils import runcpp"
   },
   {
-    "objectID": "topics/cpp/02.html#boolean-data",
-    "href": "topics/cpp/02.html#boolean-data",
-    "title": "Atomic C++ Data Types",
-    "section": "Boolean data",
-    "text": "Boolean data\nC++ uses the keyword bool which is not capitalized. The possible state values for a C++ Boolean are true and false (note: lower case). C++ uses the standard Boolean operators: && (AND), || (OR), and ! (NOT).\nNote that the internally stored values representing true and false are 1 and 0, respectively. Moreover, you can perform math operations of the 1s and 0s where they are casted as a numeric type. Indeed:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    auto print_type = [](auto expr) {\n        cout &lt;&lt; \"(\" &lt;&lt; typeid(expr).name() &lt;&lt; \") \" &lt;&lt; expr &lt;&lt; endl;\n    };\n\n    print_type(true);\n    print_type(false);\n    cout &lt;&lt; (true || false) &lt;&lt; endl;\n    cout &lt;&lt; (true && false) &lt;&lt; endl;\n    print_type(true + true);\n    print_type(true * 1.);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n(b) 1\n(b) 0\n1\n0\n(i) 2\n(d) 1\n\n\nBoolean data are also used as results for things like comparison (&lt;, ==, etc.). As usual, relational and logical operators can be combined to form complex logical conditions. The following function demonstrates relational operators:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    cout &lt;&lt; (5 == 10) &lt;&lt; endl;\n    cout &lt;&lt; (10 &gt; 5) &lt;&lt; endl;\n    cout &lt;&lt; ((5 &gt;= 1) && (5 &lt;= 10)) &lt;&lt; endl;\n    cout &lt;&lt; ((5 &gt;= 1) || (1 / 0)) &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0\n1\n1\n1\n\n\nRemark. Observe short circuit with OR works as 1/0 was not evaluated.\nOne gotcha with booleans is assignment. If you assign a non-null (i.e. nonzero), then it becomes evaluated as 1. That is, false = 0 and !false = true. To see this:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    bool bool_var = -1;\n    cout &lt;&lt; bool_var &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1\n\n\nAssigning -1 to a bool evaluates to 1! But this is intended behavior due to static typing."
+    "objectID": "topics/cpp/03.html#conditionals",
+    "href": "topics/cpp/03.html#conditionals",
+    "title": "Control Structures",
+    "section": "Conditionals",
+    "text": "Conditionals\nC++ if-else is just like Python. It doesn’t have elif. But it does allow chaining else if to emulate the same behavior.\n\n%%runcpp --run=false\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int grade;\n    cin &gt;&gt; grade;\n\n    if (grade &lt; 60) {\n        cout &lt;&lt; 'F' &lt;&lt; endl;\n    }\n    else if (grade &lt; 70) {\n        cout &lt;&lt; 'D' &lt;&lt; endl;\n    }\n    else if (grade &lt; 80) {\n        cout &lt;&lt; 'C' &lt;&lt; endl;\n    }\n    else if (grade &lt; 90) {\n        cout &lt;&lt; 'B' &lt;&lt; endl;\n    }\n    else {\n        cout &lt;&lt; 'A' &lt;&lt; endl;\n    }\n    \n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n\n\n\n\n!echo 10 | ./code/tmp\n\n0x0\n1\n\n\n\n!echo 83 | ./code/tmp\n\n0x0\n1\n\n\nRemark. There also the switch keyword, which uses case and break."
   },
   {
-    "objectID": "topics/cpp/02.html#character-data",
-    "href": "topics/cpp/02.html#character-data",
-    "title": "Atomic C++ Data Types",
-    "section": "Character data",
-    "text": "Character data\nIn Python strings can be created with single or double quotes. In C++ single quotes (’) are used for the character (char) data type, and double quotes (“) are used for the string data type.\nStrings in C++ provides dynamic memory management of an array of chars. It supports built-in methods (e.g. .size(), .substr(), .find()), and features safety and flexibility over raw C-style strings (e.g. char cstr[] = \"hello\";). Note that \"a\" == 'a' results in an error in C++.\nchar a = 'h';\nchar cstr[] = \"hello\";      // C-style string (char array)\nstd::string str = \"hello\";  // C++ string object\nBut you can convert between them:\nstr.c_str();         // std::string → const char*\nstd::string(cstr);   // char* → std::string"
+    "objectID": "topics/cpp/03.html#while-loops",
+    "href": "topics/cpp/03.html#while-loops",
+    "title": "Control Structures",
+    "section": "While loops",
+    "text": "While loops\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int c = 0;\n    while (c &lt; 5) {\n        cout &lt;&lt; c &lt;&lt; \" Hello, world!\\n\";\n        c += 1;\n    }\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0 Hello, world!\n1 Hello, world!\n2 Hello, world!\n3 Hello, world!\n4 Hello, world!\n\n\nChecking ints as condition:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int x;\n    x = -1; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    x =  0; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    x = +1; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\nok\nnot\nok"
   },
   {
-    "objectID": "topics/cpp/02.html#pointers",
-    "href": "topics/cpp/02.html#pointers",
-    "title": "Atomic C++ Data Types",
-    "section": "Pointers",
-    "text": "Pointers\nIn C++, an assignment like below consists of (1) allocating space in memory and (2) storing the value of a variable:\nint var = 100;\nTo get the address of a variable in memory we use the address-of operator &:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int var = 100;\n    cout &lt;&lt; &var &lt;&lt; \" \" &lt;&lt; var &lt;&lt; endl;\n    var = 200;\n    cout &lt;&lt; &var &lt;&lt; \" \" &lt;&lt; var &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x16bba6938 100\n0x16bba6938 200\n\n\nRemark. For basic types declared in a function scope, the address is fixed during their lifetime.\nIn Python, it is impossible to store a variable directly. Instead, a reference to the data object is used. In C++, variables store values directly, because they are faster to reference. References are slower, but they are sometimes useful. If in C++, we want to create an analogous reference to a memory location, we must use a special data type called a pointer.\n\nPointer syntax\nPointer init. The syntax for initializing a pointer is similar to the usual assignment except we use * between the data type and the identifier:\nint* ptr;\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int* ptr;\n    cout &lt;&lt; ptr &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x100953d7c\n\n\n\n\nAssigning an address using &\nOne way to do this is to have a pointer refer to another variable by using the address-of operator &, which we know returns the address of a variable.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int  var = 100;\n    int* ptr = &var;\n    cout &lt;&lt;  ptr &lt;&lt; endl;    // address of var\n    cout &lt;&lt; *ptr &lt;&lt; endl;    // dereference =&gt; value\n\n    // trying out reassignment\n    var = 200;\n    cout &lt;&lt; &var &lt;&lt; endl;\n    cout &lt;&lt; *ptr &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x16b92a938\n100\n0x16b92a938\n200\n\n\nRemark. If we assign an address for a location that is outside of your segment (area in memory reserved for your program), the operating system will jump in with a message about a “segmentation fault” (aka segfault). (Although such an error message looks bad, a seg fault is in fact a helpful error because unlike the elusive logical errors, the reason is fairly localized.)\n\n\nNull pointer\nLike None in Python, the null pointer (nullptr) in C++ points to nothing. Or more precisely, it does not point to an address that is mapped to the program’s memory space. The null pointer is often used in conditions in conjunction with AND / OR in logical operations.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int* nptr = nullptr;\n    cout &lt;&lt;  nptr &lt;&lt; endl;\n    cout &lt;&lt; !nptr &lt;&lt; endl;   // evaluates to true (1) since nptr is null\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x0\n1\n\n\nThe following example demonstrates how the null pointer can be used. The variable ptrx initially has the address of x when it is declared. On the first iteration of the loop, it is assigned the value of nullptr, which evaluates to a false value; thereby ending the loop:\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int x = 12345;\n    int* ptrx = &x;\n\n    while (ptrx) {\n        cout &lt;&lt; \"Pointer ptrx points to \" &lt;&lt; ptrx &lt;&lt; endl;\n        ptrx = nullptr;\n    }\n\n    cout &lt;&lt; \"Pointer ptrx points to nothing: \" &lt;&lt; ptrx &lt;&lt; endl;\n    cout &lt;&lt; *ptrx &lt;&lt; \"segfault?\" &lt;&lt; endl;\n\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\nPointer ptrx points to 0x16fc02938\nPointer ptrx points to nothing: 0x0\n-11\n\n\nNOTE: Since the address 0x0 is unmapped, dereferencing the null pointer results in undefined behavior. Hence, the program crashed before it can print the last string (-11 = segfault)."
-  },
-  {
-    "objectID": "README.html",
-    "href": "README.html",
-    "title": "AI notebooks",
-    "section": "",
-    "text": "Some jupyter notebooks containing notes and implementation of AI models, algorithms, & applications. Or generally AI / ML related stuff like chess engines. Ultimately, our goal is to learn how to build performant, computationally efficient, sustainable, and aligned intelligent systems: 🤖 = 🧠 + ⌛ + ♻️ + 🚃.\n\n\n\nThe venv used to run the notebooks can be re-created easily using uv:\nuv venv --python 3.13\nuv sync\nNOTE: You may have to add the .venv as ipykernel in JupyterLab:\nuv add ipykernel\nuv run python -m ipykernel install --user --name=ai-notebooks\n\n\n\nThe notebooks for each topic can be found in separate folders in the /topics directory:\n\n\n\nTopic\nFolder\nPrimary Reference(s)\nFocus\n\n\n\n\nDeep Learning Systems\n/dlsys\nCMU 9-414/714: Deep Learning Systems. Fall 2024 + 2022 video lectures\n#algorithms, #implementation"
-  },
-  {
-    "objectID": "README.html#venv",
-    "href": "README.html#venv",
-    "title": "AI notebooks",
-    "section": "",
-    "text": "The venv used to run the notebooks can be re-created easily using uv:\nuv venv --python 3.13\nuv sync\nNOTE: You may have to add the .venv as ipykernel in JupyterLab:\nuv add ipykernel\nuv run python -m ipykernel install --user --name=ai-notebooks"
-  },
-  {
-    "objectID": "README.html#the-notebooks",
-    "href": "README.html#the-notebooks",
-    "title": "AI notebooks",
-    "section": "",
-    "text": "The notebooks for each topic can be found in separate folders in the /topics directory:\n\n\n\nTopic\nFolder\nPrimary Reference(s)\nFocus\n\n\n\n\nDeep Learning Systems\n/dlsys\nCMU 9-414/714: Deep Learning Systems. Fall 2024 + 2022 video lectures\n#algorithms, #implementation"
+    "objectID": "topics/cpp/03.html#for-loops",
+    "href": "topics/cpp/03.html#for-loops",
+    "title": "Control Structures",
+    "section": "For loops",
+    "text": "For loops\nSame while loop above as a for loop:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    for (int c = 0; c &lt; 5; c++) {\n        cout &lt;&lt; c &lt;&lt; \" Hello, world!\" &lt;&lt; endl;\n    }\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0 Hello, world!\n1 Hello, world!\n2 Hello, world!\n3 Hello, world!\n4 Hello, world!"
   },
   {
     "objectID": "topics/cpp/01.html",
@@ -238,46 +196,95 @@
     "text": "Conclusion\nWe can now look back at the initial program with better understanding of its elements:\n/* \nThis hello world program demonstrates the C++ concepts\nof commenting, using libraries, and using output.\n*/\n\n#include &lt;iostream&gt;               // ①\nusing namespace std;              // ② \n\nint main() {                       // ③   \n    cout &lt;&lt; \"Hello World!\\n\";     // ④ \n    return 0;                     // ⑤\n}\n\nDirective for including iostream header.\nMakes std:: implicit.\nmain() must exist & return an int.\nCharacter stream, print to std output device.\n0 indicates program ended correctly."
   },
   {
-    "objectID": "topics/cpp/03.html",
-    "href": "topics/cpp/03.html",
-    "title": "Control Structures",
+    "objectID": "README.html",
+    "href": "README.html",
+    "title": "AI notebooks",
     "section": "",
-    "text": "from utils import runcpp"
+    "text": "Some jupyter notebooks containing notes and implementation of AI models, algorithms, & applications. Or generally AI / ML related stuff like chess engines. Ultimately, our goal is to learn how to build performant, computationally efficient, sustainable, and aligned intelligent systems: 🤖 = 🧠 + ⌛ + ♻️ + 🚃.\n\n\n\nThe venv used to run the notebooks can be re-created easily using uv:\nuv venv --python 3.13\nuv sync\nNOTE: You may have to add the .venv as ipykernel in JupyterLab:\nuv add ipykernel\nuv run python -m ipykernel install --user --name=ai-notebooks\n\n\n\nThe notebooks for each topic can be found in separate folders in the /topics directory:\n\n\n\nTopic\nFolder\nPrimary Reference(s)\n\n\n\n\nDeep Learning Systems\n/dlsys \\(\\phantom{42}\\)\nCMU 10-414/714: Deep Learning Systems (Fall 2024)"
   },
   {
-    "objectID": "topics/cpp/03.html#conditionals",
-    "href": "topics/cpp/03.html#conditionals",
-    "title": "Control Structures",
-    "section": "Conditionals",
-    "text": "Conditionals\nC++ if-else is just like Python. It doesn’t have elif. But it does allow chaining else if to emulate the same behavior.\n\n%%runcpp --run=false\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int grade;\n    cin &gt;&gt; grade;\n\n    if (grade &lt; 60) {\n        cout &lt;&lt; 'F' &lt;&lt; endl;\n    }\n    else if (grade &lt; 70) {\n        cout &lt;&lt; 'D' &lt;&lt; endl;\n    }\n    else if (grade &lt; 80) {\n        cout &lt;&lt; 'C' &lt;&lt; endl;\n    }\n    else if (grade &lt; 90) {\n        cout &lt;&lt; 'B' &lt;&lt; endl;\n    }\n    else {\n        cout &lt;&lt; 'A' &lt;&lt; endl;\n    }\n    \n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n\n\n\n\n!echo 10 | ./code/tmp\n\n0x0\n1\n\n\n\n!echo 83 | ./code/tmp\n\n0x0\n1\n\n\nRemark. There also the switch keyword, which uses case and break."
-  },
-  {
-    "objectID": "topics/cpp/03.html#while-loops",
-    "href": "topics/cpp/03.html#while-loops",
-    "title": "Control Structures",
-    "section": "While loops",
-    "text": "While loops\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int c = 0;\n    while (c &lt; 5) {\n        cout &lt;&lt; c &lt;&lt; \" Hello, world!\\n\";\n        c += 1;\n    }\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0 Hello, world!\n1 Hello, world!\n2 Hello, world!\n3 Hello, world!\n4 Hello, world!\n\n\nChecking ints as condition:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int x;\n    x = -1; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    x =  0; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    x = +1; if (x) {cout &lt;&lt; \"ok\" &lt;&lt; endl;} else {cout &lt;&lt; \"not\" &lt;&lt; endl;}\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\nok\nnot\nok"
-  },
-  {
-    "objectID": "topics/cpp/03.html#for-loops",
-    "href": "topics/cpp/03.html#for-loops",
-    "title": "Control Structures",
-    "section": "For loops",
-    "text": "For loops\nSame while loop above as a for loop:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    for (int c = 0; c &lt; 5; c++) {\n        cout &lt;&lt; c &lt;&lt; \" Hello, world!\" &lt;&lt; endl;\n    }\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0 Hello, world!\n1 Hello, world!\n2 Hello, world!\n3 Hello, world!\n4 Hello, world!"
-  },
-  {
-    "objectID": "topics/cpp/05.html",
-    "href": "topics/cpp/05.html",
-    "title": "Collection Data Types",
+    "objectID": "README.html#venv",
+    "href": "README.html#venv",
+    "title": "AI notebooks",
     "section": "",
-    "text": "In addition to the primitive types, C++ also offers built-in collection types. A collection data type is a grouping of some number of items (possibly 1 or 0) that have some shared significance or need to be operated upon together.\nArrays, vectors, strings, sets, and hash tables are among these useful C++ collection types."
+    "text": "The venv used to run the notebooks can be re-created easily using uv:\nuv venv --python 3.13\nuv sync\nNOTE: You may have to add the .venv as ipykernel in JupyterLab:\nuv add ipykernel\nuv run python -m ipykernel install --user --name=ai-notebooks"
   },
   {
-    "objectID": "topics/cpp/05.html#arrays",
-    "href": "topics/cpp/05.html#arrays",
-    "title": "Collection Data Types",
-    "section": "Arrays",
-    "text": "Arrays\nAn array data structure is an ordered arrangement of values located at equally spaced addresses in contiguous computer memory. The fact that array elements are stored in memory in contiguous memory locations making look-up via index very, very fast. In computing, a word is the unit of data used by a particular processor design, such as 32 or 64 bits. For example, an array of 100 integer variables, with indices 0 through 99, might be stored as 100 words at memory addresses 20000, 20004, 20008, … 20396. The element with index i would be located at the address 20000 + 4 × i.\nC++ arrays can be allocated in two different ways:\n\n\n\n\n\n\n\n\nAllocation\nDescription\nUse case\n\n\n\n\nStatic\nThe array size is fixed at compile-time and cannot change\nSpeed is essential or where hardware constraints exist (real-time or low-level processing)\n\n\nDynamic\nPointers are used in the allocation process so the size can change at run-time\nTypically used when more flexibility is required\n\n\n\nRemark. As a Python programmer, you can think of the array as the ancestor of the Python list, and you might remember that Python lists are actually implemented via an underlying array consisting of references.\nStatic arrays. This can be initialized by indicating both type and size (explicit or implicit):\ndouble a[10];\nstring s[] = {\"this\", \"is\", \"an\", \"array\", \"of\", \"strings\"};\nNote that as tradeoff for efficiency, C++ arrays dont offer the same protections as Python:\n\nfrom utils import runcpp\n\nHere we did out of bounds access:\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int A[] = {1, 2, 3, 4, 5};\n    cout &lt;&lt; A[4] &lt;&lt; \" \" &lt;&lt; &A[4] &lt;&lt; endl;\n    cout &lt;&lt; A[5] &lt;&lt; \" \" &lt;&lt; &A[5] &lt;&lt; endl;      // out of bounds access\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n\n\n./code/tmp.cpp:7:13: warning: array index 5 is past the end of the array (that has type 'int[5]') [-Warray-bounds]\n    7 |     cout &lt;&lt; A[5] &lt;&lt; \" \" &lt;&lt; &A[5] &lt;&lt; endl;      // out of bounds access\n      |             ^ ~\n./code/tmp.cpp:5:5: note: array 'A' declared here\n    5 |     int A[] = {1, 2, 3, 4, 5};\n      |     ^\n1 warning generated.\n\n\n5 0x16b7ae930\n1 0x16b7ae934\n0\n\n\nIt’s nice that we get a warning from our compiler. But the exit code is still 0.\nRemark. Observe that the addresses are spaced 4 apart. These are bytes which are the basic addressable unit of memory in most modern computer architectures. A byte consist of 8 bits (0 or 1). Primary data tpes are stored in multiple bytes:\n\nchar: 1 byte = 8 bits\nint / float: 4 bytes = 32 bits\ndouble: 8 bytes = 64 bits"
+    "objectID": "README.html#the-notebooks",
+    "href": "README.html#the-notebooks",
+    "title": "AI notebooks",
+    "section": "",
+    "text": "The notebooks for each topic can be found in separate folders in the /topics directory:\n\n\n\nTopic\nFolder\nPrimary Reference(s)\n\n\n\n\nDeep Learning Systems\n/dlsys \\(\\phantom{42}\\)\nCMU 10-414/714: Deep Learning Systems (Fall 2024)"
+  },
+  {
+    "objectID": "topics/cpp/02.html",
+    "href": "topics/cpp/02.html",
+    "title": "Atomic C++ Data Types",
+    "section": "",
+    "text": "Recall that C++ requires users to specify the data type of each variable. The primary built-in data types in C++ are: int, float, double, bool, and char. There is also a special type called pointer which holds a memory location. C++ also has a collection of compound data types."
+  },
+  {
+    "objectID": "topics/cpp/02.html#boolean-data",
+    "href": "topics/cpp/02.html#boolean-data",
+    "title": "Atomic C++ Data Types",
+    "section": "Boolean data",
+    "text": "Boolean data\nC++ uses the keyword bool which is not capitalized. The possible state values for a C++ Boolean are true and false (note: lower case). C++ uses the standard Boolean operators: && (AND), || (OR), and ! (NOT).\nNote that the internally stored values representing true and false are 1 and 0, respectively. Moreover, you can perform math operations of the 1s and 0s where they are casted as a numeric type. Indeed:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    auto print_type = [](auto expr) {\n        cout &lt;&lt; \"(\" &lt;&lt; typeid(expr).name() &lt;&lt; \") \" &lt;&lt; expr &lt;&lt; endl;\n    };\n\n    print_type(true);\n    print_type(false);\n    cout &lt;&lt; (true || false) &lt;&lt; endl;\n    cout &lt;&lt; (true && false) &lt;&lt; endl;\n    print_type(true + true);\n    print_type(true * 1.);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n(b) 1\n(b) 0\n1\n0\n(i) 2\n(d) 1\n\n\nBoolean data are also used as results for things like comparison (&lt;, ==, etc.). As usual, relational and logical operators can be combined to form complex logical conditions. The following function demonstrates relational operators:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    cout &lt;&lt; (5 == 10) &lt;&lt; endl;\n    cout &lt;&lt; (10 &gt; 5) &lt;&lt; endl;\n    cout &lt;&lt; ((5 &gt;= 1) && (5 &lt;= 10)) &lt;&lt; endl;\n    cout &lt;&lt; ((5 &gt;= 1) || (1 / 0)) &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0\n1\n1\n1\n\n\nRemark. Observe short circuit with OR works as 1/0 was not evaluated.\nOne gotcha with booleans is assignment. If you assign a non-null (i.e. nonzero), then it becomes evaluated as 1. That is, false = 0 and !false = true. To see this:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    bool bool_var = -1;\n    cout &lt;&lt; bool_var &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1\n\n\nAssigning -1 to a bool evaluates to 1! But this is intended behavior due to static typing."
+  },
+  {
+    "objectID": "topics/cpp/02.html#character-data",
+    "href": "topics/cpp/02.html#character-data",
+    "title": "Atomic C++ Data Types",
+    "section": "Character data",
+    "text": "Character data\nIn Python strings can be created with single or double quotes. In C++ single quotes (’) are used for the character (char) data type, and double quotes (“) are used for the string data type.\nStrings in C++ provides dynamic memory management of an array of chars. It supports built-in methods (e.g. .size(), .substr(), .find()), and features safety and flexibility over raw C-style strings (e.g. char cstr[] = \"hello\";). Note that \"a\" == 'a' results in an error in C++.\nchar a = 'h';\nchar cstr[] = \"hello\";      // C-style string (char array)\nstd::string str = \"hello\";  // C++ string object\nBut you can convert between them:\nstr.c_str();         // std::string → const char*\nstd::string(cstr);   // char* → std::string"
+  },
+  {
+    "objectID": "topics/cpp/02.html#pointers",
+    "href": "topics/cpp/02.html#pointers",
+    "title": "Atomic C++ Data Types",
+    "section": "Pointers",
+    "text": "Pointers\nIn C++, an assignment like below consists of (1) allocating space in memory and (2) storing the value of a variable:\nint var = 100;\nTo get the address of a variable in memory we use the address-of operator &:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int var = 100;\n    cout &lt;&lt; &var &lt;&lt; \" \" &lt;&lt; var &lt;&lt; endl;\n    var = 200;\n    cout &lt;&lt; &var &lt;&lt; \" \" &lt;&lt; var &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x16bba6938 100\n0x16bba6938 200\n\n\nRemark. For basic types declared in a function scope, the address is fixed during their lifetime.\nIn Python, it is impossible to store a variable directly. Instead, a reference to the data object is used. In C++, variables store values directly, because they are faster to reference. References are slower, but they are sometimes useful. If in C++, we want to create an analogous reference to a memory location, we must use a special data type called a pointer.\n\nPointer syntax\nPointer init. The syntax for initializing a pointer is similar to the usual assignment except we use * between the data type and the identifier:\nint* ptr;\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int* ptr;\n    cout &lt;&lt; ptr &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x100953d7c\n\n\n\n\nAssigning an address using &\nOne way to do this is to have a pointer refer to another variable by using the address-of operator &, which we know returns the address of a variable.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int  var = 100;\n    int* ptr = &var;\n    cout &lt;&lt;  ptr &lt;&lt; endl;    // address of var\n    cout &lt;&lt; *ptr &lt;&lt; endl;    // dereference =&gt; value\n\n    // trying out reassignment\n    var = 200;\n    cout &lt;&lt; &var &lt;&lt; endl;\n    cout &lt;&lt; *ptr &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x16b92a938\n100\n0x16b92a938\n200\n\n\nRemark. If we assign an address for a location that is outside of your segment (area in memory reserved for your program), the operating system will jump in with a message about a “segmentation fault” (aka segfault). (Although such an error message looks bad, a seg fault is in fact a helpful error because unlike the elusive logical errors, the reason is fairly localized.)\n\n\nNull pointer\nLike None in Python, the null pointer (nullptr) in C++ points to nothing. Or more precisely, it does not point to an address that is mapped to the program’s memory space. The null pointer is often used in conditions in conjunction with AND / OR in logical operations.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int* nptr = nullptr;\n    cout &lt;&lt;  nptr &lt;&lt; endl;\n    cout &lt;&lt; !nptr &lt;&lt; endl;   // evaluates to true (1) since nptr is null\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n0x0\n1\n\n\nThe following example demonstrates how the null pointer can be used. The variable ptrx initially has the address of x when it is declared. On the first iteration of the loop, it is assigned the value of nullptr, which evaluates to a false value; thereby ending the loop:\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nint main() {\n    int x = 12345;\n    int* ptrx = &x;\n\n    while (ptrx) {\n        cout &lt;&lt; \"Pointer ptrx points to \" &lt;&lt; ptrx &lt;&lt; endl;\n        ptrx = nullptr;\n    }\n\n    cout &lt;&lt; \"Pointer ptrx points to nothing: \" &lt;&lt; ptrx &lt;&lt; endl;\n    cout &lt;&lt; *ptrx &lt;&lt; \"segfault?\" &lt;&lt; endl;\n\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\nPointer ptrx points to 0x16fc02938\nPointer ptrx points to nothing: 0x0\n-11\n\n\nNOTE: Since the address 0x0 is unmapped, dereferencing the null pointer results in undefined behavior. Hence, the program crashed before it can print the last string (-11 = segfault)."
+  },
+  {
+    "objectID": "topics/cpp/04.html",
+    "href": "topics/cpp/04.html",
+    "title": "Functions",
+    "section": "",
+    "text": "Functions in C++ require a return type and a body. It may return a variable, value or nothing (void). A void return type means that assigning the function output to a variable results in an erorr. This behavior is different from Python which allows assignment of None which is the default return value whenever none is specified.\nfrom utils import *\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nint add_one(int x) {\n    return x + 1;\n}\n\nvoid hello() {\n    cout &lt;&lt; \"hello\\n\";\n}\n\nint main() {\n    cout &lt;&lt; add_one(3) &lt;&lt; endl;\n    hello();\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n4\nhello"
+  },
+  {
+    "objectID": "topics/cpp/04.html#newtons-method",
+    "href": "topics/cpp/04.html#newtons-method",
+    "title": "Functions",
+    "section": "Newton’s method",
+    "text": "Newton’s method\nExample. Let’s define an actual meaningful function. Recall Newton’s Method for getting the zero of \\(f\\):\n\\[x_{k+1} = x_k - \\frac{f(x)}{f^\\prime(x)}\\]\nGiven a number \\(a &gt; 0\\) we want to solve for its square root using \\(f(x) = x^2 - a.\\)\n\\[\nx_{k + 1} = x_k - \\frac{x_k^2 - a}{2 x_k} = \\frac{1}{2} \\left( x_k + \\frac{a}{x_k} \\right).\n\\]\n\n%%runcpp 04_newton_sqrt.cpp --run=false\n#include &lt;iostream&gt;\n#include &lt;iomanip&gt;\nusing namespace std;\n\ndouble squareroot(float a, int n_steps = 10) {\n    int i;\n    double x = a / 2;\n    cout &lt;&lt; fixed &lt;&lt; setprecision(10);\n    \n    for (i = 0; i &lt; n_steps; i++) {\n        x = 0.5 * (x + a / x);\n        cout &lt;&lt; x &lt;&lt; \"\\t\" &lt;&lt; \"| err: \" &lt;&lt; x * x - a &lt;&lt; endl;\n    }\n    \n    return x;\n}\n\nint main() {\n    double a; cin &gt;&gt; a;\n    double x;\n    x = squareroot(a);\n    cout &lt;&lt; \"\\noutput: \" &lt;&lt; x;\n    return 0;\n}\n\ng++ -std=c++23 ./code/04_newton_sqrt.cpp -o ./code/04_newton_sqrt\n\n\n\nNOTE: Here we use &lt;iomanip&gt; for std::fixed and std::setprecision. To increase cout precision from 6 to 8;\n\n!echo 1011.25 | ./code/04_newton_sqrt\n\n253.8125000000  | err: 63409.5351562500\n128.8983701674  | err: 15603.5398318240\n68.3718491123   | err: 3663.4597510372\n41.5811465161   | err: 717.7417455967\n32.9505313728   | err: 74.4875177519\n31.8202382539   | err: 1.2775625347\n31.8001635687   | err: 0.0004029930\n31.8001572323   | err: 0.0000000000\n31.8001572323   | err: -0.0000000000\n31.8001572323   | err: -0.0000000000\n\noutput: 31.8001572323\n\n\n\nround(1011.25 ** 0.5, 10)\n\n31.8001572323"
+  },
+  {
+    "objectID": "topics/cpp/04.html#parameter-passing",
+    "href": "topics/cpp/04.html#parameter-passing",
+    "title": "Functions",
+    "section": "Parameter passing",
+    "text": "Parameter passing\nCalling a function by value involves copying the contents of the arguments into the memory locations of the corresponding formal parameters. If the function changes the values of the parameters, the original contents in the memory referenced by the arguments of the calling function do not change. This is analogous to local variables in Python functions.\nIn C++, we can pass a reference to a location in memory which allows changing the value in that location. To let the compiler know that you intend to use pass by reference, you attach an & to the end of the type name in the formal parameter list in the function declaration and header.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid add_one(int& x) {\n    x = x + 1;\n}\n\nint main() {\n    int u = 41; \n    add_one(u);\n    cout &lt;&lt; u &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n42\n\n\nRemark. Removing the & in add_one results in u being the same."
+  },
+  {
+    "objectID": "topics/cpp/04.html#arrays-as-parameters-in-functions",
+    "href": "topics/cpp/04.html#arrays-as-parameters-in-functions",
+    "title": "Functions",
+    "section": "Arrays as Parameters in Functions",
+    "text": "Arrays as Parameters in Functions\nAn array is a collection data type that is the ancestor of the Python list. We will discuss arrays in more detail in the next chapter. Functions can be used with array parameters to maintain a structured design. However, a formal parameter for an array is neither a call-by-value nor a call-by-reference, but a new type of parameter pass called an array parameter:\nfloat f(int arr[]) {\n    ...\n} \nMoreover, an array is defined using the same notation.\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\ndouble avg(int arr[], int n) {\n    double s = 0;\n    for (int i = 0; i &lt; n; i++) {\n        s += arr[i];\n    }\n    return s / n;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    cout &lt;&lt; avg(arr, 2) &lt;&lt; endl;\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1.5\n\n\nNOTE: The functions with array parameters do not make private copies of the arrays. Instead, the reference is passed to reduce the impact on memory. Arrays can therefore always be permanently changed when passed as arguments to functions. ⚠️\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid zero(int arr[]) {\n    arr[0] = 0;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    println(\"{}, {}\", arr[0], arr[1]);\n    zero(arr);\n    println(\"{}, {}\", arr[0], arr[1]);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1, 2\n0, 2\n\n\nTo prevent ourselves from accidentally modifying any of these arrays, we can add the modifier const in the function head. The compiler will then raise an error if any statement within the function’s definition modifies the elements of the const array:\n\n!rm ./code/tmp\n\n\n%%runcpp --exitcode=true\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid zero(const int arr[]) {\n    arr[0] = 0;\n}\n\nint main() {\n    int arr[] = {1, 2};\n    println(\"{}, {}\", arr[0], arr[1]);\n    zero(arr);\n    println(\"{}, {}\", arr[0], arr[1]);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n127\n\n\n./code/tmp.cpp:5:12: error: read-only variable is not assignable\n    5 |     arr[0] = 0;\n      |     ~~~~~~ ^\n1 error generated.\n/bin/sh: line 1: ./code/tmp: No such file or directory"
+  },
+  {
+    "objectID": "topics/cpp/04.html#function-overloading",
+    "href": "topics/cpp/04.html#function-overloading",
+    "title": "Functions",
+    "section": "Function Overloading",
+    "text": "Function Overloading\nFunction overloading is a unique feature of C++ (not present in Python) where functions of the same name but with different implementations can be defined. The functions are distinguished based on their parameters. Note that assigning different return types result in a warning:\n\n%%runcpp\n#include &lt;iostream&gt;\nusing namespace std;\n\nvoid f(int n) {\n    println(\"1 params: {}\", n);\n}\n\nvoid f(int n, int m) {\n    println(\"2 params: {}, {}\", n, m);\n}\n\nint main() {\n    f(4);\n    f(5, 6);\n    f(0);\n    return 0;\n}\n\ng++ -std=c++23 ./code/tmp.cpp -o ./code/tmp\n./code/tmp\n\n1 params: 4\n2 params: 5, 6\n1 params: 0"
+  },
+  {
+    "objectID": "topics/cpp/index.html",
+    "href": "topics/cpp/index.html",
+    "title": "particle1331/ai-notebooks",
+    "section": "",
+    "text": "Primary reference(s): - C++ for Python Programmers - By Jan Pearce, Berea College and Brad Miller, Runestone - - C++ Machine Learning Tutorial\n\n\n\n Back to top"
   },
   {
     "objectID": "topics/dlsys/02.html",
@@ -341,5 +348,12 @@
     "title": "Softmax Regression",
     "section": "Appendix: Model complexity",
     "text": "Appendix: Model complexity\nSince SGD relies on a stochastic process, the performance of the resulting trained model varies. How are we sure that we aren’t just lucky for this particular run / random seed? What is the variance of the trained model performance over multiple runs? Is there a way to control this? This issue is at the core of learning theory and precisely what the bias-variance tradeoff addresses.\nIn practice, the crucial parameter to control is model complexity. Here model capacity or complexity is a measure of how complicated a pattern or relationship a model architecture can express. Let \\(f\\) be the true function that underlies the task. If model capacity is sufficiently large, the model class \\(\\mathcal{F} = \\{f_{\\Theta} \\mid \\Theta \\in \\mathbb{R}^d \\}\\) contains an approximation \\(\\hat{f} \\in \\mathcal{F}\\) such that \\(\\| f - \\hat{f} \\| &lt; \\epsilon\\) for a small enough \\(\\epsilon &gt; 0.\\)\nThe capacity of a model class can be controlled, for example, by the number of learnable parameters in practical architectures. It can also be constrained directly by applying regularization or certain prior knowledge such as invariances. This biases the model towards certain solutions, so these constraints are sometimes referred to as inductive biases — such knowledge is bias in the sense that it makes some solutions more likely, and others less likely. The tradeoff is that the model are steered to biased solutions more efficiently."
+  },
+  {
+    "objectID": "topics/dlsys/04.html",
+    "href": "topics/dlsys/04.html",
+    "title": "Automatic Differentiation",
+    "section": "",
+    "text": "Back to top"
   }
 ]
