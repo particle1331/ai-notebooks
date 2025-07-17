@@ -2,7 +2,7 @@
 
 Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. Or generally AI / ML related stuff like chess engines. Ultimately, our goal is to learn how to build performant, computationally efficient, sustainable, and [aligned](https://en.wikipedia.org/wiki/AI_alignment) intelligent systems: 🤖 = 🧠 + ⌛ + ♻️ + 🚃.
 
-<img src="./ai.png">
+<img src="./assets/ai.png">
 
 ## venv
 
@@ -26,4 +26,4 @@ The notebooks for each topic can be found in separate folders in the `/topics` d
 
 | **Topic** | **Folder** | **Primary Reference(s)** | **Focus** |
 | :-- | :-- | :-- | :-- | :-- |
-| [Deep Learning Systems](/topics/dlsys/) | `/dlsys` $\phantom{42}$ | [CMU 9-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/). Fall 2024 + 2022 video lectures | #algorithms, #implementation |
+| [Deep Learning Systems](/topics/dlsys/) | `/dlsys` $\phantom{42}$ | [CMU 9-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/). Fall 2024 + 2022 video lectures | `#algorithms`, `#implementation` |

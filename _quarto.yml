@@ -15,9 +15,9 @@ format:
     respect-user-color-scheme: true
     toc: true
     theme:
-      light: [cosmo, theme.scss]
-      dark: [cosmo, theme-dark.scss]
-    css: styles.css
+      light: [cosmo, assets/theme.scss]
+      dark:  [cosmo, assets/theme-dark.scss]
+    css: assets/styles.css
 
 
 website:
@@ -25,6 +25,7 @@ website:
   repo-url: https://github.com/particle1331/ai-notebooks
   site-url: https://particle1331.github.io/ai-notebooks/
   back-to-top-navigation: true
+  favicon: assets/robot.jpg
   navbar:
     left:
       - href: index.html
