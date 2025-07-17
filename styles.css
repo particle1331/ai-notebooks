@@ -1,0 +1,51 @@
+body, p {
+  text-align: justify;
+  hyphens: auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+.gray-box {
+  background-color: #060606;  /* light gray */
+  padding: 1em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  color: #f5f3f3;
+  margin: 1em 0;
+  font-size: 1rem;
+}
+
+.sidebar nav[role="doc-toc"] * {
+  text-align: left !important;
+  hyphens: auto;
+}
+
+/* Add space before section headers */
+h2, h3, h4, h5, h6 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Add space before and after images */
+img {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Target image outputs from code cells */
+.cell-output-display img,
+.cell-output img {
+  display: block;    /* ensures no weird inline spacing */
+  margin-top: 0rem;
+  margin-bottom: 1.25rem;
+  padding: 0.5rem;
+  background-color: #1a1a1a;  /* optional: makes padding visible in dark theme */
+  border-radius: 4px;           /* optional: rounded corners */
+}
