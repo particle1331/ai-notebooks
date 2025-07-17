@@ -1,9 +1,12 @@
 project:
   type: website
+  output-dir: docs
   render:
     - README.md
     - topics/**/*.ipynb
-    - "topics/**/README.md"
+
+execute:
+  freeze: auto
 
 format:
   html:
