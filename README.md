@@ -26,6 +26,4 @@ The notebooks for each topic can be found in separate folders in the `/topics` d
 
 | **Topic** | **Folder** | **Primary Reference(s)** | **Focus** |
 | :-- | :-- | :-- | :-- |
-| Deep Learning Systems | `/dlsys` | [CMU 9-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/). Fall 2024 + 2022 video lectures | `#algorithms`, `#implementation` |
-
-**Setup.** The notebooks are intended to be viewed and run using Jupyterlab or VS Code.
+| [Deep Learning Systems](/topics/dlsys/README.html) | `/dlsys` | [CMU 9-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/). Fall 2024 + 2022 video lectures | `#algorithms`, `#implementation` |

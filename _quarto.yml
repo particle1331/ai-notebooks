@@ -1,0 +1,33 @@
+project:
+  type: website
+  render:
+    - README.md
+    - topics/**/*.ipynb
+    - "topics/**/README.md"
+
+format:
+  html:
+    respect-user-color-scheme: true
+    toc: true
+    theme:
+      light: [cosmo, theme.scss]
+      dark: [cosmo, theme-dark.scss]
+    css: styles.css
+
+
+website:
+  title: "particle1331/ai-notebooks"
+  repo-url: https://github.com/particle1331/ai-notebooks
+  navbar:
+    left:
+      - href: index.html
+        text: README
+      - text: Topics
+        menu:
+          - href: /topics/dlsys/index.html
+            text: Deep Learning Systems
+          
+    tools:
+      - icon: github
+        href: https://github.com/particle1331/ai-notebooks
+        text: GitHub
