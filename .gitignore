@@ -217,6 +217,8 @@ topics/cpp/code/*
 .DS_Store
 topics/cpp/code/tmp.cpp
 
-.quarto/
-docs/
+# Quarto
+_site/
 *_files/
+
+/.quarto/

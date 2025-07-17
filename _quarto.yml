@@ -1,9 +1,11 @@
 project:
   type: website
-  output-dir: docs
   render:
     - README.md
     - topics/**/*.ipynb
+  preview:
+    port: 4200
+    browser: false
 
 execute:
   freeze: auto
@@ -21,6 +23,8 @@ format:
 website:
   title: "particle1331/ai-notebooks"
   repo-url: https://github.com/particle1331/ai-notebooks
+  site-url: https://particle1331.github.io/ai-notebooks/
+  back-to-top-navigation: true
   navbar:
     left:
       - href: index.html
@@ -29,6 +33,8 @@ website:
         menu:
           - href: /topics/dlsys/index.html
             text: Deep Learning Systems
+          - href: /topics/cpp/index.html
+            text: Machine Learning in C++
           
     tools:
       - icon: github
