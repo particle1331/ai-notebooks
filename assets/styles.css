@@ -20,7 +20,7 @@ img {
   font-size: 1rem;
 }
 
-.sidebar nav[role="doc-toc"] * {
+.sidebar {
   text-align: left !important;
   hyphens: auto;
 }
@@ -34,8 +34,8 @@ h2, h3, h4, h5, h6 {
 /* Add space before and after images */
 img {
   display: block;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 1.0rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
 }
 

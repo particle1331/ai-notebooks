@@ -14,10 +14,12 @@ format:
   html:
     respect-user-color-scheme: true
     toc: true
+    toc-location: right
     theme:
       light: [cosmo, assets/theme.scss]
       dark:  [cosmo, assets/theme-dark.scss]
     css: assets/styles.css
+    html-math-method: katex
 
 
 website:
@@ -26,18 +28,32 @@ website:
   site-url: https://particle1331.github.io/ai-notebooks/
   back-to-top-navigation: true
   favicon: assets/robot.jpg
+  page-navigation: true
+  bread-crumbs: true
+  reader-mode: true
+
   navbar:
     left:
-      - href: index.html
-        text: README
-      - text: Topics
+      - text: "README"
+        href: index.html
+      - text: "Topics"
         menu:
-          - href: /topics/dlsys/index.html
-            text: Deep Learning Systems
-          - href: /topics/cpp/index.html
-            text: Machine Learning in C++
+          - text: "Deep Learning Systems"
+            href: topics/dlsys/index.html
+          - text: "Machine Learning in C++"
+            href: topics/cpp/index.html
           
     tools:
       - icon: github
         href: https://github.com/particle1331/ai-notebooks
         text: GitHub
+
+  sidebar:
+    - id: dlsys
+      style: "floating"
+      collapse-level: 1
+      align: left
+      contents:
+        - section: "Deep Learning Systems"
+          href: topics/dlsys/index.ipynb
+          contents: topics/dlsys/*.ipynb
