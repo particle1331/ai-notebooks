@@ -12,7 +12,10 @@ execute:
 
 format:
   html:
+    math: mathjax
     respect-user-color-scheme: true
+    highlight-annotations: true
+    highlight-style: dracula
     toc: true
     toc-location: right
     theme:
