@@ -12,7 +12,7 @@ execute:
 
 format:
   html:
-    math: mathjax
+    html-math-method: katex
     respect-user-color-scheme: true
     highlight-annotations: true
     highlight-style: dracula
@@ -22,8 +22,6 @@ format:
       light: [cosmo, assets/theme.scss]
       dark:  [cosmo, assets/theme-dark.scss]
     css: assets/styles.css
-    html-math-method: katex
-
 
 website:
   title: "particle1331/ai-notebooks"
@@ -43,7 +41,7 @@ website:
         menu:
           - text: "Deep Learning Systems"
             href: topics/dlsys/index.html
-          - text: "Machine Learning in C++"
+          - text: "C++ for Machine Learning"
             href: topics/cpp/index.html
           
     tools:
@@ -60,3 +58,6 @@ website:
         - section: "Deep Learning Systems"
           href: topics/dlsys/index.ipynb
           contents: topics/dlsys/*.ipynb
+        - section: "C++ for Machine Learning"
+          href: topics/cpp/index.ipynb
+          contents: topics/cpp/*.ipynb
