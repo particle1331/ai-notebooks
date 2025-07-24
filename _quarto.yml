@@ -40,7 +40,7 @@ website:
       - text: "Topics"
         menu:
           - text: "Deep Learning Systems"
-            href: topics/dlsys/index.html
+            href: topics/deep/index.html
           - text: "C++ for Machine Learning"
             href: topics/cpp/index.html
           
@@ -50,14 +50,11 @@ website:
         text: GitHub
 
   sidebar:
-    - id: dlsys
+    - id: deep
       style: "floating"
       collapse-level: 1
       align: left
       contents:
         - section: "Deep Learning Systems"
-          href: topics/dlsys/index.ipynb
-          contents: topics/dlsys/*.ipynb
-        - section: "C++ for Machine Learning"
-          href: topics/cpp/index.ipynb
-          contents: topics/cpp/*.ipynb
+          href: topics/deep/index.ipynb
+          contents: topics/deep/*.ipynb
