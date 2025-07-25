@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Neural Networks – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../topics/deep/03.html" rel="next">
+<link href="../../topics/deep/01.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-ed72e498c0450dafe86c3800e99bcb2e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../topics/deep/index.html">
+ <span class="dropdown-text">Deep Learning Systems</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/deep/index.html">Deep Learning</a></li><li class="breadcrumb-item"><a href="../../topics/deep/02.html">Neural Networks</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../topics/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Softmax Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/02.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Automatic Differentiation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#nonlinear-features" id="toc-nonlinear-features" class="nav-link active" data-scroll-target="#nonlinear-features">Nonlinear features</a></li>
+  <li><a href="#neural-networks" id="toc-neural-networks" class="nav-link" data-scroll-target="#neural-networks">Neural networks</a>
+  <ul class="collapse">
+  <li><a href="#two-layer-neural-network" id="toc-two-layer-neural-network" class="nav-link" data-scroll-target="#two-layer-neural-network">Two-layer neural network</a></li>
+  <li><a href="#fully-connected-deep-networks" id="toc-fully-connected-deep-networks" class="nav-link" data-scroll-target="#fully-connected-deep-networks">Fully-connected deep networks</a></li>
+  </ul></li>
+  <li><a href="#backpropagation" id="toc-backpropagation" class="nav-link" data-scroll-target="#backpropagation">Backpropagation</a>
+  <ul class="collapse">
+  <li><a href="#gradients-of-a-2-layer-nn" id="toc-gradients-of-a-2-layer-nn" class="nav-link" data-scroll-target="#gradients-of-a-2-layer-nn">Gradients of a 2-layer NN</a></li>
+  <li><a href="#graph-visualization" id="toc-graph-visualization" class="nav-link" data-scroll-target="#graph-visualization">Graph visualization</a></li>
+  <li><a href="#general-formula-for-l-layers" id="toc-general-formula-for-l-layers" class="nav-link" data-scroll-target="#general-formula-for-l-layers">General formula for <span class="math inline">L</span>-layers</a></li>
+  </ul></li>
+  <li><a href="#appendix-gradient-check-using-pytorch" id="toc-appendix-gradient-check-using-pytorch" class="nav-link" data-scroll-target="#appendix-gradient-check-using-pytorch">Appendix: Gradient check using PyTorch</a></li>
+  <li><a href="#sec-univapprox" id="toc-sec-univapprox" class="nav-link" data-scroll-target="#sec-univapprox">Appendix: Universal approximation</a></li>
+  <li><a href="#appendix-linearly-separable-features" id="toc-appendix-linearly-separable-features" class="nav-link" data-scroll-target="#appendix-linearly-separable-features">Appendix: Linearly separable features</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/deep/index.html">Deep Learning</a></li><li class="breadcrumb-item"><a href="../../topics/deep/02.html">Neural Networks</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Neural Networks</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Recall that a hypothesis function (i.e.&nbsp;a choice of architecture) <span class="math inline">h\colon \mathbb{R}^d \to \mathbb{R}^K</span> maps input data to desired outputs. Initially, we used a linear hypothesis class <span class="math inline">h_\Theta(\mathbf{x}) = \Theta^\top \mathbf{x}</span> where <span class="math inline">\Theta \in \mathbb{R}^{d \times K}.</span> This forms <span class="math inline">K</span> linear functions of the input and predicts the class with the largest value. This turns out to be equivalent to partitioning the input space into <span class="math inline">K</span> linear convex regions corresponding to each class.</p>
+<p><img src="./img/03-1.svg"></p>
+<p><strong>Remark.</strong> In <span class="math inline">\mathbb{R}^2</span> with <span class="math inline">3</span> classes, we have <span class="math inline">2</span> inequality constraints <span class="math inline">\theta_1^\top \mathbf{x} \geq \theta_2^\top \mathbf{x}</span> and <span class="math inline">\theta_1^\top \mathbf{x} \geq \theta_3^\top \mathbf{x}.</span> This resuts in a convex polyhedron which is the intersection of two linear half-spaces. Similarly, for the other two. It can be shown that the interior of these subsets are disjoint and the union of the three cover all of <span class="math inline">\mathbb{R}^2.</span></p>
+<p><strong>Q.</strong> What about data that are not linearly separable? We want some way to separate these points via a nonlinear set of class boundaries.</p>
+<div id="5676443a-61c0-44b3-aa2e-9fcd26d742e4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>r_eps <span class="op">=</span> <span class="fl">0.3</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> circle_data(radius: <span class="bu">float</span>, r_eps<span class="op">=</span>r_eps, num_points<span class="op">=</span>N):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    r0 <span class="op">=</span> radius</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> math.pi <span class="op">*</span> np.random.random(N)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r0 <span class="op">+</span> r_eps <span class="op">*</span> np.random.randn(N)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> r <span class="op">*</span> np.cos(t), r <span class="op">*</span> np.sin(t)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x, y</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>x0, y0 <span class="op">=</span> circle_data(<span class="dv">3</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>x1, y1 <span class="op">=</span> circle_data(<span class="dv">5</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>x2, y2 <span class="op">=</span> circle_data(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="c4fa5281" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">"svg"</span>] </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(x0, y0, edgecolor<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(x1, y1, marker<span class="op">=</span><span class="st">"*"</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>, s<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.scatter(x2, y2, marker<span class="op">=</span><span class="st">"s"</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">"equal"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="nonlinear-features" class="level2">
+<h2 class="anchored" data-anchor-id="nonlinear-features">Nonlinear features</h2>
+<p><strong>One idea:</strong> Apply a linear classifier to some (potentially higher-dimensional) <em>features</em> of the data:</p>
+<p><span class="math display">h_\Theta(\mathbf{x}) = \Theta^\top \phi(\mathbf{x})</span></p>
+<p>where <span class="math inline">\Theta \in \mathbb{R}^{h \times K}</span> and <span class="math inline">\phi\colon \mathbb{R}^d \to \mathbb{R}^h</span> is a <strong>feature transformation</strong>.</p>
+<p><strong>Example.</strong> For the above dataset, we can define <span class="math inline">\phi(x, y) = (x, y, x^2 + y^2)</span> (i.e.&nbsp;<span class="math inline">r^2</span>) which makes the dataset separable in <span class="math inline">\mathbb{R}^3</span>:</p>
+<div id="8240c539-9f2f-4484-9cd5-b52e2b3d0d18" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>ax.scatter(x0, y0, x0 <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> y0 <span class="op">**</span> <span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ax.scatter(x1, y1, x1 <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> y1 <span class="op">**</span> <span class="dv">2</span>, marker<span class="op">=</span><span class="st">"*"</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>, s<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ax.scatter(x2, y2, x2 <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> y2 <span class="op">**</span> <span class="dv">2</span>, marker<span class="op">=</span><span class="st">"s"</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Q.</strong> How do we create the features?</p>
+<ol type="1">
+<li>Manual feature engineering (see above).</li>
+<li>In a way that <span class="math inline">\phi</span> itself is <strong>learned</strong> from data (i.e.&nbsp;<span class="math inline">\phi</span> parametric).</li>
+</ol>
+<p>Note that <span class="math inline">\phi</span> linear doesn’t work since we just get a linear classifier. If <span class="math inline">\phi(\mathbf{x}) = \Phi^\top \mathbf{x}</span> where <span class="math inline">\Phi \in \mathbb{R}^{d \times h}</span>, then</p>
+<p><span class="math display">
+\begin{aligned}
+h_\Theta(\mathbf{x})
+&amp;= \Theta^\top \phi(\mathbf{x}) \\
+&amp;= \Theta^\top \Phi^\top \mathbf{x} = (\Phi \Theta)^\top \mathbf{x}
+\end{aligned}
+</span></p>
+<p>Thus, <span class="math inline">\phi</span> must be nonlinear. It turns out that applying a univariate nonlinear function <span class="math inline">\sigma\colon \mathbb{R} \to \mathbb{R}</span> called an <strong>activation function</strong> suffices to create rich hypothesis classes (see <a href="#sec-univapprox" class="quarto-xref">Section&nbsp;5</a>). Hence, we set</p>
+<p><span class="math display">\phi(\mathbf{x}) = \sigma(\Phi^\top \mathbf{x}).</span></p>
+<p><strong>Remark.</strong> More precisely, we require <span class="math inline">\sigma</span> to have a good range of values and almost everywhere differentiability to be usable. The term “activation” has roots in neuroscience where it represents the <a href="https://en.wikipedia.org/wiki/Action_potential#/media/File:Action_potential.svg">action potential</a> firing in the cell. Finally, observe that we can feature transform features, i.e.&nbsp;compose feature transformations. This is the main idea behind deep networks as we will see below.</p>
+</section>
+<section id="neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="neural-networks">Neural networks</h2>
+<p>A <strong>neural network</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> refers to a particular type of hypothesis class, consisting of <em>multiple</em>, <em>parameterized</em> differentiable functions (a.k.a. “<strong>layers</strong>”) composed together in any manner to form the output. Since neural networks involve composing a lot of functions (sometimes hundreds), it is usually referred to as <strong>deep neural networks</strong>, although there is really no requirement on depth beyond being not linear.</p>
+<section id="two-layer-neural-network" class="level3">
+<h3 class="anchored" data-anchor-id="two-layer-neural-network">Two-layer neural network</h3>
+<p>The simplest form of neural network is basically just the nonlinear features presented earlier:</p>
+<p><span class="math display">
+\begin{aligned}
+h_\Theta(\mathbf{X}) = \sigma ( \mathbf{X} \mathbf{W_1}) \mathbf{W}_2
+\end{aligned}
+</span></p>
+<p>where <span class="math inline">\Theta = \{ \mathbf{W}_1 \in \mathbb{R}^{d \times h}, \mathbf{W}_2 \in \mathbb{R}^{h \times K} \}</span> are called the <strong>trainable parameters</strong> of the network and <span class="math inline">\sigma\colon \mathbb{R} \to \mathbb{R}</span> is the <strong>activation function</strong> that is applied elementwise to each vector. A commonly used one is <strong>ReLU</strong> defined as <span class="math inline">\sigma(z) = \max(0, z)</span>:</p>
+<div id="9a138f46-489d-4477-9d09-9700fba60677" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">1000</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="dv">2</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.plot(z, np.clip(z, a_min<span class="op">=</span><span class="dv">0</span>, a_max<span class="op">=</span><span class="va">None</span>), label<span class="op">=</span><span class="st">"relu(z)"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.6</span>, linestyle<span class="op">=</span><span class="st">"dotted"</span>)<span class="op">;</span> plt.ylim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">11</span>)<span class="op">;</span> plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="fully-connected-deep-networks" class="level3">
+<h3 class="anchored" data-anchor-id="fully-connected-deep-networks">Fully-connected deep networks</h3>
+<p>Observe that for the 2-layer network, we have <span class="math inline">|\Theta| = 2.</span> A more generic form is the <span class="math inline">L</span>-layer neural network, sometimes called a <a href="https://en.wikipedia.org/wiki/Multilayer_perceptron">multi-layer perceptron</a> (MLP), <strong>feedforward network</strong> (FFN), or <strong>fully-connected network</strong> (FC) written in batch form as:</p>
+<p><span class="math display">
+h_\Theta(\mathbf{X}) = \sigma(\sigma(\ldots \sigma(\mathbf{X}\mathbf{W}_1)\mathbf{W}_2 \ldots) \mathbf{W}_{L-1}) \mathbf{W}_L
+</span></p>
+<p>or</p>
+<p><span class="math display">
+\begin{aligned}
+\mathbf{Z}_0 &amp;= \mathbf{X} \\
+\mathbf{Z}_{i} &amp;= \sigma_i (\mathbf{Z}_{i-1} \mathbf{W}_i), \quad \forall i = 1, \ldots, L \\
+h_\Theta(\mathbf{X}) &amp;= \mathbf{Z}_{L}
+\end{aligned}
+</span></p>
+<p>where <span class="math inline">\mathbf{Z}_i \in \mathbb{R}^{N \times d_i}</span> and <span class="math inline">\mathbf{W}_i \in \mathbb{R}^{d_{i-1} \times d_{i}}</span>, <span class="math inline">d_0 = d</span> and <span class="math inline">d_{L} = K</span>, and <span class="math inline">\sigma_i: \mathbb{R} \to \mathbb{R}</span> are applied elementwise. The weights of the network is given by <span class="math inline">\Theta = \{ \mathbf{W}_1, \ldots, \mathbf{W}_L \}</span>, so that <span class="math inline">|\Theta| = L.</span> Also, we typically set <span class="math inline">\sigma_L = \text{Id}</span> for the <strong>output layer</strong>.</p>
+<p><strong>Remark.</strong> Again a bias term can be added. But in theoretical analysis we can just think there is an extra column containing ones to simplify the computation. The index <span class="math inline">i = 1, \ldots, L</span> corresponds to the number of layers applied to the input. In particular, the output layer is indexed <span class="math inline">L</span> since we apply <span class="math inline">L</span> transformations to the input indexed <span class="math inline">0.</span></p>
+<p><strong>Example.</strong> Shapes for a 3-layer neural network which classifies inputs in <span class="math inline">\mathbb{R}^{16}</span> into <span class="math inline">10</span> classes:</p>
+<center>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">i</span></th>
+<th style="text-align: center;"><span class="math inline">d_{i-1}</span></th>
+<th style="text-align: center;"><span class="math inline">d_{i}</span></th>
+<th style="text-align: left;">PyTorch object</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: left;"><code>Linear(16, 32)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">32</td>
+<td style="text-align: center;">64</td>
+<td style="text-align: left;"><code>Linear(32, 64)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">64</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: left;"><code>Linear(64, 10)</code></td>
+</tr>
+</tbody>
+</table>
+</center>
+</section>
+</section>
+<section id="backpropagation" class="level2">
+<h2 class="anchored" data-anchor-id="backpropagation">Backpropagation</h2>
+<p>Recall that to train the linear function via softmax regression and SGD, we had to calculate the gradients across cross-entropy and the matrix product. For a deep neural network, we need to calculate the gradient for each <span class="math inline">\mathbf{W}_i \in \Theta,</span> i.e.&nbsp;across each layer <span class="math inline">i = 1, 2, \ldots, L.</span> Since the gradients are calculated from the loss to the inputs, this part of the computation is called <strong>backward pass</strong>. The algorithm for caching intermediate results and accumulating the gradients is collectively called <strong>backpropagation</strong> (BP) or simply “backprop”.</p>
+<p>The best way to understand and calculate backprop is to view neural nets as <strong>computational graphs</strong> with certain defined <strong>operations</strong> (e.g.&nbsp;entire layers, or lower-level tensor operations):</p>
+<div id="cell-fig-network-dag" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> graphviz <span class="im">import</span> Digraph</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>dot <span class="op">=</span> Digraph(<span class="bu">format</span><span class="op">=</span><span class="st">"png"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>dot.attr(rankdir<span class="op">=</span><span class="st">"LR"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>dot.node_attr.update(shape<span class="op">=</span><span class="st">"box"</span>, style<span class="op">=</span><span class="st">"rounded,filled"</span>, fontsize<span class="op">=</span><span class="st">"10"</span>, fontname<span class="op">=</span><span class="st">"Helvetica"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"X"</span>, <span class="st">"X"</span>, fillcolor<span class="op">=</span><span class="st">"lightgray"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"W1"</span>, <span class="st">"W₁"</span>, fillcolor<span class="op">=</span><span class="st">"lightyellow"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"Z1"</span>, <span class="st">"Z₁ = σ(XW₁)"</span>, fillcolor<span class="op">=</span><span class="st">"lightgreen"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"W2"</span>, <span class="st">"W₂"</span>, fillcolor<span class="op">=</span><span class="st">"lightyellow"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"Z2"</span>, <span class="st">"Z₂ = Z₁W₂"</span>, fillcolor<span class="op">=</span><span class="st">"lightgreen"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"loss"</span>, <span class="st">"CE loss"</span>, fillcolor<span class="op">=</span><span class="st">"lightblue"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">"Y"</span>, <span class="st">"Y"</span>, fillcolor<span class="op">=</span><span class="st">"lightgrey"</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>dot.edges([(<span class="st">"X"</span>, <span class="st">"Z1"</span>), (<span class="st">"W1"</span>, <span class="st">"Z1"</span>), (<span class="st">"Z1"</span>, <span class="st">"Z2"</span>), (<span class="st">"W2"</span>, <span class="st">"Z2"</span>), (<span class="st">"Z2"</span>, <span class="st">"loss"</span>), (<span class="st">"Y"</span>, <span class="st">"loss"</span>)])</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>dot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div id="fig-network-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-network-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02_files/figure-html/fig-network-dag-output-1.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-network-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A computational graph of a two-layer neural network with softmax regression.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="gradients-of-a-2-layer-nn" class="level3">
+<h3 class="anchored" data-anchor-id="gradients-of-a-2-layer-nn">Gradients of a 2-layer NN</h3>
+<p>Consider a two-layer neural network for softmax regression. Our goal is to find <span class="math inline">\nabla_{\mathbf{W}_i} \mathcal{L}(h_\Theta(\mathbf{X}), \mathbf{y})</span> for <span class="math inline">i = 1, 2.</span> Let’s write this as <span class="math inline">\mathbf{Z}_1 = \sigma(\mathbf{X} \mathbf{W}_1)</span> and <span class="math inline">\mathbf{Z}_2 = \mathbf{Z_1}\mathbf{W}_2.</span> First, we branch towards the linear dependencies of <span class="math inline">\mathbf{Z}_2</span>:</p>
+<p><span class="math display">
+\boxed{
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
+&amp;= \frac{1}{B} (\mathbf{P} - \mathbf{E}_\mathbf{y}) \\[0.75em]
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_2}
+&amp;=
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
+\frac{\partial \mathbf{Z}_2}{\partial \mathbf{W}_2}
+=
+\frac{1}{B}\mathbf{Z}_1^\top (\mathbf{P} - \mathbf{E}_\mathbf{y}) \\[0.75em]
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} &amp;=
+\frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
+\frac{\partial \mathbf{Z}_2}{\partial \mathbf{Z}_1} =
+\frac{1}{B}
+(\mathbf{P} - \mathbf{E}_\mathbf{y})
+\mathbf{W}_2^\top.
+\end{aligned}
+}
+</span></p>
+<p>For the second equation, LHS has <span class="math inline">(d_1, K)</span>, while RHS has <span class="math inline">(d_1, B) \times (B, K)</span>. OK. The last formula is obtained by considering a single instance: <span class="math inline">{\partial z_2^{j}}/{\partial z_1^{i}} = w^{ij}_2 = (w^\top_2)^{ji}.</span> This has the expected shape <span class="math inline">(B, K) \times (K, d_1) = (B, d_1).</span></p>
+<p>Next, we calculate the gradient across <span class="math inline">\sigma.</span> Here we are taking the derivative of <span class="math inline">d_1</span> functions with respect to the weight tensor of shape <span class="math inline">(d, d_1).</span> Let <span class="math inline">\mathbf{U}_1 = \mathbf{X}\mathbf{W}_1</span>, so that <span class="math inline">\mathbf{Z}_1 = \sigma(\mathbf{U}_1).</span> Then,</p>
+<p><span id="eq-dzdw"><span class="math display">
+\begin{align*}
+\frac{\partial {z}_1^j}{\partial w_1^{ik}}
+&amp;= \sum_l
+\frac{\partial z_1^j}{\partial u_1^l}
+\frac{\partial u_1^l}{\partial w_1^{ik}}  \\
+&amp;= \sum_l \delta^{jl} \sigma^\prime(u_1^l) \, x^i \delta^{lk} = \delta^{jk} \sigma^\prime(u_1^j) \, x^i.
+\end{align*}
+\tag{1}</span></span></p>
+<p>Here <span class="math inline">\delta</span> refers to the <a href="https://en.wikipedia.org/wiki/Kronecker_delta">Kronecker delta</a>. The two Kronecker delta “contracted” into one. The effect of <span class="math inline">\delta^{jk}</span> is that <span class="math inline">\sigma^\prime(u^j)</span> essentially multiplies element-wise to the incoming gradient. Moreover, we aggregate the contribution of the batch instances by multiplying <span class="math inline">\mathbf{X}^\top.</span> Thus, in batch form:</p>
+<p><span class="math display">
+\boxed{
+\begin{aligned}
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_1}
+&amp;= \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} \frac{\partial \mathbf{Z}_1}{\partial \mathbf{W}_1} \\[0.7em]
+&amp;= \mathbf{X}^\top \left( \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} \odot \sigma^\prime(\mathbf{X} \mathbf{W}_1) \right) \\[0.7em]
+&amp;= \frac{1}{B} \mathbf{X}^\top \Big( [(\mathbf{P} - \mathbf{E}_\mathbf{y})
+\mathbf{W}_2^\top ] \odot \sigma^\prime(\mathbf{X} \mathbf{W}_1) \Big).
+\end{aligned}
+}
+</span></p>
+</section>
+<section id="graph-visualization" class="level3">
+<h3 class="anchored" data-anchor-id="graph-visualization">Graph visualization</h3>
+<p>Backward dependence can be inspected using the <code>torchviz</code> library. The graph shows the tensors being stored (🟧) during forward pass to compute the gradients. The weights (🟦) are instances of <strong>leaf tensors</strong>, i.e.&nbsp;the outermost nodes with no parent nodes. Hence, backward iteration stops at the leaf nodes. It follows that calculating gradients require:</p>
+<ul>
+<li><strong>twice</strong> the memory of forward pass due to <strong>caching</strong></li>
+<li><strong>same</strong> time complexity <span class="math inline">\mathcal{O}(S)</span> where <span class="math inline">S</span> is the network size.</li>
+</ul>
+<div id="56c53613-5964-4544-aee7-5671c77bb50b" class="cell" data-scrolled="true" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchviz <span class="im">import</span> make_dot</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Sequential(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    nn.Linear(<span class="dv">16</span>, <span class="dv">32</span>, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    nn.ReLU(),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    nn.Linear(<span class="dv">32</span>, <span class="dv">10</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(B, <span class="dv">16</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> model(x)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.randint(<span class="dv">0</span>, <span class="dv">10</span>, size<span class="op">=</span>(B,))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> F.cross_entropy(z, y)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>make_dot(loss.mean(), params<span class="op">=</span><span class="bu">dict</span>(model.named_parameters()), show_saved<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-7-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="general-formula-for-l-layers" class="level3">
+<h3 class="anchored" data-anchor-id="general-formula-for-l-layers">General formula for <span class="math inline">L</span>-layers</h3>
+<p>For an <span class="math inline">L</span>-layer network, we can traverse along the <span class="math inline">\mathbf{Z}_i</span>’s to find <span class="math inline">\partial{\mathcal{L}} / \partial{\mathbf{Z_i}}</span> by taking the product with the local gradients <span class="math inline">\partial{\mathbf{Z}_{i}}/\partial{\mathbf{Z}_{i-1}}.</span> This can be thought of as traversing the main trunk of the network (<a href="#fig-network-dag" class="quarto-xref">Figure&nbsp;1</a>). Meanwhile, the gradient for the weights (leaf tensors) can be calculated using the incoming gradients and <span class="math inline">\partial{\mathbf{Z}_{i}}/\partial{\mathbf{W}_{i}}</span> (see <a href="#eq-dzdw" class="quarto-xref">Equation&nbsp;1</a>). Calculating <span class="math inline">\partial{\mathbf{Z}_{i}}/\partial{\mathbf{Z}_{i-1}}</span> can be done similarly as follows. Observe that indices check out:</p>
+<p><span class="math display">
+\begin{aligned}
+\frac{\partial {z}_i^j}{\partial {z}_{i-1}^k}
+&amp;= \sum_l
+\frac{\partial {z}_i^j}{\partial u_i^l}
+\frac{\partial u_i^l}{\partial {z}_{i-1}^k}  \\
+&amp;= \sum_l \delta^{jl} \sigma^\prime(u_i^l) \, w_{i}^{kl} = \sigma^\prime(u_i^j) \, ({w^\top})^{jk}.
+\end{aligned}
+</span></p>
+<p>Let <span class="math inline">\mathbf{G}_{i} \coloneqq \frac{\partial{\mathcal{L}}}{\partial{\mathbf{Z}_{i}}}</span> with shape <span class="math inline">(B, d_{i}).</span> Then for <span class="math inline">i = L, \ldots, 1</span>:</p>
+<p><span class="math display">
+\boxed{
+\begin{aligned}
+\mathbf{G}_{L} &amp;= \frac{1}{B}(\mathbf{P} - \mathbf{E}_\mathbf{y}) \quad \quad \;\text{(cross-entropy)} \\
+\mathbf{G}_{i-1} &amp;=
+    \mathbf{G}_{i}
+    \frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{Z}_{i-1}}
+    = [
+        \mathbf{G}_{i} \odot \sigma_i^\prime(\mathbf{Z}_{i-1} \mathbf{W}_i)
+    ] \mathbf{W}_i^\top \\
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_{i}}
+&amp;= \mathbf{G}_{i}
+\frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{W}_{i}}
+= \mathbf{Z}_{i-1}^\top[\mathbf{G}_{i} \odot \sigma_i^\prime(\mathbf{Z}_{i-1} \mathbf{W}_i)]
+\end{aligned}
+}
+</span></p>
+<p>This looks very compact. You can verify that the shapes are correct and that it is consistent with the equations for a two-layer network with <span class="math inline">\sigma_2 = \text{Id}.</span> The formulas essentially describe the flow of gradients from the loss to the input. However, each update relies only on the gradients from the next layer.</p>
+<p><strong>Remark.</strong> The gradients are modulated by <span class="math inline">\sigma_i^\prime</span> and then multiplied by the weights. This is analogous to forward pass, but involves only basic operations (<span class="math inline">\odot</span>, MATMUL). Also, the equations have the form <code>loss_grad x local_grad</code> where the loss gradient <span class="math inline">\mathbf{G}_{i}</span> from the next layer is, in a sense, “global” in contrast to the “local” gradients between adjacent nodes. This pattern is quite general as we will see in the next chapter.</p>
+<!-- Finally, the shape checks out: $(B, d_{i}) \times (d_{i}, d_{i-1}) = (B, d_{i-1}).$ Here $\mathbf{W}_i^\top$ projects vectors in $\mathbb{R}^{d_{i}}$ to $\mathbb{R}^{d_{i-1}}.$ On the other hand, $\mathbf{Z}_{i-1}^\top$ accumulates $M$ vectors in $\mathbb{R}^{d_{i}}$ for each of the $d_{i-1}$ coordinates. -->
+</section>
+</section>
+<section id="appendix-gradient-check-using-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-gradient-check-using-pytorch">Appendix: Gradient check using PyTorch</h2>
+<p>Calculating manually the gradients of a 3-layer neural network:</p>
+<div id="7a0cf0a2-92c1-40d5-937c-e5793bd00685" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># network parameters</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> torch.randn(<span class="dv">16</span>, <span class="dv">64</span>, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> torch.randn(<span class="dv">64</span>, <span class="dv">32</span>, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>w3 <span class="op">=</span> torch.randn(<span class="dv">32</span>, <span class="dv">10</span>, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># forward pass</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>B  <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>x  <span class="op">=</span> torch.randn(B, <span class="dv">16</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>z1 <span class="op">=</span> torch.tanh(x <span class="op">@</span> w1)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>z2 <span class="op">=</span> torch.tanh(z1 <span class="op">@</span> w2)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>z3 <span class="op">=</span> z2 <span class="op">@</span> w3</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u <span class="kw">in</span> [w1, w2, w3, z1, z2, z3]:</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    u.retain_grad()</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> z3</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.randint(<span class="dv">0</span>, <span class="dv">10</span>, size<span class="op">=</span>(B,))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> F.cross_entropy(h, y)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>loss.backward()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Backward pass:</p>
+<div id="c74b8507-fa32-4e20-8db4-04f648ff45e2" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># walking down the trunk of the network</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>g3 <span class="op">=</span> (F.softmax(h, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> F.one_hot(y, num_classes<span class="op">=</span><span class="dv">10</span>)) <span class="op">/</span> B</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>g2 <span class="op">=</span> g3 <span class="op">@</span> w3.T</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>g1 <span class="op">=</span> (g2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z2 <span class="op">**</span> <span class="dv">2</span>)) <span class="op">@</span> w2.T</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># branching to the leaf tensors (weights)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>z0 <span class="op">=</span> x</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>dw3 <span class="op">=</span> z2.T <span class="op">@</span> g3</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>dw2 <span class="op">=</span> z1.T <span class="op">@</span> (g2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z2 <span class="op">**</span> <span class="dv">2</span>))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>dw1 <span class="op">=</span> z0.T <span class="op">@</span> (g1 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z1 <span class="op">**</span> <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that shapes are equal, otherwise we can’t subtract:</p>
+<div id="feaa5bac-912e-4ad6-afba-e82bebac5ec8" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> []</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g3 <span class="op">-</span> z3.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g2 <span class="op">-</span> z2.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g1 <span class="op">-</span> z1.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw1 <span class="op">-</span> w1.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw2 <span class="op">-</span> w2.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw3 <span class="op">-</span> w3.grad).<span class="bu">max</span>().item())</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max absolute error: </span><span class="sc">{</span><span class="bu">max</span>(errors)<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Max absolute error: 1.19e-07</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-univapprox" class="level2">
+<h2 class="anchored" data-anchor-id="sec-univapprox">Appendix: Universal approximation</h2>
+<p>[<strong>Cybenko 1989</strong>]. It turns out that any <strong>continuous map</strong> <span class="math inline">f\colon \Omega \subset \mathbb{R}^d \to \mathbb{R}^m</span> defined on a <strong>compact set</strong> <span class="math inline">\Omega</span> can be approximated by a 1-layer (wide) fully-connected network. Continuity on a compact domain is a reasonable assumption about a ground truth function that we assume exists.</p>
+<p><strong>Demo.</strong> Approximating a one-dimensional curve with a ReLU network:</p>
+<div id="efc2f0f8-4589-4fe7-921b-eb5e06eb74fd" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Ground truth</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> torch.pi, <span class="dv">2</span> <span class="op">*</span> torch.pi, <span class="dv">1000</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.sin(x) <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> x</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Get sorted sample. Shifted for demo</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="bu">sorted</span>(torch.randint(<span class="dv">30</span>, <span class="dv">970</span>, size<span class="op">=</span>(<span class="dv">24</span>,)))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> x[B,]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>ys <span class="op">=</span> y[B,]</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ReLU approximation</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> torch.zeros(<span class="dv">1000</span>,) <span class="op">+</span> ys[<span class="dv">0</span>]</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(xs) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.isclose(xs[i <span class="op">+</span> <span class="dv">1</span>], xs[i]):</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        m <span class="op">=</span> torch.tensor(<span class="fl">0.0</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        m <span class="op">=</span> (ys[i<span class="op">+</span><span class="dv">1</span>] <span class="op">-</span> ys[i]) <span class="op">/</span> (xs[i<span class="op">+</span><span class="dv">1</span>] <span class="op">-</span> xs[i])</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    z <span class="op">+=</span> m <span class="op">*</span> (torch.relu(x <span class="op">-</span> xs[i]) <span class="op">-</span> torch.relu(x <span class="op">-</span> xs[i<span class="op">+</span><span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>NOTE:</strong> This only works for target <span class="math inline">f</span> with compact domain&nbsp;<span class="math inline">[a,&nbsp;b]</span> consistent with the theorem.</p>
+<div id="d0073717-dde9-45d5-89be-12e74e2edb9c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(xs, ys, facecolor<span class="op">=</span><span class="st">"none"</span>, s<span class="op">=</span><span class="dv">12</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>, zorder<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"data"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].plot(x, y, color<span class="op">=</span><span class="st">"C1"</span>, label<span class="op">=</span><span class="st">"f"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(xs, ys, facecolor<span class="op">=</span><span class="st">"none"</span>, s<span class="op">=</span><span class="dv">12</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>, zorder<span class="op">=</span><span class="dv">4</span>, label<span class="op">=</span><span class="st">"data"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, z, color<span class="op">=</span><span class="st">"C0"</span>, label<span class="op">=</span><span class="ss">f"relu approx. (B=</span><span class="sc">{</span><span class="bu">len</span>(B)<span class="sc">}</span><span class="ss">)"</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, y, color<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"x"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">"y"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].legend(loc<span class="op">=</span><span class="st">"lower right"</span>, fontsize<span class="op">=</span><span class="fl">7.5</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-linearly-separable-features" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-linearly-separable-features">Appendix: Linearly separable features</h2>
+<p>An ideal classifier is that where the sequence of layers transform the input <span class="math inline">\mathbf{x}_i \in \mathbb{R}^{d}</span> into data points <span class="math inline">F_{\Phi}(\mathbf{x}_i) \in \mathbb{R}^{d_{L-1}}</span> that is linearly separable. That is, we essentially extend linear classification to input that is <em>not</em> linearly separable. This explains why the final layer has no activation, i.e.&nbsp;we can think of the network <span class="math inline">f</span> as</p>
+<p><span class="math display">f_{(\Theta, \Phi)} = h_{\Theta} \circ F_{\Phi}</span></p>
+<p>where <span class="math inline">h_\Theta \colon \mathbb{R}^{d_{L-1}} \to \mathbb{R}^K</span> is a linear hypothesis, while the earlier <span class="math inline">L-1</span> layers are feature extractors that compose <span class="math inline">F_{\Phi}.</span></p>
+<p><strong>Demo.</strong> Generating a dataset in <span class="math inline">\mathbb{R}^2.</span> Our goal is to separate this with a plane in <span class="math inline">\mathbb{R}^3.</span></p>
+<div id="99ec4864-7a81-4296-a35b-c234a343c0a0" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">2</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_data(M: <span class="bu">int</span>):</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    noise <span class="op">=</span> <span class="kw">lambda</span> e: torch.randn(M, <span class="dv">2</span>) <span class="op">*</span> e</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> torch.pi <span class="op">*</span> torch.rand(M, <span class="dv">1</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> torch.pi <span class="op">*</span> torch.rand(M, <span class="dv">1</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> torch.cat([<span class="fl">0.3</span> <span class="op">*</span> torch.cos(s), <span class="fl">0.3</span> <span class="op">*</span> torch.sin(s)], dim<span class="op">=</span><span class="dv">1</span>) <span class="op">+</span> noise(<span class="fl">0.2</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> torch.cat([<span class="fl">3.0</span> <span class="op">*</span> torch.cos(t), <span class="fl">3.0</span> <span class="op">*</span> torch.sin(t)], dim<span class="op">=</span><span class="dv">1</span>) <span class="op">+</span> noise(<span class="fl">0.3</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    y0 <span class="op">=</span> (torch.ones(M,) <span class="op">*</span> <span class="dv">0</span>).<span class="bu">long</span>()</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> (torch.ones(M,) <span class="op">*</span> <span class="dv">1</span>).<span class="bu">long</span>()</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x0, y0, x1, y1</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>x0, y0, x1, y1 <span class="op">=</span> generate_data(<span class="dv">1500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s do a simple 2-layer neural net where the feature extractor maps to <span class="math inline">\mathbb{R}^3</span>:</p>
+<div id="2a7deaca-b839-4e6a-8fa0-cb1217469f0f" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Sequential(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    nn.Linear(<span class="dv">2</span>, <span class="dv">3</span>), nn.Tanh(),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    nn.Linear(<span class="dv">3</span>, <span class="dv">2</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Model training:</p>
+<div id="b4a9a02c-3351-4d0b-ae04-c02001824f2f" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>optim <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.cat([x0, x1])</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.cat([y0, y1])</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> {<span class="st">"accs"</span>: [], <span class="st">"loss"</span>: []}</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> tqdm(<span class="bu">range</span>(<span class="dv">15000</span>)):</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> model(x)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> F.cross_entropy(s, y)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    optim.step()</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    optim.zero_grad()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"loss"</span>].append(loss.item())</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"accs"</span>].append(<span class="dv">100</span> <span class="op">*</span> (y <span class="op">==</span> torch.argmax(s, dim<span class="op">=</span><span class="dv">1</span>)).<span class="bu">float</span>().mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 15000/15000 [00:07&lt;00:00, 1898.47it/s]</code></pre>
+</div>
+</div>
+<div id="34cc7614-59fa-4050-b65c-0d3d47f7bcb8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> ax1.twinx()</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>ax1.plot(history[<span class="st">"loss"</span>], color<span class="op">=</span><span class="st">"blue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>ax2.plot(history[<span class="st">"accs"</span>], color<span class="op">=</span><span class="st">"red"</span>,  linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">"step"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>ax1.ticklabel_format(axis<span class="op">=</span><span class="st">"x"</span>, style<span class="op">=</span><span class="st">"sci"</span>, scilimits<span class="op">=</span>(<span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>ax1.grid(axis<span class="op">=</span><span class="st">"both"</span>, linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">"Batch loss"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">"Batch accs (%)"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>ax1.yaxis.label.set_color(<span class="st">"blue"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>ax2.yaxis.label.set_color(<span class="st">"red"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-16-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observe that accuracy trend does not exactly match the steadily decreasing loss. This is expected since accuracy considers hard labels, while the loss is calculated with respect to soft probability distributions.</p>
+<div id="c9e3048d-307c-4939-875f-09ac9dc14d74" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># transformations</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    linear_0 <span class="op">=</span> model[<span class="dv">0</span>](x0)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    linear_1 <span class="op">=</span> model[<span class="dv">0</span>](x1)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    linear_act_0 <span class="op">=</span> model[<span class="dv">1</span>](model[<span class="dv">0</span>](x0))</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    linear_act_1 <span class="op">=</span> model[<span class="dv">1</span>](model[<span class="dv">0</span>](x1))</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># separating hyperplane (see above discussion, i.e. w &lt;- w1 - w0  == logistic reg)</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    w, b <span class="op">=</span> model[<span class="dv">2</span>].parameters()</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    w, b <span class="op">=</span> (w[h] <span class="op">-</span> w[h<span class="op">-</span><span class="dv">1</span>]), (b[h] <span class="op">-</span> b[h<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>ax0 <span class="op">=</span> fig.add_subplot(<span class="dv">131</span>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> fig.add_subplot(<span class="dv">132</span>, projection<span class="op">=</span><span class="st">"3d"</span>)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> fig.add_subplot(<span class="dv">133</span>, projection<span class="op">=</span><span class="st">"3d"</span>)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>ax0.grid(alpha<span class="op">=</span><span class="fl">0.8</span>, linestyle<span class="op">=</span><span class="st">"dotted"</span>)</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>ax0.set_axisbelow(<span class="va">True</span>)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>ax0.scatter(x0[:, <span class="dv">0</span>], x0[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>ax0.scatter(x1[:, <span class="dv">0</span>], x1[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>ax0.set_xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>ax0.set_ylabel(<span class="st">"$x_2$"</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>ax0.set_xlim(<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>ax0.set_ylim(<span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>)</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>ax0.set_title(<span class="st">"(a) input"</span>)</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>ax0.legend()</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>ax0.set_facecolor(<span class="st">"whitesmoke"</span>)</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>ax0.axis(<span class="st">"equal"</span>)</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>ax1.scatter(linear_0[:, <span class="dv">0</span>], linear_0[:, <span class="dv">1</span>], linear_0[:, <span class="dv">2</span>], s<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>ax1.scatter(linear_1[:, <span class="dv">0</span>], linear_1[:, <span class="dv">1</span>], linear_1[:, <span class="dv">2</span>], s<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">"$x_2$"</span>)</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>ax1.set_zlabel(<span class="st">"$x_3$"</span>)</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">"(b) linear"</span>)</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>ax2.scatter(linear_act_0[:, <span class="dv">0</span>], linear_act_0[:, <span class="dv">1</span>], linear_act_0[:, <span class="dv">2</span>], s<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>)</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>ax2.scatter(linear_act_1[:, <span class="dv">0</span>], linear_act_1[:, <span class="dv">1</span>], linear_act_1[:, <span class="dv">2</span>], s<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">"$x_2$"</span>)</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>ax2.set_zlabel(<span class="st">"$x_3$"</span>)</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">"(c) linear + tanh"</span>)</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate grid of points</span></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>x_min <span class="op">=</span> <span class="bu">min</span>(linear_act_1[:, <span class="dv">0</span>].<span class="bu">min</span>(), linear_act_0[:, <span class="dv">0</span>].<span class="bu">min</span>())</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>x_max <span class="op">=</span> <span class="bu">max</span>(linear_act_1[:, <span class="dv">0</span>].<span class="bu">max</span>(), linear_act_0[:, <span class="dv">0</span>].<span class="bu">max</span>())</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>y_min <span class="op">=</span> <span class="bu">min</span>(linear_act_1[:, <span class="dv">1</span>].<span class="bu">min</span>(), linear_act_0[:, <span class="dv">1</span>].<span class="bu">min</span>())</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>y_max <span class="op">=</span> <span class="bu">max</span>(linear_act_1[:, <span class="dv">1</span>].<span class="bu">max</span>(), linear_act_0[:, <span class="dv">1</span>].<span class="bu">max</span>())</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>a, b, c, d <span class="op">=</span> w[<span class="dv">0</span>], w[<span class="dv">1</span>], w[<span class="dv">2</span>], b</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(x_min, x_max, <span class="dv">50</span>)</span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(y_min, y_max, <span class="dv">50</span>)</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> (<span class="op">-</span>a <span class="op">*</span> X <span class="op">-</span> b <span class="op">*</span> Y <span class="op">-</span> d) <span class="op">/</span> c</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the hyperplane for the positive class</span></span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>ax2.plot_surface(X, Y, Z, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="ss">f"C</span><span class="sc">{</span>h<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-17-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Remark.</strong> The last linear layer (the “<strong>logits</strong>”) defines the separating hyperplane.</p>
+<p>Predicting on <span class="math inline">\mathbb{R}^2</span>:</p>
+<div id="ec926d6c-fb80-4625-b51e-2d4de3bdb355" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a grid of points</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">300</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, N)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, N)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate p[1] for each point in grid</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> torch.tensor(<span class="bu">list</span>(<span class="bu">zip</span>(X, Y)), dtype<span class="op">=</span>torch.float32).permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> F.softmax(model(inp), dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> out[:, <span class="dv">1</span>].reshape(<span class="dv">300</span>, <span class="dv">300</span>).detach().numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The plot below is obtained by applying the model on each point in the grid. The coloring essentially represents the model on test data <span class="math inline">\mathbf{x} \in \mathbb{R}^2</span>. Notice that we essentially have a nonlinear decision boundary:</p>
+<div id="69527948-91a1-42b0-842f-0dda90460a3b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a color plot</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.colors <span class="im">import</span> LinearSegmentedColormap</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define custom colormap</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"C0"</span>, <span class="st">"C1"</span>]</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>n_bins <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> LinearSegmentedColormap.from_list(name<span class="op">=</span><span class="st">""</span>, colors<span class="op">=</span>colors, N<span class="op">=</span>n_bins)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>plt.pcolormesh(X, Y, Z, shading<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span>cm, rasterized<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"X"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Y"</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>plt.scatter(x0[:, <span class="dv">0</span>], x0[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>plt.scatter(x1[:, <span class="dv">0</span>], x1[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$x_2$"</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>plt.gca().set_aspect(<span class="st">"equal"</span>, adjustable<span class="op">=</span><span class="st">"box"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02_files/figure-html/cell-19-output-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The term stems from biological inspiration, but at this point, literally any hypothesis function of the type above is referred to as a neural network.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../topics/deep/01.html" class="pagination-link" aria-label="Softmax Regression">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Softmax Regression</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../topics/deep/03.html" class="pagination-link" aria-label="Automatic Differentiation">
+        <span class="nav-page-text">Automatic Differentiation</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
