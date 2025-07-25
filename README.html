@@ -311,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
         <li>
     <a class="dropdown-item" href="./topics/deep/index.html">
- <span class="dropdown-text">Deep Learning Systems</span></a>
+ <span class="dropdown-text">Deep Learning</span></a>
   </li>  
     </ul>
   </li>
@@ -362,9 +362,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The venv used to run the notebooks can be re-created easily using <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> venv <span class="at">--python</span> 3.13</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>NOTE:</strong> You may have to add the <code>.venv</code> as ipykernel in JupyterLab:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add ipykernel</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python <span class="at">-m</span> ipykernel install <span class="at">--user</span> <span class="at">--name</span><span class="op">=</span>ai-notebooks</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!-- **NOTE:** You may have to add the `.venv` as ipykernel in JupyterLab:
+```bash
+uv add ipykernel
+uv run python -m ipykernel install --user --name=ai-notebooks
+``` -->
 </section>
 <section id="the-notebooks" class="level2">
 <h2 class="anchored" data-anchor-id="the-notebooks">the notebooks</h2>
@@ -379,9 +381,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><a href="./topics/deep/">Deep Learning Systems</a></td>
+<td style="text-align: left;"><a href="./topics/deep/">Deep Learning</a></td>
 <td style="text-align: left;"><code>/deep</code></td>
-<td style="text-align: left;"><a href="https://dlsyscourse.org/lectures/">CMU 10-414/714: Deep Learning Systems</a> (Fall 2024)</td>
+<td style="text-align: left;"><a href="https://dlsyscourse.org/lectures/">CMU 10-414/714: Deep Learning Systems</a> (Fall 2022)</td>
 </tr>
 </tbody>
 </table>

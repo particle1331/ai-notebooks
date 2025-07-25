@@ -356,7 +356,7 @@ window.Quarto = {
     <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
         <li>
     <a class="dropdown-item" href="../../topics/deep/index.html">
- <span class="dropdown-text">Deep Learning Systems</span></a>
+ <span class="dropdown-text">Deep Learning</span></a>
   </li>  
     </ul>
   </li>
@@ -539,21 +539,14 @@ window.Quarto = {
 <li>Manual feature engineering (see above).</li>
 <li>In a way that <span class="math inline">\phi</span> itself is <strong>learned</strong> from data (i.e.&nbsp;<span class="math inline">\phi</span> parametric).</li>
 </ol>
-<p>Note that <span class="math inline">\phi</span> linear doesn’t work since we just get a linear classifier. If <span class="math inline">\phi(\mathbf{x}) = \Phi^\top \mathbf{x}</span> where <span class="math inline">\Phi \in \mathbb{R}^{d \times h}</span>, then</p>
-<p><span class="math display">
-\begin{aligned}
-h_\Theta(\mathbf{x})
-&amp;= \Theta^\top \phi(\mathbf{x}) \\
-&amp;= \Theta^\top \Phi^\top \mathbf{x} = (\Phi \Theta)^\top \mathbf{x}
-\end{aligned}
-</span></p>
-<p>Thus, <span class="math inline">\phi</span> must be nonlinear. It turns out that applying a univariate nonlinear function <span class="math inline">\sigma\colon \mathbb{R} \to \mathbb{R}</span> called an <strong>activation function</strong> suffices to create rich hypothesis classes (see <a href="#sec-univapprox" class="quarto-xref">Section&nbsp;5</a>). Hence, we set</p>
+<p>Note that <span class="math inline">\phi</span> linear doesn’t work since we just get a linear classifier. If <span class="math inline">\phi(\mathbf{x}) = \Phi^\top \mathbf{x}</span> where <span class="math inline">\Phi \in \mathbb{R}^{d \times h}</span>, then <span class="math inline">h_\Theta(\mathbf{x})
+= \Theta^\top \phi(\mathbf{x}) = \Theta^\top \Phi^\top \mathbf{x} = (\Phi \Theta)^\top \mathbf{x}.</span> Thus, <span class="math inline">\phi</span> must be nonlinear. It turns out that applying a univariate <strong>nonlinear</strong> function <span class="math inline">\sigma\colon \mathbb{R} \to \mathbb{R}</span> called an <strong>activation function</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> suffices to create rich hypothesis classes (see <a href="#sec-univapprox" class="quarto-xref">Section&nbsp;5</a>). Hence, we set</p>
 <p><span class="math display">\phi(\mathbf{x}) = \sigma(\Phi^\top \mathbf{x}).</span></p>
-<p><strong>Remark.</strong> More precisely, we require <span class="math inline">\sigma</span> to have a good range of values and almost everywhere differentiability to be usable. The term “activation” has roots in neuroscience where it represents the <a href="https://en.wikipedia.org/wiki/Action_potential#/media/File:Action_potential.svg">action potential</a> firing in the cell. Finally, observe that we can feature transform features, i.e.&nbsp;compose feature transformations. This is the main idea behind deep networks as we will see below.</p>
+<p><strong>Remark.</strong> More precisely, we require <span class="math inline">\sigma</span> to have a good range of values and almost everywhere differentiability to be usable. Observe that we can feature transform features, i.e.&nbsp;compose feature transformations. This is the main idea behind deep networks as we will see below.</p>
 </section>
 <section id="neural-networks" class="level2">
 <h2 class="anchored" data-anchor-id="neural-networks">Neural networks</h2>
-<p>A <strong>neural network</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> refers to a particular type of hypothesis class, consisting of <em>multiple</em>, <em>parameterized</em> differentiable functions (a.k.a. “<strong>layers</strong>”) composed together in any manner to form the output. Since neural networks involve composing a lot of functions (sometimes hundreds), it is usually referred to as <strong>deep neural networks</strong>, although there is really no requirement on depth beyond being not linear.</p>
+<p>A <strong>neural network</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> refers to a particular type of hypothesis class, consisting of <em>multiple</em>, <em>parameterized</em> differentiable functions (a.k.a. “<strong>layers</strong>”) composed together in any manner to form the output. Since neural networks involve composing a lot of functions (sometimes hundreds), it is usually referred to as <strong>deep neural networks</strong>, although there is really no requirement on depth beyond being not linear.</p>
 <section id="two-layer-neural-network" class="level3">
 <h3 class="anchored" data-anchor-id="two-layer-neural-network">Two-layer neural network</h3>
 <p>The simplest form of neural network is basically just the nonlinear features presented earlier:</p>
@@ -632,7 +625,7 @@ h_\Theta(\mathbf{X}) &amp;= \mathbf{Z}_{L}
 <h2 class="anchored" data-anchor-id="backpropagation">Backpropagation</h2>
 <p>Recall that to train the linear function via softmax regression and SGD, we had to calculate the gradients across cross-entropy and the matrix product. For a deep neural network, we need to calculate the gradient for each <span class="math inline">\mathbf{W}_i \in \Theta,</span> i.e.&nbsp;across each layer <span class="math inline">i = 1, 2, \ldots, L.</span> Since the gradients are calculated from the loss to the inputs, this part of the computation is called <strong>backward pass</strong>. The algorithm for caching intermediate results and accumulating the gradients is collectively called <strong>backpropagation</strong> (BP) or simply “backprop”.</p>
 <p>The best way to understand and calculate backprop is to view neural nets as <strong>computational graphs</strong> with certain defined <strong>operations</strong> (e.g.&nbsp;entire layers, or lower-level tensor operations):</p>
-<div id="cell-fig-network-dag" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}">
+<div id="cell-fig-network-dag" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> graphviz <span class="im">import</span> Digraph</span>
@@ -713,7 +706,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 </section>
 <section id="graph-visualization" class="level3">
 <h3 class="anchored" data-anchor-id="graph-visualization">Graph visualization</h3>
-<p>Backward dependence can be inspected using the <code>torchviz</code> library. The graph shows the tensors being stored (🟧) during forward pass to compute the gradients. The weights (🟦) are instances of <strong>leaf tensors</strong>, i.e.&nbsp;the outermost nodes with no parent nodes. Hence, backward iteration stops at the leaf nodes. It follows that calculating gradients require:</p>
+<p>Backward dependence can be inspected using the <code>torchviz</code> library. The graph shows the forward tensors being stored (<span class="math inline">\color{orange}\blacksquare</span>) during forward pass to compute the gradients. The weights (<span class="math inline">\color{cyan}\blacksquare</span>) are instances of <strong>leaf tensors</strong>, i.e.&nbsp;the outermost nodes with no parent nodes. Hence, backward iteration stops at the leaf nodes. It follows that calculating gradients require:</p>
 <ul>
 <li><strong>twice</strong> the memory of forward pass due to <strong>caching</strong></li>
 <li><strong>same</strong> time complexity <span class="math inline">\mathcal{O}(S)</span> where <span class="math inline">S</span> is the network size.</li>
@@ -758,21 +751,19 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 &amp;= \sum_l \delta^{jl} \sigma^\prime(u_i^l) \, w_{i}^{kl} = \sigma^\prime(u_i^j) \, ({w^\top})^{jk}.
 \end{aligned}
 </span></p>
-<p>Let <span class="math inline">\mathbf{G}_{i} \coloneqq \frac{\partial{\mathcal{L}}}{\partial{\mathbf{Z}_{i}}}</span> with shape <span class="math inline">(B, d_{i}).</span> Then for <span class="math inline">i = L, \ldots, 1</span>:</p>
+<p>Let <span class="math inline">\mathbf{G}_{i} = \frac{\partial{\mathcal{L}}}{\partial{\mathbf{Z}_{i}}}</span> and <span class="math inline">\boldsymbol{\varsigma}_i = \sigma_i^\prime(\mathbf{Z}_{i-1} \mathbf{W}_i)</span> both of shape <span class="math inline">(B, d_{i}).</span> For <span class="math inline">i = L, \ldots, 1</span>:</p>
 <p><span class="math display">
 \boxed{
 \begin{aligned}
 \mathbf{G}_{L} &amp;= \frac{1}{B}(\mathbf{P} - \mathbf{E}_\mathbf{y}) \quad \quad \;\text{(cross-entropy)} \\
 \mathbf{G}_{i-1} &amp;=
-    \mathbf{G}_{i}
-    \frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{Z}_{i-1}}
-    = [
-        \mathbf{G}_{i} \odot \sigma_i^\prime(\mathbf{Z}_{i-1} \mathbf{W}_i)
-    ] \mathbf{W}_i^\top \\
+\mathbf{G}_{i}
+\frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{Z}_{i-1}}
+= [\mathbf{G}_{i} \odot \boldsymbol{\varsigma}_i ]\mathbf{W}_i^\top \\
 \frac{\partial \mathcal{L}}{\partial \mathbf{W}_{i}}
 &amp;= \mathbf{G}_{i}
 \frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{W}_{i}}
-= \mathbf{Z}_{i-1}^\top[\mathbf{G}_{i} \odot \sigma_i^\prime(\mathbf{Z}_{i-1} \mathbf{W}_i)]
+= \mathbf{Z}_{i-1}^\top[\mathbf{G}_{i} \odot \boldsymbol{\varsigma}_i]
 \end{aligned}
 }
 </span></p>
@@ -784,7 +775,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <section id="appendix-gradient-check-using-pytorch" class="level2">
 <h2 class="anchored" data-anchor-id="appendix-gradient-check-using-pytorch">Appendix: Gradient check using PyTorch</h2>
 <p>Calculating manually the gradients of a 3-layer neural network:</p>
-<div id="7a0cf0a2-92c1-40d5-937c-e5793bd00685" class="cell" data-execution_count="8">
+<div id="7a0cf0a2-92c1-40d5-937c-e5793bd00685" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># network parameters</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> torch.randn(<span class="dv">16</span>, <span class="dv">64</span>, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> torch.randn(<span class="dv">64</span>, <span class="dv">32</span>, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
@@ -793,8 +784,8 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># forward pass</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>B  <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>x  <span class="op">=</span> torch.randn(B, <span class="dv">16</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>z1 <span class="op">=</span> torch.tanh(x <span class="op">@</span> w1)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>z2 <span class="op">=</span> torch.tanh(z1 <span class="op">@</span> w2)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>z1 <span class="op">=</span> torch.relu(x <span class="op">@</span> w1)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>z2 <span class="op">=</span> torch.relu(z1 <span class="op">@</span> w2)</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>z3 <span class="op">=</span> z2 <span class="op">@</span> w3</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> u <span class="kw">in</span> [w1, w2, w3, z1, z2, z3]:</span>
@@ -806,20 +797,20 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>loss.backward()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Backward pass:</p>
-<div id="c74b8507-fa32-4e20-8db4-04f648ff45e2" class="cell">
+<div id="c74b8507-fa32-4e20-8db4-04f648ff45e2" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># walking down the trunk of the network</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>g3 <span class="op">=</span> (F.softmax(h, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> F.one_hot(y, num_classes<span class="op">=</span><span class="dv">10</span>)) <span class="op">/</span> B</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>g2 <span class="op">=</span> g3 <span class="op">@</span> w3.T</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>g1 <span class="op">=</span> (g2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z2 <span class="op">**</span> <span class="dv">2</span>)) <span class="op">@</span> w2.T</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>g1 <span class="op">=</span> (g2 <span class="op">*</span> ((z1 <span class="op">@</span> w2) <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">int</span>()) <span class="op">@</span> w2.T</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># branching to the leaf tensors (weights)</span></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>z0 <span class="op">=</span> x</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>dw3 <span class="op">=</span> z2.T <span class="op">@</span> g3</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>dw2 <span class="op">=</span> z1.T <span class="op">@</span> (g2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z2 <span class="op">**</span> <span class="dv">2</span>))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>dw1 <span class="op">=</span> z0.T <span class="op">@</span> (g1 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> z1 <span class="op">**</span> <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>dw2 <span class="op">=</span> z1.T <span class="op">@</span> (g2 <span class="op">*</span> ((z1 <span class="op">@</span> w2) <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">int</span>())</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>dw1 <span class="op">=</span> z0.T <span class="op">@</span> (g1 <span class="op">*</span> ((z0 <span class="op">@</span> w1) <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">int</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Note that shapes are equal, otherwise we can’t subtract:</p>
-<div id="feaa5bac-912e-4ad6-afba-e82bebac5ec8" class="cell" data-execution_count="10">
+<div id="feaa5bac-912e-4ad6-afba-e82bebac5ec8" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> []</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g3 <span class="op">-</span> z3.grad).<span class="bu">max</span>().item())</span>
@@ -830,9 +821,10 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw2 <span class="op">-</span> w2.grad).<span class="bu">max</span>().item())</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw3 <span class="op">-</span> w3.grad).<span class="bu">max</span>().item())</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max absolute error: </span><span class="sc">{</span><span class="bu">max</span>(errors)<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">max</span>(errors) <span class="op">&lt;</span> <span class="fl">1e-6</span>, <span class="st">"Gradients do not match!"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max absolute error: </span><span class="sc">{</span><span class="bu">max</span>(errors)<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Max absolute error: 1.19e-07</code></pre>
+<pre><code>Max absolute error: 2.33e-10</code></pre>
 </div>
 </div>
 </section>
@@ -840,7 +832,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <h2 class="anchored" data-anchor-id="sec-univapprox">Appendix: Universal approximation</h2>
 <p>[<strong>Cybenko 1989</strong>]. It turns out that any <strong>continuous map</strong> <span class="math inline">f\colon \Omega \subset \mathbb{R}^d \to \mathbb{R}^m</span> defined on a <strong>compact set</strong> <span class="math inline">\Omega</span> can be approximated by a 1-layer (wide) fully-connected network. Continuity on a compact domain is a reasonable assumption about a ground truth function that we assume exists.</p>
 <p><strong>Demo.</strong> Approximating a one-dimensional curve with a ReLU network:</p>
-<div id="efc2f0f8-4589-4fe7-921b-eb5e06eb74fd" class="cell" data-execution_count="11">
+<div id="efc2f0f8-4589-4fe7-921b-eb5e06eb74fd" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Ground truth</span></span>
@@ -862,7 +854,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    z <span class="op">+=</span> m <span class="op">*</span> (torch.relu(x <span class="op">-</span> xs[i]) <span class="op">-</span> torch.relu(x <span class="op">-</span> xs[i<span class="op">+</span><span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>NOTE:</strong> This only works for target <span class="math inline">f</span> with compact domain&nbsp;<span class="math inline">[a,&nbsp;b]</span> consistent with the theorem.</p>
-<div id="d0073717-dde9-45d5-89be-12e74e2edb9c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="12">
+<div id="d0073717-dde9-45d5-89be-12e74e2edb9c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">3</span>))</span>
@@ -895,7 +887,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <p><span class="math display">f_{(\Theta, \Phi)} = h_{\Theta} \circ F_{\Phi}</span></p>
 <p>where <span class="math inline">h_\Theta \colon \mathbb{R}^{d_{L-1}} \to \mathbb{R}^K</span> is a linear hypothesis, while the earlier <span class="math inline">L-1</span> layers are feature extractors that compose <span class="math inline">F_{\Phi}.</span></p>
 <p><strong>Demo.</strong> Generating a dataset in <span class="math inline">\mathbb{R}^2.</span> Our goal is to separate this with a plane in <span class="math inline">\mathbb{R}^3.</span></p>
-<div id="99ec4864-7a81-4296-a35b-c234a343c0a0" class="cell" data-execution_count="13">
+<div id="99ec4864-7a81-4296-a35b-c234a343c0a0" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">2</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -915,7 +907,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>x0, y0, x1, y1 <span class="op">=</span> generate_data(<span class="dv">1500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s do a simple 2-layer neural net where the feature extractor maps to <span class="math inline">\mathbb{R}^3</span>:</p>
-<div id="2a7deaca-b839-4e6a-8fa0-cb1217469f0f" class="cell" data-execution_count="15">
+<div id="2a7deaca-b839-4e6a-8fa0-cb1217469f0f" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Sequential(</span>
@@ -924,7 +916,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Model training:</p>
-<div id="b4a9a02c-3351-4d0b-ae04-c02001824f2f" class="cell" data-execution_count="16">
+<div id="b4a9a02c-3351-4d0b-ae04-c02001824f2f" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -942,10 +934,10 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"loss"</span>].append(loss.item())</span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"accs"</span>].append(<span class="dv">100</span> <span class="op">*</span> (y <span class="op">==</span> torch.argmax(s, dim<span class="op">=</span><span class="dv">1</span>)).<span class="bu">float</span>().mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>100%|██████████| 15000/15000 [00:07&lt;00:00, 1898.47it/s]</code></pre>
+<pre><code>100%|██████████| 15000/15000 [00:10&lt;00:00, 1408.55it/s]</code></pre>
 </div>
 </div>
-<div id="34cc7614-59fa-4050-b65c-0d3d47f7bcb8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="17">
+<div id="34cc7614-59fa-4050-b65c-0d3d47f7bcb8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
@@ -971,7 +963,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 </div>
 </div>
 <p>Observe that accuracy trend does not exactly match the steadily decreasing loss. This is expected since accuracy considers hard labels, while the loss is calculated with respect to soft probability distributions.</p>
-<div id="c9e3048d-307c-4939-875f-09ac9dc14d74" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="18">
+<div id="c9e3048d-307c-4939-875f-09ac9dc14d74" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="16">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
@@ -1051,7 +1043,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a grid of points</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, N)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, N)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">5</span>, <span class="dv">5</span>, N)</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate p[1] for each point in grid</span></span>
@@ -1060,7 +1052,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> out[:, <span class="dv">1</span>].reshape(<span class="dv">300</span>, <span class="dv">300</span>).detach().numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The plot below is obtained by applying the model on each point in the grid. The coloring essentially represents the model on test data <span class="math inline">\mathbf{x} \in \mathbb{R}^2</span>. Notice that we essentially have a nonlinear decision boundary:</p>
-<div id="69527948-91a1-42b0-842f-0dda90460a3b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="20">
+<div id="69527948-91a1-42b0-842f-0dda90460a3b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a color plot</span></span>
@@ -1071,17 +1063,13 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>n_bins <span class="op">=</span> <span class="dv">100</span></span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> LinearSegmentedColormap.from_list(name<span class="op">=</span><span class="st">""</span>, colors<span class="op">=</span>colors, N<span class="op">=</span>n_bins)</span>
 <span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
 <span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>plt.pcolormesh(X, Y, Z, shading<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span>cm, rasterized<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"X"</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Y"</span>)</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>plt.scatter(x0[:, <span class="dv">0</span>], x0[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>plt.scatter(x1[:, <span class="dv">0</span>], x1[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$x_1$"</span>)</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$x_2$"</span>)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>plt.gca().set_aspect(<span class="st">"equal"</span>, adjustable<span class="op">=</span><span class="st">"box"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(x0[:, <span class="dv">0</span>], x0[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"C0"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>plt.scatter(x1[:, <span class="dv">0</span>], x1[:, <span class="dv">1</span>], s<span class="op">=</span><span class="fl">10.0</span>, label<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">"C1"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"$x_1$"</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"$x_2$"</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>plt.gca().set_aspect(<span class="st">"equal"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -1099,7 +1087,8 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>The term stems from biological inspiration, but at this point, literally any hypothesis function of the type above is referred to as a neural network.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The term “activation” has roots in neuroscience where it represents the <a href="https://en.wikipedia.org/wiki/Action_potential#/media/File:Action_potential.svg">action potential</a> firing in the cell.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The term stems from biological inspiration, but at this point, literally any hypothesis function of the type above is referred to as a neural network.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
