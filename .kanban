@@ -1,6 +1,84 @@
 {
   "lists": [
     {
+      "id": "3f9949af-48d0-4588-9302-3ac9b2003690",
+      "title": "Ongoing Projects",
+      "cards": [
+        {
+          "id": "a00efe9c-97c2-42b6-9371-dd8acf27e269",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "Azure Zero to Hero - Piyush - YT [0/16]",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "36ad18c1-b664-4f01-98c9-a4163b60ec90",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "[Lec] DLSys Course [03/24]",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "bb1cfa32-967a-4272-a509-fb169f85f400",
+      "title": "To Do",
+      "cards": [
+        {
+          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "[Azure-Piyush] Day 0",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+      "title": "Doing",
+      "cards": [
+        {
+          "id": "8a89c32e-2679-4ff8-8e3b-99a66cd261cb",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "Refactor DLSys intro. Only DL no Sys :-P",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+      "title": "Done",
+      "cards": [
+        {
+          "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "Remove C++",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
       "id": "5f017133-2cd3-4dd4-937d-14d589906068",
       "title": "Backlog",
       "cards": [
@@ -132,59 +210,6 @@
           "comments": []
         }
       ]
-    },
-    {
-      "id": "bb1cfa32-967a-4272-a509-fb169f85f400",
-      "title": "To Do",
-      "cards": [
-        {
-          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
-          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "[Azure-Piyush] Day 0",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
-          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
-    },
-    {
-      "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-      "title": "Doing",
-      "cards": [
-        {
-          "id": "8a89c32e-2679-4ff8-8e3b-99a66cd261cb",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "Refactor DLSys intro. Only DL no Sys :-P",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "Remove C++",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
-    },
-    {
-      "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
-      "title": "Done",
-      "cards": []
     }
   ],
   "archive": {

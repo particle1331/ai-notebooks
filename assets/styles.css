@@ -24,12 +24,6 @@ table, thead, tbody, tr, td, th {
   hyphens: auto;
 }
 
-/* Add space before section headers */
-h2, h3, h4, h5, h6 {
-  margin-top: 1.75rem;
-  margin-bottom: 0.5rem;
-}
-
 /* Add space before and after images */
 img {
   max-width: 100%;

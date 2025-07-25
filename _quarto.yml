@@ -41,8 +41,6 @@ website:
         menu:
           - text: "Deep Learning Systems"
             href: topics/deep/index.html
-          - text: "C++ for Machine Learning"
-            href: topics/cpp/index.html
           
     tools:
       - icon: github
@@ -55,6 +53,6 @@ website:
       collapse-level: 1
       align: left
       contents:
-        - section: "Deep Learning Systems"
+        - section: "Deep Learning"
           href: topics/deep/index.ipynb
           contents: topics/deep/*.ipynb
