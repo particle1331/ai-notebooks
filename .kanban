@@ -1,113 +1,9 @@
 {
   "lists": [
     {
-      "id": "3f9949af-48d0-4588-9302-3ac9b2003690",
-      "title": "Ongoing Projects",
-      "cards": [
-        {
-          "id": "a00efe9c-97c2-42b6-9371-dd8acf27e269",
-          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
-          "title": "Azure Zero to Hero - Piyush - YT [0/16]",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "36ad18c1-b664-4f01-98c9-a4163b60ec90",
-          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
-          "title": "[Lec] DLSys Course [03/24]",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "7c923d97-dff2-41b1-88f6-3e24b9ff8970",
-          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
-          "title": "[Udemy] LLM Engg ",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
-    },
-    {
-      "id": "bb1cfa32-967a-4272-a509-fb169f85f400",
-      "title": "To Do",
-      "cards": []
-    },
-    {
-      "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-      "title": "Doing",
-      "cards": [
-        {
-          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "[Azure-Piyush] Day 0",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
-    },
-    {
-      "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
-      "title": "Done",
-      "cards": [
-        {
-          "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
-          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
-          "title": "Remove C++",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "8a89c32e-2679-4ff8-8e3b-99a66cd261cb",
-          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
-          "title": "Refactor DLSys intro. Only DL no Sys :-P",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
-    },
-    {
       "id": "5f017133-2cd3-4dd4-937d-14d589906068",
       "title": "Backlog",
       "cards": [
-        {
-          "id": "b03ea4f7-101d-4303-a365-bad9736ecc67",
-          "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
-          "title": "[Udemy] Complete Agentic AI",
-          "description": "https://www.udemy.com/course/the-complete-agentic-ai-engineering-course/?couponCode=MT240725G1",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "937d9951-a26d-4136-a95b-18f50088e975",
-          "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
-          "title": "[Udemy] E2E-ML. GCP, Dask, etc.",
-          "description": "https://www.udemy.com/course/sustainable-and-scalable-machine-learning-project-development/?couponCode=MT240725G1",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
         {
           "id": "01c712aa-a0bd-41ce-827c-f9c8096898c6",
           "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
@@ -203,6 +99,145 @@
           "id": "62683daa-c765-4e3f-81ab-dcc70e96fc23",
           "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
           "title": "[Lec] CS224n. NLP Course",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "c76ca703-09aa-4c6c-b9fe-96cf63a14ff9",
+          "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
+          "title": "[Lec] Data Centric ML Course (MIT)",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "3f9949af-48d0-4588-9302-3ac9b2003690",
+      "title": "Ongoing Projects",
+      "cards": [
+        {
+          "id": "b03ea4f7-101d-4303-a365-bad9736ecc67",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "[Udemy] Complete Agentic AI",
+          "description": "https://www.udemy.com/course/the-complete-agentic-ai-engineering-course/?couponCode=MT240725G1",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "a00efe9c-97c2-42b6-9371-dd8acf27e269",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "Azure Zero to Hero - Piyush - YT [0/16]",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "7c923d97-dff2-41b1-88f6-3e24b9ff8970",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "[Udemy] LLM Engg ",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "937d9951-a26d-4136-a95b-18f50088e975",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "[Udemy] E2E-ML. GCP, Dask, etc.",
+          "description": "https://www.udemy.com/course/sustainable-and-scalable-machine-learning-project-development/?couponCode=MT240725G1",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "36ad18c1-b664-4f01-98c9-a4163b60ec90",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "[Lec] DLSys Course [03/24]",
+          "description": "- lectures only (skip mlc)\n- include some material from the E2E mlops course (udemy). \n- multi-node multi-GPU training in GCP\n- multi-GPU training with lightning AI\n- some material on CUDA / triton would be nice\n\nDO NOT COVER PRODUCTION / DEPLOYMENT. \nIt will be covered in a separate course focused on infrastructure and inference.",
+          "labels": [],
+          "checkboxes": [
+            {
+              "id": "7e75f433-039d-482b-b555-9fcc988f2557",
+              "title": "[Workshop] CUDA Course (https://www.youtube.com/watch?v=86FAWCzIe_4)",
+              "checked": false
+            },
+            {
+              "id": "ab37f9ca-ca62-45a0-9923-9cb260f7dfe3",
+              "title": "[Workshop] Flash attention Triton (https://www.youtube.com/watch?v=zy8ChVd_oTM)",
+              "checked": false
+            },
+            {
+              "id": "0fecb751-5930-49a0-8808-34c3e65230b8",
+              "title": "[Workshop] Multi-node LLM training: (https://www.youtube.com/watch?v=aPzbR1s1O_8)",
+              "checked": false
+            }
+          ],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "bb1cfa32-967a-4272-a509-fb169f85f400",
+      "title": "To Do",
+      "cards": [
+        {
+          "id": "98ee44ab-1f0c-44b2-933e-6548fc2a27a0",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "joel grus - autograd library",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+      "title": "Doing",
+      "cards": [
+        {
+          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "[Azure-Piyush] Day 0",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+      "title": "Done",
+      "cards": [
+        {
+          "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "Remove C++",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "8a89c32e-2679-4ff8-8e3b-99a66cd261cb",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "Refactor DLSys intro. Only DL no Sys :-P",
           "description": "",
           "labels": [],
           "checkboxes": [],
