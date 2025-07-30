@@ -187,9 +187,9 @@
       "title": "To Do",
       "cards": [
         {
-          "id": "98ee44ab-1f0c-44b2-933e-6548fc2a27a0",
+          "id": "3a7e1427-e095-46b3-a01b-ad5b1f125080",
           "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "joel grus - autograd library",
+          "title": "MLE appendix to Cross-Entropy",
           "description": "",
           "labels": [],
           "checkboxes": [],
@@ -202,9 +202,9 @@
       "title": "Doing",
       "cards": [
         {
-          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
+          "id": "98ee44ab-1f0c-44b2-933e-6548fc2a27a0",
           "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
+          "title": "Implement vectorized micrograd",
           "description": "",
           "labels": [],
           "checkboxes": [],
@@ -225,6 +225,24 @@
       "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
       "title": "Done",
       "cards": [
+        {
+          "id": "35c894c1-03fe-4898-bd52-f0df4d63a6c7",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "Add nice image from visionbook for cross entropy loss",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
         {
           "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
           "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
