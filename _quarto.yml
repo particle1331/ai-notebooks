@@ -12,6 +12,7 @@ execute:
 
 format:
   html:
+    lightbox: true
     html-math-method: katex
     respect-user-color-scheme: true
     highlight-annotations: true
