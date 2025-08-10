@@ -42,6 +42,8 @@ website:
         menu:
           - text: "Deep Learning"
             href: topics/deep/index.html
+          - text: "Tooling"
+            href: topics/tooling/index.html
           
     tools:
       - icon: github
@@ -57,3 +59,13 @@ website:
         - section: "Deep Learning"
           href: topics/deep/index.ipynb
           contents: topics/deep/*.ipynb
+        # - section: "CUDA Programming"
+
+    - id: tooling
+      style: "floating"
+      collapse-level: 1
+      align: left
+      contents:
+        - section: "Tooling"
+          href: topics/tooling/index.ipynb
+          contents: topics/tooling/*.ipynb

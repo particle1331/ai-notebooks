@@ -138,15 +138,6 @@
           "comments": []
         },
         {
-          "id": "a00efe9c-97c2-42b6-9371-dd8acf27e269",
-          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
-          "title": "Azure Zero to Hero - Piyush - YT [0/16]",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
           "id": "7c923d97-dff2-41b1-88f6-3e24b9ff8970",
           "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
           "title": "[Udemy] LLM Engg ",
@@ -196,9 +187,18 @@
       "title": "To Do",
       "cards": [
         {
-          "id": "3a7e1427-e095-46b3-a01b-ad5b1f125080",
+          "id": "ffa48944-a333-4865-b0bc-b3bb36cd8fe9",
           "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "MLE appendix to Cross-Entropy",
+          "title": "TMUX tooling",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "3caf6c8d-e94b-4505-9b19-e73b4877bbd4",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Agentic AI start",
           "description": "",
           "labels": [],
           "checkboxes": [],
@@ -209,26 +209,7 @@
     {
       "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
       "title": "Doing",
-      "cards": [
-        {
-          "id": "98ee44ab-1f0c-44b2-933e-6548fc2a27a0",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "Implement vectorized micrograd",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        },
-        {
-          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
-          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "[Azure-Piyush] Day 0",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
-        }
-      ]
+      "cards": []
     },
     {
       "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
@@ -244,6 +225,15 @@
           "comments": []
         },
         {
+          "id": "98ee44ab-1f0c-44b2-933e-6548fc2a27a0",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "Implement vectorized micrograd",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
           "id": "1ee35a94-ebec-4044-b21c-8fa9c99195e4",
           "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
           "title": "[Lec] DLSys Lecture 4. Autodifferentiation",
@@ -253,9 +243,27 @@
           "comments": []
         },
         {
+          "id": "2aa0c904-1242-47d9-b890-71a8a2ee6fee",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "[Azure-Piyush] Day 0",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
           "id": "5a151c5d-c52f-4515-bc85-ed344fbc10e1",
           "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
           "title": "Remove C++",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "3a7e1427-e095-46b3-a01b-ad5b1f125080",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "MLE appendix to Cross-Entropy",
           "description": "",
           "labels": [],
           "checkboxes": [],
@@ -275,7 +283,17 @@
   ],
   "archive": {
     "lists": [],
-    "cards": []
+    "cards": [
+      {
+        "id": "a00efe9c-97c2-42b6-9371-dd8acf27e269",
+        "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+        "title": "Azure Zero to Hero - Piyush - YT [0/16]",
+        "description": "",
+        "labels": [],
+        "checkboxes": [],
+        "comments": []
+      }
+    ]
   },
   "settings": {
     "labels": []
