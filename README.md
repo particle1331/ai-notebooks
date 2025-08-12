@@ -1,6 +1,6 @@
 # AI notebooks
 
-Some jupyter notebooks containing notes and implementation of AI **models**, **algorithms**, & **applications**. Or generally AI / ML related stuff like chess engines. Ultimately, our goal is to learn how to build performant, computationally efficient, sustainable, and [aligned](https://en.wikipedia.org/wiki/AI_alignment) intelligent systems: 🤖 = 🧠 + ⌛ + ♻️ + 🚃.
+Jupyter notebooks containing notes and implementation of AI models, algorithms, & applications.
 
 <img src="./assets/ai.png">
 
@@ -9,8 +9,13 @@ Some jupyter notebooks containing notes and implementation of AI **models**, **a
 The venv used to run the notebooks can be re-created easily using [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
-uv venv --python 3.13
-uv sync
+make venv
+```
+
+You can also install requirements via `pip` to entirely skip `uv` (e.g. on remote linux dev servers):
+```bash
+make requirements
+pip install -r requirements.txt
 ```
 
 <!-- **NOTE:** You may have to add the `.venv` as ipykernel in JupyterLab:
