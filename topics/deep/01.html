@@ -79,9 +79,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-ed72e498c0450dafe86c3800e99bcb2e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-f79dbffa86626eb872d8c5a00245cbfc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -358,6 +361,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../../topics/deep/index.html">
  <span class="dropdown-text">Deep Learning</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../topics/tooling/index.html">
+ <span class="dropdown-text">Tooling</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -417,6 +424,12 @@ window.Quarto = {
  <span class="menu-text">Automatic Differentiation</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient-Based Optimization</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -430,10 +443,10 @@ window.Quarto = {
    
   <ul>
   <li><a href="#ml-as-data-driven-programming" id="toc-ml-as-data-driven-programming" class="nav-link active" data-scroll-target="#ml-as-data-driven-programming">ML as data-driven programming</a></li>
-  <li><a href="#three-elements-of-a-ml-algorithm" id="toc-three-elements-of-a-ml-algorithm" class="nav-link" data-scroll-target="#three-elements-of-a-ml-algorithm">Three elements of a ML algorithm</a></li>
+  <li><a href="#three-elements-of-a-learning-algorithm" id="toc-three-elements-of-a-learning-algorithm" class="nav-link" data-scroll-target="#three-elements-of-a-learning-algorithm">Three elements of a learning algorithm</a></li>
   <li><a href="#multi-class-classification" id="toc-multi-class-classification" class="nav-link" data-scroll-target="#multi-class-classification">Multi-class classification</a></li>
   <li><a href="#linear-hypothesis-class" id="toc-linear-hypothesis-class" class="nav-link" data-scroll-target="#linear-hypothesis-class">Linear hypothesis class</a></li>
-  <li><a href="#loss-functions-softmax-and-cross-entropy" id="toc-loss-functions-softmax-and-cross-entropy" class="nav-link" data-scroll-target="#loss-functions-softmax-and-cross-entropy">Loss functions, softmax, and cross-entropy</a></li>
+  <li><a href="#softmax-and-cross-entropy" id="toc-softmax-and-cross-entropy" class="nav-link" data-scroll-target="#softmax-and-cross-entropy">Softmax and cross-entropy</a></li>
   <li><a href="#optimization-problem" id="toc-optimization-problem" class="nav-link" data-scroll-target="#optimization-problem">Optimization problem</a>
   <ul class="collapse">
   <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent">Gradient Descent</a></li>
@@ -442,6 +455,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#code-implementation" id="toc-code-implementation" class="nav-link" data-scroll-target="#code-implementation">Code implementation</a></li>
   <li><a href="#appendix-model-complexity" id="toc-appendix-model-complexity" class="nav-link" data-scroll-target="#appendix-model-complexity">Appendix: Model complexity</a></li>
+  <li><a href="#appendix-maximum-likelihood-estimation-mle" id="toc-appendix-maximum-likelihood-estimation-mle" class="nav-link" data-scroll-target="#appendix-maximum-likelihood-estimation-mle">Appendix: Maximum likelihood estimation (MLE)</a></li>
   </ul>
 </nav>
     </div>
@@ -478,15 +492,15 @@ window.Quarto = {
 </center>
 <p>^The latter input is different from training data. In practice, we want the models to perform well on unlabeled data.</p>
 </section>
-<section id="three-elements-of-a-ml-algorithm" class="level2">
-<h2 class="anchored" data-anchor-id="three-elements-of-a-ml-algorithm">Three elements of a ML algorithm</h2>
+<section id="three-elements-of-a-learning-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="three-elements-of-a-learning-algorithm">Three elements of a learning algorithm</h2>
 <p>Every machine learning algorithm has the ff.&nbsp;elements:</p>
 <table class="caption-top table">
-<caption>Elements of a ML training algorithm</caption>
+<caption>Elements of a learning algorithm</caption>
 <colgroup>
+<col style="width: 15%">
 <col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 60%">
+<col style="width: 65%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -504,12 +518,12 @@ window.Quarto = {
 <tr class="even">
 <td style="text-align: left;">Loss function</td>
 <td style="text-align: left;"><span class="math inline">\mathcal{L}, \ell</span></td>
-<td style="text-align: left;">A function that specifies how “well” a given <strong>hypothesis</strong> <span class="math inline">h_\Theta</span> (i.e.&nbsp;a choice of parameters) performs on the task of interest. The loss is expressed in terms of a pointwise <strong>loss function</strong> <span class="math inline">\ell</span> such that: <span class="math display">\mathcal{L}(h_\Theta, \mathcal{D}) = \frac{1}{N}\sum_{i=1}^N \ell(h_\Theta(\mathbf{x}_i), y_i)</span> where <span class="math inline">\ell \geq 0</span> and <span class="math inline">\ell \to 0</span> whenever the predictions are accurate, and <span class="math inline">\ell \to \infty</span> as the predictions become increasingly worse.</td>
+<td style="text-align: left;">A function that specifies how “well” a given <strong>hypothesis</strong> <span class="math inline">h_\Theta</span> (i.e.&nbsp;a choice of parameters) performs on the task of interest. The loss is expressed in terms of a pointwise <strong>loss function</strong> <span class="math inline">\ell</span> such that: <span class="math display">\mathcal{L}_{\mathcal{D}}(\Theta) = \frac{1}{N}\sum_{i=1}^N \ell(h_\Theta(\mathbf{x}_i), y_i)</span> where <span class="math inline">\ell \geq 0</span> and <span class="math inline">\ell \to 0</span> whenever the predictions are accurate, and <span class="math inline">\ell \to \infty</span> as the predictions become increasingly worse.</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Optimization algorithm</td>
+<td style="text-align: left;">Optimizer</td>
 <td style="text-align: left;">e.g.&nbsp;<br> <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-use-an-optimizer"><code>torch.optim.*</code></a>, <br> <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate"><code>LRScheduler</code></a></td>
-<td style="text-align: left;">Procedure for determining a set of parameters that (approximately) minimizes the training loss. More precisely, the optimizer handles state and the calculation required to find optimal parameters <span class="math display">\Theta^* \approx {\text{argmin}}_{\Theta} \; \mathcal{L}(h_\Theta, \mathcal{D}).</span> For deep learning, this is typically an iterative approach via SGD and its variants.</td>
+<td style="text-align: left;">Procedure for determining a set of parameters that (approximately) minimizes the training loss. More precisely, the optimizer handles state and the calculation required to find optimal parameters <span class="math display">\Theta^* \approx {\text{argmin}}_{\Theta} \; \mathcal{L}_\mathcal{D}(\Theta).</span> For deep learning, this is typically an iterative approach via SGD and its variants.</td>
 </tr>
 </tbody>
 </table>
@@ -537,86 +551,92 @@ h_\Theta(\mathbf{X}) =  \underbrace{\mathbf{X}}_{\mathbb{R}^{M \times d}} \; \un
 </span></p>
 <p><strong>Remark.</strong> Geometrically each <span class="math inline">\Theta_j = \Theta_{[:, j]} \in \mathbb{R}^d</span> defines a separating hyperplane for class <span class="math inline">j \in [K].</span> So a linear hypothesis class is able to learn to separate linearly separable data points in <span class="math inline">\mathbb{R}^d</span> using <span class="math inline">K</span> separating hyperplanes by assigning a score <span class="math inline">s_j = \Theta_j^\top \mathbf{x} \in \mathbb{R}</span> proportional to its weighted distance from the hyperplane, and the “weight” of that hyperplane <span class="math inline">\lVert\Theta_j\rVert.</span></p>
 </section>
-<section id="loss-functions-softmax-and-cross-entropy" class="level2">
-<h2 class="anchored" data-anchor-id="loss-functions-softmax-and-cross-entropy">Loss functions, softmax, and cross-entropy</h2>
-<p>The simplest loss is just the <strong>classification error</strong>: <span class="math display">\ell_{\text{err}} =
-\begin{cases}
-0 &amp; \operatorname{argmax}_i h_i(\mathbf{x}) = y \\
-1 &amp; \text{else}
-\end{cases}
-</span></p>
-<p>We typically use this loss function to assess the quality of classifiers. Unfortunately, the error is a bad loss function to use for optimization, because it is not differentiable, i.e.&nbsp;we can smoothly adjust the parameters without seeing a change in <span class="math inline">\ell_{\text{err}}</span> or that it changes abruptly.</p>
+<section id="softmax-and-cross-entropy" class="level2">
+<h2 class="anchored" data-anchor-id="softmax-and-cross-entropy">Softmax and cross-entropy</h2>
+<p>The simplest loss is just the <strong>zero-one loss</strong>: <span class="math inline">\ell = 0</span> if <span class="math inline">\operatorname{argmax}_i h_i(\mathbf{x}) = y</span>, otherwise <span class="math inline">\ell = 1.</span> This is just the classification error. Unfortunately, the error is unsuitable for optimization, simply because it is not differentiable. That is, we can smoothly adjust the parameters without seeing a change in <span class="math inline">\ell</span>, or it transitions abruptly from <span class="math inline">0</span> to <span class="math inline">1.</span></p>
 <p>Instead, we look at the probabilities assigned by the model to each class. To do this, we have to convert the class scores to probabilities exponentiating and normalizing its entries (i.e.&nbsp;making <span class="math inline">\sum_j p = 1</span> s.t. <span class="math inline">p_j \geq 0</span>). Class scores <span class="math inline">h_j(\mathbf{x}) = \Theta_j^\top \mathbf{x}</span> are exponentiated before normalizing:</p>
 <p><span class="math display">
 p_j = \frac{\exp(h_j(\mathbf{x}))}{\sum_l \exp(h_l(\mathbf{x}))} \eqqcolon \text{Softmax} (h(\mathbf{x}))_j.
 </span></p>
-<p>Then, the <strong>cross-entropy loss</strong> is given by the negative log of the probability of the true class <span class="math inline">y</span>:</p>
+<p>We can let <span class="math inline">\hat{\mathbf{y}}</span> be equal to <span class="math inline">\mathbf{p} = \text{Softmax} (h(\mathbf{x}))</span> since the softmax approximates the one-hot vector <span class="math inline">\mathbf{y}</span> of the target label <span class="math inline">y</span> (see remark below). Then, what is left is to define a loss function that captures the difference between the model probability vector and the true one. For this, we use the <strong>cross-entropy loss</strong> given by the negative log of the probability of the true class <span class="math inline">y</span>:</p>
 <p><span class="math display">
-\begin{aligned}
-\ell_{\text{CE}}(h(\mathbf{x}), y)
-&amp;= -\log \text{Softmax} (h(\mathbf{x}))_y \\
-&amp;= -h_y(\mathbf{x})+\log \sum_{j=1}^K \exp \left(h_j(\mathbf{x})\right).
-\end{aligned}
+\boxed{
+    \begin{aligned}
+    \ell_{\text{CE}}(h(\mathbf{x}), y)
+    &amp;= -\log \hat{\mathbf{y}} \odot \mathbf{y}\\[0.8em]
+    &amp;= -\log \text{Softmax} (h(\mathbf{x}))_y \\
+    &amp;= -h_y(\mathbf{x})+\log \sum_{j=1}^K \exp \left(h_j(\mathbf{x})\right).
+    \end{aligned}
+}
 </span></p>
-<p><strong>Remark.</strong> Exponentiating means that scores does not scale linearly. In fact,</p>
+<p>Here <span class="math inline">p_y = 1</span> implies <span class="math inline">\ell = -\log 1 = 0</span> while <span class="math inline">p_y = 0</span> implies <span class="math inline">-\log 0 = +\infty.</span> Hence, the model is penalized the more it becomes unconfident in the true class. Note taking the negative log of the true class suffices to penalize high score in the other classes since we have the constraint <span class="math inline">\sum p_j = 1.</span> Also, looking at the gradient, the logarithm has the nice property that it does not saturate as it approaches perfect prediction, and it explodes with really bad predictions:</p>
+<p><span class="math display">\frac{\partial\ell}{\partial p_y} = -\frac{1}{p_y}.</span></p>
+<div id="25780e85-c7fe-4664-bd8d-d4aeba4f8323" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>] </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> <span class="fl">1e-5</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> np.linspace(<span class="dv">0</span> <span class="op">+</span> eps, <span class="dv">1</span>, <span class="dv">10000</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="dv">4</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.plot(p, <span class="op">-</span>np.log(p), linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"-log(p)"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.6</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"p"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"loss"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01_files/figure-html/cell-2-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="01_files/figure-html/cell-2-output-1.svg" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To further visualize the cross-entropy loss, let’s incorporate this graph in the evaluation process. The <strong>baseline loss</strong> is given by <span class="math inline">-\log 0.1 \approx 2.30</span> assuming uniform prediction across 10 classes. Since the loss decrease more going from <span class="math inline">p= 0.1</span> to <span class="math inline">0.2</span> compared to <span class="math inline">p = 0.5</span> to <span class="math inline">0.6</span> for the true class, then the optimizer will focus on examples with bad predictions during training. This is desirable behavior.</p>
+<div id="10c4897a" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01_files/figure-html/cell-3-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="01_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Remark.</strong> The softmax can be made to be numerically stable. To see this, notice that</p>
 <p><span class="math display">
 p_j = \frac{\exp(\Delta h_j(\mathbf{x}))}{\sum_l \exp(\Delta h_l(\mathbf{x}))}
 </span></p>
 <p>where <span class="math inline">\Delta h_l(\mathbf{x}) = h_l(\mathbf{x}) - \max_{m} h_m(\mathbf{x}).</span> Thus log-softmax becomes <span class="math inline">\log (1 + \sum a_j)</span> where <span class="math inline">0 &lt; a_j \leq 1</span>, preventing both underflow and overflow. Moreover, it shows that the individual scores scale exponentially with the difference from the largest score. Hence, this transformation is sometimes called soft-<em>arg</em>max since it tends to pick out the largest entry.</p>
-<div id="002dd258-8a7c-467a-952f-324d1a025bef" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="1">
+<div id="2a87d20c" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>] </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> torch.tensor([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]).<span class="bu">float</span>()</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.numpy(), label<span class="op">=</span><span class="st">"z"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.exp().numpy(), color<span class="op">=</span><span class="st">"C1"</span>, label<span class="op">=</span><span class="st">"exp(z)"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">2</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.exp().numpy() <span class="op">/</span> z.exp().numpy().<span class="bu">sum</span>(), color<span class="op">=</span><span class="st">"C2"</span>, label<span class="op">=</span><span class="st">"Softmax(z)"</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].legend()<span class="op">;</span> ax[<span class="dv">1</span>].legend()<span class="op">;</span> ax[<span class="dv">2</span>].legend()<span class="op">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> torch.tensor([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]).<span class="bu">float</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.numpy(), label<span class="op">=</span><span class="st">"z"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.exp().numpy(), color<span class="op">=</span><span class="st">"C1"</span>, label<span class="op">=</span><span class="st">"exp(z)"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">2</span>].bar(<span class="bu">range</span>(<span class="dv">3</span>), z.exp().numpy() <span class="op">/</span> z.exp().numpy().<span class="bu">sum</span>(), color<span class="op">=</span><span class="st">"C2"</span>, label<span class="op">=</span><span class="st">"Softmax(z)"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].legend()<span class="op">;</span> ax[<span class="dv">1</span>].legend()<span class="op">;</span> ax[<span class="dv">2</span>].legend()<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_files/figure-html/cell-2-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="01_files/figure-html/cell-4-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="01_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Finally, taking the negative log of the true class suffices since we have the constraint <span class="math inline">\sum p_j = 1.</span> Moreover, <span class="math inline">p_y = 1</span> implies <span class="math inline">\ell_{\text{ce}} = -\log 1 = 0</span> while <span class="math inline">p_y = 0</span> implies <span class="math inline">-\log 0 = +\infty.</span> Observe that the penalized most severely when the model is confidently wrong.</p>
-<div id="25780e85-c7fe-4664-bd8d-d4aeba4f8323" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> <span class="fl">1e-5</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> np.linspace(<span class="dv">0</span> <span class="op">+</span> eps, <span class="dv">1</span>, <span class="dv">10000</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="dv">4</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.plot(p, <span class="op">-</span>np.log(p), linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"-log(p)"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.6</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"p"</span>)<span class="op">;</span> plt.ylabel(<span class="st">"NLL"</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="01_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Meanwhile, looking at the gradient, the NLL has the nice property that it does not saturate as it approaches perfect prediction:</p>
-<p><span class="math display">\frac{\partial\ell_{\text{NLL}}}{\partial p_y} = -\frac{1}{p_y}.</span></p>
 </section>
 <section id="optimization-problem" class="level2">
 <h2 class="anchored" data-anchor-id="optimization-problem">Optimization problem</h2>
-<p>The third ingredient of a machine learning algorithm is a method for solving the associated optimization problem, i.e.&nbsp;the problem of minimizing the average loss on the training set:</p>
+<p>The third ingredient of a learning algorithm is a method for solving the associated optimization problem, i.e.&nbsp;the problem of minimizing the average loss on the training set:</p>
 <p><span class="math display">
 \hat{\Theta} = \underset{\Theta}{\operatorname{min}} \frac{1}{N} \sum_{i=1}^N \ell_{\text{CE}} (h_\Theta(\mathbf{x}_i), y_i)
 </span></p>
-<p>How do we find an optimal set of parameters <span class="math inline">\hat{\Theta}</span>?</p>
+<p>How do we find an optimal set of parameters <span class="math inline">\hat{\Theta}</span>? It turns out that an iterative approach is the most practical.</p>
 <section id="gradient-descent" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-descent">Gradient Descent</h3>
 <p>For a matrix-input, scalar-output function <span class="math inline">f\colon \mathbb{R}^{d \times k} \to \mathbb{R}</span> the <strong>gradient</strong> <span class="math inline">\nabla_\Theta f(\Theta)</span> is defined as the matrix of partial derivatives:</p>
@@ -628,7 +648,7 @@ p_j = \frac{\exp(\Delta h_j(\mathbf{x}))}{\sum_l \exp(\Delta h_l(\mathbf{x}))}
 \end{array}\right] \in \mathbb{R}^{d \times k}
 </span></p>
 <p><strong>NOTE:</strong> <span class="math inline">\nabla_\Theta f</span> always has the same shape as <span class="math inline">\Theta</span> when <span class="math inline">f</span> is a scalar.</p>
-<p>From the multivariate Taylor expansion</p>
+<p>From the multivariate Taylor expansion,</p>
 <p><span class="math display">
 f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Delta\Theta + \mathcal{O}(\Delta\Theta^2).
 </span></p>
@@ -636,18 +656,27 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <p><span class="math display">
 \Theta_{t + 1} = \Theta_t - \alpha \cdot \nabla_\Theta f (\Theta_t)
 </span></p>
-<p>where <span class="math inline">\alpha &gt; 0</span> is called the <strong>learning rate</strong>. GD naturally is sensitive to the scale of the learning rate:</p>
-<p><img src="img/02-3.png"></p>
+<p>where <span class="math inline">\alpha &gt; 0</span> is called the <strong>learning rate</strong>. GD is naturally sensitive to the scale of the learning rate and the initial point <span class="math inline">\Theta_0.</span></p>
+<p><img src="./img/02-3.png"></p>
 </section>
 <section id="stochastic-gradient-descent-sgd" class="level3">
 <h3 class="anchored" data-anchor-id="stochastic-gradient-descent-sgd">Stochastic Gradient Descent (SGD)</h3>
-<p>In practice, we don’t typically want to compute the gradient using all examples to make a single update to the parameter. This is costly in cases where <span class="math inline">N \gg 1</span> which is typical in deep learning. Instead, we take many gradient steps where each update is based on a randomly sampled subset <strong>mini-batch</strong> <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> where <span class="math inline">B = |\mathcal{B}| \ll N.</span> At each training step:</p>
+<p>In practice, computing the gradient over the entire dataset for a single parameter update is often prohibitively expensive, especially when <span class="math inline">N</span> is large (typical in deep learning). Instead, we perform many gradient steps, each using a randomly sampled subset <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> called a <strong>mini-batch</strong>, where the <strong>batch size</strong> <span class="math inline">B = |\mathcal{B}| \ll N</span>. At each training step:</p>
 <ol type="1">
-<li><p>Sample <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> so that we get <span class="math inline">\mathbf{X}_\mathcal{B} \in \mathbb{R}^{B \times d}</span> and <span class="math inline">\mathbf{y} \in [K]^B.</span></p></li>
+<li><p>Randomly sample <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> so that we get <span class="math inline">\mathbf{X}_\mathcal{B} \in \mathbb{R}^{B \times d}</span> and <span class="math inline">\mathbf{Y}_{\mathcal{B}} \in [K]^B.</span></p></li>
 <li><p>Update parameters: <span class="math display">\begin{aligned}\Theta_{t + 1}
 = \Theta_t - \frac{\alpha}{B} \, \sum_{b \in I_\mathcal{B}} \nabla_\Theta \ell (h_{\Theta_t}(\mathbf{x}_b), y_b).\end{aligned}</span></p></li>
 </ol>
 <p>It follows that the sample dataset varies at each training step. Unlike the previous case where <span class="math inline">\mathcal{D}</span> is fixed. This mechanism of SGD reduces overfitting by <strong>implicit regularization</strong> of the gradient, i.e.&nbsp;adding noise in the training process.</p>
+<div id="78cb702a" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="01_files/figure-html/cell-5-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="01_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="gradient-of-cross-entropy" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-of-cross-entropy">Gradient of cross-entropy</h3>
@@ -659,27 +688,26 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <p><span class="math display">
 \frac{\partial \ell_{\text{CE}}}{\partial h_j} = - \delta_{yj} + \frac{\exp h_j}{\sum_{l=1}^K \exp h_l} = - \delta_{yj} + p_j.
 </span></p>
-<p>In vector form, <span class="math inline">\nabla_{\mathbf{h}} \ell_{\text{CE}} = \mathbf{p} - \mathbf{e}_y</span> where <span class="math inline">\mathbf{e}_y</span> is a one-hot vector with 1 on index <span class="math inline">y.</span></p>
-<p>Next, to calculate the derivative with respect to <span class="math inline">\Theta</span>, we use the chain rule:</p>
+<p>In vector form, <span class="math inline">\nabla_{\mathbf{h}} \ell_{\text{CE}} = \mathbf{p} - \mathbf{y}</span> where <span class="math inline">\mathbf{y}</span> is a one-hot vector with 1 on index <span class="math inline">y.</span> Next, to calculate the derivative with respect to <span class="math inline">\Theta</span>, we use the chain rule:</p>
 <p><span class="math display">
 \frac{\partial \ell_{\text{CE}}}{\partial \Theta_{ul}} =  \frac{\partial \ell_{\text{CE}}}{\partial h_j} \frac{{\partial h_j}}{\partial \Theta_{ul}} = \underbrace{(p_l - \delta_{yl})}_{K-\text{dim}} \; \underbrace{\vphantom{(}x_u}_{d-\text{dim}}.
 </span></p>
-<p>For the dimensions to make sense, <span class="math inline">\frac{\partial \ell_{\text{CE}}}{\partial \Theta} = \mathbf{x}(\mathbf{p} - \mathbf{e}_y)^\top</span> in matrix form. Recall that our vectors are column vectors. Here the product reverses since we traverse the dependence backwards from the loss.</p>
+<p>For the dimensions to make sense, <span class="math inline">\frac{\partial \ell_{\text{CE}}}{\partial \Theta} = \mathbf{x}(\hat{\mathbf{y}} - \mathbf{y})^\top</span> in matrix form. Recall that our vectors are column vectors and <span class="math inline">\hat{\mathbf{y}} = \mathbf{p}.</span> Here the product reverses since we traverse the dependence backwards from the loss.</p>
 <p><strong>Batch form.</strong> The same process works for a batch of inputs, except that we have an additional batch index which we sum over since <span class="math inline">\ell</span> depends on all input instances. The contribution of each input is matched and aggregated using matrix multiplication:</p>
 <p><span class="math display">
-\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \Theta} = \frac{1}{B}\,\underbrace{\vphantom{(}\mathbf{X}^\top}_{d \times M} \;\; \underbrace{(\mathbf{P} - \mathbf{E}_{\mathbf{y}})}_{M \times K}.
+\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \Theta} = \frac{1}{B}\,\underbrace{\vphantom{(}\mathbf{X}^\top}_{d \times M} \;\; \underbrace{(\hat{\mathbf{Y}} - \mathbf{Y})}_{M \times K}.
 </span></p>
 <p>Here the transposes switched since <span class="math inline">\mathbf{X}</span> is constructed such that it has rows of <span class="math inline">\mathbf{x}^\top,</span> hence we internally get a double transpose. Putting it all together, we can write the SGD update rule for softmax regression as follows:</p>
 <p><span class="math display">
-\Theta_{t + 1} = \Theta_t - \frac{\alpha}{B} \; \mathbf{X}^\top (\mathbf{P} - \mathbf{E}_{\mathbf{y}}).
+\Theta_{t + 1} = \Theta_t - \frac{\alpha}{B} \; \mathbf{X}^\top (\hat{\mathbf{Y}} - \mathbf{Y}).
 </span></p>
-<p>Here we have <span class="math inline">\frac{1}{B}</span> since <span class="math inline">\mathcal{L} = \frac{1}{B}\sum_b { \ell}_b.</span> Also it makes sense to scale down since the sum grows with batch size <span class="math inline">B.</span> To recap, we have the following equations:</p>
+<p>Here we have <span class="math inline">\frac{1}{B}</span> since <span class="math inline">\mathcal{L} = \frac{1}{B}\sum_b { \ell}_b.</span> Also it makes sense to scale down since the sum grows with batch size <span class="math inline">B.</span> Finally, notice that the step size becomes smaller as <span class="math inline">\| \hat{\mathbf{Y}} - \mathbf{Y} \| \to 0.</span> To recap, we have the following equations:</p>
 <p><span class="math display">
 \boxed{
 \begin{aligned}
-\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \mathbf{H}} &amp;= \frac{1}{B}  (\mathbf{P} - \mathbf{E}_{\mathbf{y}}) \\[0.75em]
-\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \Theta} &amp;= \frac{1}{B} \mathbf{X}^\top  (\mathbf{P} - \mathbf{E}_{\mathbf{y}}) \\[0.60em]
-\Theta_{t + 1} &amp;= \Theta_t - \frac{\alpha}{B} \, \mathbf{X}^\top (\mathbf{P} - \mathbf{E}_{\mathbf{y}})
+\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \mathbf{H}} &amp;= \frac{1}{B}  (\hat{\mathbf{Y}} - \mathbf{Y}) \\[0.75em]
+\frac{\partial \mathcal{L}_{\text{CE}}}{\partial \Theta} &amp;= \frac{1}{B} \mathbf{X}^\top  (\hat{\mathbf{Y}} - \mathbf{Y}) \\[0.60em]
+\Theta_{t + 1} &amp;= \Theta_t - \frac{\alpha}{B} \, \mathbf{X}^\top (\hat{\mathbf{Y}} - \mathbf{Y})
 \end{aligned}
 }
 </span></p>
@@ -687,122 +715,148 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 </section>
 <section id="code-implementation" class="level2">
 <h2 class="anchored" data-anchor-id="code-implementation">Code implementation</h2>
+<p>Since shuffling a large dataset at each training step is expensive, in practice, we shuffle it <em>once</em> and then iteratively draw <span class="math inline">B</span>-sized slices (batches) at each step—effectively sampling without replacement. A full pass through <span class="math inline">\mathcal{D}</span> under this process is called an <strong>epoch</strong>. After each epoch, we reshuffle the dataset for the next one. Consequently, the total number of SGD steps scales as <span class="math inline">\mathcal{O}(Ne / B)</span>, where <span class="math inline">e</span> is the number of epochs.</p>
+<p>In PyTorch, this procedure is handled by the <a href="https://docs.pytorch.org/docs/stable/data.html#data-loading-order-and-sampler"><code>DataLoader</code> object</a>:</p>
+<div id="34bc6849" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>NUM_EPOCHS <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.arange(<span class="dv">10</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(x, batch_size<span class="op">=</span><span class="dv">3</span>, shuffle<span class="op">=</span><span class="va">True</span>, drop_last<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> e <span class="kw">in</span> <span class="bu">range</span>(NUM_EPOCHS):</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> batch <span class="kw">in</span> train_loader:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(batch.numpy())</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[9 2 7]
+[6 1 0]
+[5 4 3]
+
+[0 3 2]
+[4 1 9]
+[7 6 5]
+</code></pre>
+</div>
+</div>
 <p>We will train a classification model based on the SGD update rule above:</p>
-<div id="b2064832-9190-42dd-b46e-3cc7dfeb5aa2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize((<span class="fl">0.1307</span>,), (<span class="fl">0.3081</span>,))  <span class="co"># MNIST mean and std</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>,  transform<span class="op">=</span>transform)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>valid_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'./data'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b2064832-9190-42dd-b46e-3cc7dfeb5aa2" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize((<span class="fl">0.1307</span>,), (<span class="fl">0.3081</span>,))  <span class="co"># MNIST mean and std</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>,  transform<span class="op">=</span>transform)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>valid_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'./data'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Defining the linear model:</p>
-<div id="b983e078-806c-41cf-80c5-5682d3dc861c" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Linear(<span class="dv">784</span>, <span class="dv">10</span>, bias<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b983e078-806c-41cf-80c5-5682d3dc861c" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Linear(<span class="dv">784</span>, <span class="dv">10</span>, bias<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Remark.</strong> The linear model can be extended to have a bias vector <span class="math inline">\beta</span>, so that <span class="math inline">h_\Theta = \mathbf{X}\Theta + \beta</span> where <span class="math inline">\beta \in \mathbb{R}^K.</span> But it turns out there is a “bias trick” in deep learning where an additional dimension containing only <span class="math inline">+1</span> is added so that the input becomes of shape <span class="math inline">(N, d + 1).</span> For simplicity, we stick with no bias.</p>
-<div id="3fc822b8-4eb2-4862-9947-9c7d5a91b9e3" class="cell" data-scrolled="true" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>loss_train <span class="op">=</span> []</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>N_EPOCHS <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="dv">16</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>ALPHA <span class="op">=</span> <span class="fl">0.01</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_step(x, y):</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">784</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> model(x)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> theta <span class="kw">in</span> model.parameters():</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> F.softmax(h, dim<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        e <span class="op">=</span> F.one_hot(y, num_classes<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        g <span class="op">=</span> x.T <span class="op">@</span> (p <span class="op">-</span> e) <span class="op">/</span> B</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        theta <span class="op">-=</span> ALPHA <span class="op">*</span> g.T</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="op">-</span>p[torch.arange(B), y].log().mean()</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss.item()</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span>B, shuffle<span class="op">=</span><span class="va">True</span>)  <span class="co"># SGD!</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> tqdm(<span class="bu">range</span>(N_EPOCHS)):</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> dl:</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> train_step(x, y)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        loss_train.append(loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="3fc822b8-4eb2-4862-9947-9c7d5a91b9e3" class="cell" data-scrolled="true" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>loss_train <span class="op">=</span> []</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>NUM_EPOCHS <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>ALPHA <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_step(x, y):</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">784</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> model(x)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> theta <span class="kw">in</span> model.parameters():</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> F.softmax(h, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        e <span class="op">=</span> F.one_hot(y, num_classes<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        g <span class="op">=</span> x.T <span class="op">@</span> (p <span class="op">-</span> e) <span class="op">/</span> B</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        theta <span class="op">-=</span> ALPHA <span class="op">*</span> g.T</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="op">-</span>p[torch.arange(B), y].log().mean()</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss.item()</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span>B, shuffle<span class="op">=</span><span class="va">True</span>)  <span class="co"># SGD</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> tqdm(<span class="bu">range</span>(NUM_EPOCHS)):</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> train_step(x, y)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        loss_train.append(loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>100%|██████████| 5/5 [00:30&lt;00:00,  6.03s/it]</code></pre>
+<pre><code>100%|██████████| 5/5 [00:20&lt;00:00,  4.02s/it]</code></pre>
 </div>
 </div>
 <p><strong>Remark.</strong> Pytorch <code>nn.Linear</code> computes <code>x @ θ.T + b</code>. Hence, we take <code>g.T</code> before updating the parameter <code>θ</code>.</p>
-<div id="5a2328e4-6a3a-4fd5-8317-9d597cb48738" class="cell" data-execution_count="6">
+<div id="5a2328e4-6a3a-4fd5-8317-9d597cb48738" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plt.plot(np.array(loss_train).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">10</span>).mean(<span class="dv">1</span>), label<span class="op">=</span><span class="st">"train"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"step"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"loss"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plt.plot(np.array(loss_train).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">10</span>).mean(<span class="dv">1</span>), label<span class="op">=</span><span class="st">"train"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"step"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"loss"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_files/figure-html/cell-7-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="01_files/figure-html/cell-10-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="01_files/figure-html/cell-10-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Label prediction sample:</p>
-<div id="f21ec709-1f28-4717-943f-796c7b5c2467" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dv <span class="op">=</span> DataLoader(valid_dataset, batch_size<span class="op">=</span>B, shuffle<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dv))</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model(x.reshape(B, <span class="op">-</span><span class="dv">1</span>)).argmax(<span class="dv">1</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> (out <span class="op">==</span> y).<span class="bu">float</span>()</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Batch acc:"</span>, <span class="ss">f"</span><span class="sc">{</span>acc<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">.</span><span class="bu">int</span>()<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>B<span class="sc">}</span><span class="ss">"</span>, <span class="ss">f"(</span><span class="sc">{</span>acc<span class="sc">.</span>mean()<span class="sc">.</span>item() <span class="op">*</span> <span class="dv">100</span><span class="sc">}</span><span class="ss">%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Sample label predictions:</p>
+<div id="f21ec709-1f28-4717-943f-796c7b5c2467" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dv <span class="op">=</span> DataLoader(valid_dataset, batch_size<span class="op">=</span>B, shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dv))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model(x.reshape(B, <span class="op">-</span><span class="dv">1</span>)).argmax(<span class="dv">1</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> (out <span class="op">==</span> y).<span class="bu">float</span>()</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Batch acc:"</span>, <span class="ss">f"</span><span class="sc">{</span>acc<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">.</span><span class="bu">int</span>()<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>B<span class="sc">}</span><span class="ss">"</span>, <span class="ss">f"(</span><span class="sc">{</span>acc<span class="sc">.</span>mean()<span class="sc">.</span>item() <span class="op">*</span> <span class="dv">100</span><span class="sc">}</span><span class="ss">%)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Batch acc: 15/16 (93.75%)</code></pre>
 </div>
 </div>
-<div id="aa81b08f" class="cell" data-execution_count="8">
+<div id="aa81b08f" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">4</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(B):</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    a, b <span class="op">=</span> <span class="bu">divmod</span>(i, <span class="dv">4</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    ax[a, b].imshow(x[i].reshape(<span class="dv">28</span>, <span class="dv">28</span>), cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    ax[a, b].set_title(<span class="ss">f"pred: </span><span class="sc">{</span>out[i]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    ax[a, b].axis(<span class="st">"off"</span>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">4</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(B):</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    a, b <span class="op">=</span> <span class="bu">divmod</span>(i, <span class="dv">4</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ax[a, b].imshow(x[i].reshape(<span class="dv">28</span>, <span class="dv">28</span>), cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"black"</span> <span class="cf">if</span> out[i] <span class="op">==</span> y[i] <span class="cf">else</span> <span class="st">"red"</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    ax[a, b].set_title(<span class="ss">f"</span><span class="sc">{</span>out[i]<span class="sc">}</span><span class="ss">"</span>, color<span class="op">=</span>color)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    ax[a, b].axis(<span class="st">"off"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_files/figure-html/cell-9-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="01_files/figure-html/cell-12-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="01_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<p><strong>Evals.</strong> The practical goal of training is not actually to minimize <span class="math inline">\mathcal{L}(h_\Theta, \mathcal{D}).</span> But to minimize the loss for samples outside of the training dataset. That is, the model should be accurate on <strong>test data</strong>. If the model does not <a href="https://en.wikipedia.org/wiki/Overfitting">overfit</a> and the test distribution does not drift too far from the training distribution, then we should be good.</p>
-<div id="37070e9e-4837-4906-b21f-21b05c6263e4" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tot <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y <span class="kw">in</span> dv:</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> model(x.reshape(B, <span class="op">-</span><span class="dv">1</span>)).argmax(<span class="dv">1</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> (out <span class="op">==</span> y).<span class="bu">float</span>()</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    tot <span class="op">+=</span> <span class="bu">len</span>(y)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">+=</span> correct.<span class="bu">sum</span>()</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test acc: </span><span class="sc">{</span>acc <span class="op">/</span> tot <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Evals.</strong> The practical goal of training is not actually to minimize <span class="math inline">\mathcal{L}_\mathcal{D}(\Theta).</span> But to minimize the loss for samples outside of the training dataset. That is, the model should be accurate on <strong>test data</strong>. If the model does not <a href="https://en.wikipedia.org/wiki/Overfitting">overfit</a> and the test distribution does not drift too far from the training distribution, then we should be good.</p>
+<div id="37070e9e-4837-4906-b21f-21b05c6263e4" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tot <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y <span class="kw">in</span> dv:</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> model(x.reshape(B, <span class="op">-</span><span class="dv">1</span>)).argmax(<span class="dv">1</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> (out <span class="op">==</span> y).<span class="bu">float</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    tot <span class="op">+=</span> <span class="bu">len</span>(y)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">+=</span> correct.<span class="bu">sum</span>()</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test acc: </span><span class="sc">{</span>acc <span class="op">/</span> tot <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Test acc: 92.01%</code></pre>
+<pre><code>Test acc: 92.31%</code></pre>
 </div>
 </div>
 </section>
@@ -811,6 +865,32 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <p>Since SGD relies on a stochastic process, the performance of the resulting trained model varies. How are we sure that we aren’t just lucky for this particular run / random seed? What is the variance of the trained model performance over multiple runs? Is there a way to control this? This issue is at the core of learning theory and precisely what the <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote12.html">Bias-Variance Tradeoff</a> addresses.</p>
 <p>In practice, the crucial parameter to control is <strong>model complexity</strong>. Here <strong>model capacity</strong> or <strong>complexity</strong> is a measure of how complicated a pattern or relationship a model architecture can express. Let <span class="math inline">f</span> be the true function that underlies the task. If model capacity is sufficiently large, the <strong>model class</strong> <span class="math inline">\mathcal{F} = \{f_{\Theta} \mid \Theta \in \mathbb{R}^d \}</span> contains an approximation <span class="math inline">\hat{f} \in \mathcal{F}</span> such that <span class="math inline">\| f - \hat{f} \| &lt; \epsilon</span> for a small enough <span class="math inline">\epsilon &gt; 0.</span></p>
 <p>The capacity of a model class can be controlled, for example, by the number of learnable parameters in practical architectures. It can also be constrained directly by applying <strong>regularization</strong> or certain <strong>prior knowledge</strong> such as invariances. This biases the model towards certain solutions, so these constraints are sometimes referred to as <strong>inductive biases</strong> — such knowledge is bias in the sense that it makes some solutions more likely, and others less likely. The tradeoff is that the model are steered to biased solutions more efficiently.</p>
+</section>
+<section id="appendix-maximum-likelihood-estimation-mle" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-maximum-likelihood-estimation-mle">Appendix: Maximum likelihood estimation (MLE)</h2>
+<p>We derive a loss function based on the principle of <a href="https://en.wikipedia.org/wiki/Maximum_likelihood_estimation">maximum likelihood estimation</a> (MLE), i.e.&nbsp;finding optimal parameters <span class="math inline">\hat{\Theta}</span> such that the dataset is assigned the highest probability under <span class="math inline">h_{\hat{\Theta}}.</span> Consider a parametric model of the target denoted by <span class="math inline">p_{\Theta}(y \mid \mathbf{x}).</span> The <strong>likelihood</strong> of the <a href="https://en.wikipedia.org/wiki/Independent_and_identically_distributed_random_variables">i.i.d.</a> sample <span class="math inline">\mathcal{D} = (\mathbf{x}_i, y_i)_{i=1}^N</span> can be defined as</p>
+<p><span class="math display">
+\begin{aligned}
+{L}(\Theta)
+&amp;= \prod_{i=1}^N p_{\Theta}(\mathbf{x}_i, y_i) \\
+&amp;= {\prod_{i=1}^N {p_{\Theta}(y_i \mid \mathbf{x}_i)}} \cdot p_{\Theta}(\mathbf{x}_i).
+\end{aligned}
+</span></p>
+<p>This is proportional to the probability assigned by the parametric model with parameters <span class="math inline">\Theta</span> on the sample <span class="math inline">\mathcal{D}.</span> The i.i.d. assumption is important: maximizing the likelihood results in a model that focuses more on inputs that are better represented in the sample, i.e.&nbsp;more probable since they are sampled more. This makes sense, but should always be kept in mind, especially if we are concerned with getting accurate inferences for underrepresented segments of the dataset.</p>
+<p>Going back, probabilities are small numbers in <span class="math inline">[0, 1]</span>, so applying the logarithm to convert the large product to a sum is a good idea. Moreover, it doesn’t affect our optimization objective since <span class="math inline">\log</span> is monotonic. Then,</p>
+<p><span class="math display">
+\begin{aligned}
+\log {L}(\Theta)
+&amp;= \sum_{i=1}^N \log p_{\Theta}(y_i \mid \mathbf{x}_i) + \sum_{i=1}^N \log p_{\Theta}(\mathbf{x}_i).
+\end{aligned}
+</span></p>
+<p>MLE then maximizes the log-likelihood with respect to the parameters <span class="math inline">\Theta</span> to get a model that makes training data more probable. The latter term is independent of <span class="math inline">\Theta,</span> hence can be dropped. It is customary in machine learning to convert this to a <strong>minimization problem</strong>. Finally, we multiply by <span class="math inline">\frac{1}{N}</span> to scale the sum with the number of examples which doesn’t affect the solution. The following then becomes our optimization problem:</p>
+<p><span class="math display">\boxed{
+\hat{\Theta} = \underset{\Theta}{\text{argmin}}\, -\frac{1}{N}\sum_{i=1}^N \log p_{\Theta}(y_i \mid \mathbf{x}_i).
+}
+</span></p>
+<p>Hence, MLE is <strong>equivalent</strong> to minimizing cross-entropy by writing</p>
+<p><span class="math display">p_{\Theta}(y \mid \mathbf{x}) = \text{Softmax}(h_\Theta(\mathbf{x}))_y.</span></p>
 
 
 </section>
@@ -1241,6 +1321,38 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
   </div>
 </nav>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

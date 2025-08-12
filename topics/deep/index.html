@@ -43,9 +43,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-ed72e498c0450dafe86c3800e99bcb2e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-f79dbffa86626eb872d8c5a00245cbfc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -322,6 +322,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../../topics/deep/index.html">
  <span class="dropdown-text">Deep Learning</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../topics/tooling/index.html">
+ <span class="dropdown-text">Tooling</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -381,6 +385,12 @@ window.Quarto = {
  <span class="menu-text">Automatic Differentiation</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient-Based Optimization</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -393,7 +403,8 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning objectives</a></li>
+  <li><a href="#course-overview" id="toc-course-overview" class="nav-link active" data-scroll-target="#course-overview">Course Overview</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives">Learning objectives</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -422,17 +433,22 @@ window.Quarto = {
 
 
 <p><strong>Deep learning systems</strong> solved problems that were considered hard prior to 2010, e.g.&nbsp;obtaining superhuman / SOTA scores on tasks and challenges such as <a href="https://www.image-net.org/challenges/LSVRC/">ImageNet</a>, <a href="https://en.wikipedia.org/wiki/CASP">CASP</a>, and <a href="https://en.wikipedia.org/wiki/Computer_Go">Go (board game)</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Later, in the early 2020s, unprecedented progress in text &amp; image generation were made with models like GPT-3 and Stable Diffusion:</p>
-<p><img src="img/01-0.png"></p>
+<p><img src="img/01-1.png"></p>
+<p><br></p>
+<section id="course-overview" class="level2">
+<h2 class="anchored" data-anchor-id="course-overview">Course Overview</h2>
+<p>This course provides a practical introduction to the core ideas and techniques behind modern deep learning systems. We put focus on both conceptual understanding and practical skills for <strong>building</strong> and <strong>training</strong> neural networks in PyTorch and related frameworks.</p>
+</section>
 <section id="learning-objectives" class="level2">
 <h2 class="anchored" data-anchor-id="learning-objectives">Learning objectives</h2>
-<p>This course will provide you will an introduction to the functioning of modern deep learning systems. You will learn about the underlying concepts of modern deep learning systems like automatic differentiation, neural network architectures, optimization, and efficient operations on systems like GPUs.</p>
+<p>By the end of this course, you will be able to:</p>
 <ul>
 <li>Understand the basic functioning of modern deep learning libraries</li>
-<li>Including concepts like automatic differentiation, gradient-based optimization</li>
+<li>Explain and implement concepts like autodifferentiation and gradient-based optimization</li>
 <li>Implement standard DL architectures (MLPs, ConvNets, RNNs, Seq2Seq, Transformers)</li>
+<li>Understand how hardware acceleration (on GPUs) works under the hood</li>
+<li>Be able to develop your own highly efficient code for modern deep learning</li>
 </ul>
-<!-- - Understand how hardware acceleration (e.g., on GPUs) works under the hood
-- Be able to develop your own highly efficient code for modern DL -->
 <!-- ## Course instructors
 
 <img src="img/01-7.png">

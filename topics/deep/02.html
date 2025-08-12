@@ -79,9 +79,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-ed72e498c0450dafe86c3800e99bcb2e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-912f1d293265def05921bca87d5a888d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-f79dbffa86626eb872d8c5a00245cbfc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -358,6 +361,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../../topics/deep/index.html">
  <span class="dropdown-text">Deep Learning</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../topics/tooling/index.html">
+ <span class="dropdown-text">Tooling</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -415,6 +422,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../../topics/deep/03.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Automatic Differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/deep/04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient-Based Optimization</span></a>
   </div>
 </li>
       </ul>
@@ -506,7 +519,7 @@ window.Quarto = {
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-3-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="02_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -517,11 +530,11 @@ window.Quarto = {
 <p><span class="math display">h_\Theta(\mathbf{x}) = \Theta^\top \phi(\mathbf{x})</span></p>
 <p>where <span class="math inline">\Theta \in \mathbb{R}^{h \times K}</span> and <span class="math inline">\phi\colon \mathbb{R}^d \to \mathbb{R}^h</span> is a <strong>feature transformation</strong>.</p>
 <p><strong>Example.</strong> For the above dataset, we can define <span class="math inline">\phi(x, y) = (x, y, x^2 + y^2)</span> (i.e.&nbsp;<span class="math inline">r^2</span>) which makes the dataset separable in <span class="math inline">\mathbb{R}^3</span>:</p>
-<div id="8240c539-9f2f-4484-9cd5-b52e2b3d0d18" class="cell" data-execution_count="3">
+<div id="8240c539-9f2f-4484-9cd5-b52e2b3d0d18" class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">"3d"</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>ax.scatter(x0, y0, x0 <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> y0 <span class="op">**</span> <span class="dv">2</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ax.scatter(x1, y1, x1 <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> y1 <span class="op">**</span> <span class="dv">2</span>, marker<span class="op">=</span><span class="st">"*"</span>, edgecolor<span class="op">=</span><span class="st">"k"</span>, s<span class="op">=</span><span class="dv">100</span>)</span>
@@ -529,7 +542,7 @@ window.Quarto = {
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-4-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="02_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -564,7 +577,7 @@ h_\Theta(\mathbf{X}) = \sigma ( \mathbf{X} \mathbf{W_1}) \mathbf{W}_2
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-5-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="02_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -648,7 +661,7 @@ h_\Theta(\mathbf{X}) &amp;= \mathbf{Z}_{L}
 <div id="fig-network-dag" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-network-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="02_files/figure-html/fig-network-dag-output-1.svg" class="img-fluid figure-img">
+<a href="02_files/figure-html/fig-network-dag-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;1: A computational graph of a two-layer neural network with softmax regression."><img src="02_files/figure-html/fig-network-dag-output-1.svg" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-network-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: A computational graph of a two-layer neural network with softmax regression.
@@ -664,18 +677,18 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 \boxed{
 \begin{aligned}
 \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
-&amp;= \frac{1}{B} (\mathbf{P} - \mathbf{E}_\mathbf{y}) \\[0.75em]
+&amp;= \frac{1}{B} (\hat{\mathbf{Y}} - \mathbf{Y}) \\[0.75em]
 \frac{\partial \mathcal{L}}{\partial \mathbf{W}_2}
 &amp;=
 \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
 \frac{\partial \mathbf{Z}_2}{\partial \mathbf{W}_2}
 =
-\frac{1}{B}\mathbf{Z}_1^\top (\mathbf{P} - \mathbf{E}_\mathbf{y}) \\[0.75em]
+\frac{1}{B}\mathbf{Z}_1^\top (\hat{\mathbf{Y}} - \mathbf{Y}) \\[0.75em]
 \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} &amp;=
 \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_2}
 \frac{\partial \mathbf{Z}_2}{\partial \mathbf{Z}_1} =
 \frac{1}{B}
-(\mathbf{P} - \mathbf{E}_\mathbf{y})
+(\hat{\mathbf{Y}} - \mathbf{Y})
 \mathbf{W}_2^\top.
 \end{aligned}
 }
@@ -698,7 +711,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 \frac{\partial \mathcal{L}}{\partial \mathbf{W}_1}
 &amp;= \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} \frac{\partial \mathbf{Z}_1}{\partial \mathbf{W}_1} \\[0.7em]
 &amp;= \mathbf{X}^\top \left( \frac{\partial \mathcal{L}}{\partial \mathbf{Z}_1} \odot \sigma^\prime(\mathbf{X} \mathbf{W}_1) \right) \\[0.7em]
-&amp;= \frac{1}{B} \mathbf{X}^\top \Big( [(\mathbf{P} - \mathbf{E}_\mathbf{y})
+&amp;= \frac{1}{B} \mathbf{X}^\top \Big( [(\hat{\mathbf{Y}} - \mathbf{Y})
 \mathbf{W}_2^\top ] \odot \sigma^\prime(\mathbf{X} \mathbf{W}_1) \Big).
 \end{aligned}
 }
@@ -733,7 +746,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-7-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-7-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="02_files/figure-html/cell-7-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -755,7 +768,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <p><span class="math display">
 \boxed{
 \begin{aligned}
-\mathbf{G}_{L} &amp;= \frac{1}{B}(\mathbf{P} - \mathbf{E}_\mathbf{y}) \quad \quad \;\text{(cross-entropy)} \\
+\mathbf{G}_{L} &amp;= \frac{1}{B}(\hat{\mathbf{Y}} - \mathbf{Y}) \quad \quad \;\text{(cross-entropy)} \\
 \mathbf{G}_{i-1} &amp;=
 \mathbf{G}_{i}
 \frac{\partial \mathbf{Z}_{i}}{\partial \mathbf{Z}_{i-1}}
@@ -810,21 +823,29 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>dw1 <span class="op">=</span> z0.T <span class="op">@</span> (g1 <span class="op">*</span> ((z0 <span class="op">@</span> w1) <span class="op">&gt;</span> <span class="dv">0</span>).<span class="bu">int</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Note that shapes are equal, otherwise we can’t subtract:</p>
-<div id="feaa5bac-912e-4ad6-afba-e82bebac5ec8" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> []</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g3 <span class="op">-</span> z3.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g2 <span class="op">-</span> z2.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(g1 <span class="op">-</span> z1.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw1 <span class="op">-</span> w1.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw2 <span class="op">-</span> w2.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>errors.append(torch.<span class="bu">abs</span>(dw3 <span class="op">-</span> w3.grad).<span class="bu">max</span>().item())</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">max</span>(errors) <span class="op">&lt;</span> <span class="fl">1e-6</span>, <span class="st">"Gradients do not match!"</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max absolute error: </span><span class="sc">{</span><span class="bu">max</span>(errors)<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="6c3f98b3" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compare(name, dt, t):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    exact  <span class="op">=</span> torch.<span class="bu">all</span>(dt <span class="op">==</span> t.grad).item()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    approx <span class="op">=</span> torch.allclose(dt, t.grad, rtol<span class="op">=</span><span class="fl">1e-5</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    max_diff <span class="op">=</span> (dt <span class="op">-</span> t.grad).<span class="bu">abs</span>().<span class="bu">max</span>().item()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>name<span class="sc">:&lt;3s}</span><span class="ss"> | exact: </span><span class="sc">{</span><span class="bu">str</span>(exact)<span class="sc">:5s}</span><span class="ss"> | approx: </span><span class="sc">{</span><span class="bu">str</span>(approx)<span class="sc">:5s}</span><span class="ss"> | max_diff: </span><span class="sc">{</span>max_diff<span class="sc">:.2e}</span><span class="ss">'</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> max_diff</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> []</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"z3"</span>, g3, z3))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"z2"</span>, g2, z2))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"z1"</span>, g1, z1))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"w1"</span>, dw1, w1))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"w2"</span>, dw2, w2))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>errors.append(compare(<span class="st">"w3"</span>, dw3, w3))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">max</span>(errors) <span class="op">&lt;</span> <span class="fl">1e-6</span>, <span class="st">"Gradients do not match!"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Max absolute error: 2.33e-10</code></pre>
+<pre><code>z3  | exact: False | approx: True  | max_diff: 3.64e-12
+z2  | exact: True  | approx: True  | max_diff: 0.00e+00
+z1  | exact: True  | approx: True  | max_diff: 0.00e+00
+w1  | exact: True  | approx: True  | max_diff: 0.00e+00
+w2  | exact: True  | approx: True  | max_diff: 0.00e+00
+w3  | exact: False | approx: True  | max_diff: 9.09e-13</code></pre>
 </div>
 </div>
 </section>
@@ -875,7 +896,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-12-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="02_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -934,7 +955,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"loss"</span>].append(loss.item())</span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"accs"</span>].append(<span class="dv">100</span> <span class="op">*</span> (y <span class="op">==</span> torch.argmax(s, dim<span class="op">=</span><span class="dv">1</span>)).<span class="bu">float</span>().mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>100%|██████████| 15000/15000 [00:10&lt;00:00, 1408.55it/s]</code></pre>
+<pre><code>100%|██████████| 15000/15000 [00:12&lt;00:00, 1191.20it/s]</code></pre>
 </div>
 </div>
 <div id="34cc7614-59fa-4050-b65c-0d3d47f7bcb8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="15">
@@ -957,7 +978,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-16-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-16-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="02_files/figure-html/cell-16-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1032,14 +1053,14 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-17-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-17-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="02_files/figure-html/cell-17-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
 <p><strong>Remark.</strong> The last linear layer (the “<strong>logits</strong>”) defines the separating hyperplane.</p>
 <p>Predicting on <span class="math inline">\mathbb{R}^2</span>:</p>
-<div id="ec926d6c-fb80-4625-b51e-2d4de3bdb355" class="cell" data-execution_count="19">
+<div id="ec926d6c-fb80-4625-b51e-2d4de3bdb355" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a grid of points</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, N)</span>
@@ -1052,7 +1073,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> out[:, <span class="dv">1</span>].reshape(<span class="dv">300</span>, <span class="dv">300</span>).detach().numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The plot below is obtained by applying the model on each point in the grid. The coloring essentially represents the model on test data <span class="math inline">\mathbf{x} \in \mathbb{R}^2</span>. Notice that we essentially have a nonlinear decision boundary:</p>
-<div id="69527948-91a1-42b0-842f-0dda90460a3b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="25">
+<div id="69527948-91a1-42b0-842f-0dda90460a3b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="18">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a color plot</span></span>
@@ -1074,7 +1095,7 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_files/figure-html/cell-19-output-1.svg" class="img-fluid figure-img"></p>
+<p><a href="02_files/figure-html/cell-19-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="02_files/figure-html/cell-19-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -1516,6 +1537,38 @@ Figure&nbsp;1: A computational graph of a two-layer neural network with softmax 
   </div>
 </nav>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
