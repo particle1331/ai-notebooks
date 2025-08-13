@@ -12,11 +12,16 @@ The venv used to run the notebooks can be re-created easily using [uv](https://d
 make venv
 ```
 
-You can also install requirements via `pip` to entirely skip `uv` (e.g. on remote linux dev servers):
+You can also install requirements via `pip` entirely skipping `uv`:
 ```bash
 make requirements
 pip install -r requirements.txt
+pip install -e .
 ```
+
+:::{.callout-tip}
+See [here](/topics/tooling/runpod.html) where we setup a remote environment from scratch.
+:::
 
 <!-- **NOTE:** You may have to add the `.venv` as ipykernel in JupyterLab:
 ```bash
