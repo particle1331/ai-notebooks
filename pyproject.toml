@@ -18,6 +18,7 @@ dependencies = [
     "tqdm>=4.67.1",
     "torchviz>=0.0.3",
     "torchview>=0.2.7",
+    "seaborn>=0.13.2",
 ]
 
 [build-system]
