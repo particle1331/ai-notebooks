@@ -484,7 +484,7 @@ window.Quarto = {
 
 
 <p>Recall that a hypothesis function (i.e.&nbsp;a choice of architecture) <span class="math inline">h\colon \mathbb{R}^d \to \mathbb{R}^K</span> maps input data to desired outputs. Initially, we used a linear hypothesis class <span class="math inline">h_\Theta(\mathbf{x}) = \Theta^\top \mathbf{x}</span> where <span class="math inline">\Theta \in \mathbb{R}^{d \times K}.</span> This forms <span class="math inline">K</span> linear functions of the input and predicts the class with the largest value. This turns out to be equivalent to partitioning the input space into <span class="math inline">K</span> linear convex regions corresponding to each class.</p>
-<p><img src="./img/03-1.svg"></p>
+<p><img src="./img/03-1.svg" width="60%"></p>
 <p><strong>Remark.</strong> In <span class="math inline">\mathbb{R}^2</span> with <span class="math inline">3</span> classes, we have <span class="math inline">2</span> inequality constraints <span class="math inline">\theta_1^\top \mathbf{x} \geq \theta_2^\top \mathbf{x}</span> and <span class="math inline">\theta_1^\top \mathbf{x} \geq \theta_3^\top \mathbf{x}.</span> This resuts in a convex polyhedron which is the intersection of two linear half-spaces. Similarly, for the other two. It can be shown that the interior of these subsets are disjoint and the union of the three cover all of <span class="math inline">\mathbb{R}^2.</span></p>
 <p><strong>Q.</strong> What about data that are not linearly separable? We want some way to separate these points via a nonlinear set of class boundaries.</p>
 <div id="5676443a-61c0-44b3-aa2e-9fcd26d742e4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;jupyter&quot;,&quot;value&quot;:{&quot;source_hidden&quot;:true}}" data-execution_count="1">

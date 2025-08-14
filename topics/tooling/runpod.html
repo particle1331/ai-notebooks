@@ -384,6 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#give-pods-ssh-access-to-github" id="toc-give-pods-ssh-access-to-github" class="nav-link" data-scroll-target="#give-pods-ssh-access-to-github">Give pods SSH access to GitHub</a></li>
   <li><a href="#virtual-environment" id="toc-virtual-environment" class="nav-link" data-scroll-target="#virtual-environment">Virtual environment</a></li>
   <li><a href="#quarto-docs" id="toc-quarto-docs" class="nav-link" data-scroll-target="#quarto-docs">Quarto docs</a></li>
+  <li><a href="#appendix-makefile" id="toc-appendix-makefile" class="nav-link" data-scroll-target="#appendix-makefile">Appendix: Makefile</a></li>
   </ul>
 </nav>
     </div>
@@ -416,12 +417,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="give-local-ssh-access-to-pods" class="level2">
 <h2 class="anchored" data-anchor-id="give-local-ssh-access-to-pods">Give local SSH access to pods</h2>
 <ol type="1">
-<li>Generate SSH keys for RunPod (no passphrase):</li>
+<li>Generate SSH keys for Runpod (no passphrase):</li>
 </ol>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"runpod"</span> <span class="at">-f</span> ~/.ssh/runpod <span class="at">-N</span> <span class="st">""</span></span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="(local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"runpod"</span> <span class="at">-f</span> ~/.ssh/runpod <span class="at">-N</span> <span class="st">""</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/runpod.pub</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ol start="2" type="1">
-<li>Add this in <code>Settings&gt;SSH Public Keys</code> (separated by newline).</li>
+<li>Add this to <strong>Settings</strong>&gt; <strong>SSH Public Keys</strong> in Runpod (separated by newline).</li>
 </ol>
 </section>
 <section id="give-pods-ssh-access-to-github" class="level2">
@@ -429,79 +435,94 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Generate SSH keys to access GitHub from each pod (no passphrase):</li>
 </ol>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"runpod-github"</span> <span class="at">-f</span> ~/.ssh/runpod_github <span class="at">-N</span> <span class="st">""</span></span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="(local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">"runpod-github"</span> <span class="at">-f</span> ~/.ssh/runpod_github <span class="at">-N</span> <span class="st">""</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> ~/.ssh/runpod_github.pub</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ol start="2" type="1">
-<li>Register the printed public SSH key in Github.</li>
-<li>Copy the pod <strong>SSH over exposed TCP</strong> connection string<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and paste below:</li>
+<li>Add the public SSH key to your GitHub account under <strong>Settings</strong>&gt; <strong>SSH and GPG Keys</strong>:</li>
 </ol>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">RUNPOD_SSH</span><span class="op">=</span><span class="st">""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><a href="./img/tooling-github-ssh.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="./img/tooling-github-ssh.png" class="img-fluid"></a></p>
+<ol start="3" type="1">
+<li>Run the following script. Then, copy your pod’s <strong>SSH over exposed TCP</strong> <u>connection string</u><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Paste the connection string in the resulting input prompt. You should verify the auto-filled values for <strong>pod IP</strong> and <strong>port number</strong> before proceeding.</li>
+</ol>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="(local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="at">-n</span> <span class="st">"\nSSH over exposed TCP connection string: \n"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">read</span> <span class="va">RUNPOD_SSH</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="va">RUNPOD_IP</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"</span><span class="va">$RUNPOD_SSH</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">'s/.*@([0-9.]+).*/\1/'</span><span class="va">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="va">RUNPOD_PORT</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"</span><span class="va">$RUNPOD_SSH</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">'s/.*-p ([0-9]+).*/\1/'</span><span class="va">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">""</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"IP:   </span><span class="va">$RUNPOD_IP</span><span class="st">"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Port: </span><span class="va">$RUNPOD_PORT</span><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ol start="4" type="1">
-<li>Extract the <strong>pod IP</strong> and <strong>port number</strong>. Captured values are printed for manual verification:</li>
+<li>Run the following script. This copies the GitHub private SSH key, adds it to the SSH agent, and logs in to the instance. You should now be connected to your pod! 🫛 Also, you can check that you have access to your repositories.</li>
 </ol>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">RUNPOD_IP</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"</span><span class="va">$RUNPOD_SSH</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">'s/.*@([0-9.]+).*/\1/'</span><span class="va">)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">RUNPOD_PORT</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">"</span><span class="va">$RUNPOD_SSH</span><span class="st">"</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">'s/.*-p ([0-9]+).*/\1/'</span><span class="va">)</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$RUNPOD_IP</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$RUNPOD_PORT</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ol start="5" type="1">
-<li>Copy the GitHub SSH key to the pod and prepare the pod’s SSH environment:</li>
-</ol>
-<div class="sourceCode" id="annotated-cell-5"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="0" onclick="event.preventDefault();">0</a><span id="annotated-cell-5-1" class="code-annotation-target"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> <span class="at">-p</span> <span class="va">$RUNPOD_PORT</span> <span class="va">$RUNPOD_IP</span> <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span>
-<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> <span class="at">-P</span> <span class="va">$RUNPOD_PORT</span> <span class="at">-i</span> ~/.ssh/runpod <span class="dt">\</span></span>
-<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a>    ~/.ssh/runpod_github root@<span class="va">$RUNPOD_IP</span>:/root/.ssh/runpod_github</span>
-<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> <span class="va">$RUNPOD_PORT</span> <span class="at">-i</span> ~/.ssh/runpod root@<span class="va">$RUNPOD_IP</span> <span class="st">'</span></span>
-<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a><span class="st">    # Set secure permissions for SSH directory and key</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-8" class="code-annotation-target"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 700 ~/.ssh</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-9" class="code-annotation-target"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 600 ~/.ssh/runpod_github</span></span>
-<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a><span class="st">    # Add GitHub to known_hosts and set permissions</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-12" class="code-annotation-target"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a><span class="st">    ssh-keyscan github.com &gt;&gt; ~/.ssh/known_hosts</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-5-13" class="code-annotation-target"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 644 ~/.ssh/known_hosts</span></span>
-<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a><span class="st">    # Start SSH agent and load the key</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-5-16" class="code-annotation-target"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a><span class="st">    ssh-agent -s &gt; ~/.ssh-agent-info</span></span>
-<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a><span class="st">    source ~/.ssh-agent-info</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-5-18" class="code-annotation-target"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a><span class="st">    ssh-add ~/.ssh/runpod_github</span></span>
-<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a><span class="st">    # Ensure the agent is auto-loaded in future sessions</span></span>
-<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a><span class="st">    line="if [ -f ~/.ssh-agent-info ]; then source ~/.ssh-agent-info; fi"</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-5-22" class="code-annotation-target"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a><span class="st">    grep -qxF "$line" ~/.bashrc || echo "$line" &gt;&gt; ~/.bashrc</span></span>
-<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a><span class="st">'</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(local)</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-4" data-filename="(local)"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="0" onclick="event.preventDefault();">0</a><span id="annotated-cell-4-1" class="code-annotation-target"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keyscan</span> <span class="at">-p</span> <span class="va">$RUNPOD_PORT</span> <span class="va">$RUNPOD_IP</span> <span class="op">&gt;&gt;</span> ~/.ssh/known_hosts</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> <span class="at">-P</span> <span class="va">$RUNPOD_PORT</span> <span class="at">-i</span> ~/.ssh/runpod <span class="dt">\</span></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    ~/.ssh/runpod_github root@<span class="va">$RUNPOD_IP</span>:/root/.ssh/runpod_github</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-t</span> <span class="at">-p</span> <span class="va">$RUNPOD_PORT</span> <span class="at">-i</span> ~/.ssh/runpod root@<span class="va">$RUNPOD_IP</span> <span class="st">'</span></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a><span class="st">    # Set secure permissions for SSH directory and key</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-8" class="code-annotation-target"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 700 ~/.ssh</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-9" class="code-annotation-target"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 600 ~/.ssh/runpod_github</span></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a><span class="st">    # Add GitHub to known_hosts and set permissions</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-12" class="code-annotation-target"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a><span class="st">    ssh-keyscan github.com &gt;&gt; ~/.ssh/known_hosts</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-4-13" class="code-annotation-target"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a><span class="st">    chmod 644 ~/.ssh/known_hosts</span></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a><span class="st">    # Start SSH agent and load the key</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-4-16" class="code-annotation-target"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a><span class="st">    eval "$(ssh-agent -s)" &gt; /dev/null;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-4-17" class="code-annotation-target"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a><span class="st">    ssh-add ~/.ssh/runpod_github</span></span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a><span class="st">    # Launch interactive shell to keep the session alive</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-4-20" class="code-annotation-target"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a><span class="st">    exec bash -l</span></span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a><span class="st">'</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-5" data-target-annotation="0">0</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="0">0</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="1" data-code-annotation="0">Append pod’s public SSH host key to local <code>known_hosts</code> to skip authenticity prompts.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="1" data-code-annotation="0">Append pod’s public SSH host key to local <code>known_hosts</code> to skip authenticity prompts.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="8" data-code-annotation="1">Permissions: only owner can read, write, or execute directory.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="8" data-code-annotation="1">Permissions: only owner can read, write, or execute directory.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="9" data-code-annotation="2">Permissions: only owner can read or write on the private key file.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="9" data-code-annotation="2">Permissions: only owner can read or write on the private key file.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="12" data-code-annotation="3">Append GitHub’s public SSH host key to pod <code>known_hosts</code> to avoid authenticity prompts.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="12" data-code-annotation="3">Append GitHub’s public SSH host key to pod <code>known_hosts</code> to avoid authenticity prompts.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="4">4</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="13" data-code-annotation="4">Permissions: <code>known_hosts</code> owner can read/write, others have read-only access.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="13" data-code-annotation="4">Permissions: <code>known_hosts</code> owner can read/write, others have read-only access.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="5">5</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="5">5</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="16" data-code-annotation="5">Run SSH agent in the background and output env vars to <code>~/.ssh-agent-info</code> for later sourcing.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="16" data-code-annotation="5">Run the SSH agent process in the background.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="6">6</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="6">6</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="18" data-code-annotation="6">Add GitHub private key to SSH agent.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="17" data-code-annotation="6">Add GitHub private key to SSH agent.</span>
 </dd>
-<dt data-target-cell="annotated-cell-5" data-target-annotation="7">7</dt>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="7">7</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="22" data-code-annotation="7">Checks if the source command exists as a whole line in <code>~/.bashrc</code> (<code>grep -qxF</code> quiet, entire line, no regex), else appends it to the end of the file, ensuring the line is only added once. This ensures that environmental variables are loaded each time you SSH into the pod.</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="20" data-code-annotation="7">Once setup completes, <code>exec bash -l</code> starts a login shell (<code>-l</code>) that preserves the environmental variables of the last one. The <code>-t</code> flag ensures proper handling of the <code>exec</code> command.</span>
 </dd>
 </dl>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -514,36 +535,35 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The <code>ssh-agent</code> process persists in the background once started, holding your loaded keys in memory. What does not persist are the environment variables (<code>SSH_AUTH_SOCK</code>, <code>SSH_AGENT_PID</code>) that let your shell know how to communicate with that agent. When you open a new shell or SSH session, those env vars are not automatically set, so your shell can’t find the running agent unless you restore them (e.g.&nbsp;by sourcing <code>~/.ssh-agent-info</code>).</p>
+<p>The <code>ssh-agent</code> process persists in the background once started, holding your loaded keys in memory. What does not persist are the environment variables (<code>SSH_AUTH_SOCK</code>, <code>SSH_AGENT_PID</code>) that let your shell know how to communicate with that agent. When you open a new shell or SSH session, those env vars are not automatically set, so your shell can’t find the running agent unless you restore them (e.g.&nbsp;doing <code>ssh-add</code> again). This is why we want all setup and SSH connection to happen in one continuous session.</p>
 </div>
 </div>
-<ol start="6" type="1">
-<li>SSH into pod and add SSH keys:</li>
-</ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> root@<span class="va">$RUNPOD_IP</span> <span class="at">-p</span> <span class="va">$RUNPOD_PORT</span> <span class="at">-i</span> ~/.ssh/runpod</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="virtual-environment" class="level2">
 <h2 class="anchored" data-anchor-id="virtual-environment">Virtual environment</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p>Inside the pod, we can now clone repositories. For example:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(root@runpod)</strong></pre>
 </div>
-<div class="callout-title-container flex-fill">
-Warning
+<div class="sourceCode" id="cb4" data-filename="(root@runpod)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:particle1331/ai-notebooks.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>In this project, we use <code>uv</code> to build an environment synced using <code>uv.lock</code>. See <a href="#lst-Makefile" class="quarto-xref">Listing&nbsp;1</a> below. This creates a virtual env <code>.venv</code> that can be used as notebook kernel:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(root@runpod)</strong></pre>
 </div>
-<div class="callout-body-container callout-body">
-<p>This part is much more specific to the current project.</p>
+<div class="sourceCode" id="cb5" data-filename="(root@runpod)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p>Clone the repo:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:particle1331/ai-notebooks.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You can use <code>uv</code> as environment and package manager synced with <code>uv.lock</code>. This creates a virtual env <code>.venv</code> that can be used as notebook kernel.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Or skip <code>uv</code> entirely and just use <code>pip</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> requirements</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(root@runpod)</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="(root@runpod)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> requirements</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-e</span> .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -554,19 +574,55 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>There are trade-offs. The pods are ephemeral, so you don’t need to perfect their setup or maintain a clean state. But then things like reproducibility may matter, so you may still want a well-defined environment. The level of precision necessary ultimately depends on your use case.</p>
+<p>Some environments, like AzureML where compute instances have network-mounted or ephemeral filesystems, can cause <code>uv</code> failures. In the case of short-lived pods, you don’t necessarily need to perfectly setup an environment or maintain a clean state. On the other hand, reproducibility benefits from a controlled, well-defined environment. As usual, the level of precision needed depends on the scope of the project.</p>
 </div>
 </div>
 </section>
 <section id="quarto-docs" class="level2">
 <h2 class="anchored" data-anchor-id="quarto-docs">Quarto docs</h2>
-<p>Check <a href="https://github.com/particle1331/ai-notebooks/blob/main/.github/workflows/publish.yml">here</a> for the Quatro version that we use. Adjust the following variable for accordingly:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">QUARTO_VERSION</span><span class="op">=</span>1.7.32  <span class="co"># may be outdated</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-q</span> https://github.com/quarto-dev/quarto-cli/releases/download/v<span class="va">${QUARTO_VERSION}</span>/quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg</span> <span class="at">-i</span> quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Check <a href="https://github.com/particle1331/ai-notebooks/blob/main/.github/workflows/publish.yml">here</a> for the Quatro version that we’re using. Adjust the following variable accordingly:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">QUARTO_VERSION</span><span class="op">=</span>1.7.32  <span class="co"># may be outdated</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-q</span> https://github.com/quarto-dev/quarto-cli/releases/download/v<span class="va">${QUARTO_VERSION}</span>/quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg</span> <span class="at">-i</span> quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> quarto-<span class="va">${QUARTO_VERSION}</span>-linux-amd64.deb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Preview then <a href="https://code.visualstudio.com/docs/remote/ssh#_forwarding-a-port-creating-ssh-tunnel">port-forward</a> using vscode:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>(root@runpod)</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="(root@runpod)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="appendix-makefile" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-makefile">Appendix: Makefile</h2>
+<div id="lst-Makefile" class="listing quarto-float quarto-figure quarto-figure-left anchored">
+<figure class="quarto-float quarto-float-lst figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-lst" id="lst-Makefile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Listing&nbsp;1: Makefile for the project.
+</figcaption>
+<div aria-describedby="lst-Makefile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Makefile</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="Makefile"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">.PHONY:</span> docs uv venv requirements</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docs:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="ex">quarto</span> preview</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ex">uv:</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pip</span> install <span class="at">--upgrade</span> pip</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pip</span> install uv</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">requirements:</span> uv</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">uv</span> pip compile pyproject.toml <span class="op">&gt;</span> requirements.txt</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ex">venv:</span> uv</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="ex">uv</span> venv <span class="at">--python</span> 3.13</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">uv</span> sync</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</figure>
+</div>
 
 
 </section>
@@ -575,7 +631,7 @@ Note
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>e.g.&nbsp;<code>export RUNPOD_SSH="ssh root@63.141.33.33 -p 22011 -i ~/.ssh/id_ed25519"</code><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>e.g.&nbsp;<code>ssh root@63.141.33.33 -p 22011 -i ~/.ssh/id_ed25519</code><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

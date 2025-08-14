@@ -483,13 +483,11 @@ window.Quarto = {
 
 
 <p>Suppose you want to write a program that will classify handwritten drawing of digits into their appropriate category: <strong>0</strong>, <strong>1</strong>, <strong>2</strong>, …, <strong>9</strong>. You could, think hard about the nature of digits, try to determine the logic of what indicates what kind of digit, and write a program to codify this logic. Or you could take advantage of the <strong>statistics</strong> of the data, e.g.&nbsp;pixel intensity in a 28 x 28 grid, as discriminative features of each instance. For this task we will use the MNIST dataset:</p>
-<p><img src="img/02-1.png" width="100%" title="Title: An elephant"></p>
+<p><img src="img/02-1.png" width="100%"></p>
 <section id="ml-as-data-driven-programming" class="level2">
 <h2 class="anchored" data-anchor-id="ml-as-data-driven-programming">ML as data-driven programming</h2>
 <p><strong>Machine learning approach.</strong> Collect a training set of images with known labels and feed these into a machine learning algorithm, which, if done well, will automatically produce a “program” that solves this task. The said program will consist of a large number of <a href="https://en.wikipedia.org/wiki/Magic_number_(programming)">magic numbers</a>, but it nonetheless performs a sequence of computations to determine the output class:</p>
-<center>
-<img src="img/02-2.png" width="100%">
-</center>
+<p><a href="./img/02-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="./img/02-2.png" class="img-fluid"></a></p>
 <p>^The latter input is different from training data. In practice, we want the models to perform well on unlabeled data.</p>
 </section>
 <section id="three-elements-of-a-learning-algorithm" class="level2">
@@ -589,7 +587,7 @@ p_j = \frac{\exp(h_j(\mathbf{x}))}{\sum_l \exp(h_l(\mathbf{x}))} \eqqcolon \text
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-2-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="01_files/figure-html/cell-2-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-2-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="01_files/figure-html/cell-2-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -599,7 +597,7 @@ p_j = \frac{\exp(h_j(\mathbf{x}))}{\sum_l \exp(h_l(\mathbf{x}))} \eqqcolon \text
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-3-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="01_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-3-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="01_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -624,7 +622,7 @@ p_j = \frac{\exp(\Delta h_j(\mathbf{x}))}{\sum_l \exp(\Delta h_l(\mathbf{x}))}
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-4-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="01_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-4-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="01_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -657,22 +655,29 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 \Theta_{t + 1} = \Theta_t - \alpha \cdot \nabla_\Theta f (\Theta_t)
 </span></p>
 <p>where <span class="math inline">\alpha &gt; 0</span> is called the <strong>learning rate</strong>. GD is naturally sensitive to the scale of the learning rate and the initial point <span class="math inline">\Theta_0.</span></p>
-<p><img src="./img/02-3.png"></p>
+<p><a href="./img/02-3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="./img/02-3.png" class="img-fluid"></a></p>
 </section>
 <section id="stochastic-gradient-descent-sgd" class="level3">
 <h3 class="anchored" data-anchor-id="stochastic-gradient-descent-sgd">Stochastic Gradient Descent (SGD)</h3>
 <p>In practice, computing the gradient over the entire dataset for a single parameter update is often prohibitively expensive, especially when <span class="math inline">N</span> is large (typical in deep learning). Instead, we perform many gradient steps, each using a randomly sampled subset <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> called a <strong>mini-batch</strong>, where the <strong>batch size</strong> <span class="math inline">B = |\mathcal{B}| \ll N</span>. At each training step:</p>
 <ol type="1">
 <li><p>Randomly sample <span class="math inline">\mathcal{B} \subset \mathcal{D}</span> so that we get <span class="math inline">\mathbf{X}_\mathcal{B} \in \mathbb{R}^{B \times d}</span> and <span class="math inline">\mathbf{Y}_{\mathcal{B}} \in [K]^B.</span></p></li>
-<li><p>Update parameters: <span class="math display">\begin{aligned}\Theta_{t + 1}
-= \Theta_t - \frac{\alpha}{B} \, \sum_{b \in I_\mathcal{B}} \nabla_\Theta \ell (h_{\Theta_t}(\mathbf{x}_b), y_b).\end{aligned}</span></p></li>
+<li><p>Update parameters: <span class="math display">
+\begin{aligned}\Theta_{t + 1}
+= \Theta_t -
+\frac{\alpha}{B} \,
+\sum_{b \in I_\mathcal{B}}
+\nabla_\Theta \ell
+(h_{\Theta_t}(\mathbf{x}_b), y_b).
+\end{aligned}
+</span></p></li>
 </ol>
 <p>It follows that the sample dataset varies at each training step. Unlike the previous case where <span class="math inline">\mathcal{D}</span> is fixed. This mechanism of SGD reduces overfitting by <strong>implicit regularization</strong> of the gradient, i.e.&nbsp;adding noise in the training process.</p>
 <div id="78cb702a" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-5-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="01_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-5-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="01_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -807,7 +812,7 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-10-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="01_files/figure-html/cell-10-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-10-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="01_files/figure-html/cell-10-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -839,7 +844,7 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="01_files/figure-html/cell-12-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="01_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></a></p>
+<p><a href="01_files/figure-html/cell-12-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="01_files/figure-html/cell-12-output-1.svg" class="img-fluid figure-img"></a></p>
 </figure>
 </div>
 </div>
