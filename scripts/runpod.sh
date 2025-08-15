@@ -9,12 +9,12 @@ echo "IP:   $RUNPOD_IP"
 echo "Port: $RUNPOD_PORT"
 
 # Verification prompt
-echo ""
-read -p "Are the IP and Port correct? (yes/no) " confirm
+read -p "Are the captured values correct? (yes/no) " confirm
 if [[ "$confirm" != "yes" ]]; then
     echo "Aborted by user."
     exit 1
 fi
+echo ""
 
 ssh-keyscan -p $RUNPOD_PORT $RUNPOD_IP >> ~/.ssh/known_hosts
 
@@ -35,5 +35,5 @@ ssh -t -p $RUNPOD_PORT -i ~/.ssh/runpod root@$RUNPOD_IP '
     ssh-add ~/.ssh/runpod_github
 
     # Launch interactive shell to keep the session alive
-    exec bash -l
+    cd ~ && exec bash -l
 '
