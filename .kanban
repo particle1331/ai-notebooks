@@ -129,6 +129,20 @@
       "title": "Ongoing Projects",
       "cards": [
         {
+          "id": "e66a75eb-1b35-4bbf-a8a6-fbeddae2350c",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "Roadmap",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": [
+            {
+              "id": "81ca89c1-59f1-438e-a507-f938f2589f20",
+              "comment": "## Deep learning\n- deep learning (old notebooks up to RNNs, + GANs, *supplement with dataflowr)\n- recsys (d2l.ai)\n- tabular data (book)\n- mnist cuda, triton\n\n## Understanding LLMs\n- reuse attention + transformers notebook\n- tokenization, embeddings\n- GPT from scratch\n- Pretraining\n- Fine tuning\n- Instruction tuning\n- main resource: [rasbt github](https://github.com/rasbt/LLMs-from-scratch?tab=readme-ov-file)\n\n## RL & Reasoning LLMs\n- hands on RL (book)\n- [reasoning models from scratch](https://www.youtube.com/watch?v=yGkJj_4bjpE)\n\n## Applied LLM and AI Agents\n- Trellis research - massive playlist\n- Vizuara AI agents course\n- HF smolagents\n- Microsoft RecAI\n\n## Tooling\n- mlflow, multi-GPU training, etc., serverless\n\n## System Design\n- large scale data course udemy\n- redo celery notebook"
+            }
+          ]
+        },
+        {
           "id": "b03ea4f7-101d-4303-a365-bad9736ecc67",
           "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
           "title": "[Udemy] Complete Agentic AI",
@@ -179,20 +193,6 @@
             }
           ],
           "comments": []
-        },
-        {
-          "id": "e66a75eb-1b35-4bbf-a8a6-fbeddae2350c",
-          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
-          "title": "Roadmap",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": [
-            {
-              "id": "81ca89c1-59f1-438e-a507-f938f2589f20",
-              "comment": "## Deep learning\n- deep learning (old notebooks up to transformers, + GANs, *supplement with dataflowr)\n- recsys (d2l.ai)\n- tabular data (book)\n\n## Understanding LLMs\n- tokenization & embeddings\n- LLMs\n- evaluation\n- LLM architectures (follow rasbt)\n\n## RL & Reasoning LLMs\n- hands on RL\n- understanding reasoning models\n\n## Mechanistic Interpretability\n- AI safety & interp\n- Observation (non-causal)\n- Intervention (causal)\n\n## Applied LLM and AI Agents\n- <trellis research>\n- Vizuara AI agents course\n- HF smolagents\n\n## Tooling\n- mlflow, multi-GPU training, etc., serverless\n\n## System Design\n- large scale data course udemy\n- redo celery notebook"
-            }
-          ]
         }
       ]
     },
