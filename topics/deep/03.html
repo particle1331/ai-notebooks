@@ -1231,7 +1231,7 @@ t ['x', 'a', 'b', 'c', 'd', 'f']</code></pre>
 <section id="model-training-from-scratch" class="level2">
 <h2 class="anchored" data-anchor-id="model-training-from-scratch">Model training (from scratch!)</h2>
 <p>Generating toy data for regression:</p>
-<p><span class="math display">y = \sqrt[4]{t + \mu_t} \quad \text{s. t.} \quad \mu_t \in \mathcal{N}(0, \sigma=1)</span></p>
+<p><span class="math display">y = \sqrt[4]{t + \epsilon_t} \quad \text{s. t.} \quad \epsilon_t \in \mathcal{N}(0, \sigma=0.8)</span></p>
 <div id="1a0e558f" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED <span class="op">=</span> <span class="dv">1</span></span>
