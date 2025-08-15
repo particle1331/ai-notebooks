@@ -129,6 +129,20 @@
       "title": "Ongoing Projects",
       "cards": [
         {
+          "id": "e66a75eb-1b35-4bbf-a8a6-fbeddae2350c",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "Roadmap",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": [
+            {
+              "id": "81ca89c1-59f1-438e-a507-f938f2589f20",
+              "comment": "## Deep learning\n- deep learning (old notebooks up to RNNs, + GANs, *supplement with dataflowr)\n- recsys (d2l.ai)\n- tabular data (book)\n- mnist cuda, triton\n\n## Understanding LLMs\n- reuse attention + transformers notebook\n- tokenization, embeddings\n- GPT from scratch\n- Pretraining\n- Fine tuning\n- Instruction tuning\n- main resource: [rasbt github](https://github.com/rasbt/LLMs-from-scratch?tab=readme-ov-file)\n\n## RL & Reasoning LLMs\n- hands on RL (book)\n- [reasoning models](https://www.youtube.com/playlist?list=PL8ser0zRo_NhHXs5hdHGfQFhdKfjZI_TE)\n\n## Applied LLM and AI Agents\n- Trellis research - massive playlist\n- Vizuara AI agents course\n- HF smolagents\n- Microsoft RecAI\n\n## Tooling\n- mlflow, multi-GPU training, etc., serverless\n\n## System Design\n- large scale data course udemy\n- redo celery notebook"
+            }
+          ]
+        },
+        {
           "id": "b03ea4f7-101d-4303-a365-bad9736ecc67",
           "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
           "title": "[Udemy] Complete Agentic AI",
@@ -187,18 +201,50 @@
       "title": "To Do",
       "cards": [
         {
-          "id": "ffa48944-a333-4865-b0bc-b3bb36cd8fe9",
+          "id": "14c5e8c0-d68c-4db6-b87f-2ca12a0d501b",
           "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "TMUX tooling",
+          "title": "Vizuara AI Agents 15hr Course",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": [
+            {
+              "id": "3136ce64-7ee0-4eda-bb30-0f6d36468959",
+              "comment": "https://www.youtube.com/watch?v=WNAkSAuhYhw"
+            }
+          ]
+        },
+        {
+          "id": "3caf6c8d-e94b-4505-9b19-e73b4877bbd4",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Agentic AI start - smolagents? + YT series (pure python)",
           "description": "",
           "labels": [],
           "checkboxes": [],
           "comments": []
         },
         {
-          "id": "3caf6c8d-e94b-4505-9b19-e73b4877bbd4",
+          "id": "36fd3c1f-20f1-4d83-b842-a9388ffcebf0",
           "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "Agentic AI start - smolagents? + YT series (pure python)",
+          "title": "Initialization, Normalization, and Regularization",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "7a1682af-6bd8-4f99-b685-19c95e7eee58",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "LLM engg days 1-2",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "b161b159-54b9-4d53-9a42-534988b7fc12",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Optimization",
           "description": "",
           "labels": [],
           "checkboxes": [],
@@ -215,6 +261,15 @@
       "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
       "title": "Done",
       "cards": [
+        {
+          "id": "ffa48944-a333-4865-b0bc-b3bb36cd8fe9",
+          "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
+          "title": "TMUX tooling",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
         {
           "id": "35c894c1-03fe-4898-bd52-f0df4d63a6c7",
           "listId": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",
