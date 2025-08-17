@@ -19,6 +19,8 @@ dependencies = [
     "torchviz>=0.0.3",
     "torchview>=0.2.7",
     "seaborn>=0.13.2",
+    "nbformat>=5.10.4",
+    "diff-match-patch>=20241021"
 ]
 
 [build-system]
