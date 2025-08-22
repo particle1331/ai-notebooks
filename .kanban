@@ -240,22 +240,32 @@
           "labels": [],
           "checkboxes": [],
           "comments": []
-        },
-        {
-          "id": "b161b159-54b9-4d53-9a42-534988b7fc12",
-          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
-          "title": "Optimization",
-          "description": "",
-          "labels": [],
-          "checkboxes": [],
-          "comments": []
         }
       ]
     },
     {
       "id": "219397cf-0196-4324-8d06-cf2ed01c42c3",
       "title": "Doing",
-      "cards": []
+      "cards": [
+        {
+          "id": "b161b159-54b9-4d53-9a42-534988b7fc12",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "Optimization",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "a96b2fed-6805-4204-8555-47ff58a6d331",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "Building effective agents",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        }
+      ]
     },
     {
       "id": "670a1f86-6ba0-4e2d-8cbd-17fb9a79d118",

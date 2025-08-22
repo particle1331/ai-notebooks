@@ -42,9 +42,11 @@ website:
         menu:
           - text: "Deep Learning"
             href: topics/deep/index.html
+          - text: "Large Language Models"
+            href: topics/llm/index.html
           - text: "Tooling"
             href: topics/tooling/index.html
-          
+
     tools:
       - icon: github
         href: https://github.com/particle1331/ai-notebooks
@@ -60,6 +62,8 @@ website:
           href: topics/deep/index.ipynb
           contents: topics/deep/*.ipynb
         # - section: "CUDA Programming"
+        # recsys
+        # deep RL
 
     - id: tooling
       style: "floating"
@@ -69,3 +73,24 @@ website:
         - section: "Tooling"
           href: topics/tooling/index.ipynb
           contents: topics/tooling/*.ipynb
+
+    - id: llm
+      style: "floating"
+      collapse-level: 1
+      align: left
+      contents:
+        - section: "Large Language Models"
+          href: topics/llm/index.ipynb
+          contents:
+          - section: "LLM Engineering"
+            href: topics/llm/chapter-llme/index.ipynb
+            contents: topics/llm/chapter-llme/*.ipynb
+
+          - section: "Agentic Systems"
+            href: topics/llm/chapter-agents/index.ipynb
+            contents: topics/llm/chapter-agents/*.ipynb
+
+          # fine-tuning
+          # serving
+          # theory (llm from scratch)
+          # reasoning models
