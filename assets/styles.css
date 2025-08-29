@@ -49,3 +49,8 @@ code {
   word-break: break-word;
   hyphens: none;
 }
+
+table.dataframe td, 
+table.dataframe th {
+  text-align: left !important;
+}

@@ -23,6 +23,9 @@ dependencies = [
     "diff-match-patch>=20241021",
     "openai>=1.101.0",
     "nltk>=3.9.1",
+    "langgraph>=0.6.6",
+    "langchain>=0.3.27",
+    "langchain-openai>=0.3.32",
 ]
 
 [build-system]

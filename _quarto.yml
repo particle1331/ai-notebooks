@@ -7,6 +7,8 @@ project:
     port: 4200
     browser: false
 
+bibliography: assets/references.bib
+
 execute:
   freeze: auto
 
