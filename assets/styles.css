@@ -75,3 +75,9 @@ table.dataframe th {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #666;
 }
+
+/* Limit text output height and make it scrollable
+.cell-output pre {
+  max-height: 600px;
+  overflow-y: auto;
+} */

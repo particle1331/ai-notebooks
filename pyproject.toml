@@ -26,6 +26,8 @@ dependencies = [
     "langgraph>=0.6.6",
     "langchain>=0.3.27",
     "langchain-openai>=0.3.32",
+    "groq>=0.31.0",
+    "colorama>=0.4.6",
 ]
 
 [build-system]
