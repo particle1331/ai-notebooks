@@ -44,8 +44,8 @@ website:
         menu:
           - text: "Deep Learning"
             href: topics/deep/index.html
-          - text: "Large Language Models"
-            href: topics/llm/index.html
+          - text: "Agentic Systems"
+            href: topics/agents/index.html
           - text: "Tooling"
             href: topics/tooling/index.html
 
@@ -76,23 +76,11 @@ website:
           href: topics/tooling/index.ipynb
           contents: topics/tooling/*.ipynb
 
-    - id: llm
+    - id: agents
       style: "floating"
       collapse-level: 1
       align: left
       contents:
-        - section: "Large Language Models"
-          href: topics/llm/index.ipynb
-          contents:
-          - section: "LLM Engineering"
-            href: topics/llm/chapter-llme/index.ipynb
-            contents: topics/llm/chapter-llme/*.ipynb
-
-          - section: "Agentic Systems"
-            href: topics/llm/chapter-agents/index.ipynb
-            contents: topics/llm/chapter-agents/*.ipynb
-
-          # fine-tuning
-          # serving
-          # theory (llm from scratch)
-          # reasoning models
+        - section: "Agentic Systems"
+          href: topics/agents/index.ipynb
+          contents: topics/agents/*.ipynb
