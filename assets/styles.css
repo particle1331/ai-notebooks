@@ -32,16 +32,14 @@ img {
   margin-top: 1.5rem;
   margin-bottom: 1.0rem;
   padding-bottom: 0.5rem;
-  filter: brightness(95%);
+  filter: brightness(96%);
 }
 
 .cell-output-display img,
 .cell-output img {
   margin-top: 0rem;
   margin-bottom: 1.25rem;
-  padding: 0.5rem;
   display: block;               /* ensures no weird inline spacing */
-  background-color: #1a1a1a;  /* optional: makes padding visible in dark theme */
   border-radius: 4px;           /* optional: rounded corners */
 }
 
@@ -58,7 +56,7 @@ table.dataframe th {
 /* WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width:   4px;
-  height: 16px;
+  height: 20px;
 }
 
 ::-webkit-scrollbar-track {
@@ -66,7 +64,7 @@ table.dataframe th {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #444;
+  background-color: #e3e3e3;
   border-radius: 6px;
   border: 3px solid transparent;  /* adds spacing around thumb */
   background-clip: content-box;   /* keeps spacing transparent */
@@ -81,3 +79,9 @@ table.dataframe th {
   max-height: 600px;
   overflow-y: auto;
 } */
+
+#quarto-back-to-top {
+  right: 9rem !important;
+  left: auto !important;
+  bottom: 1.5rem !important;
+}

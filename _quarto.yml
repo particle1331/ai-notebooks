@@ -16,14 +16,14 @@ format:
   html:
     lightbox: true
     html-math-method: katex
-    respect-user-color-scheme: true
     highlight-annotations: true
-    highlight-style: dracula
     toc: true
     toc-location: right
-    theme:
-      light: [cosmo, assets/theme.scss]
-      dark:  [cosmo, assets/theme-dark.scss]
+    theme: united
+    # highlight-style: dracula
+    # theme:
+    #   light: [cosmo, assets/theme.scss]
+    #   dark:  [cosmo, assets/theme-dark.scss]
     css: assets/styles.css
 
 website:
