@@ -85,3 +85,11 @@ table.dataframe th {
   left: auto !important;
   bottom: 1.5rem !important;
 }
+
+/* Fix Quarto tooltip readability in light mode */
+body:not(.quarto-dark) .tippy-box {
+  background-color: #fefefe !important;
+  border: 1px solid #ccc !important;
+  color: #222 !important;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+}
