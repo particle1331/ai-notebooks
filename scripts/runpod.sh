@@ -1,39 +1,32 @@
 #!/bin/bash
-printf "\nSSH over exposed TCP connection string:\n"
+# Usage: paste the full SSH string when prompted
+
+printf "SSH over exposed TCP connection string:\n"
 read RUNPOD_SSH
 
+# Extract IP as number or . after @ until space or end
 RUNPOD_IP=$(echo "$RUNPOD_SSH" | sed -E 's/.*@([0-9.]+).*/\1/')
+
+# Extract port as number after -p flag until space or end
 RUNPOD_PORT=$(echo "$RUNPOD_SSH" | sed -E 's/.*-p ([0-9]+).*/\1/')
-echo ""
-echo "IP:   $RUNPOD_IP"
-echo "Port: $RUNPOD_PORT"
 
 # Verification prompt
-read -p "Are the captured values correct? (yes/no) " confirm
+echo ""
+echo "Connecting to host $RUNPOD_IP port $RUNPOD_PORT."
+read -p "Proceed? (yes/no): " confirm
 if [[ "$confirm" != "yes" ]]; then
     echo "Aborted by user."
     exit 1
 fi
 echo ""
 
-ssh-keyscan -p $RUNPOD_PORT $RUNPOD_IP >> ~/.ssh/known_hosts
+# Copy GitHub key
+scp -P $RUNPOD_PORT -i ~/.ssh/runpod -o StrictHostKeyChecking=no \
+    ~/.ssh/runpod_github root@$RUNPOD_IP:/root/.ssh/id_rsa
 
-scp -P $RUNPOD_PORT -i ~/.ssh/runpod \
-    ~/.ssh/runpod_github root@$RUNPOD_IP:/root/.ssh/runpod_github
-
+# Fix perms, add GitHub to known_hosts, start shell
 ssh -t -p $RUNPOD_PORT -i ~/.ssh/runpod root@$RUNPOD_IP '
-    # Set secure permissions for SSH directory and key
-    chmod 700 ~/.ssh
-    chmod 600 ~/.ssh/runpod_github
-
-    # Add GitHub to known_hosts and set permissions
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
-    chmod 644 ~/.ssh/known_hosts
-
-    # Start SSH agent and load the key
-    eval "$(ssh-agent -s)" > /dev/null;
-    ssh-add ~/.ssh/runpod_github
-
-    # Launch interactive shell to keep the session alive
+    chmod 600 ~/.ssh/id_rsa
+    ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
     cd ~ && exec bash -l
 '

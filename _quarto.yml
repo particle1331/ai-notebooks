@@ -7,6 +7,8 @@ project:
     port: 4200
     browser: false
 
+bibliography: assets/references.bib
+
 execute:
   freeze: auto
 
@@ -14,14 +16,14 @@ format:
   html:
     lightbox: true
     html-math-method: katex
-    respect-user-color-scheme: true
     highlight-annotations: true
-    highlight-style: dracula
     toc: true
     toc-location: right
-    theme:
-      light: [cosmo, assets/theme.scss]
-      dark:  [cosmo, assets/theme-dark.scss]
+    theme: united
+    # highlight-style: dracula
+    # theme:
+    #   light: [cosmo, assets/theme.scss]
+    #   dark:  [cosmo, assets/theme-dark.scss]
     css: assets/styles.css
 
 website:
@@ -42,9 +44,11 @@ website:
         menu:
           - text: "Deep Learning"
             href: topics/deep/index.html
+          - text: "Agentic Systems"
+            href: topics/agents/index.html
           - text: "Tooling"
             href: topics/tooling/index.html
-          
+
     tools:
       - icon: github
         href: https://github.com/particle1331/ai-notebooks
@@ -60,6 +64,8 @@ website:
           href: topics/deep/index.ipynb
           contents: topics/deep/*.ipynb
         # - section: "CUDA Programming"
+        # recsys
+        # deep RL
 
     - id: tooling
       style: "floating"
@@ -69,3 +75,12 @@ website:
         - section: "Tooling"
           href: topics/tooling/index.ipynb
           contents: topics/tooling/*.ipynb
+
+    - id: agents
+      style: "floating"
+      collapse-level: 1
+      align: left
+      contents:
+        - section: "Agentic Systems"
+          href: topics/agents/index.ipynb
+          contents: topics/agents/*.ipynb
