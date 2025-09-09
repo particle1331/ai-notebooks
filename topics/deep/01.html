@@ -74,14 +74,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2cd88b842f3556f70e7132508a5c4eca.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-f79dbffa86626eb872d8c5a00245cbfc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-ba00ac99bbea9e7b2b28265043683411.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-63ed81e4b7024dfd846e609cdb8e6b0f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -160,178 +156,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../../assets/styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
-    const toggleBodyColorMode = (bsSheetEl) => {
-      const mode = bsSheetEl.getAttribute("data-mode");
-      const bodyEl = window.document.querySelector("body");
-      if (mode === "dark") {
-        bodyEl.classList.add("quarto-dark");
-        bodyEl.classList.remove("quarto-light");
-      } else {
-        bodyEl.classList.add("quarto-light");
-        bodyEl.classList.remove("quarto-dark");
-      }
-    }
-    const toggleBodyColorPrimary = () => {
-      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
-      if (bsSheetEl) {
-        toggleBodyColorMode(bsSheetEl);
-      }
-    }
-    const setColorSchemeToggle = (alternate) => {
-      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
-      for (let i=0; i < toggles.length; i++) {
-        const toggle = toggles[i];
-        if (toggle) {
-          if (alternate) {
-            toggle.classList.add("alternate");
-          } else {
-            toggle.classList.remove("alternate");
-          }
-        }
-      }
-    };
-    const toggleColorMode = (alternate) => {
-      // Switch the stylesheets
-      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
-      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
-      manageTransitions('#quarto-margin-sidebar .nav-link', false);
-      if (alternate) {
-        // note: dark is layered on light, we don't disable primary!
-        enableStylesheet(alternateStylesheets);
-        for (const sheetNode of alternateStylesheets) {
-          if (sheetNode.id === "quarto-bootstrap") {
-            toggleBodyColorMode(sheetNode);
-          }
-        }
-      } else {
-        disableStylesheet(alternateStylesheets);
-        enableStylesheet(primaryStylesheets)
-        toggleBodyColorPrimary();
-      }
-      manageTransitions('#quarto-margin-sidebar .nav-link', true);
-      // Switch the toggles
-      setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
-      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
-        manageTransitions("body", false);
-        window.scrollTo(0, 1);
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-          manageTransitions("body", true);
-        }, 40);
-      }
-    }
-    const disableStylesheet = (stylesheets) => {
-      for (let i=0; i < stylesheets.length; i++) {
-        const stylesheet = stylesheets[i];
-        stylesheet.rel = 'disabled-stylesheet';
-      }
-    }
-    const enableStylesheet = (stylesheets) => {
-      for (let i=0; i < stylesheets.length; i++) {
-        const stylesheet = stylesheets[i];
-        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
-          stylesheet.rel = 'stylesheet';
-        }
-      }
-    }
-    const manageTransitions = (selector, allowTransitions) => {
-      const els = window.document.querySelectorAll(selector);
-      for (let i=0; i < els.length; i++) {
-        const el = els[i];
-        if (allowTransitions) {
-          el.classList.remove('notransition');
-        } else {
-          el.classList.add('notransition');
-        }
-      }
-    }
-    const isFileUrl = () => {
-      return window.location.protocol === 'file:';
-    }
-    const hasAlternateSentinel = () => {
-      let styleSentinel = getColorSchemeSentinel();
-      if (styleSentinel !== null) {
-        return styleSentinel === "alternate";
-      } else {
-        return false;
-      }
-    }
-    const setStyleSentinel = (alternate) => {
-      const value = alternate ? "alternate" : "default";
-      if (!isFileUrl()) {
-        window.localStorage.setItem("quarto-color-scheme", value);
-      } else {
-        localAlternateSentinel = value;
-      }
-    }
-    const getColorSchemeSentinel = () => {
-      if (!isFileUrl()) {
-        const storageValue = window.localStorage.getItem("quarto-color-scheme");
-        return storageValue != null ? storageValue : localAlternateSentinel;
-      } else {
-        return localAlternateSentinel;
-      }
-    }
-    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
-      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
-      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
-      let newTheme = '';
-      if(authorPrefersDark) {
-        newTheme = isAlternate ? baseTheme : alternateTheme;
-      } else {
-        newTheme = isAlternate ? alternateTheme : baseTheme;
-      }
-      const changeGiscusTheme = () => {
-        // From: https://github.com/giscus/giscus/issues/336
-        const sendMessage = (message) => {
-          const iframe = document.querySelector('iframe.giscus-frame');
-          if (!iframe) return;
-          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
-        }
-        sendMessage({
-          setConfig: {
-            theme: newTheme
-          }
-        });
-      }
-      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
-      if (isGiscussLoaded) {
-        changeGiscusTheme();
-      }
-    };
-    const authorPrefersDark = false;
-    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    const darkModeDefault = queryPrefersDark.matches;
-      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
-      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
-    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
-    // Dark / light mode switch
-    window.quartoToggleColorScheme = () => {
-      // Read the current dark / light value
-      let toAlternate = !hasAlternateSentinel();
-      toggleColorMode(toAlternate);
-      setStyleSentinel(toAlternate);
-      toggleGiscusIfUsed(toAlternate, darkModeDefault);
-      window.dispatchEvent(new Event('resize'));
-    };
-    queryPrefersDark.addEventListener("change", e => {
-      if(window.localStorage.getItem("quarto-color-scheme") !== null)
-        return;
-      const alternate = e.matches
-      toggleColorMode(alternate);
-      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
-      toggleGiscusIfUsed(alternate, darkModeDefault);
-    });
-    // Switch to dark mode if need be
-    if (hasAlternateSentinel()) {
-      toggleColorMode(true);
-    } else {
-      toggleColorMode(false);
-    }
-  </script>
+<body class="nav-sidebar floating nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -362,6 +187,10 @@ window.Quarto = {
  <span class="dropdown-text">Deep Learning</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../../topics/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../../topics/tooling/index.html">
  <span class="dropdown-text">Tooling</span></a>
   </li>  
@@ -369,9 +198,8 @@ window.Quarto = {
   </li>
 </ul>
           </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools tools-wide">
+            <div class="quarto-navbar-tools">
     <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
   <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
   <div class="quarto-reader-toggle-btn">
   <i class="bi"></i>
@@ -462,7 +290,6 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/deep/index.html">Deep Learning</a></li><li class="breadcrumb-item"><a href="../../topics/deep/01.html">Softmax Regression</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Softmax Regression</h1>
@@ -486,42 +313,47 @@ window.Quarto = {
 <p><img src="img/02-1.png" width="100%"></p>
 <section id="ml-as-data-driven-programming" class="level2">
 <h2 class="anchored" data-anchor-id="ml-as-data-driven-programming">ML as data-driven programming</h2>
-<p><strong>Machine learning approach.</strong> Collect a training set of images with known labels and feed these into a machine learning algorithm, which, if done well, will automatically produce a “program” that solves this task. The said program will consist of a large number of <a href="https://en.wikipedia.org/wiki/Magic_number_(programming)">magic numbers</a>, but it nonetheless performs a sequence of computations to determine the output class:</p>
+<p><strong>Machine learning approach.</strong> Collect a training set of images with known labels and feed these into a machine learning algorithm, which, if done well, will automatically produce a <u>program</u> that solves this task. The generated program contains an unusually large amount of <a href="https://en.wikipedia.org/wiki/Magic_number_(programming)">magic numbers</a> that will be used to determine the output class:</p>
 <p><a href="./img/02-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="./img/02-2.png" class="img-fluid"></a></p>
-<p>^The latter input is different from training data. In practice, we want the models to perform well on unlabeled data.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Notice that the latter input is different from training data. In practice, we want the models to perform well on unlabeled data. In other words, the model <strong>generalizes</strong>.</p>
+</div>
+</div>
 </section>
 <section id="three-elements-of-a-learning-algorithm" class="level2">
 <h2 class="anchored" data-anchor-id="three-elements-of-a-learning-algorithm">Three elements of a learning algorithm</h2>
-<p>Every machine learning algorithm has the ff.&nbsp;elements:</p>
 <table class="caption-top table">
-<caption>Elements of a learning algorithm</caption>
-<colgroup>
-<col style="width: 15%">
-<col style="width: 20%">
-<col style="width: 65%">
-</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Element</th>
-<th style="text-align: left;">Object</th>
+<th style="text-align: center;">Element</th>
+<th style="text-align: center;">Object</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Hypothesis class</td>
-<td style="text-align: left;"><span class="math inline">\mathcal{H}</span></td>
-<td style="text-align: left;">This defines the “program structure”. In deep learning, the hypothesis class is parameterized via a set of parameters <span class="math inline">\Theta.</span> The parameters describe how we map <strong>inputs</strong> (images of digits) to <strong>outputs</strong> (labels, or probabilities for each class). Formally, <span class="math inline">\mathcal{H} = \{h_\Theta \mid \Theta \in \mathbb{R}^d \}</span> where <span class="math inline">h_\Theta(\mathbf{x}) = \hat{y}</span> or <span class="math inline">\hat{\mathbf{p}}</span> for an input <span class="math inline">\mathbf{x}.</span></td>
+<td style="text-align: center;"><strong>Hypothesis class</strong></td>
+<td style="text-align: center;"><span class="math inline">\mathcal{H}</span> <br> <img width="500/"></td>
+<td style="text-align: left;">Defines the <u>program structure</u> from inputs to outputs. Or in practical terms, it corresponds to the choice of <strong>model architecture</strong> and <strong>hyperparameters</strong> (e.g.&nbsp;linear model or tree-based models with depth 20). Formally, <span class="math inline">\mathcal{H} = \{ h_\Theta\colon \mathcal{X} \to \mathcal{Y} \mid \Theta \in \mathbb{R}^M \}</span> consisting of parametric functions.</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Loss function</td>
-<td style="text-align: left;"><span class="math inline">\mathcal{L}, \ell</span></td>
-<td style="text-align: left;">A function that specifies how “well” a given <strong>hypothesis</strong> <span class="math inline">h_\Theta</span> (i.e.&nbsp;a choice of parameters) performs on the task of interest. The loss is expressed in terms of a pointwise <strong>loss function</strong> <span class="math inline">\ell</span> such that: <span class="math display">\mathcal{L}_{\mathcal{D}}(\Theta) = \frac{1}{N}\sum_{i=1}^N \ell(h_\Theta(\mathbf{x}_i), y_i)</span> where <span class="math inline">\ell \geq 0</span> and <span class="math inline">\ell \to 0</span> whenever the predictions are accurate, and <span class="math inline">\ell \to \infty</span> as the predictions become increasingly worse.</td>
+<td style="text-align: center;"><strong>Loss function</strong></td>
+<td style="text-align: center;"><span class="math inline">\mathcal{L}, \ell</span></td>
+<td style="text-align: left;">Specifies how well a given <strong>hypothesis</strong> <span class="math inline">h_\Theta</span> (i.e.&nbsp;a choice of parameters) performs on the task of interest. The loss is generally expressed in terms of a pointwise <strong>loss function</strong> <span class="math inline">\ell</span> such that: <span class="math display">\mathcal{L}_{\mathcal{D}}(\Theta) = \frac{1}{N}\sum_{i=1}^N \ell(h_\Theta(\mathbf{x}_i), y_i)</span> where <span class="math inline">\ell \geq 0</span> and <span class="math inline">\ell \to 0</span> whenever the predictions are accurate, and <span class="math inline">\ell \to \infty</span> as the predictions become increasingly worse.</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Optimizer</td>
-<td style="text-align: left;">e.g.&nbsp;<br> <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-use-an-optimizer"><code>torch.optim.*</code></a>, <br> <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate"><code>LRScheduler</code></a></td>
-<td style="text-align: left;">Procedure for determining a set of parameters that (approximately) minimizes the training loss. More precisely, the optimizer handles state and the calculation required to find optimal parameters <span class="math display">\Theta^* \approx {\text{argmin}}_{\Theta} \; \mathcal{L}_\mathcal{D}(\Theta).</span> For deep learning, this is typically an iterative approach via SGD and its variants.</td>
+<td style="text-align: center;"><strong>Optimizer</strong></td>
+<td style="text-align: center;">e.g.<br> <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-use-an-optimizer"><code>torch.optim.*</code></a>, <a href="https://docs.pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate"><code>LRScheduler</code></a></td>
+<td style="text-align: left;">The optimizer handles <strong>state</strong> and the <strong>algorithm</strong> required to find optimal parameters that minimize the training loss. For deep learning, this is typically an iterative approach via SGD and its variants: <span class="math display">\Theta_{t+1}, \Lambda_t = \mathscr{G}(\Theta_t, \Lambda_{t-1})</span> where <span class="math inline">\Lambda_t</span> is state. The goal of training is for the parameters to converge to some <span class="math inline">\hat{\Theta}</span> that approximately minimizes the training loss. That is, <span class="math inline">\hat{\Theta} \approx {\text{argmin}}_{\Theta} \; \mathcal{L}_\mathcal{D}(\Theta).</span></td>
 </tr>
 </tbody>
 </table>
@@ -529,7 +361,7 @@ window.Quarto = {
 <section id="multi-class-classification" class="level2">
 <h2 class="anchored" data-anchor-id="multi-class-classification">Multi-class classification</h2>
 <p>For multi-class classification, the <strong>training dataset</strong> <span class="math inline">\mathcal{D}</span> consists of input-output pairs <span class="math inline">\mathcal{D} = (\mathbf{x}_i, y_i)_{i=1}^N</span> where <span class="math inline">\mathbf{x}_i \in \mathbb{R}^d</span> with <span class="math inline">d</span> is the <strong>input dimensionality</strong> and <span class="math inline">y_i \in [1, K] \subset \mathbb{Z}</span> where <span class="math inline">K</span> is the <strong>number of classes</strong>. Here <span class="math inline">N = | \mathcal{D} |</span> is the size of the dataset. In this setting, a <strong>hypothesis function</strong> <span class="math inline">h</span> maps input vectors <span class="math inline">\mathbf{x}</span> to <span class="math inline">K</span>-dimensional vectors: <span class="math inline">h \colon \; \mathbb{R}^d \to \mathbb{R}^K.</span> The output <span class="math inline">h_j(\mathbf{x})</span> indicates some measure of “belief” in how much likely the label is to be class <span class="math inline">j</span>. That is, the most likely class for an input <span class="math inline">\mathbf{x}</span> is predicted as the coordinate <span class="math inline">\hat{j} = \text{argmax}_j \; h_j(\mathbf{x})</span>.</p>
-<p><strong>Example.</strong> For MNIST, <span class="math inline">d = 28 \times 28 = 784</span>, <span class="math inline">K = 10</span> and <span class="math inline">M = 60,000.</span></p>
+<p><strong>Example.</strong> For MNIST, <span class="math inline">d = 28 \times 28 = 784</span>, <span class="math inline">K = 10</span> and <span class="math inline">N = 60,000.</span></p>
 </section>
 <section id="linear-hypothesis-class" class="level2">
 <h2 class="anchored" data-anchor-id="linear-hypothesis-class">Linear hypothesis class</h2>
@@ -881,15 +713,14 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 &amp;= {\prod_{i=1}^N {p_{\Theta}(y_i \mid \mathbf{x}_i)}} \cdot p_{\Theta}(\mathbf{x}_i).
 \end{aligned}
 </span></p>
-<p>This is proportional to the probability assigned by the parametric model with parameters <span class="math inline">\Theta</span> on the sample <span class="math inline">\mathcal{D}.</span> The i.i.d. assumption is important: maximizing the likelihood results in a model that focuses more on inputs that are better represented in the sample, i.e.&nbsp;more probable since they are sampled more. This makes sense, but should always be kept in mind, especially if we are concerned with getting accurate inferences for underrepresented segments of the dataset.</p>
-<p>Going back, probabilities are small numbers in <span class="math inline">[0, 1]</span>, so applying the logarithm to convert the large product to a sum is a good idea. Moreover, it doesn’t affect our optimization objective since <span class="math inline">\log</span> is monotonic. Then,</p>
+<p>Probabilities are generally in <span class="math inline">(0, 1) \subset \mathbb{R}</span> and <span class="math inline">N \gg 1</span>, so <span class="math inline">L(\Theta) \approx 0.</span> Hence, applying the logarithm to convert the large product to a sum is a good idea. Moreover, it doesn’t affect our optimization objective since <span class="math inline">\log</span> is monotonic. Then,</p>
 <p><span class="math display">
 \begin{aligned}
 \log {L}(\Theta)
 &amp;= \sum_{i=1}^N \log p_{\Theta}(y_i \mid \mathbf{x}_i) + \sum_{i=1}^N \log p_{\Theta}(\mathbf{x}_i).
 \end{aligned}
 </span></p>
-<p>MLE then maximizes the log-likelihood with respect to the parameters <span class="math inline">\Theta</span> to get a model that makes training data more probable. The latter term is independent of <span class="math inline">\Theta,</span> hence can be dropped. It is customary in machine learning to convert this to a <strong>minimization problem</strong>. Finally, we multiply by <span class="math inline">\frac{1}{N}</span> to scale the sum with the number of examples which doesn’t affect the solution. The following then becomes our optimization problem:</p>
+<p>MLE then maximizes the log-likelihood with respect to the parameters <span class="math inline">\Theta</span> to get a model that makes training data more probable. The latter term is independent of <span class="math inline">\Theta,</span> so it can be dropped. It is customary in machine learning to convert this to a <strong>minimization problem</strong>. Finally, we multiply by <span class="math inline">\frac{1}{N}</span> to scale the sum with the number of examples which doesn’t affect the solution. The following then becomes our optimization problem:</p>
 <p><span class="math display">\boxed{
 \hat{\Theta} = \underset{\Theta}{\text{argmin}}\, -\frac{1}{N}\sum_{i=1}^N \log p_{\Theta}(y_i \mid \mathbf{x}_i).
 }
@@ -903,19 +734,6 @@ f(\Theta + \Delta \Theta) \approx f(\Theta) + \nabla_\Theta f(\Theta) \cdot \Del
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
-    // Ensure there is a toggle, if there isn't float one in the top right
-    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
-      const i = window.document.createElement("i");
-      i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
-    }
-    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {

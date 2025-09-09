@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Augmented LLMs as Agents – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../topics/agents/02.html" rel="next">
+<link href="../../topics/agents/index.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-63ed81e4b7024dfd846e609cdb8e6b0f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../topics/deep/index.html">
+ <span class="dropdown-text">Deep Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../topics/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../topics/tooling/index.html">
+ <span class="dropdown-text">Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../topics/agents/01.html">Augmented LLMs as Agents</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../topics/agents/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentic Systems</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/agents/01.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Augmented LLMs as Agents</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/agents/02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pattern 1: Reflection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/agents/03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pattern 2: Tool Use</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#llm-inference-via-apis" id="toc-llm-inference-via-apis" class="nav-link active" data-scroll-target="#llm-inference-via-apis">LLM inference via APIs</a>
+  <ul class="collapse">
+  <li><a href="#openai-api-client" id="toc-openai-api-client" class="nav-link" data-scroll-target="#openai-api-client">OpenAI API client</a></li>
+  <li><a href="#structured-outputs" id="toc-structured-outputs" class="nav-link" data-scroll-target="#structured-outputs">Structured outputs</a></li>
+  </ul></li>
+  <li><a href="#llm-augmentations-goals-tools-memory" id="toc-llm-augmentations-goals-tools-memory" class="nav-link" data-scroll-target="#llm-augmentations-goals-tools-memory">LLM augmentations: goals, tools, &amp; memory</a>
+  <ul class="collapse">
+  <li><a href="#function-calling" id="toc-function-calling" class="nav-link" data-scroll-target="#function-calling">Function calling</a></li>
+  <li><a href="#memory-and-retrieval" id="toc-memory-and-retrieval" class="nav-link" data-scroll-target="#memory-and-retrieval">Memory and retrieval</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../topics/agents/01.html">Augmented LLMs as Agents</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Augmented LLMs as Agents</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>AI agents are artificial intelligence systems that interacts with its environment. We will be primarily interested in LLM-based agents that uses a core LLM system for <strong>reasoning</strong>, <strong>planning</strong>, and <strong>tool calling</strong>. In practice, this also involve developing tools that are designed to interface with LLM-based agents. The foundational framework of reasoning (via <a href="@fig-cot-prompting">chain-of-thought</a>) and task-specific actions for LLMs is explored in the <strong>ReAct paper</strong> <span class="citation" data-cites="ReAct2023">(<a href="#ref-ReAct2023" role="doc-biblioref">Yao et al. 2023</a>)</span> (<a href="#fig-react-paper" class="quarto-xref">Figure&nbsp;1</a>):</p>
+<blockquote class="blockquote">
+<p>[We] explore the use of LLMs to generate both reasoning traces and task-specific actions in an interleaved manner, allowing for greater synergy between the two: reasoning traces help the model induce, track, and update action plans as well as handle exceptions, while actions allow it to interface with external sources, such as knowledge bases or environments, to gather additional information. […] On two interactive decision making benchmarks (ALFWorld and WebShop), ReAct outperforms imitation and reinforcement learning methods by an absolute success rate of 34% and 10% respectively, while being prompted with only one or two in-context examples.</p>
+</blockquote>
+<div id="fig-react-paper" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-react-paper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/react-paper.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: ReAct vs CoT only and Act only methods. ALFWorld is a text-based environment (similar to text adventure RPGs in the old days) designed for agents to reason and learn high-level policies. HotpotQA is a question-answering dataset containing multi-hop (i.e.&nbsp;requiring resolving intermediate steps to get to the final answer) questions in natural language, with strong supervision for supporting facts."><img src="./img/react-paper.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-react-paper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: <strong>ReAct vs CoT only and Act only methods.</strong> <a href="https://alfworld.github.io/">ALFWorld</a> is a text-based environment (similar to text adventure RPGs in the old days) designed for agents to reason and learn high-level policies. <a href="https://hotpotqa.github.io/">HotpotQA</a> is a question-answering dataset containing multi-hop (i.e.&nbsp;requiring resolving intermediate steps to get to the final answer) questions in natural language, with strong supervision for supporting facts.
+</figcaption>
+</figure>
+</div>
+<div id="fig-cot-prompting" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cot-prompting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/zero-cot.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Chain-of-thought (CoT) prompting."><img src="./img/zero-cot.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cot-prompting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: <strong>Chain-of-thought</strong> (CoT) prompting.
+</figcaption>
+</figure>
+</div>
+<p><br></p>
+<section id="llm-inference-via-apis" class="level2">
+<h2 class="anchored" data-anchor-id="llm-inference-via-apis">LLM inference via APIs</h2>
+<section id="openai-api-client" class="level3">
+<h3 class="anchored" data-anchor-id="openai-api-client">OpenAI API client</h3>
+<p>To explore building effective AI agents, we can start with pure Python and LLM APIs. In particular, we use the <a href="https://github.com/openai/openai-python/tree/main">Python SDK</a> for the <a href="https://platform.openai.com/docs/api-reference/introduction">OpenAI API</a>. First, we need to load the API key in the environmental variables. The client expects the environmental variable <code>OPENAI_API_KEY</code> which we can load from the <code>.env</code> file. This is easy enough to implement:</p>
+<div id="e5bfff04" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.utils <span class="im">import</span> load_dotenv, <span class="bu">print</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.getsource(load_dotenv))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>def load_dotenv(verbose=False):
+    with open(".env") as f:
+        for line in f.readlines():
+            k, v = line.split("=")
+            os.environ[k] = v.strip().strip('"')
+            if verbose:
+                print(f"Loaded env variable: {k}")
+</code></pre>
+</div>
+</div>
+<div id="d5d77b65" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>load_dotenv(verbose<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loaded env variable: OPENAI_API_KEY
+Loaded env variable: GROQ_API_KEY</code></pre>
+</div>
+</div>
+<p>Then the API key is automatically read by the <strong>client</strong>:</p>
+<div id="424d6f68" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> OpenAI()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>completion <span class="op">=</span> client.chat.completions.create(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gpt-4o"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    messages<span class="op">=</span>[</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>, </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="st">"You're a helpful assistant."</span>},</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="st">"Tell me about the history of GPT in a single paragraph."</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>response_text <span class="op">=</span> completion.choices[<span class="dv">0</span>].message.content</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We can have <strong>multiple completions</strong> of the same prompt. This allows choosing between the responses. For example, we can set <code>temperature=0.9</code> to get more varied outputs, so that choosing becomes nontrivial. By default only 1 completion by default, hence <code>[0]</code>.</p>
+</div>
+</div>
+<div id="055bb4c8" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response_text, wrap<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GPT, or Generative Pre-trained Transformer, is a series of language models
+developed by OpenAI. The journey began with the release of GPT in 2018, a model
+built on the transformer architecture, which was introduced by Vaswani et al. in
+2017. This was followed by GPT-2 in 2019, which gained attention for its larger
+scale and enhanced text generation capabilities, leading OpenAI to initially
+withhold its full version due to concerns about misuse. In 2020, GPT-3 was
+released, boasting 175 billion parameters and showcasing remarkable abilities in
+understanding and generating human-like text, prompting widespread usage in
+various applications. In March 2023, OpenAI announced GPT-4, marking further
+advancements in language understanding. These models illustrate the rapid
+evolution and growing impact of AI in natural language processing.</code></pre>
+</div>
+</div>
+<p>Entire model response:</p>
+<div id="e55f61bc" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pprint(completion.model_dump())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'choices': [{'finish_reason': 'stop',
+              'index': 0,
+              'logprobs': None,
+              'message': {'annotations': [],
+                          'audio': None,
+                          'content': 'GPT, or Generative Pre-trained '
+                                     'Transformer, is a series of language '
+                                     'models developed by OpenAI. The journey '
+                                     'began with the release of GPT in 2018, a '
+                                     'model built on the transformer '
+                                     'architecture, which was introduced by '
+                                     'Vaswani et al. in 2017. This was '
+                                     'followed by GPT-2 in 2019, which gained '
+                                     'attention for its larger scale and '
+                                     'enhanced text generation capabilities, '
+                                     'leading OpenAI to initially withhold its '
+                                     'full version due to concerns about '
+                                     'misuse. In 2020, GPT-3 was released, '
+                                     'boasting 175 billion parameters and '
+                                     'showcasing remarkable abilities in '
+                                     'understanding and generating human-like '
+                                     'text, prompting widespread usage in '
+                                     'various applications. In March 2023, '
+                                     'OpenAI announced GPT-4, marking further '
+                                     'advancements in language understanding. '
+                                     'These models illustrate the rapid '
+                                     'evolution and growing impact of AI in '
+                                     'natural language processing.',
+                          'function_call': None,
+                          'refusal': None,
+                          'role': 'assistant',
+                          'tool_calls': None}}],
+ 'created': 1756901315,
+ 'id': 'chatcmpl-CBgZvbf9tJ6pPDvXbMXHdATIS7E5C',
+ 'model': 'gpt-4o-2024-08-06',
+ 'object': 'chat.completion',
+ 'service_tier': 'default',
+ 'system_fingerprint': 'fp_46bff0e0c8',
+ 'usage': {'completion_tokens': 167,
+           'completion_tokens_details': {'accepted_prediction_tokens': 0,
+                                         'audio_tokens': 0,
+                                         'reasoning_tokens': 0,
+                                         'rejected_prediction_tokens': 0},
+           'prompt_tokens': 28,
+           'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0},
+           'total_tokens': 195}}</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We are using the <strong>chat completions</strong> API where an autoregressive process that’s running under the hood. Here the prompt to be completed is:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>messages<span class="op">=</span>[</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a poetic but terse assistant."</span>},   <span class="co"># prompt</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"What is the color of the sky?"</span>}              <span class="co"># prompt</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And the completion is given by the API’s output:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"role"</span>: <span class="st">"assistant"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"content"</span>: <span class="st">"The sky's color shifts from azure to amber, a canvas for sun's daily journey."</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Remark.</strong> The generated response is statistically the most likely continuation of the prompt text sequence.</p>
+</div>
+</div>
+</section>
+<section id="structured-outputs" class="level3">
+<h3 class="anchored" data-anchor-id="structured-outputs">Structured outputs</h3>
+<p><a href="https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses">Structured outputs</a> is a feature that ensures that a model generates responses that adhere to a supplied <strong>schema</strong> (e.g.&nbsp;a Pydantic model). As such, the output can then be parsed using the same Pydantic model. Structured outputs makes prompting significantly simpler: no more need for strongly worded prompts to achieve consistent formatting, no explicitly having to retry incorrectly formatted responses, or having invalid hallucinated values (can specify <strong>enums</strong>).</p>
+<div id="70811ae5" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> OpenAI()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CalendarEvent(BaseModel):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    name: <span class="bu">str</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    date: <span class="bu">str</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    participants: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>completion <span class="op">=</span> client.chat.completions.parse(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">"gpt-4o"</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    messages<span class="op">=</span>[</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Extract the event information."</span>},</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="st">"Alice and Bob are going to a science fair on Friday."</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    response_format<span class="op">=</span>CalendarEvent,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>event <span class="op">=</span> completion.choices[<span class="dv">0</span>].message.parsed</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>event</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>CalendarEvent(name='Science Fair', date='Friday', participants=['Alice', 'Bob'])</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="llm-augmentations-goals-tools-memory" class="level2">
+<h2 class="anchored" data-anchor-id="llm-augmentations-goals-tools-memory">LLM augmentations: goals, tools, &amp; memory</h2>
+<p>The foundational building block of agentic systems is a core language model service interfaces with <strong>goals</strong>, <strong>tools</strong>, and <strong>memory</strong> modules. Since current models are able to effectively plan and reason, this greatly improves the problem solving ability of such systems. Moreover, augmentation is necessary for LLMs to reason about data outside of their training data (i.e.&nbsp;data that is outdated relative to the training cutoff). These augmentations also allow the agentic module to <u>interact with its environment</u>.</p>
+<div id="fig-augmentedllm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-augmentedllm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/augmented-llm.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: A diagram of one request-response cycle with a core LLM service augmented with goals, tools, and memory capabilities. Interaction with environment occurs in step (3.2)."><img src="./img/augmented-llm.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-augmentedllm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: A diagram of <strong>one request-response cycle</strong> with a core LLM service augmented with goals, tools, and memory capabilities. Interaction with environment occurs in step (3.2).
+</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Many descriptions of agentic systems explicitly include <strong>retrieval</strong> as a core module (e.g.&nbsp;<a href="https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_agentic_rag/#agentic-rag">Agentic RAG</a>). But retrieval can be part of the tools or memory module so we just abstract over it. Instead, we introduce a <em>Goals</em> module — less common in standard formulations — which highlights the significant role of prompt engineering and spec-driven development in guiding system behavior.</p>
+</div>
+</div>
+<section id="function-calling" class="level3">
+<h3 class="anchored" data-anchor-id="function-calling">Function calling</h3>
+<p>Also known as <strong>tool calling</strong>. Function calling give models access to external tools and data that they can use to respond to prompts. Since LLMs <em>only</em> consume and generate text, they cannot actually execute functions. Instead, the main program listens to the LLM hallucinate and executes the commands based on that (<a href="#fig-brainvat" class="quarto-xref">Figure&nbsp;4</a>).</p>
+<div id="fig-brainvat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-brainvat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/brain-vat.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: LLM as brain in a vat. The LLM as core reasoning module thinking of what function to execute with what arguments without having the capability to execute them. We provide a separate process and environment for running the code. Source"><img src="./img/brain-vat.png" class="img-fluid figure-img" style="width:70.0%"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-brainvat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: <strong>LLM as brain in a vat.</strong> The LLM as core reasoning module thinking of what function to execute with what arguments without having the capability to execute them. We provide a separate process and environment for running the code. <a href="https://en.wikipedia.org/wiki/Brain_in_a_vat">Source</a>
+</figcaption>
+</figure>
+</div>
+<p><strong>Task.</strong> To demonstrate tool calling, we develop a system of querying the weather in <a href="https://www.philatlas.com/luzon/r04a/rizal/pililla/quisao.html">Quisao</a> using natural language. It essentially builds on the OpenAI <strong>chat completions API</strong> (see <a href="#fig-chat-completions" class="quarto-xref">Figure&nbsp;5</a>). Basically, we want the agent to call the following core API:</p>
+<div id="5e6bdad9" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_weather(latitude, longitude):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Get current weather data for provided coordinates with units:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">    temperature (celsius), wind speed (kph), &amp; precipitation (mm).</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get((</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"https://api.open-meteo.com/v1/forecast?latitude=</span><span class="sc">{</span>latitude<span class="sc">}</span><span class="ss">&amp;longitude=</span><span class="sc">{</span>longitude<span class="sc">}</span><span class="ss">&amp;"</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"current=temperature_2m,wind_speed_10m,relative_humidity_2m,precipitation,precipitation_probability"</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> response.json()</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data[<span class="st">"current"</span>]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>get_weather(latitude<span class="op">=</span><span class="fl">14.4779</span>, longitude<span class="op">=</span><span class="fl">121.3214</span>)  <span class="co"># true coordinates</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>{'time': '2025-09-03T12:00',
+ 'interval': 900,
+ 'temperature_2m': 28.6,
+ 'wind_speed_10m': 10.7,
+ 'relative_humidity_2m': 84,
+ 'precipitation': 0.2,
+ 'precipitation_probability': 53}</code></pre>
+</div>
+</div>
+<p><strong>Tool definition.</strong> For the LLM to understand a specific tool, we have to define a schema that informs the model of what the tool does and its expected (required and optional) arguments. The following is the function definition for <code>get_weather</code>:</p>
+<div id="c8c9d5d7" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>tools <span class="op">=</span> [</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-3" class="code-annotation-target"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"function"</span>,</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"function"</span>: {</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-8-5" class="code-annotation-target"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"name"</span>: <span class="st">"get_weather"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-8-6" class="code-annotation-target"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"description"</span>: <span class="st">"Get current weather data for provided coordinates with units: temperature (celsius), wind speed (kph), &amp; precipitation (mm)."</span>,</span>
+<span id="annotated-cell-8-7"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"parameters"</span>: {</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-8-8" class="code-annotation-target"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a>                <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-8-9" class="code-annotation-target"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">"properties"</span>: {</span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"latitude"</span>: {</span>
+<span id="annotated-cell-8-11"><a href="#annotated-cell-8-11" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"type"</span>: <span class="st">"number"</span></span>
+<span id="annotated-cell-8-12"><a href="#annotated-cell-8-12" aria-hidden="true" tabindex="-1"></a>                    },</span>
+<span id="annotated-cell-8-13"><a href="#annotated-cell-8-13" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"longitude"</span>: {</span>
+<span id="annotated-cell-8-14"><a href="#annotated-cell-8-14" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"type"</span>: <span class="st">"number"</span></span>
+<span id="annotated-cell-8-15"><a href="#annotated-cell-8-15" aria-hidden="true" tabindex="-1"></a>                    },</span>
+<span id="annotated-cell-8-16"><a href="#annotated-cell-8-16" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="annotated-cell-8-17"><a href="#annotated-cell-8-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"required"</span>: [<span class="st">"latitude"</span>, <span class="st">"longitude"</span>],</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-8-18" class="code-annotation-target"><a href="#annotated-cell-8-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"additionalProperties"</span>: <span class="va">False</span>,</span>
+<span id="annotated-cell-8-19"><a href="#annotated-cell-8-19" aria-hidden="true" tabindex="-1"></a>            },</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-8-20" class="code-annotation-target"><a href="#annotated-cell-8-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"strict"</span>: <span class="va">True</span>,</span>
+<span id="annotated-cell-8-21"><a href="#annotated-cell-8-21" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="annotated-cell-8-22"><a href="#annotated-cell-8-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-8-23"><a href="#annotated-cell-8-23" aria-hidden="true" tabindex="-1"></a>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="3" data-code-annotation="1">Should always be function.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="5" data-code-annotation="2">Function’s name (i.e.&nbsp;<code>get_weather</code>).</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="6" data-code-annotation="3">Usually just the docstring. Should describe when and how to use the function.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="8" data-code-annotation="4">Parameters are naturally JSON objects.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="9" data-code-annotation="5">List of arguments. Clearly the two arguments are required.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="18" data-code-annotation="6">Part of JSON schema that determines whether extra fields are valid or not.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="20" data-code-annotation="7">Not part of JSON schema, but OpenAI function calling option that <em>guides</em> the model to strictly follow the schema (i.e.&nbsp;not improvise). Setting <code>additionalProperties</code> to <code>False</code> and <code>strict</code> to <code>True</code> works together to ensure that the model generates the correct parameters schema.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Because <code>parameters</code> is defined by a JSON schema, you can leverage many of its rich features like property types, enums, descriptions, nested objects, and so on. For example, we can have:</p>
+<pre><code>"properties": {
+    "unit": {
+        "type": "string",
+        "enum": ["celsius", "fahrenheit"],
+        "description": "Unit of measure for temperature."
+    }
+}</code></pre>
+</div>
+</div>
+<p><strong>Agent definition.</strong> We define messages outside of the agent to track chat history.</p>
+<div id="014a64d0" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>system_prompt <span class="op">=</span> <span class="st">"You are a helpful weather assistant."</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_prompt}]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_weather_agent(messages: <span class="bu">list</span>, update<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Agent with access to `get_weather` API. Responds with tool calls."""</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    completion <span class="op">=</span> client.chat.completions.create(</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"gpt-4.1"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>messages,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        tools<span class="op">=</span>tools,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> completion.choices[<span class="dv">0</span>].message</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> update:</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        messages.append(out.model_dump())</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co"># query step. expects tool_calls</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What's the weather like in Quisao, Pililla, Rizal right now?"</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: query})</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> get_weather_agent(messages)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>pprint(response.model_dump())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'annotations': [],
+ 'audio': None,
+ 'content': None,
+ 'function_call': None,
+ 'refusal': None,
+ 'role': 'assistant',
+ 'tool_calls': [{'function': {'arguments': '{"latitude":14.4944,"longitude":121.3239}',
+                              'name': 'get_weather'},
+                 'id': 'call_4QeMnQu5xVJpJZxeeIHWuejY',
+                 'type': 'function'}]}</code></pre>
+</div>
+</div>
+<p>It’s impressive that fairly accurate coordinates were obtained without using web search (i.e.&nbsp;these facts were inferred from the model weights). Observe that whenever we have <code>tools</code>, the model responds with only <code>tool_calls</code> as nonnull (e.g.&nbsp;<code>content</code> is empty) with role <code>assistant</code>.</p>
+<p><strong>Function calls.</strong> We will iterate over tool calls and process them separately. Each function call and their results are then logged in the message history. This explains why we defined <code>messages</code> outside of the API call unlike the usual setup .</p>
+<div id="f94696d2" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_function(name, args):</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> {</span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"get_weather"</span>: get_weather  </span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fn[name](<span class="op">**</span>args)</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tool_call <span class="kw">in</span> response.tool_calls:</span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a>    args <span class="op">=</span> json.loads(tool_call.function.arguments)</span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> tool_call.function.name</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>    tool_output <span class="op">=</span> call_function(name, args)</span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>    messages.append({    </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-14" class="code-annotation-target"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"role"</span>: <span class="st">"tool"</span>,</span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tool_call_id"</span>: tool_call.<span class="bu">id</span>, </span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"content"</span>: json.dumps(tool_output)</span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17" aria-hidden="true" tabindex="-1"></a>    })</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="14" data-code-annotation="1">Tool calls are logged with role <code>tool</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Message history appended with actual API output:</p>
+<div id="1cc27b32" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pprint(messages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[{'content': 'You are a helpful weather assistant.', 'role': 'system'},
+ {'content': "What's the weather like in Quisao, Pililla, Rizal right now?",
+  'role': 'user'},
+ {'annotations': [],
+  'audio': None,
+  'content': None,
+  'function_call': None,
+  'refusal': None,
+  'role': 'assistant',
+  'tool_calls': [{'function': {'arguments': '{"latitude":14.4944,"longitude":121.3239}',
+                               'name': 'get_weather'},
+                  'id': 'call_4QeMnQu5xVJpJZxeeIHWuejY',
+                  'type': 'function'}]},
+ {'content': '{"time": "2025-09-03T12:00", "interval": 900, "temperature_2m": '
+             '28.6, "wind_speed_10m": 10.7, "relative_humidity_2m": 84, '
+             '"precipitation": 0.2, "precipitation_probability": 53}',
+  'role': 'tool',
+  'tool_call_id': 'call_4QeMnQu5xVJpJZxeeIHWuejY'}]</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Chat completion API calls have stateless single request-response cycles which gives the user straightforward control over the <strong>message history</strong>. This can be seen in the above example where we manually manage message history with tool calls declaration as well as actual function outputs.</p>
+</div>
+</div>
+<p><strong>Report agent.</strong> Next, we pass this thread to another agent (possibly to a different, more specialized model) which will process the outputs of the tool calls along with earlier chat messages. To take advantage of structured outputs we again define a response format. Here we use Pydantic <code>Field</code> with a description that helps the LLM.</p>
+<div id="42e9bb38" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> Field</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WeatherReport(BaseModel):</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    response: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"A natural language response to the user's question."</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"Current temperature in celsius for the given location."</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> weather_report_agent(messages: <span class="bu">list</span>, update<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    completion <span class="op">=</span> client.chat.completions.parse(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"gpt-4o"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>messages,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        tools<span class="op">=</span>tools,    <span class="co"># &lt;!&gt;</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>WeatherReport,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> completion.choices[<span class="dv">0</span>].message</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> update:</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        messages.append(out.model_dump())</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The aggregator also needs access to tools for it to understand the context of each tool call!</p>
+</div>
+</div>
+<p><strong>Final output.</strong> Note that the units correctly identified from the <code>get_weather</code> docstring:</p>
+<div id="52f1eda4" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> weather_report_agent(messages)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>weather_report <span class="op">=</span> response.parsed</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"temp:"</span>, weather_report.temperature, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(weather_report.response, wrap<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>temp: 28.6 
+
+The current weather in Quisao, Pililla, Rizal is warm with a temperature of
+28.6°C. The humidity is relatively high at 84%, and there is a light breeze with
+wind speeds of 10.7 kph. There's also a chance of light precipitation, with
+recorded precipitation of 0.2 mm.</code></pre>
+</div>
+</div>
+<div id="fig-chat-completions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chat-completions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/chat-completions-api.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Creating a weather report using the chat completions API with LLM agents."><img src="./img/chat-completions-api.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chat-completions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Creating a weather report using the chat completions API with LLM agents.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="memory-and-retrieval" class="level3">
+<h3 class="anchored" data-anchor-id="memory-and-retrieval">Memory and retrieval</h3>
+<p>The following is a toy example of an agent that reads and writes to an external data source. One characteristic of retrieval systems is that the entire process is <strong>stateless</strong>, e.g.&nbsp;it cannot learn from interactions. Retrieval systems generally involve queries to an external data source, then adding the response to the current model context.</p>
+<p>For the following example, the LLM also writes to the same memory store hence affecting future generation states. It follows that this system is <strong>stateful</strong>. We can think of the external memory store as the <strong>long-term memory</strong> of the system. On the other hand, LLMs naturally have <strong>short-term memory</strong> in the form of its context. The architecture is shown in <a href="#fig-retrieval-system" class="quarto-xref">Figure&nbsp;6</a>.</p>
+<div id="fig-retrieval-system" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-retrieval-system-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="./img/retrieval-system.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: The LLM expresses the intent to write to the memory store via the structured output. Then, it is up to the main program to perform the actual writing. This allows hooks like guardrails to be applied before executing the function. Note that the retrieval happens prior to LLM processing. It would be nice to have the LLM read the entire filestore but this becomes more expensive as the memory store grows. In practice, information retrieval techniques such as TF-IDF and embedding similarity can be used."><img src="./img/retrieval-system.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-retrieval-system-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: The LLM expresses the intent to write to the memory store via the structured output. Then, it is up to the main program to perform the actual writing. This allows hooks like <a href="https://cookbook.openai.com/examples/how_to_use_guardrails">guardrails</a> to be applied before executing the function. Note that the retrieval happens prior to LLM processing. It would be nice to have the LLM read the entire filestore but this becomes more expensive as the memory store grows. In practice, information retrieval techniques such as TF-IDF and embedding similarity can be used.
+</figcaption>
+</figure>
+</div>
+<p><strong>Memory store.</strong> Memories are saved as dictionaries <code>{"tag": &lt;tag&gt;, "fact": &lt;fact&gt;}</code>. The following objects work around this definition. A retrieval function is defined as a method of the memory store class which gets relevant memory items based on <em>keyword search</em>. Hence, we have the following function for extracting keywords:</p>
+<div id="83e7c0eb" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.corpus <span class="im">import</span> stopwords</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.tokenize <span class="im">import</span> word_tokenize</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>stop_words <span class="op">=</span> <span class="bu">set</span>(stopwords.words(<span class="st">"english"</span>))</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tokenize(text):</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Tokenize into words then remove stopwords."""</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> word_tokenize(text.lower())</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    filtered_tokens <span class="op">=</span> [word <span class="cf">for</span> word <span class="kw">in</span> tokens <span class="cf">if</span> word <span class="kw">not</span> <span class="kw">in</span> stop_words <span class="kw">and</span> word <span class="kw">not</span> <span class="kw">in</span> string.punctuation]</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> filtered_tokens</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Punk is a pre-trained unsupervised machine learning model for tokenization. It's one of the most crucial and widely used components in the NLTK library."</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Original:"</span>, text)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Filtered:"</span>, tokenize(text))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Original: Punk is a pre-trained unsupervised machine learning model for tokenization. It's one of the most crucial and widely used components in the NLTK library.
+Filtered: ['punk', 'pre-trained', 'unsupervised', 'machine', 'learning', 'model', 'tokenization', "'s", 'one', 'crucial', 'widely', 'used', 'components', 'nltk', 'library']</code></pre>
+</div>
+</div>
+<div id="0e31d46b" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="annotated-cell-15-2"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> List</span>
+<span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
+<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-6"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MemoryItem(BaseModel):</span>
+<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>    tag: <span class="bu">str</span></span>
+<span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a>    fact: <span class="bu">str</span></span>
+<span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a>    reason: <span class="bu">str</span></span>
+<span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-12"><a href="#annotated-cell-15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MemoryResponse(BaseModel):</span>
+<span id="annotated-cell-15-13"><a href="#annotated-cell-15-13" aria-hidden="true" tabindex="-1"></a>    items: List[MemoryItem]</span>
+<span id="annotated-cell-15-14"><a href="#annotated-cell-15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-15"><a href="#annotated-cell-15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-16"><a href="#annotated-cell-15-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MemoryStore:</span>
+<span id="annotated-cell-15-17"><a href="#annotated-cell-15-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, path<span class="op">=</span><span class="st">"memory.json"</span>):</span>
+<span id="annotated-cell-15-18"><a href="#annotated-cell-15-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Load memory from JSON file in local path."""</span></span>
+<span id="annotated-cell-15-19"><a href="#annotated-cell-15-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.path <span class="op">=</span> path</span>
+<span id="annotated-cell-15-20"><a href="#annotated-cell-15-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data <span class="op">=</span> []</span>
+<span id="annotated-cell-15-21"><a href="#annotated-cell-15-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tags <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="annotated-cell-15-22"><a href="#annotated-cell-15-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.load()</span>
+<span id="annotated-cell-15-23"><a href="#annotated-cell-15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-24"><a href="#annotated-cell-15-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load(<span class="va">self</span>):</span>
+<span id="annotated-cell-15-25"><a href="#annotated-cell-15-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="annotated-cell-15-26"><a href="#annotated-cell-15-26" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.data <span class="op">=</span> json.load(<span class="bu">open</span>(<span class="va">self</span>.path))</span>
+<span id="annotated-cell-15-27"><a href="#annotated-cell-15-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">FileNotFoundError</span>:</span>
+<span id="annotated-cell-15-28"><a href="#annotated-cell-15-28" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.reset()</span>
+<span id="annotated-cell-15-29"><a href="#annotated-cell-15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-30"><a href="#annotated-cell-15-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>):</span>
+<span id="annotated-cell-15-31"><a href="#annotated-cell-15-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(<span class="va">self</span>.path, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="annotated-cell-15-32"><a href="#annotated-cell-15-32" aria-hidden="true" tabindex="-1"></a>            json.dump(<span class="va">self</span>.data, f, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-15-33"><a href="#annotated-cell-15-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-34"><a href="#annotated-cell-15-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> reset(<span class="va">self</span>):</span>
+<span id="annotated-cell-15-35"><a href="#annotated-cell-15-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data <span class="op">=</span> []</span>
+<span id="annotated-cell-15-36"><a href="#annotated-cell-15-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tags <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="annotated-cell-15-37"><a href="#annotated-cell-15-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.save()</span>
+<span id="annotated-cell-15-38"><a href="#annotated-cell-15-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="annotated-cell-15-39"><a href="#annotated-cell-15-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> add(<span class="va">self</span>, item: MemoryItem):</span>
+<span id="annotated-cell-15-40"><a href="#annotated-cell-15-40" aria-hidden="true" tabindex="-1"></a>        tag, fact <span class="op">=</span> item.tag, item.fact</span>
+<span id="annotated-cell-15-41"><a href="#annotated-cell-15-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tags.add(tag)</span>
+<span id="annotated-cell-15-42"><a href="#annotated-cell-15-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data.append({<span class="st">"tag"</span>: tag, <span class="st">"fact"</span>: fact})</span>
+<span id="annotated-cell-15-43"><a href="#annotated-cell-15-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-44"><a href="#annotated-cell-15-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-15-45"><a href="#annotated-cell-15-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.data)</span>
+<span id="annotated-cell-15-46"><a href="#annotated-cell-15-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="annotated-cell-15-47"><a href="#annotated-cell-15-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrieve(<span class="va">self</span>, query: <span class="bu">str</span>, topk: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>) <span class="op">-&gt;</span> List[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-15-48"><a href="#annotated-cell-15-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Simple keyword-based retrieval."""</span></span>
+<span id="annotated-cell-15-49"><a href="#annotated-cell-15-49" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="annotated-cell-15-50"><a href="#annotated-cell-15-50" aria-hidden="true" tabindex="-1"></a>        query_words <span class="op">=</span> tokenize(query)</span>
+<span id="annotated-cell-15-51"><a href="#annotated-cell-15-51" aria-hidden="true" tabindex="-1"></a>        retrieved <span class="op">=</span> []</span>
+<span id="annotated-cell-15-52"><a href="#annotated-cell-15-52" aria-hidden="true" tabindex="-1"></a>        </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-53" class="code-annotation-target"><a href="#annotated-cell-15-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> memory <span class="kw">in</span> <span class="bu">reversed</span>(<span class="va">self</span>.data):</span>
+<span id="annotated-cell-15-54"><a href="#annotated-cell-15-54" aria-hidden="true" tabindex="-1"></a>            tag, fact <span class="op">=</span> memory[<span class="st">"tag"</span>], memory[<span class="st">"fact"</span>]</span>
+<span id="annotated-cell-15-55"><a href="#annotated-cell-15-55" aria-hidden="true" tabindex="-1"></a>            fact <span class="op">=</span> <span class="st">' '</span>.join(tokenize(fact))</span>
+<span id="annotated-cell-15-56"><a href="#annotated-cell-15-56" aria-hidden="true" tabindex="-1"></a>            memory_text <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>tag<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>fact<span class="sc">}</span><span class="ss">"</span>.lower()</span>
+<span id="annotated-cell-15-57"><a href="#annotated-cell-15-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-58"><a href="#annotated-cell-15-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> word <span class="kw">in</span> query_words:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-15-59" class="code-annotation-target"><a href="#annotated-cell-15-59" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> word <span class="kw">in</span> memory_text:</span>
+<span id="annotated-cell-15-60"><a href="#annotated-cell-15-60" aria-hidden="true" tabindex="-1"></a>                    retrieved.append(memory)</span>
+<span id="annotated-cell-15-61"><a href="#annotated-cell-15-61" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span></span>
+<span id="annotated-cell-15-62"><a href="#annotated-cell-15-62" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="annotated-cell-15-63"><a href="#annotated-cell-15-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(retrieved) <span class="op">==</span> topk:</span>
+<span id="annotated-cell-15-64"><a href="#annotated-cell-15-64" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="annotated-cell-15-65"><a href="#annotated-cell-15-65" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="annotated-cell-15-66"><a href="#annotated-cell-15-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> retrieved</span>
+<span id="annotated-cell-15-67"><a href="#annotated-cell-15-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-68"><a href="#annotated-cell-15-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-69"><a href="#annotated-cell-15-69" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> OpenAI()</span>
+<span id="annotated-cell-15-70"><a href="#annotated-cell-15-70" aria-hidden="true" tabindex="-1"></a>mem <span class="op">=</span> MemoryStore()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="53" data-code-annotation="1">More recent = more relevant.</span>
+</dd>
+<dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="59" data-code-annotation="2">Substring check. e.g.&nbsp;<code>'commute' in 'commute_experience'</code> evaluates to <code>True</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Next, we define the <strong>generation step</strong> and the <strong>write step</strong>:</p>
+<div id="78de9786" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>prompt_template <span class="op">=</span> <span class="kw">lambda</span> memories, tags: <span class="ss">f"""</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="ss">You are an assistant that processes daily user logs. For each log, extract a concise, </span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="ss">factual summary of what happened. Each summary should be atomic, standalone, and </span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="ss">likely useful for future interactions. Assign a relevant `tag` to each summary (`fact`) </span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ss">before saving it to memory. </span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ss">The following are relevant entries (based on the current input) in the Memory Store:</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>memories<span class="sc">}</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="ss">The following are the current tags:</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span>tags<span class="sc">}</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="ss">**GUIDELINES:**</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="ss">1. **EXTRACT ATOMIC FACTS:**</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="ss">    - Break down information into the smallest meaningful, self-contained units.</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Good**: "User's favorite programmer is Jon Blow."</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Bad**: "User mentioned their favorite programmer is Jon Blow who is a famous game programmer" (This has two facts.)</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="ss">    - The `fact` must be a concise, direct paraphrase of the fact. Remove conversational fluff.</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Good Info:** "User's favorite city is Tokyo"</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Bad Info:** "The user stated that if they had to pick a favorite city, they think it would be Tokyo."</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  **TAG EFFECTIVELY:**</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Format:** Prefer generic, descriptive tags in `snake_case`.</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Simple:** Prefer simple tags. Choose `commute` is better than `commute_experience`.</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="ss">    - **Reuse:** Strongly prefer existing tags. Create a new tag only if necessary.</span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="ss">    - An example: For "I really enjoy hiking in the Alps every summer," a good tag is `hobby` or `outdoor_activity`.</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="ss">    </span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  **EVALUATE &amp; DECIDE:**</span></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="ss">    - It is acceptable to save zero logs from an input if nothing is meaningfully new or relevant.</span></span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="ss">    - Save multiple logs if the user provides multiple distinct pieces of information.</span></span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a><span class="ss">    - Each memory item should make sense on its own. There should be no dependence between separate logs.</span></span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> capture_memorable_facts(user_log: <span class="bu">str</span>, topk: <span class="bu">int</span><span class="op">=</span><span class="dv">3</span>) <span class="op">-&gt;</span> MemoryResponse:</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Generate memorable facts from log and write them to memory."""</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># generate memorable facts based on relevant items</span></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>    retrieved_memories <span class="op">=</span> mem.retrieve(user_log, topk)</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>    current_tags <span class="op">=</span> <span class="bu">list</span>(mem.tags)</span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>    system_prompt <span class="op">=</span> prompt_template(retrieved_memories, current_tags)</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> client.chat.completions.parse(</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"gpt-4o"</span>,</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_prompt},</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_log},</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>MemoryResponse,</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># save items to memory store</span></span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> response.choices[<span class="dv">0</span>].message.parsed</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> out.items:</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>        mem.add(item)</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>    mem.save()</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Examples:</p>
+<div id="a6599b51" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>logs <span class="op">=</span> [</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Woke up later than usual because I forgot to set an alarm, rushed through a quick shower, skipped coffee, and still managed to leave for work on time."</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Traffic was unusually light, but halfway through I realized I left my ID at home, debated turning back, and decided to just explain at the office front desk."</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Took the train, found no seats since it was packed, but struck up a short conversation with a stranger about the book they were reading while we both stood."</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Stopped by the bakery, picked up bread for the team, and noticed they had a new seasonal pastry that tempted me but I decided to pass."</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Opened my email first thing at the office, skimmed through a pile of routine messages, flagged one urgent client request, and forwarded it to the team lead."</span>,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Woah! While crossing the street a man suddenly darted into traffic, cars honked, everyone gasped, and I stood frozen for a moment before hurrying away still shaken."</span>,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Listened to a podcast while walking to the subway, half distracted by construction noise on the street, and made a mental note to check out the book they recommended."</span>,</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Grabbed a pen from my drawer because mine ran out of ink, ended up reorganizing the entire drawer, and discovered an old sticky note with a reminder I had long forgotten."</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> []</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> log <span class="kw">in</span> logs:</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    memory_items <span class="op">=</span> capture_memorable_facts(log).items</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> memory_items:</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>        d <span class="op">=</span> item.model_dump()</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        d[<span class="st">"text"</span>] <span class="op">=</span> log</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>        items.append(d)</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>df_resp <span class="op">=</span> pd.DataFrame(items)</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>mem.reset()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The agent decides whether to reuse a tag or create a new one based on the data:</p>
+<div id="8d4931a2" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(<span class="st">"ignore"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.max_colwidth'</span>, <span class="va">None</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(</span><span class="sc">{</span><span class="bu">len</span>(logs)<span class="sc">}</span><span class="ss"> total logs, </span><span class="sc">{</span><span class="bu">len</span>(df_resp)<span class="sc">}</span><span class="ss"> facts saved, </span><span class="sc">{</span><span class="bu">len</span>(df_resp.tag.unique())<span class="sc">}</span><span class="ss"> tags)"</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"tags:"</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>pprint(<span class="bu">list</span>(df_resp.tag.unique()))</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>df_resp[[<span class="st">"tag"</span>, <span class="st">"fact"</span>, <span class="st">"text"</span>, <span class="st">"reason"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(8 total logs, 10 facts saved, 8 tags)
+tags:
+['commute',
+ 'food_purchase',
+ 'work_task',
+ 'unexpected_incident',
+ 'media_consumption',
+ 'book_interest',
+ 'workspace_organization',
+ 'personal_discovery']</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">tag</th>
+<th data-quarto-table-cell-role="th">fact</th>
+<th data-quarto-table-cell-role="th">text</th>
+<th data-quarto-table-cell-role="th">reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>commute</td>
+<td>User managed to leave for work on time despite waking up late, skipping coffee, and rushing through a shower.</td>
+<td>Woke up later than usual because I forgot to set an alarm, rushed through a quick shower, skipped coffee, and still managed to leave for work on time.</td>
+<td>This aligns with existing commute experiences and contributes to understanding daily schedules.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>commute</td>
+<td>User forgot their ID at home but decided to explain at the office front desk instead of turning back.</td>
+<td>Traffic was unusually light, but halfway through I realized I left my ID at home, debated turning back, and decided to just explain at the office front desk.</td>
+<td>This fact complements the existing information about the commute, noting the decision-making process and potential impact.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>food_purchase</td>
+<td>User picked up bread for the team at the bakery.</td>
+<td>Stopped by the bakery, picked up bread for the team, and noticed they had a new seasonal pastry that tempted me but I decided to pass.</td>
+<td>This log details a specific purchase made by the user, which may be relevant for future preferences or routines.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>work_task</td>
+<td>User opened their email first thing at the office and forwarded an urgent client request to the team lead.</td>
+<td>Opened my email first thing at the office, skimmed through a pile of routine messages, flagged one urgent client request, and forwarded it to the team lead.</td>
+<td>The log provides a summary of a specific task conducted by the user as part of their work routine.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>unexpected_incident</td>
+<td>User witnessed a man dart into traffic, causing cars to honk and bystanders to gasp, which left them shaken.</td>
+<td>Woah! While crossing the street a man suddenly darted into traffic, cars honked, everyone gasped, and I stood frozen for a moment before hurrying away still shaken.</td>
+<td>This is a distinct and memorable experience regarding an unexpected and alarming incident.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>media_consumption</td>
+<td>User listened to a podcast while walking to the subway.</td>
+<td>Listened to a podcast while walking to the subway, half distracted by construction noise on the street, and made a mental note to check out the book they recommended.</td>
+<td>This indicates what the user was doing during their walk, related to media consumption.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>commute</td>
+<td>User was half distracted by construction noise on the street while walking to the subway.</td>
+<td>Listened to a podcast while walking to the subway, half distracted by construction noise on the street, and made a mental note to check out the book they recommended.</td>
+<td>This describes part of the user's experience during their commute.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>book_interest</td>
+<td>User made a mental note to check out a book recommended in a podcast.</td>
+<td>Listened to a podcast while walking to the subway, half distracted by construction noise on the street, and made a mental note to check out the book they recommended.</td>
+<td>This indicates a new interest or intention to explore a book.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>workspace_organization</td>
+<td>User reorganized their drawer after retrieving a pen.</td>
+<td>Grabbed a pen from my drawer because mine ran out of ink, ended up reorganizing the entire drawer, and discovered an old sticky note with a reminder I had long forgotten.</td>
+<td>Recording about workspace organization may provide context for future tasks or preferences.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>personal_discovery</td>
+<td>User discovered an old sticky note with a forgotten reminder in their drawer.</td>
+<td>Grabbed a pen from my drawer because mine ran out of ink, ended up reorganizing the entire drawer, and discovered an old sticky note with a reminder I had long forgotten.</td>
+<td>Finding a forgotten reminder may impact user's future decisions or tasks.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-ReAct2023" class="csl-entry" role="listitem">
+Yao, Shunyu, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. 2023. <span>“ReAct: Synergizing Reasoning and Acting in Language Models.”</span> <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../topics/agents/index.html" class="pagination-link" aria-label="Agentic Systems">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Agentic Systems</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../topics/agents/02.html" class="pagination-link" aria-label="Pattern 1: Reflection">
+        <span class="nav-page-text">Pattern 1: Reflection</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
