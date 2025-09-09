@@ -58,6 +58,6 @@ class ChatHistory(list):
         chat["role"] = Role.validate(chat["role"])
         super().append(chat)
 
-    def update(self, prompt: str, role: str):
+    def update(self, prompt: str, role: str, tag: str = ""):
         """Append a message to the chat history."""
-        self.append(message_dict(prompt=prompt, role=role))
+        self.append(message_dict(prompt=prompt, role=role, tag=tag))

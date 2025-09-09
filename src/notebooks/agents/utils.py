@@ -1,6 +1,9 @@
 import re
 from dataclasses import dataclass
 
+from groq import Groq
+from openai import OpenAI
+
 
 @dataclass
 class TagContentResult:
@@ -10,7 +13,7 @@ class TagContentResult:
 
 def extract_tag_content(text: str, tag: str) -> TagContentResult:
     """
-    Extracts all content enclosed by specified tags, 
+    Extracts all content enclosed by specified tags,
     e.g. <thought>, <response>, etc.
     Parameters:
         text (str): The input string containing multiple potential tags
@@ -23,3 +26,7 @@ def extract_tag_content(text: str, tag: str) -> TagContentResult:
         content=[content.strip() for content in matched_contents],
         found=bool(matched_contents),
     )
+
+
+def get_client(provider: str):
+    return {"openai": OpenAI, "groq": Groq}[provider]
