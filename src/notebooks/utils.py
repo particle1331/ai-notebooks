@@ -1,6 +1,8 @@
-import os
 import builtins
+import os
 import textwrap
+
+from IPython.display import display_markdown
 
 
 def hello():
@@ -24,3 +26,7 @@ def print(*args, wrap: bool=False, width: int=80, **kwargs):
         else:
             new_args.append(arg)
     builtins.print(*new_args, **kwargs)
+
+
+def print_markdown(s: str):
+    display_markdown(s, raw=True)
