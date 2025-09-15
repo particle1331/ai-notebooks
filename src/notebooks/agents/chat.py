@@ -1,5 +1,8 @@
 from typing import Optional
 
+from openai import NOT_GIVEN
+from pydantic import BaseModel
+
 
 class Role:
     USER = "user"
@@ -10,9 +13,12 @@ class Role:
     @classmethod
     def get_valid_roles(cls) -> set:
         """Automatically detect all uppercase constant roles"""
-        return {value for name, value in vars(cls).items() 
-                if name.isupper() and isinstance(value, str)}
-    
+        return {
+            value
+            for name, value in vars(cls).items()
+            if name.isupper() and isinstance(value, str)
+        }
+
     @classmethod
     def validate(cls, role: str) -> str:
         valid_roles = cls.get_valid_roles()
@@ -21,10 +27,32 @@ class Role:
         return role
 
 
-def completions_create(client, messages: list, model: str) -> str:
-    """Return generated string from model based on messages."""
-    response = client.chat.completions.create(messages=messages, model=model)
-    return str(response.choices[0].message.content)
+def completions_create(client, messages: list, model: str, tools=NOT_GIVEN) -> str:
+    """Generate string based on message history."""
+    response = client.chat.completions.create(
+        messages=messages,
+        model=model,
+        tools=tools,
+    )
+    return response.choices[0].message.content
+
+
+def completions_parse(
+    client,
+    messages: list,
+    model: str,
+    response_format: BaseModel,
+    tools=NOT_GIVEN,
+) -> dict:
+    """Generate structured output based on message history."""
+    response = client.chat.completions.parse(
+        messages=messages,
+        model=model,
+        tools=tools,
+        response_format=response_format,
+    )
+
+    return response.choices[0].message.parsed
 
 
 def message_dict(prompt: str, role: str, tag: str = "") -> dict:
@@ -34,13 +62,13 @@ def message_dict(prompt: str, role: str, tag: str = "") -> dict:
     return {"role": role, "content": prompt}
 
 
-
 class ChatHistory(list):
-    def __init__(self, 
-        system_prompt: Optional[str] = None, 
+    def __init__(
+        self,
+        system_prompt: Optional[str] = None,
         messages: Optional[list] = None,
-        max_len: int = -1, 
-        fixed_n: int = 1
+        max_len: int = -1,
+        fixed_n: int = 1,
     ):
         """Fixed message list with a optional total length and number of fixed initial messages."""
         messages = [] if messages is None else messages
@@ -51,10 +79,10 @@ class ChatHistory(list):
         self.max_len = max_len
         if system_prompt:
             self.update(prompt=system_prompt, role=Role.SYSTEM)
-        
+
     def append(self, chat: dict):
         if len(self) == self.max_len:
-            self.pop(self.fixed_n)    # i.e. keep 0, 1, ..., n-1 (first n)
+            self.pop(self.fixed_n)  # i.e. keep 0, 1, ..., n-1 (first n)
         chat["role"] = Role.validate(chat["role"])
         super().append(chat)
 

@@ -1,8 +1,14 @@
 import builtins
 import os
 import textwrap
+import inspect
 
-from IPython.display import display_markdown
+from typing import Any
+
+from IPython.display import HTML, display, display_markdown
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonLexer
 
 
 def hello():
@@ -18,7 +24,7 @@ def load_dotenv(verbose=False):
                 print(f"Loaded env variable: {k}")
 
 
-def print(*args, wrap: bool=False, width: int=80, **kwargs):
+def print(*args, wrap: bool = False, width: int = 80, **kwargs):
     new_args = []
     for arg in args:
         if wrap and isinstance(arg, str):
@@ -30,3 +36,17 @@ def print(*args, wrap: bool=False, width: int=80, **kwargs):
 
 def print_markdown(s: str):
     display_markdown(s, raw=True)
+
+
+def display_python(code: str | Any):
+    # Generate highlighted HTML
+    code = inspect.getsource(code) if not isinstance(code, str) else code
+    formatter = HtmlFormatter(style="colorful", cssclass="highlight")
+    highlighted_code = highlight(code, PythonLexer(), formatter)
+
+    # Get the CSS for the style
+    css = formatter.get_style_defs(".highlight")
+
+    # Display both CSS and code
+    display(HTML(f"<style>{css}</style>"))
+    display(HTML(highlighted_code))
