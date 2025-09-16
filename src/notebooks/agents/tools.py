@@ -1,6 +1,6 @@
 import inspect
 import json
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Any
 
 
 def get_signature(fn: Callable) -> dict:
@@ -80,39 +80,32 @@ class Tool:
         self.signature = get_signature(fn)
         self.__class__._registry[self.name] = self
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.signature)
 
-    def __call__(self, **kwargs):
+    def __call__(self, **kwargs) -> Any:
         return self.fn(**kwargs)
     
     @classmethod
-    def parse_tool_call(cls, tool_call: str | dict):
-        tool_call = json.loads(tool_call) if isinstance(tool_call, str) else tool_call
+    def parse_tool_call(cls, tool_call: str | dict) -> tuple[str, dict[str, Any]]:
+        if isinstance(tool_call, str):
+            tool_call = json.loads(tool_call)
+
+        assert set(["function", "id"]) <= set(tool_call.keys())
+        assert isinstance(tool_call["id"], int)
+        assert set(tool_call["function"].keys()) == set(["arguments", "name"])
+        
         name = tool_call["function"]["name"]
+        schema = Tool.get_tool(name).signature["function"]["parameters"]["properties"]
         args = json.loads(tool_call["function"]["arguments"])
+        args = validate_args(args=args, args_schema=schema)  
         return name, args
 
     @classmethod
-    def validate_tool_call(cls, tool_call: dict):
-        assert set(tool_call.keys()) == set(["function", "id"])
-        assert isinstance(tool_call["id"], int)
-        assert set(tool_call["function"].keys()) == set(["arguments", "name"])
-        name, args = cls.parse_tool_call(tool_call)
-        schema = Tool.get_tool(name).signature["function"]["parameters"]["properties"]
-        return {
-            "function": {
-                "arguments": json.dumps(validate_args(args=args, args_schema=schema)), 
-                "name": name
-            }, 
-            "id": tool_call["id"]
-        }
-
-    @classmethod
-    def execute(cls, tool_call: str | dict):
+    def execute(cls, tool_call: str | dict) -> Any:
         """Execute the function from natural language."""
         name, args = cls.parse_tool_call(tool_call)
-        return Tool.get_tool(name)(**args)  # validates, i.e. __call__
+        return Tool.get_tool(name)(**args)
 
     @classmethod
     def get_tool(cls, name: str) -> Optional["Tool"]:

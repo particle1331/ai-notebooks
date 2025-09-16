@@ -1,9 +1,9 @@
-from typing import Optional
-from pydantic import BaseModel
 from functools import lru_cache
+from typing import Any, Optional, Union
 
-import groq
-import openai
+from pydantic import BaseModel
+
+ToolCalls = list[dict[str, Any]]
 
 
 class Role:
@@ -43,40 +43,60 @@ class ChatCompletions:
         self.completions = client.chat.completions
         self.default_model = default_model
 
-    def _not_given(self):
-        return groq.NOT_GIVEN if isinstance(self.client, groq.Groq) else openai.NOT_GIVEN
+    def _not_given(self) -> Any:
+        if "groq" in str(type(self.client)).lower():
+            import groq
+            return groq.NOT_GIVEN
+        else:
+            import openai
+            return openai.NOT_GIVEN
 
-    def _build_payload(self, messages, model, tools, **extra):
+    def _build_payload(self, messages, model, tools, **extra) -> dict[str, Any]:
         return {
             "messages": messages,
             "model": model or self.default_model,
             "tools": tools or self._not_given(),
-            **extra
+            **extra,
         }
-    
-    def _process_tool_calls(self, response, parse: bool = False):
+
+    def _process_response(
+        self, response, parse: bool = False
+    ) -> Union[ToolCalls, str, dict[str, Any]]:
         if response.choices[0].finish_reason == "tool_calls":
-            out = []
+            calls = []
             for i, call in enumerate(response.choices[0].message.tool_calls):
                 call_dict = call.model_dump()
                 call_dict["id"] = i
-                out.append(call_dict)
-            return out
-        
+                calls.append(call_dict)
+            return calls
+
         if parse:
             return response.choices[0].message.parsed.model_dump()
         else:
             return response.choices[0].message.content
 
-    def create(self, messages: list, model: str = "", tools=None, **extra) -> str:
+    def create(
+        self,
+        messages: list[dict],
+        model: str = "",
+        tools: Optional[list[dict]] = None,
+        **extra,
+    ) -> Union[str, ToolCalls]:
         payload = self._build_payload(messages, model, tools, **extra)
         response = self.completions.create(**payload)
-        return self._process_tool_calls(response, parse=False)
+        return self._process_response(response, parse=False)
 
-    def parsed(self, messages: list, schema: BaseModel, model: str = "", tools=None, **extra) -> dict:
+    def parsed(
+        self,
+        messages: list[dict],
+        schema: BaseModel,
+        model: str = "",
+        tools: Optional[list[dict]] = None,
+        **extra,
+    ) -> Union[dict[str, Any], ToolCalls]:
         payload = self._build_payload(messages, model, tools, response_format=schema, **extra)
         response = self.completions.parse(**payload)
-        return self._process_tool_calls(response, parse=True)
+        return self._process_response(response, parse=True)
 
 
 class ChatHistory(list):
@@ -97,11 +117,11 @@ class ChatHistory(list):
         if system_prompt:
             self.update(prompt=system_prompt, role=Role.SYSTEM)
 
-    def append(self, chat: dict):
+    def append(self, message: dict):
         if len(self) == self.max_len:
             self.pop(self.fixed_n)  # i.e. keep 0, 1, ..., n-1 (first n)
-        chat["role"] = Role.validate(chat["role"])
-        super().append(chat)
+        message["role"] = Role.validate(message["role"])
+        super().append(message)
 
     def update(self, prompt: str, role: str, tag: str = "", **extra):
         """Append a message to the chat history."""
