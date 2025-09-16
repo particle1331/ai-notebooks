@@ -1,10 +1,6 @@
 from functools import lru_cache
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel
-
-ToolCalls = list[dict[str, Any]]
-
 
 class Role:
     USER = "user"
@@ -51,62 +47,42 @@ class ChatCompletions:
             import openai
             return openai.NOT_GIVEN
 
-    def _build_payload(self, messages, model, tools, **extra) -> dict[str, Any]:
+    def _args(self, messages, model, tools, **extra) -> dict:
         return {
             "messages": messages,
             "model": model or self.default_model,
             "tools": tools or self._not_given(),
             **extra,
         }
+    
+    def _process_tool_calls(self, response) -> list:
+        tool_calls = response.choices[0].message.tool_calls
+        calls = []
+        for i, call in enumerate(tool_calls):
+            call_dict = call.model_dump()
+            call_dict["id"] = i
+            calls.append(call_dict)
+        return calls
 
-    def _process_response(
-        self, response, parse: bool = False
-    ) -> Union[ToolCalls, str, dict[str, Any]]:
+    def _process_response(self, response, parse=False) -> Union[str, dict, list]:
         if response.choices[0].finish_reason == "tool_calls":
-            calls = []
-            for i, call in enumerate(response.choices[0].message.tool_calls):
-                call_dict = call.model_dump()
-                call_dict["id"] = i
-                calls.append(call_dict)
-            return calls
+            return self._process_tool_calls(response)
+        msg = response.choices[0].message
+        return msg.parsed.model_dump() if parse else msg.content
 
-        if parse:
-            return response.choices[0].message.parsed.model_dump()
-        else:
-            return response.choices[0].message.content
-
-    def create(
-        self,
-        messages: list[dict],
-        model: str = "",
-        tools: Optional[list[dict]] = None,
-        **extra,
-    ) -> Union[str, ToolCalls]:
-        payload = self._build_payload(messages, model, tools, **extra)
-        response = self.completions.create(**payload)
+    def create(self, messages, model="", tools=None, **extra) -> str | list:
+        args = self._args(messages, model, tools, **extra)
+        response = self.completions.create(**args)
         return self._process_response(response, parse=False)
 
-    def parsed(
-        self,
-        messages: list[dict],
-        schema: BaseModel,
-        model: str = "",
-        tools: Optional[list[dict]] = None,
-        **extra,
-    ) -> Union[dict[str, Any], ToolCalls]:
-        payload = self._build_payload(messages, model, tools, response_format=schema, **extra)
+    def parsed(self, messages, schema, model="", tools=None, **extra) -> dict | list:
+        payload = self._args(messages, model, tools, response_format=schema, **extra)
         response = self.completions.parse(**payload)
         return self._process_response(response, parse=True)
 
 
 class ChatHistory(list):
-    def __init__(
-        self,
-        system_prompt: Optional[str] = None,
-        messages: Optional[list] = None,
-        max_len: int = -1,
-        fixed_n: int = 1,
-    ):
+    def __init__(self, system_prompt=None, messages=None, max_len=-1, fixed_n=1):
         """Fixed message list with a optional total length and number of fixed initial messages."""
         messages = [] if messages is None else messages
         super().__init__(messages)
@@ -123,6 +99,6 @@ class ChatHistory(list):
         message["role"] = Role.validate(message["role"])
         super().append(message)
 
-    def update(self, prompt: str, role: str, tag: str = "", **extra):
+    def update(self, prompt: str, role: str, tag="", **extra):
         """Append a message to the chat history."""
         self.append(message_dict(prompt=prompt, role=role, tag=tag, **extra))

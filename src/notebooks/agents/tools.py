@@ -1,6 +1,6 @@
 import inspect
 import json
-from typing import Callable, Dict, List, Optional, Any
+from typing import Callable, Dict, List, Optional
 
 
 def get_signature(fn: Callable) -> dict:
@@ -83,11 +83,11 @@ class Tool:
     def __str__(self) -> str:
         return json.dumps(self.signature)
 
-    def __call__(self, **kwargs) -> Any:
+    def __call__(self, **kwargs):
         return self.fn(**kwargs)
     
     @classmethod
-    def parse_tool_call(cls, tool_call: str | dict) -> tuple[str, dict[str, Any]]:
+    def parse_tool_call(cls, tool_call: str | dict):
         if isinstance(tool_call, str):
             tool_call = json.loads(tool_call)
 
@@ -102,18 +102,18 @@ class Tool:
         return name, args
 
     @classmethod
-    def execute(cls, tool_call: str | dict) -> Any:
-        """Execute the function from natural language."""
+    def execute(cls, tool_call: str | dict):
+        """Execute a tool call from text or schema."""
         name, args = cls.parse_tool_call(tool_call)
         return Tool.get_tool(name)(**args)
 
     @classmethod
     def get_tool(cls, name: str) -> Optional["Tool"]:
         """Get a tool by name from the registry."""
-        return cls._registry.get(name)
+        return cls._registry[name]
 
     @classmethod
-    def get_all_tools(cls) -> List[dict]:
+    def list_tools(cls) -> List[dict]:
         """Get signatures of all registered tools."""
         return [tool.signature for tool in cls._registry.values()]
 
