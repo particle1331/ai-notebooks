@@ -6,11 +6,18 @@ from typing import Callable, Dict, List, Optional
 def get_signature(fn: Callable) -> dict:
     """Generates the signature for a given function."""
 
+    json_types = {  # limited types supported :p
+        "int": "integer",
+        "str": "string",
+        "bool": "boolean",
+        "float": "number",
+    }
+
     # get required params and types from fn signature
     required = []
     properties = {}
     for v in inspect.signature(fn).parameters.values():
-        properties[v.name] = {"type": str(v.annotation)}
+        properties[v.name] = {"type": json_types[v.annotation.__name__]}
         if v.default == inspect._empty:
             required.append(v.name)
         else:
@@ -36,16 +43,16 @@ def validate_args(args: dict, args_schema: dict) -> dict:
     """Returns args dict with values converted to correct type.
     Example usage:
     >>> args = {'latitude': '14.4833', 'longitude': '121.2667'}
-    >>> args_schema = {'latitude': {'type': '<class 'float'>'}, 'longitude': {'type': '<class 'float'>'}}
+    >>> args_schema = {'latitude': {'type': 'number'}, 'longitude': {'type': 'number'}}
     >>> validate_args(args, args_schema)
     {'latitude': 14.4833, 'longitude': 121.2667}
     """
 
     type_mapping = {  # limited types supported :p
-        "<class 'int'>": int,
-        "<class 'str'>": str,
-        "<class 'bool'>": bool,
-        "<class 'float'>": float,
+        "integer": int,
+        "string": str,
+        "boolean": bool,
+        "number": float,
     }
 
     # loop thru tool typed arguments, i.e. untyped = skip
@@ -77,27 +84,35 @@ class Tool:
         return json.dumps(self.signature)
 
     def __call__(self, **kwargs):
-        tool_call = {"name": self.name, "arguments": kwargs, "id": -1}
-        kwargs = Tool.validate_tool_call(tool_call)
         return self.fn(**kwargs)
+    
+    @classmethod
+    def parse_tool_call(cls, tool_call: str | dict):
+        tool_call = json.loads(tool_call) if isinstance(tool_call, str) else tool_call
+        name = tool_call["function"]["name"]
+        args = json.loads(tool_call["function"]["arguments"])
+        return name, args
 
     @classmethod
     def validate_tool_call(cls, tool_call: dict):
-        required_keys = ["name", "arguments", "id"]
-        assert set(required_keys) == set(tool_call.keys()), "missing tool call field"
+        assert set(tool_call.keys()) == set(["function", "id"])
         assert isinstance(tool_call["id"], int)
-        args = tool_call["arguments"]
-        name = tool_call["name"]
+        assert set(tool_call["function"].keys()) == set(["arguments", "name"])
+        name, args = cls.parse_tool_call(tool_call)
         schema = Tool.get_tool(name).signature["function"]["parameters"]["properties"]
-        return validate_args(args=args, args_schema=schema)
+        return {
+            "function": {
+                "arguments": json.dumps(validate_args(args=args, args_schema=schema)), 
+                "name": name
+            }, 
+            "id": tool_call["id"]
+        }
 
     @classmethod
     def execute(cls, tool_call: str | dict):
         """Execute the function from natural language."""
-        tool_call = json.loads(tool_call) if isinstance(tool_call, str) else tool_call
-        name = tool_call["name"]
-        args = tool_call["parameters"]
-        return Tool.get_tool(name)(**args)
+        name, args = cls.parse_tool_call(tool_call)
+        return Tool.get_tool(name)(**args)  # validates, i.e. __call__
 
     @classmethod
     def get_tool(cls, name: str) -> Optional["Tool"]:

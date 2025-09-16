@@ -29,4 +29,4 @@ def extract_tag_content(text: str, tag: str) -> TagContentResult:
 
 
 def get_client(provider: str):
-    return {"openai": OpenAI, "groq": Groq}[provider]
+    return {"openai": OpenAI, "groq": Groq}[provider]()
