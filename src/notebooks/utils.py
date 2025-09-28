@@ -2,6 +2,7 @@ import builtins
 import os
 import textwrap
 import inspect
+import pathlib
 
 from typing import Any
 
@@ -11,12 +12,16 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
 
+ROOT_PATH = pathlib.Path(__file__).parents[2]
+
+
 def hello():
     print("Hello from notebooks!")
 
 
-def load_dotenv(verbose=False):
-    with open(".env") as f:
+def load_dotenv(path=None, verbose=False):
+    path = ".env" if not path else path
+    with open(path) as f:
         for line in f.readlines():
             k, v = line.split("=")
             os.environ[k] = v.strip().strip('"')
@@ -38,9 +43,14 @@ def print_markdown(s: str):
     display_markdown(s, raw=True)
 
 
-def display_python(code: str | Any):
-    # Generate highlighted HTML
-    code = inspect.getsource(code) if not isinstance(code, str) else code
+def display_python(code: str | list[str] | Any):
+    get_source = lambda c: inspect.getsource(c) if not isinstance(c, str) else c
+    if isinstance(code, list):
+        code_ = [get_source(c) for c in code]
+        code = "\n\n".join(code_)
+    else:
+        code = get_source(code)
+
     formatter = HtmlFormatter(style="colorful", cssclass="highlight")
     highlighted_code = highlight(code, PythonLexer(), formatter)
 

@@ -39,22 +39,12 @@ class ChatCompletions:
         self.model = deployment.model
         self.client = deployment.client
         self.completions = self.client.chat.completions
-        
-    def _not_given(self) -> Any:
-        if "groq" in str(type(self.client)).lower():
-            import groq
-            return groq.NOT_GIVEN
-        else:
-            import openai
-            return openai.NOT_GIVEN
 
     def _args(self, messages, tools, **extra) -> dict:
-        return {
-            "messages": messages,
-            "model": self.model,
-            "tools": tools or self._not_given(),
-            **extra,
-        }
+        out = {"messages": messages, "model": self.model, **extra}
+        if tools:
+            out["tools"] = tools
+        return out
     
     def _process_tool_calls(self, response) -> list:
         tool_calls = response.choices[0].message.tool_calls

@@ -3,9 +3,6 @@ from dataclasses import dataclass
 
 from groq import Groq
 from openai import OpenAI
-from typing import Union
-
-Client = Union[str, Groq, OpenAI]
 
 
 @dataclass
@@ -31,25 +28,31 @@ def extract_tag_content(text: str, tag: str) -> TagContentResult:
     )
 
 
-def get_client(provider: str):
-    return {"openai": OpenAI, "groq": Groq}[provider]()
+LLM_CLIENTS = {
+    "groq": Groq,
+    "openai": OpenAI,
+}
+
+def get_client(client):
+    if isinstance(client, str):
+        return LLM_CLIENTS[client]()
+    else:
+        assert type(client) in LLM_CLIENTS.values(), "unsupported LLM provider"
+        return client
 
 
 class Deployment:
-    def __init__(self, client: Client, model: str):
-        if isinstance(client, str):
-            client = get_client(client)
+    def __init__(self, client, model: str):
+        client = get_client(client)
         self.model = model
         self.client = client
         self.metadata = client.models.retrieve(model).model_dump()
         
     def __repr__(self) -> str:
-        if "groq" in str(self.client).lower():
-            provider = "groq"
-        else:
-            provider = "openai"
+        provider = type(self.client).__module__
         return f"{provider}:{self.model}"
 
     @classmethod
     def list_models(cls, client) -> list[str]:
+        client = get_client(client)
         return [m.id for m in client.models.list().data]
