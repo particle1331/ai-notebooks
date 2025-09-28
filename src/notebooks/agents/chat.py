@@ -1,5 +1,6 @@
 from functools import lru_cache
-from typing import Any, Optional, Union
+from typing import Any, Union
+from notebooks.agents.utils import Deployment
 
 
 class Role:
@@ -34,11 +35,11 @@ def message_dict(prompt: str, role: str, tag: str = "", **extra) -> dict:
 
 
 class ChatCompletions:
-    def __init__(self, client, default_model: str = ""):
-        self.client = client
-        self.completions = client.chat.completions
-        self.default_model = default_model
-
+    def __init__(self, deployment: Deployment):
+        self.model = deployment.model
+        self.client = deployment.client
+        self.completions = self.client.chat.completions
+        
     def _not_given(self) -> Any:
         if "groq" in str(type(self.client)).lower():
             import groq
@@ -47,10 +48,10 @@ class ChatCompletions:
             import openai
             return openai.NOT_GIVEN
 
-    def _args(self, messages, model, tools, **extra) -> dict:
+    def _args(self, messages, tools, **extra) -> dict:
         return {
             "messages": messages,
-            "model": model or self.default_model,
+            "model": self.model,
             "tools": tools or self._not_given(),
             **extra,
         }
@@ -70,13 +71,13 @@ class ChatCompletions:
         msg = response.choices[0].message
         return msg.parsed.model_dump() if parse else msg.content
 
-    def create(self, messages, model="", tools=None, **extra) -> str | list:
-        args = self._args(messages, model, tools, **extra)
+    def create(self, messages, tools=None, **extra) -> str | list:
+        args = self._args(messages, tools, **extra)
         response = self.completions.create(**args)
         return self._process_response(response, parse=False)
 
-    def parsed(self, messages, schema, model="", tools=None, **extra) -> dict | list:
-        payload = self._args(messages, model, tools, response_format=schema, **extra)
+    def parsed(self, messages, schema, tools=None, **extra) -> dict | list:
+        payload = self._args(messages, tools, response_format=schema, **extra)
         response = self.completions.parse(**payload)
         return self._process_response(response, parse=True)
 
