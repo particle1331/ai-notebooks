@@ -180,6 +180,15 @@
           "labels": [],
           "checkboxes": [],
           "comments": []
+        },
+        {
+          "id": "d77ac740-fa40-489c-820a-447352294877",
+          "listId": "5f017133-2cd3-4dd4-937d-14d589906068",
+          "title": "self driving cars toronto coursera",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
         }
       ]
     },
@@ -252,6 +261,24 @@
             }
           ],
           "comments": []
+        },
+        {
+          "id": "aa7f7fed-a475-47c6-8cc2-8bbc519b4a3e",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "sep 2025: deep learning (old stuff i have + UFAL) -> RL (UFAL, lapan) -> LLM from scratch (raschska repo)  -> reasoning models from scratch (rashcka repo)",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "9d3e7e96-0ecd-4a8a-bafc-7649e1c6aa38",
+          "listId": "3f9949af-48d0-4588-9302-3ac9b2003690",
+          "title": "also learn about leadership. get specializations. or maybe MSEM cuboulder",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
         }
       ]
     },
@@ -259,6 +286,33 @@
       "id": "bb1cfa32-967a-4272-a509-fb169f85f400",
       "title": "To Do",
       "cards": [
+        {
+          "id": "87d6d5d3-e2f1-40ec-adad-47e8742ae3b7",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Version of Dev Setup for AWS. Include Docker.",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "b09c479e-06bc-4dfe-a53d-a182596a7642",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Add okt MLOps notebooks",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "b161b159-54b9-4d53-9a42-534988b7fc12",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Optimization",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
         {
           "id": "14c5e8c0-d68c-4db6-b87f-2ca12a0d501b",
           "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
@@ -422,6 +476,15 @@
           "labels": [],
           "checkboxes": [],
           "comments": []
+        },
+        {
+          "id": "113c9680-18b0-4db7-9895-17277ea966f6",
+          "listId": "bb1cfa32-967a-4272-a509-fb169f85f400",
+          "title": "Donner: AI in Production: Gen AI and Agentic AI at scale",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
         }
       ]
     },
@@ -430,18 +493,27 @@
       "title": "Doing",
       "cards": [
         {
-          "id": "b161b159-54b9-4d53-9a42-534988b7fc12",
+          "id": "a96b2fed-6805-4204-8555-47ff58a6d331",
           "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "Optimization",
+          "title": "Planning ReAct",
           "description": "",
           "labels": [],
           "checkboxes": [],
           "comments": []
         },
         {
-          "id": "a96b2fed-6805-4204-8555-47ff58a6d331",
+          "id": "f52a7b1c-2cb0-4e3c-9241-1c225a81fa8d",
           "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
-          "title": "Building effective agents",
+          "title": "Episodic Memory",
+          "description": "",
+          "labels": [],
+          "checkboxes": [],
+          "comments": []
+        },
+        {
+          "id": "dfe70c0c-bc2b-46d1-a672-eb03bc025378",
+          "listId": "219397cf-0196-4324-8d06-cf2ed01c42c3",
+          "title": "Multi-Agent",
           "description": "",
           "labels": [],
           "checkboxes": [],

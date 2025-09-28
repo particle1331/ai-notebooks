@@ -13,6 +13,3 @@ requirements: uv
 venv: uv
 	uv venv --python 3.13
 	uv sync
-
-diff: # args="cf6450c 3139d8f", or args=cf6450c
-	uv run python -m scripts.diff $(args)

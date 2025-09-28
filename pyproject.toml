@@ -28,6 +28,7 @@ dependencies = [
     "langchain-openai>=0.3.32",
     "groq>=0.31.0",
     "colorama>=0.4.6",
+    "nbdime>=4.0.2",
 ]
 
 [build-system]
