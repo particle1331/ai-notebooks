@@ -92,7 +92,8 @@ class Tool:
             tool_call = json.loads(tool_call)
 
         assert set(["function", "id"]) <= set(tool_call.keys())
-        assert isinstance(tool_call["id"], int)
+        assert tool_call["id"].isnumeric()
+        assert str(int(tool_call["id"])) == tool_call["id"]
         assert set(tool_call["function"].keys()) == set(["arguments", "name"])
         
         name = tool_call["function"]["name"]

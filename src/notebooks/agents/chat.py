@@ -51,15 +51,17 @@ class ChatCompletions:
         calls = []
         for i, call in enumerate(tool_calls):
             call_dict = call.model_dump()
-            call_dict["id"] = i
+            call_dict["id"] = str(i)
             calls.append(call_dict)
         return calls
 
     def _process_response(self, response, parse=False) -> Union[str, dict, list]:
-        if response.choices[0].finish_reason == "tool_calls":
+        finish_reason = response.choices[0].finish_reason
+        if finish_reason == "tool_calls":
             return self._process_tool_calls(response)
-        msg = response.choices[0].message
-        return msg.parsed.model_dump() if parse else msg.content
+        else:
+            message = response.choices[0].message
+            return message.parsed.model_dump() if parse else message.content
 
     def create(self, messages, tools=None, **extra) -> str | list:
         args = self._args(messages, tools, **extra)

@@ -20,7 +20,7 @@ def hello():
 
 
 def load_dotenv(path=None, verbose=False):
-    path = ".env" if not path else path
+    path = path or ".env"
     with open(path) as f:
         for line in f.readlines():
             k, v = line.split("=")
