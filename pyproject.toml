@@ -29,6 +29,7 @@ dependencies = [
     "groq>=0.31.0",
     "colorama>=0.4.6",
     "nbdime>=4.0.2",
+    "chromadb>=1.1.0",
 ]
 
 [build-system]

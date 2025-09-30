@@ -1,5 +1,10 @@
+import json
+
+from typing import Union, Optional
+from pydantic import BaseModel
 from functools import lru_cache
-from typing import Any, Union
+
+from notebooks.utils import notna
 from notebooks.agents.utils import Deployment
 
 
@@ -34,46 +39,6 @@ def message_dict(prompt: str, role: str, tag: str = "", **extra) -> dict:
     return {"role": role, "content": prompt, **extra}
 
 
-class ChatCompletions:
-    def __init__(self, deployment: Deployment):
-        self.model = deployment.model
-        self.client = deployment.client
-        self.completions = self.client.chat.completions
-
-    def _args(self, messages, tools, **extra) -> dict:
-        out = {"messages": messages, "model": self.model, **extra}
-        if tools:
-            out["tools"] = tools
-        return out
-    
-    def _process_tool_calls(self, response) -> list:
-        tool_calls = response.choices[0].message.tool_calls
-        calls = []
-        for i, call in enumerate(tool_calls):
-            call_dict = call.model_dump()
-            call_dict["id"] = str(i)
-            calls.append(call_dict)
-        return calls
-
-    def _process_response(self, response, parse=False) -> Union[str, dict, list]:
-        finish_reason = response.choices[0].finish_reason
-        if finish_reason == "tool_calls":
-            return self._process_tool_calls(response)
-        else:
-            message = response.choices[0].message
-            return message.parsed.model_dump() if parse else message.content
-
-    def create(self, messages, tools=None, **extra) -> str | list:
-        args = self._args(messages, tools, **extra)
-        response = self.completions.create(**args)
-        return self._process_response(response, parse=False)
-
-    def parsed(self, messages, schema, tools=None, **extra) -> dict | list:
-        payload = self._args(messages, tools, response_format=schema, **extra)
-        response = self.completions.parse(**payload)
-        return self._process_response(response, parse=True)
-
-
 class ChatHistory(list):
     def __init__(self, system_prompt=None, messages=None, max_len=-1, fixed_n=1):
         """Fixed message list with a optional total length and number of fixed initial messages."""
@@ -95,3 +60,54 @@ class ChatHistory(list):
     def update(self, prompt: str, role: str, tag="", **extra):
         """Append a message to the chat history."""
         self.append(message_dict(prompt=prompt, role=role, tag=tag, **extra))
+
+
+class ChatCompletions:
+    def __init__(self, deployment: Deployment):
+        self.model = deployment.model
+        self.client = deployment.client
+        self.completions = self.client.chat.completions
+
+    def _args(self, messages, tools, response_format, **extra) -> dict:
+        args = {"messages": messages, "model": self.model, **extra}
+        if notna(response_format):
+            assert issubclass(response_format, BaseModel)
+            args["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": response_format.__name__,
+                    "schema": response_format.model_json_schema()
+                }
+            }
+        if tools:
+            args["tools"] = tools
+        return args
+    
+    def _process_tool_calls(self, response) -> list:
+        tool_calls = response.choices[0].message.tool_calls
+        calls = []
+        for i, call in enumerate(tool_calls):
+            call_dict = call.model_dump()
+            call_dict["id"] = str(i)
+            calls.append(call_dict)
+        return calls
+
+    def _process_response(self, response, parse=False) -> Union[str, dict, list]:
+        finish_reason = response.choices[0].finish_reason
+        if finish_reason == "tool_calls":
+            return self._process_tool_calls(response)
+        else:
+            message = response.choices[0].message
+            content = message.content
+            return json.loads(content) if parse else content
+
+    def create(self, 
+        messages: Union[list, ChatHistory],
+        tools: Optional[list[dict]] = None, 
+        response_format: Optional[BaseModel] = None, 
+        temperature: float = 1.0,
+        **extra
+    ) -> Union[str, dict, list]:
+        args = self._args(messages, tools, response_format, temperature=temperature, **extra)
+        response = self.completions.create(**args)
+        return self._process_response(response, parse=notna(response_format))

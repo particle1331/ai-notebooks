@@ -60,3 +60,7 @@ def display_python(code: str | list[str] | Any):
     # Display both CSS and code
     display(HTML(f"<style>{css}</style>"))
     display(HTML(highlighted_code))
+
+
+def notna(x: Any) -> bool:
+    return x is not None
