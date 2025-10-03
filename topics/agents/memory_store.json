@@ -1,0 +1,21 @@
+[
+  {
+    "category": "allergy",
+    "text": "My wife is allergic to peanuts.",
+    "metadata": {
+      "relation": "wife"
+    },
+    "id": "1"
+  },
+  {
+    "category": "food_preference",
+    "text": "We love eating pasta and prefer vegetarian options on Mondays.",
+    "metadata": {
+      "preference": "pasta",
+      "vegetarian_on": [
+        "Monday"
+      ]
+    },
+    "id": "2"
+  }
+]

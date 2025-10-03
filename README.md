@@ -9,8 +9,7 @@ Jupyter notebooks containing notes and implementation of **AI models**, **algori
 The venv used to run the notebooks can be re-created easily using [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
-git clone git@github.com:particle1331/ai-notebooks.git
-cd ai-notebooks
+git clone git@github.com:particle1331/ai-notebooks.git && cd ai-notebooks
 make venv
 ```
 

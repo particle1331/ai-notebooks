@@ -57,7 +57,7 @@ website:
   sidebar:
     - id: deep
       style: "floating"
-      collapse-level: 1
+      collapse-level: 2
       align: left
       contents:
         - section: "Deep Learning"
@@ -66,7 +66,7 @@ website:
         # - section: "CUDA Programming"
         # recsys
         # deep RL
-
+ 
     - id: tooling
       style: "floating"
       collapse-level: 1
@@ -78,9 +78,13 @@ website:
 
     - id: agents
       style: "floating"
-      collapse-level: 1
+      collapse-level: 2
       align: left
       contents:
         - section: "Agentic Systems"
           href: topics/agents/index.ipynb
           contents: topics/agents/*.ipynb
+
+        - section: "Agentic Patterns"
+          href: topics/agents/patterns/index.ipynb
+          contents: topics/agents/patterns/*.ipynb
