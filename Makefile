@@ -4,8 +4,12 @@ docs:
 	quarto preview
 
 uv:
-	pip install --upgrade pip
-	pip install uv
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "Installing uv..."; \
+		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+	else \
+		echo "uv already installed."; \
+	fi
 
 requirements: uv
 	uv pip compile pyproject.toml > requirements.txt
