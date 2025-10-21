@@ -28,6 +28,7 @@ dependencies = [
     { name = "openai" },
     { name = "pandas" },
     { name = "pip" },
+    { name = "rich" },
     { name = "scikit-learn" },
     { name = "seaborn" },
     { name = "torch" },

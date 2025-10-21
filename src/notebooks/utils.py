@@ -1,6 +1,6 @@
-import builtins
 import os
-import textwrap
+import sys
+import rich
 import inspect
 import pathlib
 
@@ -11,8 +11,19 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
-
 ROOT_PATH = pathlib.Path(__file__).parents[2]
+
+
+def pprint(x, wrap=False, width=80, expand_all=False, indent_guides=True, **kwargs):
+    P = rich.pretty.Pretty
+    T = rich.theme.Theme({"repr.indent": "dim grey50",})
+    console = rich.console.Console(theme=T)
+    if wrap and isinstance(x, str):
+        x = "\n".join([x[i:i+width] for i in range(0, len(x), width)])
+        print(x, **kwargs)
+    else:
+        p = P(x, expand_all=expand_all, indent_guides=indent_guides, **kwargs)
+        console.print(p, soft_wrap=not wrap, width=width)
 
 
 def hello():
@@ -29,25 +40,10 @@ def load_dotenv(path=None, verbose=False):
                 print(f"Loaded env variable: {k}")
 
 
-def print(*args, wrap: bool = False, width: int = 80, **kwargs):
-    new_args = []
-    for arg in args:
-        if wrap and isinstance(arg, str):
-            new_args.append(textwrap.fill(arg, width=width))
-        else:
-            new_args.append(arg)
-    builtins.print(*new_args, **kwargs)
-
-
-def print_markdown(s: str):
-    display_markdown(s, raw=True)
-
-
 def display_python(code: str | list[str] | Any):
     get_source = lambda c: inspect.getsource(c) if not isinstance(c, str) else c
     if isinstance(code, list):
-        code_ = [get_source(c) for c in code]
-        code = "\n\n".join(code_)
+        code = "\n\n".join([get_source(c) for c in code])
     else:
         code = get_source(code)
 
@@ -60,7 +56,3 @@ def display_python(code: str | list[str] | Any):
     # Display both CSS and code
     display(HTML(f"<style>{css}</style>"))
     display(HTML(highlighted_code))
-
-
-def notna(x: Any) -> bool:
-    return x is not None

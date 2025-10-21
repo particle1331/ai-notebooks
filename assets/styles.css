@@ -43,6 +43,10 @@ img {
   border-radius: 4px;           /* optional: rounded corners */
 }
 
+.cell-output table {
+  margin-bottom: 1.5em;
+}
+
 code {
   word-break: break-word;
   hyphens: none;

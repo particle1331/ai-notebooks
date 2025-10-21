@@ -4,7 +4,6 @@ from typing import Union, Optional
 from pydantic import BaseModel
 from functools import lru_cache
 
-from notebooks.utils import notna
 from notebooks.agents.utils import Deployment
 
 
@@ -70,7 +69,7 @@ class ChatCompletions:
 
     def _args(self, messages, tools, response_format, **extra) -> dict:
         args = {"messages": messages, "model": self.model, **extra}
-        if notna(response_format):
+        if response_format is not None:
             assert issubclass(response_format, BaseModel)
             args["response_format"] = {
                 "type": "json_schema",
@@ -109,5 +108,6 @@ class ChatCompletions:
         **extra
     ) -> Union[str, dict, list]:
         args = self._args(messages, tools, response_format, temperature=temperature, **extra)
+        parse = response_format is not None
         response = self.completions.create(**args)
-        return self._process_response(response, parse=notna(response_format))
+        return self._process_response(response, parse=parse)

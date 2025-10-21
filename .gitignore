@@ -220,9 +220,10 @@ topics/cpp/code/tmp.cpp
 # Quarto
 _site/
 *_files/
-
 /.quarto/
-snippets.md
-test.ipynb
+
+# Misc
 topics/agents/.chroma_db
 topics/agents/data/
+snippets.md
+dev.ipynb
