@@ -1,0 +1,37 @@
+{
+  "todo": [
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "category": "Meta",
+      "creation_time": "2025-10-28T20:13:56.073Z",
+      "description": {
+        "content": "**Planned paths**: 6. **Current:** 4\n   - Deep Learning\n   - Reinforcement Learning (*)\n   - LLM Engineering (*)\n   - Agentic Systems\n   - Dev Tooling\n   - App Development",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "## Guidelines / Demarcation\n\n**DL, RL**: clear. basically theory.\n\n**Agentic systems**: AI agents concepts + Patterns\n\n**LLM engg**: fine-tuning, reason, pre/post-training\n\n**Dev tooling:** tools that can be easily incorporated to improve existing workflows, infra, dev practices. For example new databases. duckdb, pandas -> polars. mlflow. prefect. or platforms like docker, runpod. designed for one-off things & mostly things useful for development, improve dev QoL.\n\n**App development:** Frontend / fullstack apps, large-scale data applications, system design. Maybe include 3-4 notebooks series covering a project. So these are more project based instead of documentation based like the above. Also include devops / mlops frameworks if its more \"production\" oriented than dev / tooling. Maybe include some Terraform, data engg. See datatalks.club zoom camps. \n\n## Resources\n\n- DL: UFAL course -> sgrivnod pytorch tutorials\n- RL: lapan book 3e. maybe alberta coursera (?)\n- LLME: raschka books LLM + reasoning models\n- Agentic: Ghassemi course + YT vids\n- App development: YT vids + udemy. \n\nNOTE: always try to incorporate / re-use old stuff / old notebooks.",
+        "mime": "text/markdown"
+      },
+      "id": "2",
+      "prio": 5,
+      "references": [],
+      "title": "ROADMAP"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "category": "Tooling",
+      "creation_time": "2025-10-28T19:48:47.733Z",
+      "id": "1",
+      "prio": 5,
+      "references": [],
+      "title": "Security: Fix runpod github PAT. <!>"
+    }
+  ],
+  "in-progress": [],
+  "testing": [],
+  "done": []
+}
