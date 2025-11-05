@@ -38,3 +38,6 @@ packages = ["src/notebooks"]
 
 [tool.ruff]
 ignore = ["E731"]
+
+[tool.uv.workspace]
+members = ["projects/flet-tutorials"]

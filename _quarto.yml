@@ -46,8 +46,10 @@ website:
             href: topics/deep/index.html
           - text: "Agentic Systems"
             href: topics/agents/index.html
-          - text: "Tooling"
+          - text: "Dev Tooling"
             href: topics/tooling/index.html
+          - text: "App Development"
+            href: topics/apps/index.html
 
     tools:
       - icon: github
@@ -72,7 +74,7 @@ website:
       collapse-level: 1
       align: left
       contents:
-        - section: "Tooling"
+        - section: "Dev Tooling"
           href: topics/tooling/index.ipynb
           contents: topics/tooling/*.ipynb
 
@@ -88,3 +90,12 @@ website:
         - section: "Agentic Patterns"
           href: topics/agents/patterns/index.ipynb
           contents: topics/agents/patterns/*.ipynb
+
+    - id: apps
+      style: "floating"
+      collapse-level: 2
+      align: left
+      contents:
+        - section: "App Development"
+          href: topics/apps/index.ipynb
+          contents: topics/apps/*.ipynb
