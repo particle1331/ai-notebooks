@@ -1,5 +1,5 @@
 [project]
-name = "flet-greeting"
+name = "flet-basics"
 version = "0.1.0"
 description = ""
 readme = "README.md"
@@ -8,7 +8,9 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-  "flet[all]==0.28.3",
+  "flet==0.28.3",
+  "plotly>=6.5.0",
+  "kaleido>=1.2.0",
 ]
 
 [tool.flet]
@@ -16,9 +18,14 @@ dependencies = [
 # Combined with project.name to build bundle ID for iOS and Android apps
 org = "com.mycompany"
 
-# project display name that is used as an app title, etc
-product = "flet-greeting"
+# project display name that is used as an app title on Android and iOS home screens,
+# shown in window titles and about app dialogs on desktop.
+product = "flet-basics"
+
+# company name to display in about app dialogs
 company = "Flet"
+
+# copyright text to display in about app dialogs
 copyright = "Copyright (C) 2025 by Flet"
 
 [tool.flet.app]
@@ -28,3 +35,9 @@ path = "src"
 dev-dependencies = [
     "flet[all]==0.28.3",
 ]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+flet = {extras = ["all"], version = "0.28.3"}

@@ -1,4 +1,4 @@
-# FletDiceroll app
+# FletBasics app
 
 ## Run the app
 

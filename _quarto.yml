@@ -6,6 +6,8 @@ project:
   preview:
     port: 4200
     browser: false
+  resources:
+    - topics/apps/img/*
 
 bibliography: assets/references.bib
 
