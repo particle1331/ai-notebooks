@@ -26,7 +26,6 @@ dependencies = [
     "datasets>=4.1.1",
     "boto3>=1.40.45",
     "rich>=14.1.0",
-    "reflex>=0.8.16",
     "flet[all]>=0.28.3",
     "ipykernel>=7.1.0",
 ]
@@ -42,4 +41,4 @@ packages = ["src/notebooks"]
 ignore = ["E731"]
 
 [tool.uv.workspace]
-members = ["projects/flet-tutorials", "projects/flet-basics"]
+members = ["projects/flet-tutorials", "projects/flet-basics", "projects/reflex-vm"]

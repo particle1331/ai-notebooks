@@ -7,7 +7,7 @@ project:
     port: 4200
     browser: false
   resources:
-    - topics/apps/img/*
+    - topics/apps/img/**/*
 
 bibliography: assets/references.bib
 
@@ -48,10 +48,10 @@ website:
             href: topics/deep/index.html
           - text: "Agentic Systems"
             href: topics/agents/index.html
-          - text: "Dev Tooling"
-            href: topics/tooling/index.html
           - text: "App Development"
             href: topics/apps/index.html
+          - text: "Talks, Tools, & Topics"
+            href: topics/tooling/index.html
 
     tools:
       - icon: github
@@ -64,7 +64,7 @@ website:
       collapse-level: 2
       align: left
       contents:
-        - section: "Deep Learning"
+        - section: ""
           href: topics/deep/index.ipynb
           contents: topics/deep/*.ipynb
         # - section: "CUDA Programming"
@@ -73,10 +73,10 @@ website:
  
     - id: tooling
       style: "floating"
-      collapse-level: 1
+      collapse-level: 2
       align: left
       contents:
-        - section: "Dev Tooling"
+        - section: ""
           href: topics/tooling/index.ipynb
           contents: topics/tooling/*.ipynb
 
@@ -85,11 +85,11 @@ website:
       collapse-level: 2
       align: left
       contents:
-        - section: "Agentic Systems"
+        - section: ""
           href: topics/agents/index.ipynb
           contents: topics/agents/*.ipynb
 
-        - section: "Agentic Patterns"
+        - section: ""
           href: topics/agents/patterns/index.ipynb
           contents: topics/agents/patterns/*.ipynb
 
@@ -98,6 +98,6 @@ website:
       collapse-level: 2
       align: left
       contents:
-        - section: "App Development"
+        - section: ""
           href: topics/apps/index.ipynb
           contents: topics/apps/*.ipynb
