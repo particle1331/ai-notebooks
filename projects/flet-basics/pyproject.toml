@@ -9,8 +9,7 @@ authors = [
 ]
 dependencies = [
   "flet==0.28.3",
-  "plotly>=6.5.0",
-  "kaleido>=1.2.0",
+  "redis>=7.1.0",
 ]
 
 [tool.flet]

@@ -9,7 +9,7 @@ dependencies = [
     "torch>=2.7.1",
     "matplotlib>=3.10.3",
     "pandas>=2.3.0",
-    "scikit-learn>=1.7.0",
+    "scikit-learn>=1.8.0",
     "torchvision>=0.22.1",
     "tqdm>=4.67.1",
     "torchviz>=0.0.3",
@@ -28,6 +28,7 @@ dependencies = [
     "rich>=14.1.0",
     "flet[all]>=0.28.3",
     "ipykernel>=7.1.0",
+    "gunicorn>=23.0.0",
 ]
 
 [build-system]
