@@ -3,11 +3,11 @@ import flet as ft
 def main(page: ft.Page):
     def add_clicked(e):
         task_list.controls.append(ft.Checkbox(label=new_task.value))
-        new_task.value = ""
+        new_task.value = ""     # blank = show hint text again
         full_col.update()
 
     new_task = ft.TextField(
-        hint_text="What's needs to be done?", 
+        hint_text="What needs to be done?", 
         expand=True, 
         on_submit=add_clicked   # ENTER triggers on_submit
     )
