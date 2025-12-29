@@ -42,4 +42,4 @@ packages = ["src/notebooks"]
 ignore = ["E731"]
 
 [tool.uv.workspace]
-members = ["projects/flet-tutorials", "projects/flet-basics", "projects/reflex-vm"]
+members = ["projects/flet-basics"]

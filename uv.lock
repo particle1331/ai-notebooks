@@ -729,6 +729,20 @@ wheels = [
 ]
 
 [[package]]
+name = "flet-todo"
+version = "0.1.0"
+source = { editable = "projects/flet-todo" }
+dependencies = [
+    { name = "flet" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "flet" },
+    { name = "flet", extra = ["all"] },
+]
+
+[[package]]
 name = "flet-web"
 version = "0.28.3"
 source = { registry = "https://pypi.org/simple" }
