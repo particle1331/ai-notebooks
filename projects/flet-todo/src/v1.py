@@ -4,7 +4,7 @@ def main(page: ft.Page):
     def add_clicked(e):
         task_list.controls.append(ft.Checkbox(label=new_task.value))
         new_task.value = ""     # blank = show hint text again
-        full_col.update()
+        main_col.update()
 
     new_task = ft.TextField(
         hint_text="What needs to be done?", 
@@ -18,8 +18,10 @@ def main(page: ft.Page):
     
     new_task_row = ft.Row(controls=[new_task, add_button])
     task_list = ft.Column()
-    full_col = ft.Column(width=600, controls=[new_task_row, task_list])
+    main_col = ft.Column(width=600, controls=[new_task_row, task_list])
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.add(full_col)
+    page.add(main_col)
 
-ft.app(main)
+
+if __name__ == "__main__":
+    ft.run(main)

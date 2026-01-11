@@ -1,12 +1,13 @@
 import flet as ft
 from typing import Callable
 
-class Task(ft.Column):
+class TaskItem(ft.Column):
     def __init__(self, text: str, delete_hook: Callable):
         super().__init__()
-        
         self.delete_hook = delete_hook
         self.checkbox = ft.Checkbox(label=text)
+        
+        # buttons
         self.edit_button = ft.IconButton(
             icon=ft.Icons.EDIT,
             on_click=self.edit_clicked
@@ -22,14 +23,23 @@ class Task(ft.Column):
             on_click=self.save_clicked
         )
 
+        # two views
         self.display_view = ft.Row(controls=[
             self.checkbox, self.edit_button, self.delete_button
         ])
 
-        self.edit_view = ft.Row(controls=[
-            ft.TextField(value=self.checkbox.label, expand=True, on_submit=self.save_clicked),
-            self.save_button,
-        ], visible=False)
+        self.edit_view = ft.Row(
+            controls=[
+                ft.TextField(
+                    value=self.checkbox.label, 
+                    expand=True, 
+                    on_submit=self.save_clicked
+                ),
+                self.save_button,
+            ], 
+            visible=False
+        )
+
         self.controls.extend([self.display_view, self.edit_view])
 
     def delete_clicked(self, e):
@@ -39,7 +49,6 @@ class Task(ft.Column):
     def edit_clicked(self, e):
         self.display_view.visible = False
         self.edit_view.visible = True
-        self.edit_view.controls[0].focus()
         self.update()
 
     def save_clicked(self, e):
@@ -55,7 +64,7 @@ class Task(ft.Column):
 class TodoApp(ft.Column):
     def __init__(self, page: ft.Page, width: int):
         super().__init__(width=width)
-        self.page = page
+        self._page = page
         self.new_task = ft.TextField(
             hint_text="What needs to be done?", 
             expand=True, 
@@ -72,7 +81,7 @@ class TodoApp(ft.Column):
         ])
 
     def add_clicked(self, e):
-        task = Task(self.new_task.value, delete_hook=self.delete_task)
+        task = TaskItem(self.new_task.value, delete_hook=self.delete_task)
         self.task_list.controls.append(task)
         self.new_task.value = ""    # blank = show hint text again
         self.update()
@@ -80,21 +89,29 @@ class TodoApp(ft.Column):
     def is_isolated(self):
         return True
     
-    def delete_task(self, task: Task):
+    def delete_task(self, task: TaskItem):
         dlg_modal = ft.AlertDialog(
             modal=True,
             title=ft.Text("Confirm delete"),
             content=ft.Text("Are you sure you want to delete this task?"),
             actions=[
-                ft.ElevatedButton(
+                ft.Button(
                     "Yes", 
-                    on_click=lambda e: (self.task_list.controls.remove(task), self.update(), self.page.close(dlg_modal))),
-                ft.TextButton("No", on_click=lambda e: self.page.close(dlg_modal)),
+                    on_click=lambda e: (
+                        self.task_list.controls.remove(task), 
+                        self.update(), 
+                        self._page.pop_dialog()
+                    )
+                ),
+                ft.TextButton(
+                    "No", 
+                    on_click=lambda e: self._page.pop_dialog()
+                ),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )
-        self.page.open(dlg_modal)
-        self.page.update()
+        self._page.show_dialog(dlg_modal)
+        self._page.update()
         
 
 def main(page: ft.Page):
@@ -102,6 +119,5 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.add(ft.Text("Todo list 📝", size=50, weight=ft.FontWeight.BOLD), todo)
 
-
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

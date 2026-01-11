@@ -1,7 +1,7 @@
 import flet as ft
 from typing import Callable
 
-class Task(ft.Column):
+class TaskItem(ft.Column):
     def __init__(self, text: str, status_hook: Callable, delete_hook: Callable):
         super().__init__()
         
@@ -121,7 +121,7 @@ class TodoApp(ft.Column):
         ])
 
     async def add_clicked(self, e):
-        task = Task(
+        task = TaskItem(
             self.new_task.value, 
             status_hook=self.on_status_change, 
             delete_hook=self.confirm_delete_task
@@ -165,7 +165,7 @@ class TodoApp(ft.Column):
         self._page.show_dialog(delete_dialog)
         self._page.update()
     
-    def delete_task(self, task: Task):
+    def delete_task(self, task: TaskItem):
         self.task_list.controls.remove(task)
         
     def confirm_clear_completed(self):
@@ -201,7 +201,7 @@ class TodoApp(ft.Column):
     def tabs_changed(self, e):
         self.update()
 
-    def is_completed(self, task: Task):
+    def is_completed(self, task: TaskItem):
         return task.checkbox.value
 
     def before_update(self):
@@ -215,17 +215,12 @@ class TodoApp(ft.Column):
         for task in self.task_list.controls:
             task.visible = visible_fn[selected_tab](task)
 
+
 async def main(page: ft.Page):
     todo = TodoApp(page, width=600)
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.add(ft.Text("Todo list 📝", size=50, weight=ft.FontWeight.BOLD), todo)
     await todo.new_task.focus()
 
-
 if __name__ == "__main__":
     ft.run(main)
-
-
-# show switching tabs print
-# explain task list is same filtering only changes visibility
-# status hook for checkbox change need to be called on TodoApp level to update filtering.
