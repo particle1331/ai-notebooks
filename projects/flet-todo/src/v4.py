@@ -204,7 +204,7 @@ class TodoApp(ft.Column):
     def is_completed(self, task: TaskItem):
         return task.checkbox.value
 
-    def before_update(self):
+    def before_update(self):    # lifecycle method!
         visible_fn = {
             TodoApp.TAB_ALL: lambda task: True,
             TodoApp.TAB_ACTIVE: lambda task: not self.is_completed(task),
