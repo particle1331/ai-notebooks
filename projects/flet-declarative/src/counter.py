@@ -11,8 +11,8 @@ class AppState:
     async def start_counter(self):
         self.counter = 0
         for _ in range(0, 10):
-            self.counter += 0.1
             await asyncio.sleep(0.5)
+            self.counter += 0.1
 
 
 @ft.component
