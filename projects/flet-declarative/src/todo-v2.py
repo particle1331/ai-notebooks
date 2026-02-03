@@ -5,18 +5,11 @@ from dataclasses import dataclass, field
 
 TaskID = ft.IdCounter()
 
-@ft.observable
 @dataclass
 class Task:
     name: str
     is_completed: bool = False
     id: int = field(default_factory=TaskID)
-    
-    def update(self, name: str):
-        self.name = name
-
-    def toggle_status(self):
-        self.is_completed = not self.is_completed
 
 
 ALL = "all"
@@ -26,19 +19,38 @@ COMPLETED = "completed"
 @ft.observable
 @dataclass
 class TodoAppState:
-    # NOTE: only re-assignment triggers observers in flet! => tuple
-    tasks: tuple[Task] = field(default_factory=tuple)
+    tasks: list[Task] = field(default_factory=list)
     task_filters: list[str] = field(default_factory=lambda: [ALL, ACTIVE, COMPLETED])
-    selected_filter: int = 0
+    selected_filter_idx: int = 0
 
     def add_task(self, task: Task):
-        self.tasks = self.tasks + (task,)
+        self.tasks.append(task)
     
     def delete_task(self, task: Task):
-        self.tasks = tuple([t for t in self.tasks if t is not task])
+        self.tasks.remove(task)
+
+    def update_task(self, task: Task, new_name: str):
+        for idx, t in enumerate(self.tasks):
+            if t.id == task.id:
+                self.tasks[idx] = Task(
+                    name=new_name, 
+                    is_completed=t.is_completed, 
+                    id=t.id
+                )
+                break
+    
+    def toggle_task_status(self, task: Task):
+        for idx, t in enumerate(self.tasks):
+            if t.id == task.id:
+                self.tasks[idx] = Task(
+                    name=t.name, 
+                    is_completed=not t.is_completed, 
+                    id=t.id
+                )
+                break
 
     def list_visible_tasks(self) -> list[Task]:
-        tab = self.task_filters[self.selected_filter]
+        tab = self.task_filters[self.selected_filter_idx]
         is_visible = lambda t: (tab == ALL) \
             or (tab == COMPLETED and t.is_completed) \
             or (tab == ACTIVE and not t.is_completed)
@@ -50,7 +62,7 @@ class TodoAppState:
 
 
 @ft.component
-def TaskView(task: Task, on_delete: Callable) -> ft.Row:
+def TaskView(app: TodoAppState, task: Task) -> ft.Row:
 
     is_editing, set_is_editing = ft.use_state(False)
     _name, set_name = ft.use_state(task.name)
@@ -63,11 +75,11 @@ def TaskView(task: Task, on_delete: Callable) -> ft.Row:
         set_is_editing(False)
 
     def save_edit():
-        task.update(name=_name)
+        app.update_task(task, new_name=_name)
         set_is_editing(False)
 
     def delete():
-        on_delete(task)
+        app.delete_task(task)
 
     if is_editing:
         return ft.Row([
@@ -92,6 +104,7 @@ def TaskView(task: Task, on_delete: Callable) -> ft.Row:
             ft.Checkbox(
                 value=task.is_completed,
                 label=task.name,
+                on_change=lambda e: app.toggle_task_status(task)
             ), 
             ft.IconButton(
                 icon=ft.Icons.EDIT, 
@@ -168,7 +181,7 @@ def TodoAppView() -> ft.Column:
 
     #- status filter tabs
     filter_tabs = ft.Tabs(
-        selected_index=todo.selected_filter,
+        selected_index=todo.selected_filter_idx,
         length=3,
         on_change=lambda e: setattr(todo, "selected_filter", e.control.selected_index),
         content=ft.TabBar(
@@ -199,11 +212,7 @@ def TodoAppView() -> ft.Column:
             filter_tabs,
             ft.ListView(
                 controls=[
-                    TaskView(
-                        task=t, 
-                        on_delete=confirm_delete, 
-                        on_toggle_status=lambda _: todo.notify()
-                    ) 
+                    TaskView(app=todo, task=t) 
                     for t in todo.list_visible_tasks()
                 ],
                 height=250, 

@@ -5,7 +5,7 @@ def main(page: ft.Page):
         troute = ft.TemplateRoute(page.route)
         if troute.match("/books/:id"):
             page.add(ft.Text(f"Book ID: {troute.id}"))
-        elif troute.match("/account/:account_id/orders/:order_id"):
+        elif troute.match("/accounts/:account_id/orders/:order_id"):
             page.add(ft.Text(f"Account: {troute.account_id}. Order: {troute.order_id}"))
         else:
             page.add(ft.Text("Unknown route"))
@@ -15,4 +15,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

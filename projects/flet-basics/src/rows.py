@@ -1,7 +1,7 @@
 import flet as ft
-import time
+import asyncio
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     page.add(
         ft.Row(controls=[
             ft.Text("A", size=60),
@@ -12,7 +12,6 @@ def main(page: ft.Page):
 
     timer = ft.Text(size=30)
     page.add(timer)
-    time.sleep(10)
 
     while True:
         timer.data = 3
@@ -20,7 +19,7 @@ def main(page: ft.Page):
             timer.value = f"Removing controls in {timer.data} seconds..."
             timer.data -= 1
             page.update()
-            time.sleep(1)
+            await asyncio.sleep(1)
 
         page.controls[0].controls.pop()
         page.update()
@@ -32,4 +31,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

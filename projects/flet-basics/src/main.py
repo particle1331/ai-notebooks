@@ -17,12 +17,12 @@ hello_world = [
 ]
 
 
-def main(page: ft.Page):    # <1>
+def main(page: ft.Page):
     default = hello_world[0]
-    greeting = ft.Text(default, size=60, data=default)    #<2>
+    greeting = ft.Text(default, size=60, data=default)
     n = len(hello_world)
     
-    def roll_greeting(e):   # <3>
+    def roll_greeting(e):
         # Force update rolling animation
         greeting.value = ""
         page.update()
@@ -34,20 +34,20 @@ def main(page: ft.Page):    # <1>
         page.update()
 
 
-    page.floating_action_button = ft.FloatingActionButton(  # <4>
+    page.floating_action_button = ft.FloatingActionButton(
         content=ft.Icon(ft.Icons.CASINO, size=60),
         on_click=roll_greeting,
         height=60, width=60
     )
 
-    page.add(   # <5>
+    page.add(
         ft.Container(
             greeting,
-            alignment=ft.alignment.center,
+            alignment=ft.Alignment.CENTER,
             expand=True
         )
     )
 
 
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

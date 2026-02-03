@@ -7,53 +7,30 @@ class TaskItem(ft.Column):
         self.delete_hook = delete_hook
         self.checkbox = ft.Checkbox(label=text)
         
-        # buttons
-        self.edit_button = ft.IconButton(
-            icon=ft.Icons.EDIT,
-            on_click=self.edit_clicked
-        )
+        # icons
+        self.edit_icon = ft.IconButton(icon=ft.Icons.EDIT, on_click=self.edit_clicked)
+        self.save_icon = ft.IconButton(icon=ft.Icons.SAVE, on_click=self.save_clicked)
+        self.delete_icon = ft.IconButton(icon=ft.Icons.DELETE, on_click=self.delete_clicked)
 
-        self.delete_button = ft.IconButton(
-            icon=ft.Icons.DELETE,
-            on_click=self.delete_clicked
-        )
+        # views
+        self.text_view = ft.Row([self.checkbox, self.edit_icon, self.delete_icon])
+        self.text_edit = ft.TextField(self.checkbox.label, expand=True, on_submit=self.save_clicked)
+        self.edit_view = ft.Row([self.text_edit, self.save_icon], visible=False)
 
-        self.save_button = ft.IconButton(
-            icon=ft.Icons.SAVE,
-            on_click=self.save_clicked
-        )
-
-        # two views
-        self.display_view = ft.Row(controls=[
-            self.checkbox, self.edit_button, self.delete_button
-        ])
-
-        self.edit_view = ft.Row(
-            controls=[
-                ft.TextField(
-                    value=self.checkbox.label, 
-                    expand=True, 
-                    on_submit=self.save_clicked
-                ),
-                self.save_button,
-            ], 
-            visible=False
-        )
-
-        self.controls.extend([self.display_view, self.edit_view])
+        self.controls.extend([self.text_view, self.edit_view])
 
     def delete_clicked(self, e):
         """Remove this task from the todo list using external hook."""
         self.delete_hook(self)
 
     def edit_clicked(self, e):
-        self.display_view.visible = False
+        self.text_view.visible = False
         self.edit_view.visible = True
         self.update()
 
     def save_clicked(self, e):
-        self.checkbox.label = self.edit_view.controls[0].value
-        self.display_view.visible = True
+        self.checkbox.label = self.text_edit.value
+        self.text_view.visible = True
         self.edit_view.visible = False
         self.update()
 

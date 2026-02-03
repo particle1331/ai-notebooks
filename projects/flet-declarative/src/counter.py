@@ -3,8 +3,9 @@ from dataclasses import dataclass
 
 import flet as ft
 
-@dataclass
+
 @ft.observable
+@dataclass
 class AppState:
     counter: float
 

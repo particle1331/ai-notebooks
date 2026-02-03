@@ -1,3 +1,4 @@
+import asyncio
 import flet as ft
 
 HOME_ROUTE = "/"
@@ -8,8 +9,8 @@ home_view = lambda page: ft.View(
     route=HOME_ROUTE,
     controls=[
         ft.AppBar(title=ft.Text("Home"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-        ft.ElevatedButton("Visit Store", on_click=lambda e: page.go(STORE_ROUTE)),
-        ft.ElevatedButton("Check Orders", on_click=lambda e: page.go(ORDERS_ROUTE)),
+        ft.Button("Visit Store", on_click=lambda e: asyncio.create_task(page.push_route(STORE_ROUTE))),
+        ft.Button("Check Orders", on_click=lambda e: asyncio.create_task(page.push_route(ORDERS_ROUTE))),
     ],
 )
 
@@ -17,7 +18,7 @@ store_view = lambda page: ft.View(
     route=STORE_ROUTE,
     controls=[
         ft.AppBar(title=ft.Text("Store"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-        ft.ElevatedButton("Go Home", on_click=lambda e: page.go(HOME_ROUTE)),
+        ft.Button("Go Home", on_click=lambda e: asyncio.create_task(page.push_route(HOME_ROUTE))),
     ],
 )
 
@@ -25,12 +26,12 @@ orders_view = lambda page: ft.View(
     route=ORDERS_ROUTE,
     controls=[
         ft.AppBar(title=ft.Text("Orders"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-        ft.ElevatedButton("Go Home", on_click=lambda e: page.go(HOME_ROUTE)),
+        ft.Button("Go Home", on_click=lambda e: asyncio.create_task(page.push_route(HOME_ROUTE))),
     ],
 )
 
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     def route_change(e):
         routes_map = {
             HOME_ROUTE: home_view,
@@ -43,9 +44,9 @@ def main(page: ft.Page):
         page.update()
 
     page.on_route_change = route_change
-    page.go(page.route)
+    page.views.append(home_view(page))
     page.update()
     
 
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

@@ -32,4 +32,4 @@ def main(page: ft.Page):
     page.add(Countdown(10), Countdown(5))
 
 if __name__ == "__main__":
-    ft.app(main)
+    ft.run(main)

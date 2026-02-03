@@ -19,7 +19,7 @@ def main(page: ft.Page):
         page.update()
 
     output_text = ft.Text()
-    submit_button = ft.ElevatedButton(text="Submit", on_click=button_clicked)
+    submit_button = ft.Button("Submit", on_click=button_clicked)
     dropdown = ft.Dropdown(
         width=150,
         options=[
@@ -35,4 +35,5 @@ def main(page: ft.Page):
         output_text
     )
 
-ft.app(main)
+if __name__ == "__main__":
+    ft.run(main)
