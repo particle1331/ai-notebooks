@@ -27,38 +27,69 @@ class TodoAppState:
         self.tasks.append(task)
     
     def delete_task(self, task: Task):
-        self.tasks.remove(task)
+        self.tasks = [t for t in self.tasks if t.id != task.id]
 
     def update_task(self, task: Task, new_name: str):
         for idx, t in enumerate(self.tasks):
             if t.id == task.id:
-                self.tasks[idx] = Task(
-                    name=new_name, 
-                    is_completed=t.is_completed, 
-                    id=t.id
-                )
                 break
+        self.tasks[idx] = Task(
+            name=new_name, 
+            is_completed=t.is_completed, 
+            id=t.id
+        )
     
     def toggle_task_status(self, task: Task):
         for idx, t in enumerate(self.tasks):
             if t.id == task.id:
-                self.tasks[idx] = Task(
-                    name=t.name, 
-                    is_completed=not t.is_completed, 
-                    id=t.id
-                )
                 break
+        self.tasks[idx] = Task(
+            name=t.name, 
+            is_completed=not t.is_completed, 
+            id=t.id
+        )
 
-    def list_visible_tasks(self) -> list[Task]:
+    def switch_filter(self, filter_idx: int):
+        self.selected_filter_idx = filter_idx
+
+    @property
+    def visible_tasks(self) -> list[Task]:
         tab = self.task_filters[self.selected_filter_idx]
-        is_visible = lambda t: (tab == ALL) \
-            or (tab == COMPLETED and t.is_completed) \
-            or (tab == ACTIVE and not t.is_completed)
-        return [t for t in self.tasks if is_visible(t)]
+        is_visible = {
+            ALL: lambda task: True,
+            COMPLETED: lambda task: task.is_completed,
+            ACTIVE: lambda task: not task.is_completed
+        }
+        return [t for t in self.tasks if is_visible[tab](t)]
 
     @property
     def active_tasks_number(self) -> int:
         return len([task for task in self.tasks if not task.is_completed])        
+
+
+# NOTE: non-reactive => suffices to have this as usual fn that returns a control
+# If it needs things like ft.use_state, then it should be wrapped as @ft.component 
+# to support a reactive context.
+def DialogModal(
+    text: Optional[str] = "",
+    decline_handler: Optional[Callable] = None,
+    confirm_handler: Optional[Callable] = None,
+):
+    def wrap_close(handler: Optional[Callable]):
+        if handler is None:
+            return lambda e: e.page.pop_dialog()
+        return lambda e: (handler(e), e.page.pop_dialog())
+
+    return ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Confirm delete"),
+        content=ft.Text(text),
+        actions=[
+            ft.Button("Yes", on_click=wrap_close(confirm_handler)),
+            ft.TextButton("No", on_click=wrap_close(decline_handler)),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END
+    )
 
 
 @ft.component
@@ -78,8 +109,12 @@ def TaskView(app: TodoAppState, task: Task) -> ft.Row:
         app.update_task(task, new_name=_name)
         set_is_editing(False)
 
-    def delete():
-        app.delete_task(task)
+    def confirm_delete():
+        dialog = DialogModal(
+            text="Are you sure you want to delete this task?",
+            confirm_handler=lambda e: app.delete_task(task)
+        )
+        ft.context.page.show_dialog(dialog)
 
     if is_editing:
         return ft.Row([
@@ -112,48 +147,16 @@ def TaskView(app: TodoAppState, task: Task) -> ft.Row:
             ),
             ft.IconButton(
                 icon=ft.Icons.DELETE, 
-                on_click=delete
+                on_click=confirm_delete
             )
         ])
-
-
-# NOTE: non-reactive => suffices to have this as a usual function that returns a control
-# If it internally uses things like ft.use_state then it should be wrapped as @ft.component
-def DialogModal(
-    text: Optional[str] = "",
-    decline_handler: Optional[Callable] = None,
-    confirm_handler: Optional[Callable] = None,
-):
-    def wrap_close(hook):
-        if hook is None:
-            return lambda e: e.page.pop_dialog()
-        return lambda e: (hook(e), e.page.pop_dialog())
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text("Confirm delete"),
-        content=ft.Text(text),
-        actions=[
-            ft.Button("Yes", on_click=wrap_close(confirm_handler)),
-            ft.TextButton("No", on_click=wrap_close(decline_handler)),
-        ],
-        actions_alignment=ft.MainAxisAlignment.END
-    )
 
 
 @ft.component
 def TodoAppView() -> ft.Column:
     todo, _ = ft.use_state(TodoAppState())
-    
-    #- delete one task
-    def confirm_delete(task):
-        dialog = DialogModal(
-            text="Are you sure you want to delete this task?",
-            confirm_handler=lambda e: todo.delete_task(task)
-        )
-        ft.context.page.show_dialog(dialog)
 
-    #- add new task
+    # add new task
     new_task_name, set_new_task_name = ft.use_state("")
     new_task_field_ref = ft.use_ref()
 
@@ -179,18 +182,18 @@ def TodoAppView() -> ft.Column:
         )
     ])
 
-    #- status filter tabs
+    # status filter tabs
     filter_tabs = ft.Tabs(
         selected_index=todo.selected_filter_idx,
         length=3,
-        on_change=lambda e: setattr(todo, "selected_filter", e.control.selected_index),
+        on_change=lambda e: todo.switch_filter(e.control.selected_index),
         content=ft.TabBar(
             scrollable=False,
             tabs=[ft.Tab(label=tab) for tab in todo.task_filters],
         )
     )
 
-    #- footer
+    # footer
     def delete_completed():
         for task in todo.tasks[:]:
             if task.is_completed:
@@ -203,7 +206,7 @@ def TodoAppView() -> ft.Column:
         )
         ft.context.page.show_dialog(dialog)
 
-    #- build ui
+    # build ui
     return ft.Column(
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
@@ -213,7 +216,7 @@ def TodoAppView() -> ft.Column:
             ft.ListView(
                 controls=[
                     TaskView(app=todo, task=t) 
-                    for t in todo.list_visible_tasks()
+                    for t in todo.visible_tasks
                 ],
                 height=250, 
                 spacing=10, 
