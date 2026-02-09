@@ -70,7 +70,7 @@ class TodoAppState:
 # NOTE: non-reactive => suffices to have this as usual fn that returns a control
 # If it needs things like ft.use_state, then it should be wrapped as @ft.component 
 # to support a reactive context.
-def DialogModal(
+def ConfirmDialog(
     text: Optional[str] = "",
     decline_handler: Optional[Callable] = None,
     confirm_handler: Optional[Callable] = None,
@@ -110,7 +110,7 @@ def TaskView(app: TodoAppState, task: Task) -> ft.Row:
         set_is_editing(False)
 
     def confirm_delete():
-        dialog = DialogModal(
+        dialog = ConfirmDialog(
             text="Are you sure you want to delete this task?",
             confirm_handler=lambda e: app.delete_task(task)
         )
@@ -200,7 +200,7 @@ def TodoAppView() -> ft.Column:
                 todo.delete_task(task)
 
     def confirm_delete_completed():
-        dialog = DialogModal(
+        dialog = ConfirmDialog(
             text="Are you sure you want to delete completed tasks?",
             confirm_handler=lambda e: delete_completed()
         )
