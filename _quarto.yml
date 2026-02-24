@@ -2,12 +2,12 @@ project:
   type: website
   render:
     - README.md
-    - topics/**/*.ipynb
+    - notebooks/**/*.ipynb
   preview:
     port: 4200
     browser: false
   resources:
-    - topics/apps/img/**/*
+    - notebooks/apps/img/**/*
 
 bibliography: assets/references.bib
 
@@ -45,13 +45,13 @@ website:
       - text: "Topics"
         menu:
           - text: "Deep Learning"
-            href: topics/deep/index.html
+            href: notebooks/deep/index.html
           - text: "Agentic Systems"
-            href: topics/agents/index.html
+            href: notebooks/agents/index.html
           - text: "App Development"
-            href: topics/apps/index.html
+            href: notebooks/apps/index.html
           - text: "Special Topics & Tooling"
-            href: topics/tooling/index.html
+            href: notebooks/tooling/index.html
 
     tools:
       - icon: github
@@ -65,8 +65,8 @@ website:
       align: left
       contents:
         - section: ""
-          href: topics/deep/index.ipynb
-          contents: topics/deep/*.ipynb
+          href: notebooks/deep/index.ipynb
+          contents: notebooks/deep/*.ipynb
         # - section: "CUDA Programming"
         # recsys
         # deep RL
@@ -77,8 +77,8 @@ website:
       align: left
       contents:
         - section: ""
-          href: topics/tooling/index.ipynb
-          contents: topics/tooling/*.ipynb
+          href: notebooks/tooling/index.ipynb
+          contents: notebooks/tooling/*.ipynb
 
     - id: agents
       style: "floating"
@@ -86,12 +86,12 @@ website:
       align: left
       contents:
         - section: ""
-          href: topics/agents/index.ipynb
-          contents: topics/agents/*.ipynb
+          href: notebooks/agents/index.ipynb
+          contents: notebooks/agents/*.ipynb
 
         - section: ""
-          href: topics/agents/patterns/index.ipynb
-          contents: topics/agents/patterns/*.ipynb
+          href: notebooks/agents/patterns/index.ipynb
+          contents: notebooks/agents/patterns/*.ipynb
 
     - id: apps
       style: "floating"
@@ -99,5 +99,5 @@ website:
       align: left
       contents:
         - section: ""
-          href: topics/apps/index.ipynb
-          contents: topics/apps/*.ipynb
+          href: notebooks/apps/index.ipynb
+          contents: notebooks/apps/*.ipynb

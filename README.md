@@ -40,8 +40,8 @@ uv run python -m ipykernel install --user --name=ai-notebooks
 
 ## the notebooks
 
-The notebooks for each topic can be found in separate folders in the `/topics` directory:
-
+The notebooks are located in [`/notebooks`](https://github.com/particle1331/ai-notebooks/tree/main/notebooks) under separate directories for each topic.
+<!-- 
 | **Topic** | **Folder** | **Primary Reference(s)** |
 | :-- | :-- | :-- |
-| [Deep Learning](/topics/deep/) | `/deep` | [CMU 10-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/) (Fall 2022) |
+| [Deep Learning](/topics/deep/) | `/deep` | [CMU 10-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/) (Fall 2022) | -->

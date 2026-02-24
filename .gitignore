@@ -223,9 +223,9 @@ _site/
 /.quarto/
 
 # Misc
-topics/agents/.chroma_db
 topics/agents/data/
 snippets.md
 dev.ipynb
 
 **/*.quarto_ipynb
+**/.chroma_db
