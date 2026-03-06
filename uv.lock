@@ -801,6 +801,14 @@ dev = [
 ]
 
 [[package]]
+name = "flet-chat"
+version = "0.1.0"
+source = { editable = "projects/flet-chat" }
+dependencies = [
+    { name = "flet" },
+]
+
+[[package]]
 name = "flet-cli"
 version = "0.80.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2124,11 +2132,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/0b/5f/19930f824ffeb0ad4
 wheels = [
     { url = "https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl", hash = "sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1", size = 160065 },
 ]
-
-[[package]]
-name = "offline-taskapp"
-version = "0.1.0"
-source = { editable = "projects/offline-taskapp" }
 
 [[package]]
 name = "ollama"
