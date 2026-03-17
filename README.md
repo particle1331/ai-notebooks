@@ -1,6 +1,6 @@
 # AI notebooks
 
-Jupyter notebooks containing notes and implementation of **AI models**, **algorithms**, & **applications**.
+Jupyter notebooks containing experiments and discussions on **AI models**, **algorithms**, & **applications**.
 
 <img src="./assets/ai.png">
 
