@@ -1,20 +1,73 @@
 import flet as ft
-from dataclasses import dataclass
-from typing import Optional, Callable
+import threading
+
+from typing import Callable, Optional
+from dataclasses import dataclass, field
 
 
-def JoinDialog(join_click: Callable):
+@dataclass
+class ChatRoom:
+    active_users: set[str] = field(default_factory=set)
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+
+    def add_user(self, name: str):
+        with self._lock:
+            self.validate_username(name)
+            self.active_users.add(name)
+
+    def remove_user(self, name: str):
+        with self._lock:
+            self.active_users.discard(name)
+
+    def validate_username(self, name: str):
+        if name in self.active_users:
+            print("raising error")
+            raise ValueError(f'"{name}" is already taken. Please choose another.')
+        if not name.strip():
+            print("raising error")
+            raise ValueError("Username cannot be empty.")
+
+
+def JoinDialog(join_click: Callable, chatroom: ChatRoom):
     def wrap_close(handler: Callable):
-        # Pass both the event AND the username to the handler
-        return lambda e: (handler(e, user_name.value), e.page.pop_dialog())
+        def handle(e):
+            entered = username.value.strip()
+            try:
+                print(entered in chatroom.active_users)
+                chatroom.add_user(entered)
 
-    user_name = ft.TextField(label="Enter your name")
+            except ValueError as error: # <3>
+                print("caught error")
+                e.page.pop_dialog()
+                rejoin_dialog = JoinDialog(join_click, chatroom)
+                error_dialog = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("Invalid Username"),
+                    content=ft.Text(str(error)),
+                    actions=[
+                        ft.Button(
+                            "OK", 
+                            on_click=lambda ev: (                    
+                                ev.page.pop_dialog(),            
+                                e.page.show_dialog(rejoin_dialog)
+                            )
+                        )
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                e.page.show_dialog(error_dialog)
+            
+            e.page.pop_dialog()
+            handler(e, entered)     # <2>
+        return handle
+
+    username = ft.TextField(label="Enter your name")
 
     return ft.AlertDialog(
-        modal=True,
+        modal=True, # <1>
         title=ft.Text("Welcome!"),
-        content=ft.Column([user_name], tight=True),
-        actions=[ft.Button("Join", on_click=wrap_close(join_click))],
+        content=ft.Column([username], tight=True),
+        actions=[ft.Button("Join", on_click=wrap_close(join_click))], 
         actions_alignment=ft.MainAxisAlignment.END
     )
 
@@ -28,52 +81,48 @@ class Message:
 @ft.component
 def AppView():
     page = ft.context.page
-    session_id = page.session.id
-    username, set_username = ft.use_state("")  # Will be populated from session store
-    history, set_history = ft.use_state([]) 
+    username, set_username = ft.use_state("")
+    history, set_history = ft.use_state([])
     message, set_message = ft.use_state("")
-    
-    def on_message(msg: Message):
-        def update_ui():
-            set_history(lambda current_history: [*current_history, msg])
-            page.update()
-        page.run_thread(update_ui)
 
-    def subscribe_and_join():
-        """Subscribe to messages and show join dialog if username not set."""
+    def on_message(msg_obj: Message):
+        page.run_thread(lambda: set_history(lambda h: [*h, msg_obj]))
+        page.update()
+
+    def join_and_subscribe():
         page.pubsub.subscribe(on_message)
-        
-        stored_username = page.session.store.get("user_name")
-        if stored_username:
-            # sync session store and state
+
+        try:
+            stored_username = page.session.store.get("username") or ""
+            page.chat.add_user(stored_username)
             set_username(stored_username)
-        else:
+        except ValueError:
             def on_join(e, entered_name):
-                if entered_name.strip():
-                    set_username(entered_name)
-                    page.session.store.set("user_name", entered_name)  # Persist username
-                    page.pubsub.send_all(Message(user=entered_name, text="joined the chat!"))
-            
-            page.show_dialog(JoinDialog(on_join))
-        
-        def cleanup(): 
+                set_username(entered_name)
+                page.session.store.set("username", entered_name)
+                page.pubsub.send_all(
+                    Message(
+                        user=entered_name, 
+                        text=f"{entered_name} joined the chat!"
+                    )
+                )
+
+            page.show_dialog(JoinDialog(on_join, page.chat))
+
+        def cleanup():
+            current_user = page.session.store.get("username") or ""
+            page.chat.remove_user(current_user)
             page.pubsub.unsubscribe(on_message)
+
         return cleanup
 
-    # Single use_effect for both subscription and dialog
-    ft.use_effect(subscribe_and_join, [])  
+    ft.use_effect(join_and_subscribe, [])
 
     def send_click(e):
         if message.strip() and username:
             page.pubsub.send_all(Message(user=username, text=message))
             set_message("")
 
-    # Show a temporary message if user hasn't joined yet
-    if not username:
-        return ft.Column(controls=[
-            ft.Text("Please join the chat using the dialog...")
-        ])
-    
     return ft.Column(
         controls=[
             ft.Column(controls=[ft.Text(f"{m.user}: {m.text}") for m in history]),
@@ -92,4 +141,11 @@ def AppView():
 
 
 if __name__ == "__main__":
-    ft.run(lambda page: page.render(AppView))
+    # shared state across sessions
+    chatroom = ChatRoom()
+
+    def bootstrap(page: ft.Page):
+        page.chat = chatroom
+        page.render(AppView)
+
+    ft.run(bootstrap)
