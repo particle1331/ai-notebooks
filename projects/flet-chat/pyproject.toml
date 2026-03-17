@@ -8,19 +8,11 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-  "flet>=0.80.1"
+  "flet>=0.80.1",
+  "flet-code-editor>=0.82.0",
 ]
 
 [dependency-groups]
 dev = [
   "flet[all]>=0.80.1",
 ]
-
-[tool.flet]
-org = "com.mycompany"
-product = "flet-chat"
-company = "Flet"
-copyright = "Copyright (C) 2026 by Flet"
-
-[tool.flet.app]
-path = "src"

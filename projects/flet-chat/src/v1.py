@@ -16,10 +16,8 @@ def AppView():
     message, set_message = ft.use_state("")
     
     def on_message(msg: Message):
-        def update_ui():
-            set_history(lambda current_history: [*current_history, msg])
-            page.update()   # force update
-        page.run_thread(update_ui)
+        page.run_thread(lambda: set_history(lambda h: [*h, msg]))
+        page.update()
 
     # subscribe once. use_effect expects cleanup function
     def subscribe():

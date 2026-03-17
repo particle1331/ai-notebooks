@@ -43,4 +43,4 @@ packages = ["src/notebooks"]
 ignore = ["E731"]
 
 [tool.uv.workspace]
-members = ["projects/flet-basics", "projects/offline-taskapp"]
+members = ["projects/flet-basics"]
