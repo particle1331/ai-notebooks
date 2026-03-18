@@ -27,8 +27,8 @@ class ChatRoom:
 
 
 def JoinDialog(join_click: Callable, chatroom: ChatRoom):
-    def wrap_close(handler: Callable):
-        def handle(e):
+    def loop(handler: Callable):
+        def wrapper(e):
             entered = username.value.strip()
             try:
                 chatroom.add_user(entered)
@@ -43,8 +43,8 @@ def JoinDialog(join_click: Callable, chatroom: ChatRoom):
                     actions=[
                         ft.Button(
                             "OK", 
-                            on_click=lambda ev: (                    
-                                ev.page.pop_dialog(),            
+                            on_click=lambda _: (                    
+                                e.page.pop_dialog(),            
                                 e.page.show_dialog(rejoin_dialog)
                             )
                         )
@@ -56,15 +56,16 @@ def JoinDialog(join_click: Callable, chatroom: ChatRoom):
             
             e.page.pop_dialog()
             handler(e, entered)     # <2>
-        return handle
+        return wrapper
 
-    username = ft.TextField(label="Enter your name")
+    wrapped = loop(join_click)
+    username = ft.TextField(label="Enter your name", on_submit=wrapped)
 
     return ft.AlertDialog(
         modal=True, # <1>
         title=ft.Text("Welcome!"),
         content=ft.Column([username], tight=True),
-        actions=[ft.Button("Join", on_click=wrap_close(join_click))], 
+        actions=[ft.Button("Join", on_click=wrapped)], 
         actions_alignment=ft.MainAxisAlignment.END
     )
 
@@ -73,6 +74,54 @@ def JoinDialog(join_click: Callable, chatroom: ChatRoom):
 class Message:
     user: str
     text: str
+
+
+@ft.control
+class ChatMessage(ft.Row):
+    def __init__(self, msg_obj: Message):
+        super().__init__()
+        self.msg_obj = msg_obj
+        self.vertical_alignment = ft.CrossAxisAlignment.START
+        self.controls = [
+            ft.CircleAvatar(
+                content=ft.Text(self.get_initials(self.msg_obj.user)),
+                color=ft.Colors.WHITE,
+                bgcolor=self.get_avatar_color(self.msg_obj.user),
+            ),
+            ft.Column(
+                tight=True,
+                spacing=5,
+                controls=[
+                    ft.Text(self.msg_obj.user, weight=ft.FontWeight.BOLD),
+                    ft.Text(self.msg_obj.text, selectable=True),
+                ],
+            ),
+        ]
+
+    def get_initials(self, username: str):
+        if username:
+            return username[:1].capitalize()
+        else:
+            return "?"
+
+    def get_avatar_color(self, username: str):
+        colors_lookup = [
+            ft.Colors.AMBER,
+            ft.Colors.BLUE,
+            ft.Colors.BROWN,
+            ft.Colors.CYAN,
+            ft.Colors.GREEN,
+            ft.Colors.INDIGO,
+            ft.Colors.LIME,
+            ft.Colors.ORANGE,
+            ft.Colors.PINK,
+            ft.Colors.PURPLE,
+            ft.Colors.RED,
+            ft.Colors.TEAL,
+            ft.Colors.YELLOW,
+        ]
+        color_idx = hash(username) % len(colors_lookup)
+        return colors_lookup[color_idx]
 
 
 @ft.component
@@ -100,7 +149,7 @@ def AppView():
                 page.session.store.set("username", entered_name)
                 page.pubsub.send_all(
                     Message(
-                        user=entered_name, 
+                        user="System", 
                         text=f"{entered_name} joined the chat!"
                     )
                 )
@@ -121,9 +170,19 @@ def AppView():
             page.pubsub.send_all(Message(user=username, text=message))
             set_message("")
 
+    def build_messages(msg_objs: list[Message]):
+        controls = []
+        for msg in msg_objs:
+            if msg.user == "System":
+                c = ft.Text(msg.text, italic=True, color=ft.Colors.GREY)
+                controls.append(c)
+            else:
+                controls.append(ChatMessage(msg))
+        return controls
+
     return ft.Column(
         controls=[
-            ft.Column(controls=[ft.Text(f"{m.user}: {m.text}") for m in history]),
+            ft.Column(controls=build_messages(history)),
             ft.Row(controls=[
                 ft.TextField(
                     label="New message",
