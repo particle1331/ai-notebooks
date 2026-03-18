@@ -21,10 +21,8 @@ class ChatRoom:
 
     def validate_username(self, name: str):
         if name in self.active_users:
-            print("raising error")
             raise ValueError(f'"{name}" is already taken. Please choose another.')
         if not name.strip():
-            print("raising error")
             raise ValueError("Username cannot be empty.")
 
 
@@ -33,11 +31,9 @@ def JoinDialog(join_click: Callable, chatroom: ChatRoom):
         def handle(e):
             entered = username.value.strip()
             try:
-                print(entered in chatroom.active_users)
                 chatroom.add_user(entered)
 
             except ValueError as error: # <3>
-                print("caught error")
                 e.page.pop_dialog()
                 rejoin_dialog = JoinDialog(join_click, chatroom)
                 error_dialog = ft.AlertDialog(
@@ -56,6 +52,7 @@ def JoinDialog(join_click: Callable, chatroom: ChatRoom):
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
                 e.page.show_dialog(error_dialog)
+                return
             
             e.page.pop_dialog()
             handler(e, entered)     # <2>
