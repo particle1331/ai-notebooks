@@ -27,45 +27,47 @@ class ChatRoom:
 
 
 def JoinDialog(join_click: Callable, chatroom: ChatRoom):
-    def loop(handler: Callable):
-        def wrapper(e):
-            entered = username.value.strip()
+    def join_click_loop():                                                          # <1>
+        def handler(e):
             try:
-                chatroom.add_user(entered)
-
-            except ValueError as error: # <3>
                 e.page.pop_dialog()
-                rejoin_dialog = JoinDialog(join_click, chatroom)
-                error_dialog = ft.AlertDialog(
-                    modal=True,
-                    title=ft.Text("Invalid Username"),
-                    content=ft.Text(str(error)),
-                    actions=[
-                        ft.Button(
-                            "OK", 
-                            on_click=lambda _: (                    
-                                e.page.pop_dialog(),            
-                                e.page.show_dialog(rejoin_dialog)
-                            )
-                        )
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
-                e.page.show_dialog(error_dialog)
-                return
-            
-            e.page.pop_dialog()
-            handler(e, entered)     # <2>
-        return wrapper
+                entered = username.value.strip()
+                chatroom.add_user(entered)
+                join_click(e, entered)                                              # <2>
 
-    wrapped = loop(join_click)
-    username = ft.TextField(label="Enter your name", on_submit=wrapped)
+            except ValueError as error:                                             # <3>
+                e.page.pop_dialog()
+                e.page.show_dialog(
+                    ft.AlertDialog(
+                        modal=True,
+                        title=ft.Text("Invalid Username"),
+                        content=ft.Text(str(error)),
+                        actions=[
+                            ft.Button(
+                                "OK", 
+                                on_click=lambda _: (                    
+                                    e.page.pop_dialog(),                                    # pop error dialog        
+                                    e.page.show_dialog(JoinDialog(join_click, chatroom))    # start over with a fresh join dialog
+                                )
+                            )
+                        ],
+                        actions_alignment=ft.MainAxisAlignment.END,
+                    )
+                )
+                return
+        return handler
+    
+    username = ft.TextField(
+        label="Enter your name",
+        on_submit=join_click_loop(),
+        autofocus=True,
+    )
 
     return ft.AlertDialog(
-        modal=True, # <1>
+        modal=True, 
         title=ft.Text("Welcome!"),
         content=ft.Column([username], tight=True),
-        actions=[ft.Button("Join", on_click=wrapped)], 
+        actions=[ft.Button("Join", on_click=join_click_loop())], 
         actions_alignment=ft.MainAxisAlignment.END
     )
 
@@ -78,22 +80,22 @@ class Message:
 
 @ft.control
 class ChatMessage(ft.Row):
-    def __init__(self, msg_obj: Message):
+    def __init__(self, message: Message):
         super().__init__()
-        self.msg_obj = msg_obj
+        self.message = message
         self.vertical_alignment = ft.CrossAxisAlignment.START
         self.controls = [
             ft.CircleAvatar(
-                content=ft.Text(self.get_initials(self.msg_obj.user)),
+                content=ft.Text(self.get_initials(self.message.user)),
                 color=ft.Colors.WHITE,
-                bgcolor=self.get_avatar_color(self.msg_obj.user),
+                bgcolor=self.get_avatar_color(self.message.user),
             ),
             ft.Column(
                 tight=True,
                 spacing=5,
                 controls=[
-                    ft.Text(self.msg_obj.user, weight=ft.FontWeight.BOLD),
-                    ft.Text(self.msg_obj.text, selectable=True),
+                    ft.Text(self.message.user, weight=ft.FontWeight.BOLD),
+                    ft.Text(self.message.text, selectable=True),
                 ],
             ),
         ]
@@ -122,6 +124,18 @@ class ChatMessage(ft.Row):
         ]
         color_idx = hash(username) % len(colors_lookup)
         return colors_lookup[color_idx]
+
+
+def build_messages(messages: list[Message]) -> list[ft.Control]:
+    controls = []
+    for msg in messages:
+        if msg.user == "System":
+            text = msg.text
+            system_message = ft.Text(text, italic=True, color=ft.Colors.GREY)
+            controls.append(system_message)
+        else:
+            controls.append(ChatMessage(msg))
+    return controls
 
 
 @ft.component
@@ -165,35 +179,47 @@ def AppView():
 
     ft.use_effect(join_and_subscribe, [])
 
-    def send_click(e):
+    async def send_click(e):
         if message.strip() and username:
             page.pubsub.send_all(Message(user=username, text=message))
             set_message("")
+            await new_message.focus()
 
-    def build_messages(msg_objs: list[Message]):
-        controls = []
-        for msg in msg_objs:
-            if msg.user == "System":
-                c = ft.Text(msg.text, italic=True, color=ft.Colors.GREY)
-                controls.append(c)
-            else:
-                controls.append(ChatMessage(msg))
-        return controls
+    chat = ft.ListView(
+        controls=build_messages(history),
+        expand=True,
+        spacing=10,
+        auto_scroll=True,
+    )
+
+    new_message = ft.TextField(
+        label="New message",
+        value=message,
+        expand=True,
+        on_change=lambda e: set_message(e.control.value),
+        on_submit=send_click,
+        autofocus=True,
+    )
+
+    new_message_row = ft.Row(
+        controls=[
+            new_message,
+            ft.Button(content=ft.Icon(ft.Icons.SEND), on_click=send_click)
+        ],
+    )
 
     return ft.Column(
         controls=[
-            ft.Column(controls=build_messages(history)),
-            ft.Row(controls=[
-                ft.TextField(
-                    label="New message",
-                    value=message,
-                    width=400,
-                    on_change=lambda e: set_message(e.control.value),
-                    on_submit=send_click
-                ),
-                ft.Button("Send", on_click=send_click)
-            ]),
-        ]
+            ft.Container(
+                content=chat,
+                border=ft.Border.all(1, ft.Colors.OUTLINE),
+                border_radius=5,
+                padding=10,
+                expand=True,
+            ),
+            new_message_row
+        ],
+        expand=True,
     )
 
 

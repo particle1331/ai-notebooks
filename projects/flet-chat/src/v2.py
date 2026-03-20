@@ -27,44 +27,46 @@ class ChatRoom:
 
 
 def JoinDialog(join_click: Callable, chatroom: ChatRoom):
-    def wrap_close(handler: Callable):
-        def handle(e):
-            entered = username.value.strip()
+    def join_click_loop():                                                          # <1>
+        def handler(e):
             try:
-                chatroom.add_user(entered)
-
-            except ValueError as error: # <3>
                 e.page.pop_dialog()
-                rejoin_dialog = JoinDialog(join_click, chatroom)
-                error_dialog = ft.AlertDialog(
-                    modal=True,
-                    title=ft.Text("Invalid Username"),
-                    content=ft.Text(str(error)),
-                    actions=[
-                        ft.Button(
-                            "OK", 
-                            on_click=lambda ev: (                    
-                                ev.page.pop_dialog(),            
-                                e.page.show_dialog(rejoin_dialog)
-                            )
-                        )
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
-                e.page.show_dialog(error_dialog)
-                return
-            
-            e.page.pop_dialog()
-            handler(e, entered)     # <2>
-        return handle
+                entered = username.value.strip()
+                chatroom.add_user(entered)
+                join_click(e, entered)                                              # <2>
 
-    username = ft.TextField(label="Enter your name")
+            except ValueError as error:                                             # <3>
+                e.page.pop_dialog()
+                e.page.show_dialog(
+                    ft.AlertDialog(
+                        modal=True,
+                        title=ft.Text("Invalid Username"),
+                        content=ft.Text(str(error)),
+                        actions=[
+                            ft.Button(
+                                "OK", 
+                                on_click=lambda _: (                    
+                                    e.page.pop_dialog(),                                    # pop error dialog        
+                                    e.page.show_dialog(JoinDialog(join_click, chatroom))    # start over with a fresh join dialog
+                                )
+                            )
+                        ],
+                        actions_alignment=ft.MainAxisAlignment.END,
+                    )
+                )
+                return
+        return handler
+    
+    username = ft.TextField(
+        label="Enter your name",
+        on_submit=join_click_loop()
+    )
 
     return ft.AlertDialog(
-        modal=True, # <1>
+        modal=True, 
         title=ft.Text("Welcome!"),
         content=ft.Column([username], tight=True),
-        actions=[ft.Button("Join", on_click=wrap_close(join_click))], 
+        actions=[ft.Button("Join", on_click=join_click_loop())], 
         actions_alignment=ft.MainAxisAlignment.END
     )
 
@@ -100,7 +102,7 @@ def AppView():
                 page.session.store.set("username", entered_name)
                 page.pubsub.send_all(
                     Message(
-                        user=entered_name, 
+                        user="System", 
                         text=f"{entered_name} joined the chat!"
                     )
                 )
