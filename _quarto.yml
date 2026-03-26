@@ -44,8 +44,10 @@ website:
         href: index.html
       - text: "Topics"
         menu:
-          - text: "Deep Learning"
+          - text: "Deep Learning Foundations"
             href: notebooks/deep/index.html
+          - text: "Language Models From Scratch"
+            href: notebooks/llm/index.html
           - text: "Agentic Systems"
             href: notebooks/agents/index.html
           - text: "App Development"
@@ -70,6 +72,15 @@ website:
         # - section: "CUDA Programming"
         # recsys
         # deep RL
+
+    - id: llm
+      style: "floating"
+      collapse-level: 2
+      align: left
+      contents:
+        - section: ""
+          href: notebooks/llm/index.ipynb
+          contents: notebooks/llm/*.ipynb
  
     - id: tooling
       style: "floating"
