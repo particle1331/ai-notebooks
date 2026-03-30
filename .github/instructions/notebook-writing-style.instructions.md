@@ -64,7 +64,7 @@ The default register is **impersonal and declarative** — the subject is the te
 - **Notation is defined inline** at point of first use, not deferred: "the **gradient** $\nabla_\Theta f(\Theta)$ is defined as the matrix of partial derivatives."
 - **Cross-references** use Quarto syntax: `{#eq-label}` for equations, `@eq-label` for inline references, `[@Author2008]` for literature citations, `{#sec-label}` for appendix anchors.
 - **Derivation commentary** follows each major algebraic step to justify shapes or operations: "For the second equation, the LHS has shape $(d, K)$, while the RHS has shape $(d, B) \times (B, K)$."
-- Complexity-theoretic claims are stated with citations or footnotes, not proved inline.
+- Deeply theoretic claims (out of scope) are stated with citations or footnotes, not proved inline.
 
 ## Concepts Introduction
 
