@@ -17,6 +17,19 @@ When reading Jupyter notebooks or files with outputs:
 
 This policy preserves token context while capturing the useful signal from text outputs.
 
+## Notebook Cell References
+
+Notebooks are referenced relative to the `notebooks/` directory (implied, not written).
+The notation `path/to/notebook.ipynb:[N]` or `path/to/notebook.ipynb:[N,L1:L2]` refers to:
+- `N` - the cell with current execution count N
+- `L1:L2` - (optional) lines L1 to L2 within that cell's source (1-indexed)
+
+Examples:
+- `deep/03.ipynb:[50]` - the cell with execution count 50 in `notebooks/deep/03.ipynb`
+- `deep/03.ipynb:[50,11:23]` - lines 11 to 23 of that cell
+
+Always verify the cell content matches the user's description before acting on it. If the execution count appears stale (content doesn't match), ask the user to clarify.
+
 ## General Preferences
 
 - Be concise and direct in responses
