@@ -54,6 +54,8 @@ website:
             href: notebooks/apps/index.html
           - text: "Special Topics & Tooling"
             href: notebooks/tooling/index.html
+          - text: "AI Engineering Crash Course"
+            href: notebooks/prep/index.html
 
     tools:
       - icon: github
@@ -112,3 +114,38 @@ website:
         - section: ""
           href: notebooks/apps/index.ipynb
           contents: notebooks/apps/*.ipynb
+
+    - id: prep
+      style: "floating"
+      collapse-level: 2
+      align: left
+      contents:
+        - section: "Crash Course"
+          href: notebooks/prep/index.ipynb
+          contents:
+            - notebooks/prep/01-llm-api.ipynb
+            - notebooks/prep/02-prompt-engg.ipynb
+            - notebooks/prep/03-rag-concepts.ipynb
+            - notebooks/prep/04-eval-concepts.ipynb
+            - notebooks/prep/05-agents-foundations.ipynb
+            - notebooks/prep/06-observability.ipynb
+            - notebooks/prep/07-rag-pipeline.ipynb
+            - notebooks/prep/08-agents-langgraph.ipynb
+            - notebooks/prep/09-fine-tuning.ipynb
+            - notebooks/prep/10-model-serving.ipynb
+            - notebooks/prep/11-cost-optimization.ipynb
+            - notebooks/prep/12-ai-infra.ipynb
+            - notebooks/prep/13-capstone-compliance.ipynb
+
+        - section: "Deep Dives"
+          href: notebooks/prep/deep-dives/index.ipynb
+          contents:
+            - notebooks/prep/deep-dives/01-advanced-rag.ipynb
+            - notebooks/prep/deep-dives/02-eval-pipelines.ipynb
+            - notebooks/prep/deep-dives/03-agent-memory.ipynb
+            - notebooks/prep/deep-dives/04-resilience.ipynb
+            - notebooks/prep/deep-dives/05-mlops.ipynb
+            - notebooks/prep/deep-dives/06-ai-security.ipynb
+            - notebooks/prep/deep-dives/07-embeddings-advanced.ipynb
+            - notebooks/prep/deep-dives/08-multimodal.ipynb
+            - notebooks/prep/deep-dives/09-iac-containers.ipynb
