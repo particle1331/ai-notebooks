@@ -36,6 +36,10 @@ taken verbatim from the reference notebooks.
 - **Personality is allowed sparingly** -- in footnotes, code comments, or parentheticals:
   "(read: are hopeful) for this to work", "But too lazy."
   Kaomoji/emoji only in code comments, never in prose.
+- **Em-dashes (—) are used sparingly.** Only when the syntactic break genuinely
+  requires one — a strong parenthetical, a sharp pivot, or an abrupt qualification.
+  Do not use em-dashes as default clause separators or stylistic decoration. If a
+  comma, colon, or period works, use that instead.
 
 ### Examples
 
@@ -640,7 +644,62 @@ Y = (X + np.random.normal(size=N, scale=0.8)) ** 0.25
 - Quarto column widths: `: {tbl-colwidths="[30,70]"}`
 - Prefer tables over long bullet lists for structured reference material
 
-### Examples
+### Index Page Tables
+
+Index notebooks (`index.ipynb`) use a **3-column table per Part/section** — not a single flat 2-column table. The canonical pattern from `prep/index.ipynb` and `apps/index.ipynb`:
+
+- **Column 1 (`#`):** Linked notebook number, e.g. `[05](/notebooks/apps/05-fastapi.html)`. Use `[Ex]` for example/worked-application notebooks. Width ~6%.
+- **Column 2 (Title):** Plain title text, bold for capstone/flagship notebooks. Width ~26%.
+- **Column 3 (Key Topics):** Rich comma-separated summary of 4–6 specific subtopics — not vague one-liners. Width ~68%.
+- Always end with `: {tbl-colwidths="[6,26,68]"}` (or adjusted proportions).
+- Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links in index tables.
+- Each Part gets its **own separate markdown cell** with a `## Part N — Title` heading above the table.
+- Example notebooks (not general-concept notebooks) are labeled `**Example: Foo**` in the Title column and use `[Ex]` in the `#` column.
+
+```markdown
+## Part II — Backend & Infrastructure
+
+| # | Title | Key Topics |
+|---|---|---|
+| [05](/notebooks/apps/05-fastapi.html) | FastAPI Fundamentals | REST vs. RPC, request/response lifecycle, async handlers, Pydantic validation, dependency injection, OpenAPI docs |
+| [06](/notebooks/apps/06-docker.html) | Docker & Local Infrastructure | Container lifecycle, image layering, docker-compose multi-service orchestration, 12-factor app, Postgres + pgvector setup |
+| [07](/notebooks/apps/07-database.html) | Database Design & ORM | Relational schema design, indexing strategies, Alembic migrations, async SQLAlchemy, query patterns for media metadata |
+
+: {tbl-colwidths="[6,26,68]"}
+```
+
+Contrast with `prep/index.ipynb` which uses a 4-column pattern (Day/Week, #, Title, Key Topics) with `tbl-colwidths="[12,6,28,54]"` — use that variant when a scheduling/pacing column is relevant.
+
+### `_quarto.yml` Updates
+
+**Whenever a new notebook series (new subdirectory under `notebooks/`) is created**, the following must be updated in `_quarto.yml`:
+
+1. **navbar `menu`** — add an entry under `website.navbar.left[Topics].menu`:
+   ```yaml
+   - text: "Series Title"
+     href: notebooks/<section>/index.html
+   ```
+
+2. **sidebar** — add a new sidebar entry:
+   ```yaml
+   - id: <section>
+     style: "floating"
+     collapse-level: 2
+     align: left
+     contents:
+       - section: ""
+         href: notebooks/<section>/index.ipynb
+         contents: notebooks/<section>/*.ipynb
+   ```
+   Use explicit file lists (like the `prep` sidebar) instead of glob patterns when the series has subsections or requires a specific ordering.
+
+3. **`project.resources`** — add any image/asset directories if the series has an `img/` folder:
+   ```yaml
+   resources:
+     - notebooks/<section>/img/**/*
+   ```
+
+### In-Notebook Reference Tables
 
 ```markdown
 | Element | Object | Description |

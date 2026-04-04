@@ -8,6 +8,7 @@ project:
     browser: false
   resources:
     - notebooks/apps/img/**/*
+    - notebooks/apps/nbx/img/**/*
 
 bibliography: assets/references.bib
 
@@ -52,6 +53,8 @@ website:
             href: notebooks/agents/index.html
           - text: "App Development"
             href: notebooks/apps/index.html
+          - text: "NBX: Compute Platform"
+            href: notebooks/apps/nbx/index.html
           - text: "Special Topics & Tooling"
             href: notebooks/tooling/index.html
           - text: "AI Engineering Crash Course"
@@ -114,6 +117,15 @@ website:
         - section: ""
           href: notebooks/apps/index.ipynb
           contents: notebooks/apps/*.ipynb
+
+        - section: "NBX: Compute Platform"
+          href: notebooks/apps/nbx/index.ipynb
+          contents:
+            - notebooks/apps/nbx/01-architecture.ipynb
+            - notebooks/apps/nbx/02-registry.ipynb
+            - notebooks/apps/nbx/03-packaging.ipynb
+            - notebooks/apps/nbx/04-queue.ipynb
+            - notebooks/apps/nbx/05-streaming.ipynb
 
     - id: prep
       style: "floating"
