@@ -86,7 +86,6 @@ def AppView():
 
     def on_message(msg_obj: Message):
         page.run_thread(lambda: set_history(lambda h: [*h, msg_obj]))
-        page.update()
 
     def join_and_subscribe():
         page.pubsub.subscribe(on_message)

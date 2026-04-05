@@ -17,7 +17,6 @@ def AppView():
     
     def on_message(msg: Message):
         page.run_thread(lambda: set_history(lambda h: [*h, msg]))
-        page.update()
 
     # subscribe once. use_effect expects cleanup function
     def subscribe():
