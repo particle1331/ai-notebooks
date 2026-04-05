@@ -43,6 +43,7 @@ taken verbatim from the reference notebooks.
   - **Strong parenthetical / abrupt qualification:** `"async from top to bottom — every route handler is \`async def\`."` (sharp trailing clarification)
   - **Dramatic contrast or pivot:** `"A database schema is not static — tables gain columns, indexes are added, constraints change."`
   - **Double-emdash appositive insert:** `"A fast producer — say, the CLIP pipeline — emits messages faster than the client can render."` (pair enclosing an interruptive aside)
+  - **Inline label/description in table cells:** `Todo App — stateful control subclassing, checkbox + textfield composition...` (label followed by descriptive clause inside a table cell)
   **Not** legitimate uses:
   - **Part/section headers:** Use a period: `## Part II. Backend & Infrastructure`
   - **List-item label/description separators** (`- Term — description`): use a colon (`- Term: description`).
