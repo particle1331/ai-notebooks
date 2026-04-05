@@ -9,10 +9,4 @@ authors = [
 ]
 dependencies = [
   "flet>=0.80.1",
-  "flet-code-editor>=0.82.0",
-]
-
-[dependency-groups]
-dev = [
-  "flet[all]>=0.80.1",
 ]
