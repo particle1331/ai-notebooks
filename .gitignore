@@ -222,6 +222,10 @@ _site/
 *_files/
 /.quarto/
 
+# Temporary files
+tmp/*
+!tmp/.gitkeep
+
 # Misc
 topics/agents/data/
 snippets.md

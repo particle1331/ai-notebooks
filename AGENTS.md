@@ -156,6 +156,10 @@ When reading notebooks:
 
 When enhancing these utilities, maintain backward compatibility and update docstrings.
 
+## Temporary Files
+
+When creating temporary files (e.g., patch scripts, one-off helper scripts, scratch files), always write them to the `tmp/` folder at the project root (i.e., `<project_root>/tmp/`), not the OS-level `/tmp/`. Never create temporary files elsewhere in the workspace unless they are meant to be committed.
+
 ## Git Workflow
 
 - **Commit only when explicitly asked** by the user

@@ -651,31 +651,147 @@ Y = (X + np.random.normal(size=N, scale=0.8)) ** 0.25
 - Quarto column widths: `: {tbl-colwidths="[30,70]"}`
 - Prefer tables over long bullet lists for structured reference material
 
-### Index Page Tables
+### Index Pages
 
-Index notebooks (`index.ipynb`) use a **3-column table per Part/section** — not a single flat 2-column table. The canonical pattern from `prep/index.ipynb` and `apps/index.ipynb`:
+Index notebooks (`index.ipynb`) are the entry point for a series. The **gold standard** is `apps/index.ipynb`. Most index pages follow the structured skeleton below. The exception is `tooling/`, which uses a deliberately flat format (see "Flat Collection Index" below).
 
-- **Column 1 (`#`):** Linked notebook number, e.g. `[05](/notebooks/apps/05-fastapi.html)`. Use `[Ex]` for example/worked-application notebooks. Width ~6%.
-- **Column 2 (Title):** Plain title text, bold for capstone/flagship notebooks. Width ~26%.
-- **Column 3 (Key Topics):** Rich comma-separated summary of 4–6 specific subtopics — not vague one-liners. Width ~68%.
-- Always end with `: {tbl-colwidths="[6,26,68]"}` (or adjusted proportions).
-- Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links in index tables.
-- Each Part gets its **own separate markdown cell** with a `## Part N. Title` heading above the table.
-- Example notebooks (not general-concept notebooks) are labeled `**Example: Foo**` in the Title column and use `[Ex]` in the `#` column.
+#### Top-Level Series Index Structure
 
-```markdown
-## Part II. Backend & Infrastructure
+A top-level series index (`notebooks/<section>/index.ipynb`) has these cells **in order**, each in its own markdown cell:
 
-| # | Title | Key Topics |
-|---|---|---|
-| [05](/notebooks/apps/05-fastapi.html) | FastAPI Fundamentals | REST vs. RPC, request/response lifecycle, async handlers, Pydantic validation, dependency injection, OpenAPI docs |
-| [06](/notebooks/apps/06-docker.html) | Docker & Local Infrastructure | Container lifecycle, image layering, docker-compose multi-service orchestration, 12-factor app, Postgres + pgvector setup |
-| [07](/notebooks/apps/07-database.html) | Database Design & ORM | Relational schema design, indexing strategies, Alembic migrations, async SQLAlchemy, query patterns for media metadata |
+1. **`# Series Title`** — single H1, no subtitle, no extra text
+2. **Hook paragraph** — one paragraph (3-5 sentences) motivating the series: what gap it fills, who it's for, what you'll be able to do at the end. Written in the project's "we/you" voice.
+3. **`## About This Series`** — detailed overview using bold-labeled subsections within a single markdown cell:
+   - Start with a paragraph describing scope and organization. Use `[text]{.mark}` for the 1-2 most important phrases.
+   - `**Audience:**` — who the reader is, what they already know, what they want.
+   - `**Stack.**` — tools/libraries used, linked to their homepages, with a sentence explaining *why* this stack was chosen.
+   - `**The main project**` (if applicable) — the through-line project that ties the series together. Use `[text]{.mark}` to highlight the project name. Describe its ambition and what makes it a good teaching vehicle.
+4. **`## Part N. Title`** sections — one per Part, each in its **own markdown cell** with a notebook table (see table format below). Use period-separated part headers: `## Part I. Flet & UI Fundamentals`, `## Part II. Backend & Infrastructure`.
+5. **Named sub-series sections** (if the series contains self-contained mini-series in subdirectories, e.g. `cda/`, `nbx/`):
+   - Heading: `## Sub-series Name` (e.g. `## NBX: Compute Platform`, `## Coding Agent From Scratch`)
+   - One paragraph (3-5 sentences) describing what the sub-series builds and its scope
+   - A notebook table (same format as Part tables)
+   - Closing line: `See the [Sub-series index](/notebooks/<section>/<subseries>/index.html) to get started.`
+6. **`## Prerequisites`** — bullet list with bold leading phrases: `- **Python 3.13+**, comfort with async/await, basic familiarity with HTTP`
+7. **`## How to Read This Series`** — reading paths for different audiences, each starting with a **bold conditional**:
+   - `**If you are new to <topic>:** Start at [01](...) and work forward...`
+   - `**If you already know <prerequisite>:** Skip ... and start at [05](...)...`
+   - `**If you only want <specific goal>:** Read [05](...) → [06](...) → ... in order.`
+   - `**If you are here for <sub-series>:** [NBX](...) is self-contained and can be read independently...`
+8. **Empty trailing cell** — a final markdown cell with empty `"source": []`
 
-: {tbl-colwidths="[6,26,68]"}
+#### Sub-Series Index Structure
+
+A sub-series index (`notebooks/<section>/<subseries>/index.ipynb`) is simpler:
+
+1. **`# Sub-series Title`** — single H1
+2. **Overview paragraph** — 2-3 sentences: what it builds, what it assumes
+3. **`## Contents`** — single notebook table
+4. **`## Prerequisites`** — bullet list with bold-labeled items, linking back to prerequisite notebooks from the parent series
+
+#### Flat Collection Index (`tooling/`)
+
+The `tooling/` section is a **flat collection of independent notebooks** — no Parts, no About This Series, no Prerequisites, no How to Read. The index page is deliberately minimal:
+
+1. **`# Title`** + **one-liner subtitle** in the same cell (H1 followed by a single sentence)
+2. **`## Contents`** — a flat 2-column table: **Topic** (linked title) and **Summary** (1-3 sentence description)
+3. **Empty trailing cell**
+
+Notebooks in `tooling/` have **no assumed co-dependence**. Even if some notebooks happen to form a short consecutive series on a topic (e.g. "RL 1", "RL 2", "RL 3"), the index page does not group or label them — they just appear as individual rows in the flat contents table. No sub-series sections, no Part headings.
+
+```
+[CELL 1 - markdown]
+# Special Topics & Tooling
+
+On technical talks, practical tools, and emerging topics across data, ML, and engineering.
+
+[CELL 2 - markdown]
+## Contents
+
+| Topic             | Summary                                                     |
+|-------------------|-------------------------------------------------------------|
+| [Runpod Setup](runpod.ipynb) | Step-by-step guide to setting up SSH access, ... |
+| [Security Tooling](security.ipynb) | Defense-in-depth security for Python projects: ... |
+
+[CELL 3 - empty]
 ```
 
-Contrast with `prep/index.ipynb` which uses a 4-column pattern (Day/Week, #, Title, Key Topics) with `tbl-colwidths="[12,6,28,54]"` — use that variant when a scheduling/pacing column is relevant.
+Note: `tooling/` uses **relative `.ipynb` links** (not absolute `.html` paths) and does not use `tbl-colwidths` — this is intentional and differs from the other index pages.
+
+#### Notebook Table Format
+
+Tables use a **3-column layout** by default:
+
+- **Column 1 (`#`):** Linked notebook number — `[05](/notebooks/apps/05-fastapi.html)`. Use `[Ex]` for example/worked-application notebooks. Width ~6%.
+- **Column 2 (Title):** Plain title text. Bold for capstone/flagship notebooks (e.g. `**Photo App: End-to-End**`). Width ~26%.
+- **Column 3 (Key Topics / What We Build):** Rich comma-separated summary of 4–6 specific subtopics — not vague one-liners. Include inline code for key classes/tools. Width ~68%.
+- Always end with `: {tbl-colwidths="[6,26,68]"}` (or adjusted proportions).
+- Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links.
+- If a 4th column is needed (e.g. Capstone), adjust widths accordingly: `[6,22,46,26]`.
+
+Variant: `prep/index.ipynb` uses a 4-column pattern (Day/Week, #, Title, Key Topics) with `tbl-colwidths="[12,6,28,54]"` — use that when a scheduling/pacing column is relevant.
+
+#### Complete Example (from `apps/index.ipynb`)
+
+```
+[CELL 1 - markdown] # Application Development
+
+[CELL 2 - markdown] App development is where software engineering, systems
+architecture, and applied AI converge into something a user can actually
+touch. ... This series closes that gap.
+
+[CELL 3 - markdown] ## About This Series
+This series covers the [theory and practice]{.mark} of building
+**data-driven applications**: ...
+**Audience:** Someone trained in machine learning ...
+**Stack.** The series uses tools chosen for clarity ...
+**The main project** is a [personal photo library application]{.mark} ...
+
+[CELL 4 - markdown] ## Part I. Flet & UI Fundamentals
+| # | Title | Key Topics | Capstone |
+|---|---|---|---|
+| [01](...) | Flet I: Basics | Imperative UI model, ... | [Todo App](...) — ... |
+| [03](...) | Flet II: Declarative UI | ... | ... |
+: {tbl-colwidths="[6,22,46,26]"}
+
+[CELL 5 - markdown] ## Part II. Backend & Infrastructure
+| # | Title | Key Topics |
+|---|---|---|
+| [05](...) | FastAPI Fundamentals | REST vs. RPC, ... |
+| [06](...) | Docker & Local Infrastructure | Container lifecycle, ... |
+| [07](...) | Database Design & ORM | Relational schema design, ... |
+: {tbl-colwidths="[6,26,68]"}
+
+[CELL 6-7 - markdown] ## Part III. ... / ## Part IV. ...  (same pattern)
+
+[CELL 8 - markdown] ## NBX: Compute Platform
+A five-notebook series that builds a production-grade ML compute platform ...
+| # | Title | Key Topics |
+|---|---|---|
+| [01](...) | Platform Architecture | System design principles, ... |
+...
+: {tbl-colwidths="[6,26,68]"}
+See the [NBX series index](...) to get started.
+
+[CELL 9 - markdown] ## Coding Agent From Scratch
+A seven-notebook series that builds a complete async AI coding agent ...
+| # | Title | What We Build |
+|---|---|---|
+| [01](...) | The LLM Client | Async streaming wrapper ... |
+...
+: {tbl-colwidths="[6,28,66]"}
+See the [CDA series index](...) to get started.
+
+[CELL 10 - markdown] ## Prerequisites
+- **Python 3.13+**, comfort with async/await ...
+## How to Read This Series
+**If you are new to app development:** Start at [01](...) ...
+**If you already know Flet:** Skip 01 and 03 ...
+**If you only want the photo app:** Read [05](...) → [06](...) → ...
+**If you are here for the tooling:** [NBX](...) is self-contained ...
+
+[CELL 11 - markdown] (empty source)
+```
 
 ### `_quarto.yml` Updates
 

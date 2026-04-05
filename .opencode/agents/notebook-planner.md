@@ -52,16 +52,16 @@ outdated.
 
 The repository has these sections (each maps to a folder under `notebooks/`):
 
-### `deep/` -- Deep Learning Foundations (33 notebooks)
+### `deep/` -- Deep Learning Foundations (40 notebooks)
 A textbook-style sequence covering:
 - **01**: Softmax Regression (linear models, cross-entropy, SGD)
 - **02**: Neural Networks (MLPs, backprop, universal approximation)
 - **03**: Automatic Differentiation (computational graphs, autograd engine from scratch)
-- **03-cnn/**: Convolutional Neural Networks (14 notebooks: convolution ops, architectures, training, transfer learning, visualization)
-- **04**: Optimization: SGD to Adam
-- **04-sequence-models/**: Language Modeling (n-grams, embeddings, WaveNet/causal convolutions)
+- **03-cnn/**: Convolutional Neural Networks (16 notebooks: convolution ops, stride/padding, pooling, architectures, trainer engine, LR scheduling, feature maps, data augmentation, transfer learning, guided backprop, text classification)
+- **04**: Optimization: SGD to AdamW
+- **04-sequence-models/**: Language Modeling (7 notebooks: n-grams, neural n-gram model, character embeddings, WaveNet/causal convolutions)
 - **05-training**: Activations and Gradients (initialization, layer norm, gradient analysis)
-- **05-rnns/**: Recurrent Neural Networks (12 notebooks: RNN, LSTM, GRU, deep/bidirectional RNNs, BPTT)
+- **05-rnns/**: Recurrent Neural Networks (12 notebooks: RNN cell, RNN language model, training, text generation, BPTT, LSTM, GRU, deep RNNs, bidirectional RNNs, vanishing gradients)
 
 **Notable gaps:** No attention/transformer content in `deep/` (covered instead in `llm/`). No coverage of: GANs, VAEs, diffusion models, graph neural networks, self-supervised learning, deep RL.
 
@@ -76,20 +76,42 @@ A comprehensive "hacker's guide" series:
 
 **Notable gaps:** No Tutorial 01/Part I. No coverage of: multi-modal models, vision-language models, speech models, long-context methods, test-time compute/search.
 
-### `agents/` -- Agentic Systems (6 notebooks + 1 pattern)
+### `agents/` -- Agentic Systems (5 notebooks + 1 pattern)
+- **00**: Foundations
 - **01**: Chat Completions API
 - **02**: Function Calling
-- **03**: Prompt Engineering
+- **03**: Reasoning Strategies
 - **06**: Agent Memory Systems
 - **patterns/01**: Reflection
 
-**Notable gaps:** Notebooks 04-05 missing (likely: ReAct agents, RAG/retrieval). Patterns folder is sparse (no planning, multi-agent, evaluation patterns).
+**Notable gaps:** Notebooks 04-05 missing. Patterns folder is sparse (no planning, multi-agent, evaluation patterns).
 
-### `apps/` -- App Development (4 notebooks)
-- **01-04**: Flet framework progression (basics, todo app, declarative UI, chatroom)
+### `apps/` -- Application Development (12 notebooks + 2 sub-series)
+The main series builds a personal photo library application:
+- **Part I -- Flet & UI:** 01 (Flet Basics), 03 (Declarative UI)
+- **Part II -- Backend:** 05 (FastAPI), 06 (Docker), 07 (Database/ORM)
+- **Part III -- Pipelines & AI:** 08 (S3 pipelines), 09 (Embeddings/vector search), 10 (People clustering)
+- **Part IV -- Integration:** 11 (Flet-FastAPI integration), 12 (WebSockets/realtime), 13 (Multimodal queries), 14 (Photo App end-to-end)
 
-### `tooling/` -- Special Topics & Tooling (2 notebooks)
-- OpenCode setup, RunPod environment setup
+Sub-series:
+- **apps/cda/** -- Coding Agent From Scratch (7 notebooks): LLM client, tool system, agent loop, hardening, chat UI, persistence/commands, MCP integration
+- **apps/nbx/** -- NBX Compute Platform (5 notebooks): platform architecture, machine registry, job packaging, task queue, log streaming
+
+### `prep/` -- AI Engineering Prep (13 notebooks + 9 deep-dives)
+Interview/certification-focused series:
+- **01-06**: LLM APIs, prompt engineering, RAG concepts, evaluation, ReAct agents, observability
+- **07-10**: Production RAG, LangGraph/multi-agent, fine-tuning, model serving
+- **11-13**: Cost optimization, AI infrastructure (Docker/K8s/IaC), capstone (compliance reviewer)
+
+Sub-series:
+- **prep/deep-dives/**: 9 notebooks covering advanced RAG, eval pipelines, agent memory, resilience patterns, MLOps, AI security, advanced embeddings, multimodal LLMs, IaC & containers
+
+### `tooling/` -- Special Topics & Tooling (5 notebooks)
+- **opencode**: AI coding agent setup
+- **runpod**: RunPod environment setup
+- **mcp**: MCP Servers with FastMCP
+- **security**: Security tooling for developers
+- **svd**: Singular Value Decomposition
 
 ---
 
@@ -212,12 +234,17 @@ Your outlines should respect the author's established patterns:
 
 Follow the existing naming patterns:
 
-- **`deep/`**: `NN.ipynb` for standalone, `NN-topic/NNx-subtopic.ipynb` for series
+- **`deep/`**: `NN.ipynb` for standalone, `NN-topic/NNx-subtopic.ipynb` for sub-series
   (e.g., `03-cnn/03a-convolution.ipynb`)
 - **`llm/`**: `tutorial_NN_topic.ipynb` (e.g., `tutorial_21_multimodal.ipynb`)
 - **`agents/`**: `NN-topic.ipynb` (e.g., `04-react.ipynb`)
-- **`apps/`**: `NN-topic.ipynb` (e.g., `05-flet.ipynb`)
-- **`tooling/`**: descriptive name, no number (e.g., `docker.ipynb`)
+- **`agents/patterns/`**: `NN-topic.ipynb` (e.g., `02-planning.ipynb`)
+- **`apps/`**: `NN-topic.ipynb` for main series (e.g., `05-fastapi.ipynb`)
+- **`apps/<subseries>/`**: `NN-topic.ipynb` within a named subdirectory
+  (e.g., `apps/cda/01-client.ipynb`, `apps/nbx/02-registry.ipynb`)
+- **`prep/`**: `NN-topic.ipynb` (e.g., `07-rag-pipeline.ipynb`)
+- **`prep/deep-dives/`**: `NN-topic.ipynb` (e.g., `01-advanced-rag.ipynb`)
+- **`tooling/`**: descriptive name, no number (e.g., `docker.ipynb`, `mcp.ipynb`)
 
 ---
 
