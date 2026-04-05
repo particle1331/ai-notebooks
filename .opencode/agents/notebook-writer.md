@@ -43,8 +43,9 @@ taken verbatim from the reference notebooks.
   - **Strong parenthetical / abrupt qualification:** `"async from top to bottom — every route handler is \`async def\`."` (sharp trailing clarification)
   - **Dramatic contrast or pivot:** `"A database schema is not static — tables gain columns, indexes are added, constraints change."`
   - **Double-emdash appositive insert:** `"A fast producer — say, the CLIP pipeline — emits messages faster than the client can render."` (pair enclosing an interruptive aside)
-  - **Part/section headers:** `## Part II — Backend & Infrastructure` (intentional index-page style, always keep)
-  - **List-item label/description separators** (`- Term — description`) are **not** a legitimate use; replace with a colon (`- Term: description`).
+  **Not** legitimate uses:
+  - **Part/section headers:** Use a period: `## Part II. Backend & Infrastructure`
+  - **List-item label/description separators** (`- Term — description`): use a colon (`- Term: description`).
 
 ### Examples
 
@@ -658,11 +659,11 @@ Index notebooks (`index.ipynb`) use a **3-column table per Part/section** — no
 - **Column 3 (Key Topics):** Rich comma-separated summary of 4–6 specific subtopics — not vague one-liners. Width ~68%.
 - Always end with `: {tbl-colwidths="[6,26,68]"}` (or adjusted proportions).
 - Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links in index tables.
-- Each Part gets its **own separate markdown cell** with a `## Part N — Title` heading above the table.
+- Each Part gets its **own separate markdown cell** with a `## Part N. Title` heading above the table.
 - Example notebooks (not general-concept notebooks) are labeled `**Example: Foo**` in the Title column and use `[Ex]` in the `#` column.
 
 ```markdown
-## Part II — Backend & Infrastructure
+## Part II. Backend & Infrastructure
 
 | # | Title | Key Topics |
 |---|---|---|
