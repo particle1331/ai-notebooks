@@ -9,6 +9,7 @@ project:
   resources:
     - notebooks/apps/img/**/*
     - notebooks/apps/nbx/img/**/*
+    - notebooks/apps/cda/img/**/*
 
 bibliography: assets/references.bib
 
@@ -124,6 +125,10 @@ website:
             - notebooks/apps/nbx/03-packaging.ipynb
             - notebooks/apps/nbx/04-queue.ipynb
             - notebooks/apps/nbx/05-streaming.ipynb
+
+        - section: "CDA: Coding Agent From Scratch"
+          href: notebooks/apps/cda/index.ipynb
+          contents: notebooks/apps/cda/*.ipynb
 
     - id: prep
       style: "floating"
