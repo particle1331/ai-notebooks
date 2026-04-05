@@ -37,9 +37,14 @@ taken verbatim from the reference notebooks.
   "(read: are hopeful) for this to work", "But too lazy."
   Kaomoji/emoji only in code comments, never in prose.
 - **Em-dashes (—) are used sparingly.** Only when the syntactic break genuinely
-  requires one — a strong parenthetical, a sharp pivot, or an abrupt qualification.
-  Do not use em-dashes as default clause separators or stylistic decoration. If a
-  comma, colon, or period works, use that instead.
+  requires one. Do not use em-dashes as default clause separators or stylistic
+  decoration. If a comma, colon, or period works, use that instead.
+  Legitimate uses:
+  - **Strong parenthetical / abrupt qualification:** `"async from top to bottom — every route handler is \`async def\`."` (sharp trailing clarification)
+  - **Dramatic contrast or pivot:** `"A database schema is not static — tables gain columns, indexes are added, constraints change."`
+  - **Double-emdash appositive insert:** `"A fast producer — say, the CLIP pipeline — emits messages faster than the client can render."` (pair enclosing an interruptive aside)
+  - **Part/section headers:** `## Part II — Backend & Infrastructure` (intentional index-page style, always keep)
+  - **List-item label/description separators** (`- Term — description`) are **not** a legitimate use; replace with a colon (`- Term: description`).
 
 ### Examples
 
