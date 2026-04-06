@@ -47,6 +47,7 @@ taken verbatim from the reference notebooks.
   **Not** legitimate uses:
   - **Part/section headers:** Use a period: `## Part II. Backend & Infrastructure`
   - **List-item label/description separators** (`- Term — description`): use a colon (`- Term: description`).
+  - **Notebook H1 subtitles:** Use a colon: `# Agentic AI II: LangGraph & Multi-Agent Systems`, not `# Agentic AI II — LangGraph & Multi-Agent Systems`.
 
 ### Examples
 
@@ -695,9 +696,8 @@ The `tooling/` section is a **flat collection of independent notebooks** — no 
 
 1. **`# Title`** + **one-liner subtitle** in the same cell (H1 followed by a single sentence)
 2. **`## Contents`** — a flat 2-column table: **Topic** (linked title) and **Summary** (1-3 sentence description)
-3. **Empty trailing cell**
-
-Notebooks in `tooling/` have **no assumed co-dependence**. Even if some notebooks happen to form a short consecutive series on a topic (e.g. "RL 1", "RL 2", "RL 3"), the index page does not group or label them — they just appear as individual rows in the flat contents table. No sub-series sections, no Part headings.
+3. If some notebooks form a short self-contained series (e.g. RL1–RL4), split them into a **named `##` subsection** after the main Contents table. Include a 2–3 sentence intro blurb and a separate `| Topic | Summary |` table. No Part headings, no Prerequisites, no How to Read.
+4. **Empty trailing cell**
 
 ```
 [CELL 1 - markdown]
@@ -710,13 +710,37 @@ On technical talks, practical tools, and emerging topics across data, ML, and en
 
 | Topic             | Summary                                                     |
 |-------------------|-------------------------------------------------------------|
-| [Runpod Setup](runpod.ipynb) | Step-by-step guide to setting up SSH access, ... |
-| [Security Tooling](security.ipynb) | Defense-in-depth security for Python projects: ... |
+| [Runpod Setup](01-runpod.ipynb) | Step-by-step guide to setting up SSH access, ... |
+| [Security Tooling](05-security.ipynb) | Defense-in-depth security for Python projects: ... |
+
+: {tbl-colwidths="[25,75]"}
+
+## Reinforcement Learning
+
+A self-contained four-notebook series building RL from first principles through modern LLM alignment. ...
+
+| Topic             | Summary                                                     |
+|-------------------|-------------------------------------------------------------|
+| [RL1: Foundations](06-rl-foundations.ipynb) | MDPs, Bellman equations, ... |
+| [RL4: RL for Language Models](09-rl-for-llms.ipynb) | LLM generation as an MDP, ... |
+
+: {tbl-colwidths="[25,75]"}
 
 [CELL 3 - empty]
 ```
 
-Note: `tooling/` uses **relative `.ipynb` links** (not absolute `.html` paths) and does not use `tbl-colwidths` — this is intentional and differs from the other index pages.
+Note: `tooling/` uses **relative `.ipynb` links** (not absolute `.html` paths).
+
+#### Sidebar Labels vs. Notebook Titles
+
+Sidebar labels do not have to match the notebook's H1 title. Use shorter, more ergonomic labels in `_quarto.yml` when the full title is long:
+
+```yaml
+- text: "RL3: Proximal Policy Optimization"   # sidebar label (short)
+  href: notebooks/tooling/08-rl-ppo.html       # notebook H1 can be longer
+```
+
+**Rule:** The **Topic column in the index table must exactly match the sidebar `text:` label** for its notebook. This keeps the index and the sidebar visually consistent. When you set a sidebar label, update the index Topic cell to match — and vice versa.
 
 #### Notebook Table Format
 

@@ -93,7 +93,25 @@ website:
       contents:
         - section: ""
           href: notebooks/tooling/index.ipynb
-          contents: notebooks/tooling/*.ipynb
+          contents:
+            - text: "Runpod Setup"
+              href: notebooks/tooling/01-runpod.ipynb
+            - text: "OpenCode"
+              href: notebooks/tooling/02-opencode.ipynb
+            - text: "Singular Value Decomposition"
+              href: notebooks/tooling/03-svd.ipynb
+            - text: "MCP Servers"
+              href: notebooks/tooling/04-mcp.ipynb
+            - text: "Security Tooling"
+              href: notebooks/tooling/05-security.ipynb
+            - text: "RL1: Foundations"
+              href: notebooks/tooling/06-rl-foundations.ipynb
+            - text: "RL2: Policy Gradients"
+              href: notebooks/tooling/07-rl-policy-gradients.ipynb
+            - text: "RL3: Proximal Policy Optimization"
+              href: notebooks/tooling/08-rl-ppo.ipynb
+            - text: "RL4: RL for Language Models"
+              href: notebooks/tooling/09-rl-for-llms.ipynb
 
     - id: agents
       style: "floating"
@@ -115,20 +133,63 @@ website:
       contents:
         - section: ""
           href: notebooks/apps/index.ipynb
-          contents: notebooks/apps/*.ipynb
+          contents:
+            - text: "Flet I: Basics"
+              href: notebooks/apps/01-flet.ipynb
+            - text: "Flet II: Declarative UI"
+              href: notebooks/apps/03-flet.ipynb
+            - text: "FastAPI Fundamentals"
+              href: notebooks/apps/05-fastapi.ipynb
+            - text: "Docker & Infrastructure"
+              href: notebooks/apps/06-docker.ipynb
+            - text: "Database & ORM"
+              href: notebooks/apps/07-database.ipynb
+            - text: "S3 & Batch Pipelines"
+              href: notebooks/apps/08-s3-pipeline.ipynb
+            - text: "Embeddings & Vector Search"
+              href: notebooks/apps/09-embeddings.ipynb
+            - text: "People Clustering"
+              href: notebooks/apps/10-clustering.ipynb
+            - text: "Flet ↔ FastAPI"
+              href: notebooks/apps/11-integration.ipynb
+            - text: "Realtime & WebSockets"
+              href: notebooks/apps/12-realtime.ipynb
+            - text: "Multimodal Queries"
+              href: notebooks/apps/13-multimodal.ipynb
+            - text: "Photo App: End-to-End"
+              href: notebooks/apps/14-photo-app.ipynb
 
         - section: "NBX: Compute Platform"
           href: notebooks/apps/nbx/index.ipynb
           contents:
-            - notebooks/apps/nbx/01-architecture.ipynb
-            - notebooks/apps/nbx/02-registry.ipynb
-            - notebooks/apps/nbx/03-packaging.ipynb
-            - notebooks/apps/nbx/04-queue.ipynb
-            - notebooks/apps/nbx/05-streaming.ipynb
+            - text: "Platform Architecture"
+              href: notebooks/apps/nbx/01-architecture.ipynb
+            - text: "Registry & Dashboard"
+              href: notebooks/apps/nbx/02-registry.ipynb
+            - text: "Job Packaging & Execution"
+              href: notebooks/apps/nbx/03-packaging.ipynb
+            - text: "Task Queue & Dispatch"
+              href: notebooks/apps/nbx/04-queue.ipynb
+            - text: "Log Streaming & Artifacts"
+              href: notebooks/apps/nbx/05-streaming.ipynb
 
         - section: "CDA: Coding Agent From Scratch"
           href: notebooks/apps/cda/index.ipynb
-          contents: notebooks/apps/cda/*.ipynb
+          contents:
+            - text: "Streaming LLM Client"
+              href: notebooks/apps/cda/01-client.ipynb
+            - text: "The Tool System"
+              href: notebooks/apps/cda/02-tools.ipynb
+            - text: "The Agent Loop"
+              href: notebooks/apps/cda/03-agent.ipynb
+            - text: "Hardening the Agent"
+              href: notebooks/apps/cda/04-hardening.ipynb
+            - text: "GUI 1: Chat Interface"
+              href: notebooks/apps/cda/05-ui.ipynb
+            - text: "GUI 2: Tools & Persistence"
+              href: notebooks/apps/cda/06-ui2.ipynb
+            - text: "GUI 3: MCP Integration"
+              href: notebooks/apps/cda/07-ui3.ipynb
 
     - id: prep
       style: "floating"
@@ -138,19 +199,32 @@ website:
         - section: "Crash Course"
           href: notebooks/prep/index.ipynb
           contents:
-            - notebooks/prep/01-llm-api.ipynb
-            - notebooks/prep/02-prompt-engg.ipynb
-            - notebooks/prep/03-rag-concepts.ipynb
-            - notebooks/prep/04-eval-concepts.ipynb
-            - notebooks/prep/05-agents-foundations.ipynb
-            - notebooks/prep/06-observability.ipynb
-            - notebooks/prep/07-rag-pipeline.ipynb
-            - notebooks/prep/08-agents-langgraph.ipynb
-            - notebooks/prep/09-fine-tuning.ipynb
-            - notebooks/prep/10-model-serving.ipynb
-            - notebooks/prep/11-cost-optimization.ipynb
-            - notebooks/prep/12-ai-infra.ipynb
-            - notebooks/prep/13-capstone-compliance.ipynb
+            - text: "LLM APIs"
+              href: notebooks/prep/01-llm-api.ipynb
+            - text: "Prompt Engineering"
+              href: notebooks/prep/02-prompt-engg.ipynb
+            - text: "RAG Concepts"
+              href: notebooks/prep/03-rag-concepts.ipynb
+            - text: "LLM Evaluation"
+              href: notebooks/prep/04-eval-concepts.ipynb
+            - text: "Agentic AI I"
+              href: notebooks/prep/05-agents-foundations.ipynb
+            - text: "Observability"
+              href: notebooks/prep/06-observability.ipynb
+            - text: "Production RAG"
+              href: notebooks/prep/07-rag-pipeline.ipynb
+            - text: "Agentic AI II"
+              href: notebooks/prep/08-agents-langgraph.ipynb
+            - text: "Fine-Tuning"
+              href: notebooks/prep/09-fine-tuning.ipynb
+            - text: "Model Serving"
+              href: notebooks/prep/10-model-serving.ipynb
+            - text: "Cost Optimization"
+              href: notebooks/prep/11-cost-optimization.ipynb
+            - text: "AI Infrastructure"
+              href: notebooks/prep/12-ai-infra.ipynb
+            - text: "Capstone"
+              href: notebooks/prep/13-capstone-compliance.ipynb
 
         - section: "Deep Dives"
           href: notebooks/prep/deep-dives/index.ipynb
