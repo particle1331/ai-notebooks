@@ -112,6 +112,8 @@ website:
               href: notebooks/tooling/08-rl-ppo.ipynb
             - text: "RL4: RL for Language Models"
               href: notebooks/tooling/09-rl-for-llms.ipynb
+            - text: "Weak Supervision"
+              href: notebooks/tooling/10-weak-supervision.ipynb
 
     - id: agents
       style: "floating"

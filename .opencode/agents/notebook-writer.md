@@ -683,12 +683,14 @@ A top-level series index (`notebooks/<section>/index.ipynb`) has these cells **i
 
 #### Sub-Series Index Structure
 
-A sub-series index (`notebooks/<section>/<subseries>/index.ipynb`) is simpler:
+A sub-series index (`notebooks/<section>/<subseries>/index.ipynb`) follows the same gold standard as a top-level index, just smaller:
 
 1. **`# Sub-series Title`** — single H1
-2. **Overview paragraph** — 2-3 sentences: what it builds, what it assumes
-3. **`## Contents`** — single notebook table
-4. **`## Prerequisites`** — bullet list with bold-labeled items, linking back to prerequisite notebooks from the parent series
+2. **Hook paragraph** — one paragraph establishing stakes and context, no heading
+3. **`## About This Series`** — with **Goal.**, **Audience.**, **Stack.** bold labels and `{.mark}` highlights
+4. **`## Course Notebooks`** — single notebook table (same `# | Title | Key Topics` format, plain number in `#`, link on Title)
+5. **`## Prerequisites` + `## How to Read This Series`** — combined in one cell, with bolded `**If you...**` navigation entries
+- No trailing empty cell in sub-series indexes.
 
 #### Flat Collection Index (`tooling/`)
 
@@ -746,8 +748,8 @@ Sidebar labels do not have to match the notebook's H1 title. Use shorter, more e
 
 Tables use a **3-column layout** by default:
 
-- **Column 1 (`#`):** Linked notebook number — `[05](/notebooks/apps/05-fastapi.html)`. Use `[Ex]` for example/worked-application notebooks. Width ~6%.
-- **Column 2 (Title):** Plain title text. Bold for capstone/flagship notebooks (e.g. `**Photo App: End-to-End**`). Width ~26%.
+- **Column 1 (`#`):** Plain text notebook number — `01`, `02`, etc. Use `Ex` for example/worked-application notebooks. **Never a link.** Width ~6%.
+- **Column 2 (Title):** Linked title — `[Flet I: Basics](/notebooks/apps/01-flet.html)`. Bold for capstone/flagship notebooks (e.g. `[**Photo App: End-to-End**](/notebooks/apps/14-photo-app.html)`). Width ~26%.
 - **Column 3 (Key Topics / What We Build):** Rich comma-separated summary of 4–6 specific subtopics — not vague one-liners. Include inline code for key classes/tools. Width ~68%.
 - Always end with `: {tbl-colwidths="[6,26,68]"}` (or adjusted proportions).
 - Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links.
@@ -774,16 +776,16 @@ This series covers the [theory and practice]{.mark} of building
 [CELL 4 - markdown] ## Part I. Flet & UI Fundamentals
 | # | Title | Key Topics | Capstone |
 |---|---|---|---|
-| [01](...) | Flet I: Basics | Imperative UI model, ... | [Todo App](...) — ... |
-| [03](...) | Flet II: Declarative UI | ... | ... |
+| 01 | [Flet I: Basics](...) | Imperative UI model, ... | [Todo App](...) — ... |
+| 03 | [Flet II: Declarative UI](...) | ... | ... |
 : {tbl-colwidths="[6,22,46,26]"}
 
 [CELL 5 - markdown] ## Part II. Backend & Infrastructure
 | # | Title | Key Topics |
 |---|---|---|
-| [05](...) | FastAPI Fundamentals | REST vs. RPC, ... |
-| [06](...) | Docker & Local Infrastructure | Container lifecycle, ... |
-| [07](...) | Database Design & ORM | Relational schema design, ... |
+| 05 | [FastAPI Fundamentals](...) | REST vs. RPC, ... |
+| 06 | [Docker & Local Infrastructure](...) | Container lifecycle, ... |
+| 07 | [Database Design & ORM](...) | Relational schema design, ... |
 : {tbl-colwidths="[6,26,68]"}
 
 [CELL 6-7 - markdown] ## Part III. ... / ## Part IV. ...  (same pattern)
@@ -792,7 +794,7 @@ This series covers the [theory and practice]{.mark} of building
 A five-notebook series that builds a production-grade ML compute platform ...
 | # | Title | Key Topics |
 |---|---|---|
-| [01](...) | Platform Architecture | System design principles, ... |
+| 01 | [Platform Architecture](...) | System design principles, ... |
 ...
 : {tbl-colwidths="[6,26,68]"}
 See the [NBX series index](...) to get started.
@@ -801,7 +803,7 @@ See the [NBX series index](...) to get started.
 A seven-notebook series that builds a complete async AI coding agent ...
 | # | Title | What We Build |
 |---|---|---|
-| [01](...) | The LLM Client | Async streaming wrapper ... |
+| 01 | [Streaming LLM Client](...) | Async streaming wrapper ... |
 ...
 : {tbl-colwidths="[6,28,66]"}
 See the [CDA series index](...) to get started.

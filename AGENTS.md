@@ -147,6 +147,21 @@ When reading notebooks:
 - **Read small text outputs:** Model summaries, error messages, results tables
 - **Focus on code cells:** The actual logic and logic explanations matter most
 
+### Index Notebook Structure
+
+The gold standard for index notebooks is `notebooks/apps/index.ipynb`. All series and sub-series index files must follow this structure exactly:
+
+- **Cell 0:** `# Series Title` — title only, nothing else
+- **Cell 1:** Single plain paragraph — the hook. No heading. Establishes stakes and context.
+- **Cell 2:** `## About This Series` — with bold labels **Audience:**, **Stack.**, and a goal/project description. Use `[text]{.mark}` for 1–2 highlighted key phrases.
+- **Cells 3–N:** One cell per part/section, each containing `## Part X. Name` (or `## Course Notebooks` for flat series) followed by a Quarto table. Table format rules:
+  - `#` column: **plain text number** (e.g. `01`, `02`) — never a link
+  - `Title` column: **linked title** (e.g. `[Notebook Title](/notebooks/path.html)`)
+  - Table ends with `: {tbl-colwidths="[...]"}` on a new line
+- **Final cell:** `## Prerequisites` and `## How to Read This Series` combined in one cell. "How to Read" uses 3–5 bolded `**If you...**` navigation entries.
+- No trailing empty cells.
+- Each cell's `"source"` is a single string (not a list of lines).
+
 ## Project-Specific Utilities
 
 **src/notebooks/** provides helper modules:
@@ -207,5 +222,5 @@ uv sync                # Sync existing deps from lock file
 
 ---
 
-**Last Updated:** 2026-04-03  
+**Last Updated:** 2026-04-06  
 **Project Root:** `/Users/particle1331/code/latest/ai-notebooks`
