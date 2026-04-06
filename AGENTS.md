@@ -153,7 +153,7 @@ The gold standard for index notebooks is `notebooks/apps/index.ipynb`. All serie
 
 - **Cell 0:** `# Series Title` — title only, nothing else
 - **Cell 1:** Single plain paragraph — the hook. No heading. Establishes stakes and context.
-- **Cell 2:** `## About This Series` — with bold labels **Audience:**, **Stack.**, and a goal/project description. Use `[text]{.mark}` for 1–2 highlighted key phrases.
+- **Cell 2:** `## About This Series` — with bold labels **Audience.**, **Stack.**, and a goal/project description. Use `[text]{.mark}` for 1–2 highlighted key phrases.
 - **Cells 3–N:** One cell per part/section, each containing `## Part X. Name` (or `## Course Notebooks` for flat series) followed by a Quarto table. Table format rules:
   - `#` column: **plain text number** (e.g. `01`, `02`) — never a link
   - `Title` column: **linked title** (e.g. `[Notebook Title](/notebooks/path.html)`)

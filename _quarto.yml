@@ -72,7 +72,26 @@ website:
       contents:
         - section: ""
           href: notebooks/deep/index.ipynb
-          contents: notebooks/deep/*.ipynb
+          contents:
+            - notebooks/deep/01-softmax-regression.ipynb
+            - notebooks/deep/02-neural-networks.ipynb
+            - notebooks/deep/03-autodiff.ipynb
+            - notebooks/deep/04-optimizers.ipynb
+            - notebooks/deep/05-activations-and-gradients.ipynb
+            - notebooks/deep/06-cnn.ipynb
+            - notebooks/deep/07-language-modeling.ipynb
+            - notebooks/deep/08-rnn.ipynb
+            - notebooks/deep/09-attention-transformers.ipynb
+            - notebooks/deep/11-appendix-expressivity.ipynb
+            - notebooks/deep/12-appendix-resnet.ipynb
+        - section: "Advanced Topics"
+          href: notebooks/deep/advanced/index.ipynb
+          contents:
+            - notebooks/deep/advanced/13-translation.ipynb
+            - notebooks/deep/advanced/14-generative-models.ipynb
+            - notebooks/deep/advanced/15-diffusion.ipynb
+            - notebooks/deep/advanced/16-segmentation.ipynb
+            - notebooks/deep/advanced/17-captioning.ipynb
         # - section: "CUDA Programming"
         # recsys
         # deep RL
@@ -84,8 +103,47 @@ website:
       contents:
         - section: ""
           href: notebooks/llm/index.ipynb
-          contents: notebooks/llm/*.ipynb
- 
+          contents:
+            - text: "GPT from Scratch"
+              href: notebooks/llm/01-gpt-architecture.ipynb
+            - text: "Byte Pair Encoding & Tokenization"
+              href: notebooks/llm/02-tokenization.ipynb
+            - text: "Data Pipelines for Pretraining"
+              href: notebooks/llm/03-data-pipelines.ipynb
+            - text: "Optimizer, Schedule & Mixed Precision"
+              href: notebooks/llm/04-training-loop.ipynb
+            - text: "Gradient & Activation Diagnostics"
+              href: notebooks/llm/05-scaling-diagnostics.ipynb
+            - text: "Pretraining nanoGPT"
+              href: notebooks/llm/06-pretraining.ipynb
+            - text: "Multi-GPU with DDP & FSDP"
+              href: notebooks/llm/07-distributed-training.ipynb
+            - text: "Instruction Tuning with LoRA"
+              href: notebooks/llm/08-sft-lora.ipynb
+            - text: "DPO & Reward Modeling"
+              href: notebooks/llm/09-preference-optimization.ipynb
+            - text: "Reinforcement Learning with GRPO"
+              href: notebooks/llm/10-grpo.ipynb
+            - text: "Knowledge Distillation"
+              href: notebooks/llm/11-distillation.ipynb
+            - text: "Model Quantization"
+              href: notebooks/llm/12-quantization.ipynb
+            - text: "KV Cache & Speculative Decoding"
+              href: notebooks/llm/13-inference.ipynb
+            - text: "Inference-Time Scaling"
+              href: notebooks/llm/14-inference-time-scaling.ipynb
+            - text: "Training a Reasoning Model"
+              href: notebooks/llm/15-reasoning-model.ipynb
+        - section: "DeepSeek"
+          href: notebooks/llm/deepseek/index.ipynb
+          contents:
+            - text: "MLA & Mixture of Experts"
+              href: notebooks/llm/deepseek/01-deepseek-architecture.ipynb
+            - text: "Training NanoDeepSeek"
+              href: notebooks/llm/deepseek/02-training-nanodeepseek.ipynb
+            - text: "The Engram Layer"
+              href: notebooks/llm/deepseek/03-engram-layer.ipynb
+
     - id: tooling
       style: "floating"
       collapse-level: 2
@@ -114,6 +172,8 @@ website:
               href: notebooks/tooling/09-rl-for-llms.ipynb
             - text: "Weak Supervision"
               href: notebooks/tooling/10-weak-supervision.ipynb
+            - text: "Generating Exercise Notebooks"
+              href: notebooks/tooling/11-exercise-gen.ipynb
 
     - id: agents
       style: "floating"
@@ -122,11 +182,29 @@ website:
       contents:
         - section: ""
           href: notebooks/agents/index.ipynb
-          contents: notebooks/agents/*.ipynb
-
-        - section: ""
-          href: notebooks/agents/patterns/index.ipynb
-          contents: notebooks/agents/patterns/*.ipynb
+          contents:
+            - text: "LLMs as Agents"
+              href: notebooks/agents/00-foundations.ipynb
+            - text: "Tool Use & Function Calling"
+              href: notebooks/agents/01-tools.ipynb
+            - text: "Chain-of-Thought Reasoning"
+              href: notebooks/agents/02-reasoning.ipynb
+            - text: "The Agent Loop"
+              href: notebooks/agents/03-agent-loop.ipynb
+            - text: "Context & Prompt Management"
+              href: notebooks/agents/04-context.ipynb
+            - text: "Long-Term Memory"
+              href: notebooks/agents/05-memory.ipynb
+            - text: "Safety & Guardrails"
+              href: notebooks/agents/06-safety.ipynb
+            - text: "Evaluation & Benchmarking"
+              href: notebooks/agents/07-evaluation.ipynb
+            - text: "Workflows & Agentic Patterns"
+              href: notebooks/agents/08-patterns.ipynb
+            - text: "Multi-Agent Coordination"
+              href: notebooks/agents/09-multi-agent.ipynb
+            - text: "Extensibility & MCP"
+              href: notebooks/agents/10-extensibility.ipynb
 
     - id: apps
       style: "floating"

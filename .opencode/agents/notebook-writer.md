@@ -695,7 +695,7 @@ A top-level series index (`notebooks/<section>/index.ipynb`) has these cells **i
 2. **Hook paragraph** — one paragraph (3-5 sentences) motivating the series: what gap it fills, who it's for, what you'll be able to do at the end. Written in the project's "we/you" voice.
 3. **`## About This Series`** — detailed overview using bold-labeled subsections within a single markdown cell:
    - Start with a paragraph describing scope and organization. Use `[text]{.mark}` for the 1-2 most important phrases.
-   - `**Audience:**` — who the reader is, what they already know, what they want.
+   - `**Audience.**` — who the reader is, what they already know, what they want.
    - `**Stack.**` — tools/libraries used, linked to their homepages, with a sentence explaining *why* this stack was chosen.
    - `**The main project**` (if applicable) — the through-line project that ties the series together. Use `[text]{.mark}` to highlight the project name. Describe its ambition and what makes it a good teaching vehicle.
 4. **`## Part N. Title`** sections — one per Part, each in its **own markdown cell** with a notebook table (see table format below). Use period-separated part headers: `## Part I. Flet & UI Fundamentals`, `## Part II. Backend & Infrastructure`.
@@ -800,7 +800,7 @@ touch. ... This series closes that gap.
 [CELL 3 - markdown] ## About This Series
 This series covers the [theory and practice]{.mark} of building
 **data-driven applications**: ...
-**Audience:** Someone trained in machine learning ...
+**Audience.** Someone trained in machine learning ...
 **Stack.** The series uses tools chosen for clarity ...
 **The main project** is a [personal photo library application]{.mark} ...
 
