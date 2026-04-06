@@ -33,13 +33,17 @@ Key characteristics of the `deep/` series:
 - The implement-then-verify rhythm (build → compare vs. PyTorch / ground truth) is pervasive
 - Figures are used purposefully: only when they add clarity that prose cannot
 
-## Index Notebooks: Gold Standard is `apps/index.ipynb`
+## Index Notebooks: Gold Standards
 
-When creating or updating a **series index** (`index.ipynb`), the **gold standard is
-`notebooks/apps/index.ipynb`**, which was manually fine-tuned by the author. Replicate
-its exact cell structure, prose density, table format, and navigational conventions
-(Prerequisites + How to Read). Do not improvise the index structure — follow the
-`apps/index.ipynb` pattern precisely.
+When creating or updating a **series index** (`index.ipynb`), refer to these two gold standards, both manually fine-tuned by the author:
+
+- **`notebooks/apps/index.ipynb`** — for modular series with Parts, sub-series, and multiple optional reading paths. Uses a 3-column table (`#`, Title, Key Topics) by default, with an optional 4th column (Capstone) where relevant.
+- **`notebooks/prep/index.ipynb`** — for paced curricula with a scheduling dimension (crash course vs. extended path). Uses a 4-column table (Day/Week, `#`, Title, Key Topics) because readers need to know *when* to cover each notebook. Of particular note is the **Capstone section** (`## Capstone: Compliance Document Reviewer`), which uses a 2-column dependency table (Capstone Component | Draws From) to show how every notebook in the series contributes a specific component to the final project. This is an excellent pattern for any series with a capstone or culminating project — it makes the series feel purposeful and retroactively justifies every preceding notebook.
+
+**Which to use:** If the series has a time-based pacing structure (days, weeks, sprints), follow the `prep/` pattern. Otherwise, follow the `apps/` pattern. Do not improvise the index structure — match the appropriate gold standard based on the series' pedagogy.
+
+**Nice touches from `prep/index.ipynb` to replicate where appropriate:**
+- **Callout note in Prerequisites** — `prep/` uses a `:::{.callout-note}` after the prerequisite bullet list to highlight a hard requirement (e.g. API keys, cloud accounts, estimated costs). Use this pattern whenever the series has a non-obvious external dependency that could block readers if they don't set it up in advance.
 
 ---
 
@@ -782,7 +786,7 @@ Tables use a **3-column layout** by default:
 - Links use **absolute rendered paths**: `/notebooks/<section>/<file>.html` — never `.ipynb` links.
 - If a 4th column is needed (e.g. Capstone), adjust widths accordingly: `[6,22,46,26]`.
 
-Variant: `prep/index.ipynb` uses a 4-column pattern (Day/Week, #, Title, Key Topics) with `tbl-colwidths="[12,6,28,54]"` — use that when a scheduling/pacing column is relevant.
+Variant: `prep/index.ipynb` uses a 4-column pattern (Day/Week, `#`, Title, Key Topics) with `tbl-colwidths="[12,6,28,54]"`. Use this pattern **only** when the series has an explicit pacing/scheduling structure (e.g. "Day 1", "Week 2"). For all other series, use the default 3-column pattern from `apps/index.ipynb`.
 
 #### Complete Example (from `apps/index.ipynb`)
 
