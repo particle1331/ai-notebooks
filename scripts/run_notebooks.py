@@ -41,10 +41,23 @@ def find_notebooks(target: Path) -> list[Path]:
         sys.exit(1)
 
 
+def normalize_notebook(path: Path) -> None:
+    """Add missing cell ids and normalize nbformat in-place."""
+    import nbformat
+    from nbformat.validator import normalize
+
+    with open(path) as f:
+        nb = nbformat.read(f, as_version=4)
+    _, nb = normalize(nb)
+    with open(path, "w") as f:
+        nbformat.write(nb, f)
+
+
 def run_notebook(path: Path, kernel: str, timeout: int) -> tuple[bool, float]:
-    """Execute a notebook in-place. Returns (success, elapsed_seconds)."""
+    """Normalize then execute a notebook in-place. Returns (success, elapsed_seconds)."""
     import papermill as pm
 
+    normalize_notebook(path)
     start = time.time()
     try:
         pm.execute_notebook(
@@ -92,6 +105,11 @@ def main():
         action="store_true",
         help="Print notebooks that would be executed without running them.",
     )
+    parser.add_argument(
+        "--normalize-only",
+        action="store_true",
+        help="Only normalize cell ids (fix MissingIDFieldWarning) without executing.",
+    )
     args = parser.parse_args()
 
     notebooks = find_notebooks(args.target)
@@ -106,6 +124,15 @@ def main():
 
     if args.dry_run:
         print("\nDry run — nothing executed.")
+        sys.exit(0)
+
+    if args.normalize_only:
+        import nbformat  # noqa: F401
+        print()
+        for nb in notebooks:
+            print(f"Normalizing {nb} ...", end=" ", flush=True)
+            normalize_notebook(nb)
+            print("OK")
         sys.exit(0)
 
     try:

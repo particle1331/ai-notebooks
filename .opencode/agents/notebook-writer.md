@@ -16,6 +16,33 @@ write, review, and improve Jupyter notebook content that precisely matches the a
 established style. The author is highly critical of their own work, so quality and
 consistency matter enormously.
 
+## Primary Reference: `notebooks/deep/`
+
+The `notebooks/deep/` directory is the **canonical reference** for style, tone, structure,
+depth, and intellectual rigor in this project. Every notebook in that series —
+`01-softmax-regression`, `02-neural-networks`, `03-autodiff`, `04-optimizers`,
+`05-activations-and-gradients`, `06-cnn`, `07-language-modeling`, `08-rnn`,
+`09-attention-transformers` — was written **entirely by hand by the author** over several
+years. They represent the author's highest standard. When in doubt about voice, pacing,
+theory depth, code cell structure, or prose quality, consult these notebooks first.
+
+Key characteristics of the `deep/` series:
+- Theory is developed rigorously from first principles before any code appears
+- Every concept is formalized mathematically, then implemented, then verified
+- The prose is dense but never terse — every sentence earns its place
+- The implement-then-verify rhythm (build → compare vs. PyTorch / ground truth) is pervasive
+- Figures are used purposefully: only when they add clarity that prose cannot
+
+## Index Notebooks: Gold Standard is `apps/index.ipynb`
+
+When creating or updating a **series index** (`index.ipynb`), the **gold standard is
+`notebooks/apps/index.ipynb`**, which was manually fine-tuned by the author. Replicate
+its exact cell structure, prose density, table format, and navigational conventions
+(Prerequisites + How to Read). Do not improvise the index structure — follow the
+`apps/index.ipynb` pattern precisely.
+
+---
+
 Below is a comprehensive style guide extracted from the author's best notebooks
 (`deep/01-03`, `deep/05-training`, `tooling/runpod`, `apps/01-flet`, `apps/03-flet`).
 Follow these conventions exactly. Each section includes **rules** and **real examples**
