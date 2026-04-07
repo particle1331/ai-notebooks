@@ -73,25 +73,41 @@ website:
         - section: ""
           href: notebooks/deep/index.ipynb
           contents:
-            - notebooks/deep/01-softmax-regression.ipynb
-            - notebooks/deep/02-neural-networks.ipynb
-            - notebooks/deep/03-autodiff.ipynb
-            - notebooks/deep/04-optimizers.ipynb
-            - notebooks/deep/05-activations-and-gradients.ipynb
-            - notebooks/deep/06-cnn.ipynb
-            - notebooks/deep/07-language-modeling.ipynb
-            - notebooks/deep/08-rnn.ipynb
-            - notebooks/deep/09-attention-transformers.ipynb
-            - notebooks/deep/11-appendix-expressivity.ipynb
-            - notebooks/deep/12-appendix-resnet.ipynb
+            - text: "01. Softmax Regression"
+              href: notebooks/deep/01-softmax-regression.ipynb
+            - text: "02. Neural Networks"
+              href: notebooks/deep/02-neural-networks.ipynb
+            - text: "03. Automatic Differentiation"
+              href: notebooks/deep/03-autodiff.ipynb
+            - text: "04. Optimizers: SGD to AdamW"
+              href: notebooks/deep/04-optimizers.ipynb
+            - text: "05. Activations and Gradients"
+              href: notebooks/deep/05-activations-and-gradients.ipynb
+            - text: "06. Convolutional Networks"
+              href: notebooks/deep/06-cnn.ipynb
+            - text: "07. Language Modeling"
+              href: notebooks/deep/07-language-modeling.ipynb
+            - text: "08. Recurrent Neural Networks"
+              href: notebooks/deep/08-rnn.ipynb
+            - text: "09. Attention & Transformers"
+              href: notebooks/deep/09-attention-transformers.ipynb
+            - text: "11. Activation Patterns"
+              href: notebooks/deep/11-appendix-expressivity.ipynb
+            - text: "12. ResNet from Scratch"
+              href: notebooks/deep/12-appendix-resnet.ipynb
         - section: "Advanced Topics"
           href: notebooks/deep/advanced/index.ipynb
           contents:
-            - notebooks/deep/advanced/13-translation.ipynb
-            - notebooks/deep/advanced/14-generative-models.ipynb
-            - notebooks/deep/advanced/15-diffusion.ipynb
-            - notebooks/deep/advanced/16-segmentation.ipynb
-            - notebooks/deep/advanced/17-captioning.ipynb
+            - text: "13. Machine Translation"
+              href: notebooks/deep/advanced/13-translation.ipynb
+            - text: "14. Generative Models"
+              href: notebooks/deep/advanced/14-generative-models.ipynb
+            - text: "15. Diffusion Models"
+              href: notebooks/deep/advanced/15-diffusion.ipynb
+            - text: "16. Semantic Segmentation"
+              href: notebooks/deep/advanced/16-segmentation.ipynb
+            - text: "17. Image Captioning"
+              href: notebooks/deep/advanced/17-captioning.ipynb
         # - section: "CUDA Programming"
         # recsys
         # deep RL
@@ -104,44 +120,44 @@ website:
         - section: ""
           href: notebooks/llm/index.ipynb
           contents:
-            - text: "GPT from Scratch"
+            - text: "01. GPT from Scratch"
               href: notebooks/llm/01-gpt-architecture.ipynb
-            - text: "Byte Pair Encoding & Tokenization"
+            - text: "02. Byte Pair Encoding & Tokenization"
               href: notebooks/llm/02-tokenization.ipynb
-            - text: "Data Pipelines for Pretraining"
+            - text: "03. Data Pipelines for Pretraining"
               href: notebooks/llm/03-data-pipelines.ipynb
-            - text: "Optimizer, Schedule & Mixed Precision"
+            - text: "04. Optimizer, Schedule & Mixed Precision"
               href: notebooks/llm/04-training-loop.ipynb
-            - text: "Gradient & Activation Diagnostics"
+            - text: "05. Gradient & Activation Diagnostics"
               href: notebooks/llm/05-scaling-diagnostics.ipynb
-            - text: "Pretraining nanoGPT"
+            - text: "06. Pretraining nanoGPT"
               href: notebooks/llm/06-pretraining.ipynb
-            - text: "Multi-GPU with DDP & FSDP"
+            - text: "07. Multi-GPU with DDP & FSDP"
               href: notebooks/llm/07-distributed-training.ipynb
-            - text: "Instruction Tuning with LoRA"
+            - text: "08. Instruction Tuning with LoRA"
               href: notebooks/llm/08-sft-lora.ipynb
-            - text: "DPO & Reward Modeling"
+            - text: "09. DPO & Reward Modeling"
               href: notebooks/llm/09-preference-optimization.ipynb
-            - text: "Reinforcement Learning with GRPO"
+            - text: "10. Reinforcement Learning with GRPO"
               href: notebooks/llm/10-grpo.ipynb
-            - text: "Knowledge Distillation"
+            - text: "11. Knowledge Distillation"
               href: notebooks/llm/11-distillation.ipynb
-            - text: "Model Quantization"
+            - text: "12. Model Quantization"
               href: notebooks/llm/12-quantization.ipynb
-            - text: "KV Cache & Speculative Decoding"
+            - text: "13. KV Cache & Speculative Decoding"
               href: notebooks/llm/13-inference.ipynb
-            - text: "Inference-Time Scaling"
+            - text: "14. Inference-Time Scaling"
               href: notebooks/llm/14-inference-time-scaling.ipynb
-            - text: "Training a Reasoning Model"
+            - text: "15. Training a Reasoning Model"
               href: notebooks/llm/15-reasoning-model.ipynb
         - section: "DeepSeek"
           href: notebooks/llm/deepseek/index.ipynb
           contents:
-            - text: "MLA & Mixture of Experts"
+            - text: "01. MLA & Mixture of Experts"
               href: notebooks/llm/deepseek/01-deepseek-architecture.ipynb
-            - text: "Training NanoDeepSeek"
+            - text: "02. Training NanoDeepSeek"
               href: notebooks/llm/deepseek/02-training-nanodeepseek.ipynb
-            - text: "The Engram Layer"
+            - text: "03. The Engram Layer"
               href: notebooks/llm/deepseek/03-engram-layer.ipynb
 
     - id: tooling
@@ -183,27 +199,27 @@ website:
         - section: ""
           href: notebooks/agents/index.ipynb
           contents:
-            - text: "LLMs as Agents"
+            - text: "00. LLMs as Agents"
               href: notebooks/agents/00-foundations.ipynb
-            - text: "Tool Use & Function Calling"
+            - text: "01. Tool Use & Function Calling"
               href: notebooks/agents/01-tools.ipynb
-            - text: "Chain-of-Thought Reasoning"
+            - text: "02. Chain-of-Thought Reasoning"
               href: notebooks/agents/02-reasoning.ipynb
-            - text: "The Agent Loop"
+            - text: "03. The Agent Loop"
               href: notebooks/agents/03-agent-loop.ipynb
-            - text: "Context & Prompt Management"
+            - text: "04. Context & Prompt Management"
               href: notebooks/agents/04-context.ipynb
-            - text: "Long-Term Memory"
+            - text: "05. Long-Term Memory"
               href: notebooks/agents/05-memory.ipynb
-            - text: "Safety & Guardrails"
+            - text: "06. Safety & Guardrails"
               href: notebooks/agents/06-safety.ipynb
-            - text: "Evaluation & Benchmarking"
+            - text: "07. Evaluation & Benchmarking"
               href: notebooks/agents/07-evaluation.ipynb
-            - text: "Workflows & Agentic Patterns"
+            - text: "08. Workflows & Agentic Patterns"
               href: notebooks/agents/08-patterns.ipynb
-            - text: "Multi-Agent Coordination"
+            - text: "09. Multi-Agent Coordination"
               href: notebooks/agents/09-multi-agent.ipynb
-            - text: "Extensibility & MCP"
+            - text: "10. Extensibility & MCP"
               href: notebooks/agents/10-extensibility.ipynb
 
     - id: apps
@@ -214,61 +230,61 @@ website:
         - section: ""
           href: notebooks/apps/index.ipynb
           contents:
-            - text: "Flet I: Basics"
+            - text: "01. Flet I: Basics"
               href: notebooks/apps/01-flet.ipynb
-            - text: "Flet II: Declarative UI"
+            - text: "03. Flet II: Declarative UI"
               href: notebooks/apps/03-flet.ipynb
-            - text: "FastAPI Fundamentals"
+            - text: "05. FastAPI Fundamentals"
               href: notebooks/apps/05-fastapi.ipynb
-            - text: "Docker & Infrastructure"
+            - text: "06. Docker & Infrastructure"
               href: notebooks/apps/06-docker.ipynb
-            - text: "Database & ORM"
+            - text: "07. Database & ORM"
               href: notebooks/apps/07-database.ipynb
-            - text: "S3 & Batch Pipelines"
+            - text: "08. S3 & Batch Pipelines"
               href: notebooks/apps/08-s3-pipeline.ipynb
-            - text: "Embeddings & Vector Search"
+            - text: "09. Embeddings & Vector Search"
               href: notebooks/apps/09-embeddings.ipynb
-            - text: "People Clustering"
+            - text: "10. People Clustering"
               href: notebooks/apps/10-clustering.ipynb
-            - text: "Flet ↔ FastAPI"
+            - text: "11. Flet ↔ FastAPI"
               href: notebooks/apps/11-integration.ipynb
-            - text: "Realtime & WebSockets"
+            - text: "12. Realtime & WebSockets"
               href: notebooks/apps/12-realtime.ipynb
-            - text: "Multimodal Queries"
+            - text: "13. Multimodal Queries"
               href: notebooks/apps/13-multimodal.ipynb
-            - text: "Photo App: End-to-End"
+            - text: "14. Photo App: End-to-End"
               href: notebooks/apps/14-photo-app.ipynb
 
         - section: "NBX: Compute Platform"
           href: notebooks/apps/nbx/index.ipynb
           contents:
-            - text: "Platform Architecture"
+            - text: "01. Platform Architecture"
               href: notebooks/apps/nbx/01-architecture.ipynb
-            - text: "Registry & Dashboard"
+            - text: "02. Registry & Dashboard"
               href: notebooks/apps/nbx/02-registry.ipynb
-            - text: "Job Packaging & Execution"
+            - text: "03. Job Packaging & Execution"
               href: notebooks/apps/nbx/03-packaging.ipynb
-            - text: "Task Queue & Dispatch"
+            - text: "04. Task Queue & Dispatch"
               href: notebooks/apps/nbx/04-queue.ipynb
-            - text: "Log Streaming & Artifacts"
+            - text: "05. Log Streaming & Artifacts"
               href: notebooks/apps/nbx/05-streaming.ipynb
 
         - section: "CDA: Coding Agent From Scratch"
           href: notebooks/apps/cda/index.ipynb
           contents:
-            - text: "Streaming LLM Client"
+            - text: "01. Streaming LLM Client"
               href: notebooks/apps/cda/01-client.ipynb
-            - text: "The Tool System"
+            - text: "02. The Tool System"
               href: notebooks/apps/cda/02-tools.ipynb
-            - text: "The Agent Loop"
+            - text: "03. The Agent Loop"
               href: notebooks/apps/cda/03-agent.ipynb
-            - text: "Hardening the Agent"
+            - text: "04. Hardening the Agent"
               href: notebooks/apps/cda/04-hardening.ipynb
-            - text: "GUI 1: Chat Interface"
+            - text: "05. GUI 1: Chat Interface"
               href: notebooks/apps/cda/05-ui.ipynb
-            - text: "GUI 2: Tools & Persistence"
+            - text: "06. GUI 2: Tools & Persistence"
               href: notebooks/apps/cda/06-ui2.ipynb
-            - text: "GUI 3: MCP Integration"
+            - text: "07. GUI 3: MCP Integration"
               href: notebooks/apps/cda/07-ui3.ipynb
 
     - id: prep
@@ -279,42 +295,51 @@ website:
         - section: "Crash Course"
           href: notebooks/prep/index.ipynb
           contents:
-            - text: "LLM APIs"
+            - text: "01. LLM APIs"
               href: notebooks/prep/01-llm-api.ipynb
-            - text: "Prompt Engineering"
+            - text: "02. Prompt Engineering"
               href: notebooks/prep/02-prompt-engg.ipynb
-            - text: "RAG Concepts"
+            - text: "03. RAG Concepts"
               href: notebooks/prep/03-rag-concepts.ipynb
-            - text: "LLM Evaluation"
+            - text: "04. LLM Evaluation"
               href: notebooks/prep/04-eval-concepts.ipynb
-            - text: "Agentic AI I"
+            - text: "05. Agentic AI I"
               href: notebooks/prep/05-agents-foundations.ipynb
-            - text: "Observability"
+            - text: "06. Observability"
               href: notebooks/prep/06-observability.ipynb
-            - text: "Production RAG"
+            - text: "07. Production RAG"
               href: notebooks/prep/07-rag-pipeline.ipynb
-            - text: "Agentic AI II"
+            - text: "08. Agentic AI II"
               href: notebooks/prep/08-agents-langgraph.ipynb
-            - text: "Fine-Tuning"
+            - text: "09. Fine-Tuning"
               href: notebooks/prep/09-fine-tuning.ipynb
-            - text: "Model Serving"
+            - text: "10. Model Serving"
               href: notebooks/prep/10-model-serving.ipynb
-            - text: "Cost Optimization"
+            - text: "11. Cost Optimization"
               href: notebooks/prep/11-cost-optimization.ipynb
-            - text: "AI Infrastructure"
+            - text: "12. AI Infrastructure"
               href: notebooks/prep/12-ai-infra.ipynb
-            - text: "Capstone"
+            - text: "13. Capstone"
               href: notebooks/prep/13-capstone-compliance.ipynb
 
         - section: "Deep Dives"
           href: notebooks/prep/deep-dives/index.ipynb
           contents:
-            - notebooks/prep/deep-dives/01-advanced-rag.ipynb
-            - notebooks/prep/deep-dives/02-eval-pipelines.ipynb
-            - notebooks/prep/deep-dives/03-agent-memory.ipynb
-            - notebooks/prep/deep-dives/04-resilience.ipynb
-            - notebooks/prep/deep-dives/05-mlops.ipynb
-            - notebooks/prep/deep-dives/06-ai-security.ipynb
-            - notebooks/prep/deep-dives/07-embeddings-advanced.ipynb
-            - notebooks/prep/deep-dives/08-multimodal.ipynb
-            - notebooks/prep/deep-dives/09-iac-containers.ipynb
+            - text: "01. Advanced RAG"
+              href: notebooks/prep/deep-dives/01-advanced-rag.ipynb
+            - text: "02. Automated Eval Pipelines"
+              href: notebooks/prep/deep-dives/02-eval-pipelines.ipynb
+            - text: "03. Agent Memory"
+              href: notebooks/prep/deep-dives/03-agent-memory.ipynb
+            - text: "04. Resilience Patterns"
+              href: notebooks/prep/deep-dives/04-resilience.ipynb
+            - text: "05. MLOps: CI/CD for AI"
+              href: notebooks/prep/deep-dives/05-mlops.ipynb
+            - text: "06. AI Security & Compliance"
+              href: notebooks/prep/deep-dives/06-ai-security.ipynb
+            - text: "07. Advanced Embeddings"
+              href: notebooks/prep/deep-dives/07-embeddings-advanced.ipynb
+            - text: "08. Multimodal LLMs"
+              href: notebooks/prep/deep-dives/08-multimodal.ipynb
+            - text: "09. IaC & Container Orchestration"
+              href: notebooks/prep/deep-dives/09-iac-containers.ipynb

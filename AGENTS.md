@@ -156,11 +156,42 @@ The gold standard for index notebooks is `notebooks/apps/index.ipynb`. All serie
 - **Cell 2:** `## About This Series` — with bold labels **Audience.**, **Stack.**, and a goal/project description. Use `[text]{.mark}` for 1–2 highlighted key phrases.
 - **Cells 3–N:** One cell per part/section, each containing `## Part X. Name` (or `## Course Notebooks` for flat series) followed by a Quarto table. Table format rules:
   - `#` column: **plain text number** (e.g. `01`, `02`) — never a link
-  - `Title` column: **linked title** (e.g. `[Notebook Title](/notebooks/path.html)`)
+  - `#` column: **plain text number** (e.g. `01`, `02`) for top-level series. Sub-series referenced from a parent index use a series prefix with colon separator in the `#` column: `NBX:01`, `CDA:01`, `DS:01`, `DD:01`.
+  - `Title` column: **linked title** — plain descriptive text, no number prefix. Format: `[Notebook Title](/notebooks/path.html)`.
   - Table ends with `: {tbl-colwidths="[...]"}` on a new line
 - **Final cell:** `## Prerequisites` and `## How to Read This Series` combined in one cell. "How to Read" uses 3–5 bolded `**If you...**` navigation entries.
 - No trailing empty cells.
 - Each cell's `"source"` is a single string (not a list of lines).
+
+### Title Numbering in Index Tables
+
+The `#` column of index tables carries the notebook number. This applies to all series except `tooling/`.
+
+**Within a series' own index** (e.g. `deep/index.ipynb`, `apps/cda/index.ipynb`), the `#` column uses plain numbers:
+- `| 01 | [Softmax Regression](01-softmax-regression.ipynb) | ... |`
+
+**Sub-series referenced from a parent index** use a series prefix with colon separator in the `#` column:
+- NBX (in `apps/index.ipynb`): `| NBX:01 | [Platform Architecture](/notebooks/apps/nbx/01-architecture.html) | ... |`
+- CDA (in `apps/index.ipynb`): `| CDA:01 | [Streaming LLM Client](/notebooks/apps/cda/01-client.html) | ... |`
+- DeepSeek (in `llm/index.ipynb`): `| DS:01 | [MLA & Mixture of Experts](/notebooks/llm/deepseek/01-deepseek-architecture.html) | ... |`
+- Deep Dives (in `prep/index.ipynb`): `| DD:01 | [Advanced RAG](/notebooks/prep/deep-dives/01-advanced-rag.html) | ... |`
+
+**Deep Dives in their own index** (`prep/deep-dives/index.ipynb`) also use the `DD:` prefix since that is their canonical numbering scheme.
+
+### Sidebar Numbering in `_quarto.yml`
+
+The Quarto sidebar `text:` entries in `_quarto.yml` carry the number prefix so the sidebar is easy to scan. The format is `"NN. Title"` (zero-padded two digits, period, space). This applies to all series except `tooling/`.
+
+Examples:
+- `- text: "01. Softmax Regression"`
+- `- text: "13. Machine Translation"`
+
+Sub-series entries within their parent sidebar section use plain numbers (the section header like `"NBX: Compute Platform"` already provides context):
+- `- text: "01. Platform Architecture"` (under `NBX: Compute Platform`)
+- `- text: "01. Streaming LLM Client"` (under `CDA: Coding Agent From Scratch`)
+- `- text: "01. MLA & Mixture of Experts"` (under `DeepSeek`)
+
+Deep dives use bare paths (no explicit `text:`), so Quarto infers the title from the notebook.
 
 ## Project-Specific Utilities
 

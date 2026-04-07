@@ -60,7 +60,7 @@ import torch                           # third-party
 import torch.nn as nn
 import numpy as np
 
-from notebooks.agents.tools import Tool  # local
+from notebooks.agent.tools.base import Tool  # local
 ```
 
 - Absolute imports only (never relative)
