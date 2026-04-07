@@ -221,6 +221,7 @@ topics/cpp/code/tmp.cpp
 _site/
 *_files/
 /.quarto/
+**/*.html.md
 
 # Temporary files
 tmp/*
