@@ -4,6 +4,10 @@ import rich
 import inspect
 import pathlib
 
+import torch
+import random
+import numpy as np
+
 from typing import Any
 
 from IPython.display import HTML, display, display_markdown
@@ -12,6 +16,12 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
 ROOT_PATH = pathlib.Path(__file__).parents[2]
+DATA_PATH = ROOT_PATH / "data"
+ARTIFACTS_PATH = ROOT_PATH / "artifacts"
+
+def init():
+    DATA_PATH.mkdir(exist_ok=True)
+    ARTIFACTS_PATH.mkdir(exist_ok=True)
 
 
 def pprint(x, wrap=False, width=80, expand_all=False, indent_guides=True, **kwargs):
@@ -56,3 +66,51 @@ def display_python(code: str | list[str] | Any):
     # Display both CSS and code
     display(HTML(f"<style>{css}</style>"))
     display(HTML(highlighted_code))
+
+
+
+def get_device(): 
+    return (
+        torch.device("cuda:0") if torch.cuda.is_available() else (
+            torch.device("mps") if torch.mps.is_available() else 
+                torch.device("cpu")
+        )
+    )
+
+
+class eval_context:
+    """Context manager to set model to eval mode."""
+    def __init__(self, model):
+        self.model = model
+        self.state = model.training
+
+    def __enter__(self):
+        self.model.eval()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.model.train(self.state)
+
+
+def set_seed(value=42, deterministic=False):
+    """Set the seed for reproducibility. 
+    
+    WARNING: Setting deterministic=True may result in decreased performance. 
+    e.g. disabling benchmarking causes cuDNN to deterministically select an 
+    algorithm, possibly at the cost of reduced performance.
+    """
+
+    random.seed(value)
+    np.random.seed(value)
+    torch.manual_seed(value)
+    
+    if deterministic:
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(True)
+    else:
+        torch.backends.cudnn.benchmark = True
+        torch.use_deterministic_algorithms(False)
+
+    print(f"seed: {value}  deterministic: {deterministic}")
+
+
+init()

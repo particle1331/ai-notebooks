@@ -234,5 +234,6 @@ dev.ipynb
 **/*.quarto_ipynb
 **/.chroma_db
 site_libs/
-/notebooks/deep/data
-/data
+notebooks/deep/data/
+data/
+artifacts/
