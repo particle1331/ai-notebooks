@@ -58,6 +58,8 @@ website:
             href: notebooks/tooling/index.html
           - text: "AI Engineering Crash Course"
             href: notebooks/prep/index.html
+          - text: "Classical Machine Learning"
+            href: notebooks/classical/index.html
 
     tools:
       - icon: github
@@ -95,6 +97,8 @@ website:
               href: notebooks/deep/11-appendix-expressivity.ipynb
             - text: "12. ResNet from Scratch"
               href: notebooks/deep/12-appendix-resnet.ipynb
+            - text: "18. Double Descent"
+              href: notebooks/deep/18-appendix-double-descent.ipynb
         - section: "Advanced Topics"
           href: notebooks/deep/advanced/index.ipynb
           contents:
@@ -343,3 +347,24 @@ website:
               href: notebooks/prep/deep-dives/08-multimodal.ipynb
             - text: "09. IaC & Container Orchestration"
               href: notebooks/prep/deep-dives/09-iac-containers.ipynb
+
+    - id: classical
+      style: "floating"
+      collapse-level: 2
+      align: left
+      contents:
+        - section: ""
+          href: notebooks/classical/index.ipynb
+          contents:
+            - text: "01. Bias, Variance & Regularization"
+              href: notebooks/classical/01-bias-variance.ipynb
+            - text: "02. Tree-Based Methods"
+              href: notebooks/classical/02-tree-methods.ipynb
+            - text: "03. Bayesian Thinking"
+              href: notebooks/classical/03-bayesian-thinking.ipynb
+            - text: "04. Feature Engineering & Unsupervised Learning"
+              href: notebooks/classical/04-feature-engineering.ipynb
+            - text: "05. Evaluation & Causal Reasoning"
+              href: notebooks/classical/05-evaluation-causal.ipynb
+            - text: "06. Tabular Deep Learning"
+              href: notebooks/classical/06-tabular-dl.ipynb
