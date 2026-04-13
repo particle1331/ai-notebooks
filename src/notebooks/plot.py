@@ -146,11 +146,10 @@ class Panel:
         x : array-like, optional
             X-axis values.  Defaults to ``range(len(y))``.
         smooth : int, optional
-            If set, draws the raw trace at ``alpha=0.3`` and overlays an
-            exponential moving average (EMA) with the given span at full
-            opacity.  Uses ``alpha = 2 / (span + 1)`` (same convention
-            as pandas and TensorBoard).  No lag — the smoothed line
-            covers the full x range.
+            If set, draws the raw trace at ``alpha=0.3`` and overlays an exponential 
+            moving average (EMA) with based on smooth parameter at full opacity. Uses 
+            ``ema_alpha = 2 / (smooth + 1)``(same convention as pandas and TensorBoard).  
+            No lag — the smoothed line covers the full x range.
         """
         y = _to_numpy(y)
         x = np.arange(len(y)) if x is None else _to_numpy(x)
