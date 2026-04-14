@@ -531,7 +531,7 @@ class Plot:
         self._panels = [Panel(ax) for ax in self._axes_flat]
 
         if title is not None:
-            self.fig.suptitle(title, fontsize=14, fontweight="bold")
+            self.fig.suptitle(title, fontsize=14)
 
     def __getitem__(self, idx: int | tuple[int, int]) -> Panel:
         """Access a panel by flat index ``plot[i]`` or 2D index ``plot[i, j]``."""
