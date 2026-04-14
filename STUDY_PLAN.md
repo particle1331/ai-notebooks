@@ -81,5 +81,5 @@ Prep track runs at full speed; heavy foundational notebooks get 2-week slots.
 | | | [ ] `tooling/03` Singular Value Decomposition | |
 | 40 | | [ ] `tooling/04` MCP Servers with FastMCP | |
 | | | [ ] `tooling/05` Security Tooling for Developers | |
-| 41 | | [ ] `tooling/10` Weak Supervision | |
+| 41 | | [x] `tooling/10` Weak Supervision | |
 | | | [ ] `tooling/11` Generating Exercise Notebooks | **All 109 notebooks complete** |
