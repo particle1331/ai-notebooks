@@ -192,6 +192,10 @@ website:
               href: notebooks/tooling/09-rl-for-llms.ipynb
             - text: "Weak Supervision"
               href: notebooks/tooling/10-weak-supervision.ipynb
+            - text: "11. Text-to-LoRA"
+              href: notebooks/tooling/11-text-to-lora.ipynb
+            - text: "Prompt Optimization"
+              href: notebooks/tooling/12-prompt-optimization.ipynb
 
     - id: agents
       style: "floating"

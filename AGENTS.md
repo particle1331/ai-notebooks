@@ -120,7 +120,7 @@ Notebooks in `notebooks/` follow structured pedagogical patterns:
 ### Code Cell Conventions
 - **Every cell preceded by descriptive markdown** explaining the cell's purpose
 - Use **bold structural labels** (`**Data.**`, `**Model.**`, `**Training.**`, etc.) to organize cell content
-- **Numbered annotations** (`# (1)`, `# (2)`) for comments on non-obvious lines
+- **Numbered annotations** (`# <1>`, `# <2>`) for comments on non-obvious lines — Quarto renders these as clickable callouts when `highlight-annotations: true` is set
 
 ### Markdown & Prose
 - **Action-first style:** "We compute X" rather than "Computing X is done"
