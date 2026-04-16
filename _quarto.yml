@@ -54,12 +54,12 @@ website:
             href: notebooks/agents/index.html
           - text: "Application Development"
             href: notebooks/apps/index.html
-          - text: "Special Topics & Tooling"
-            href: notebooks/tooling/index.html
           - text: "AI Engineering Crash Course"
             href: notebooks/prep/index.html
           - text: "Classical Machine Learning"
             href: notebooks/classical/index.html
+          - text: "Special Topics & Tooling"
+            href: notebooks/tooling/index.html
 
     tools:
       - icon: github
@@ -192,8 +192,6 @@ website:
               href: notebooks/tooling/09-rl-for-llms.ipynb
             - text: "Weak Supervision"
               href: notebooks/tooling/10-weak-supervision.ipynb
-            - text: "Generating Exercise Notebooks"
-              href: notebooks/tooling/11-exercise-gen.ipynb
 
     - id: agents
       style: "floating"
