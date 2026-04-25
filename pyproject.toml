@@ -42,6 +42,7 @@ dependencies = [
     "gymnasium>=1.2.3",
     "torchsummary>=1.5.1",
     "opencv-python>=4.13.0.92",
+    "sentence-transformers>=5.4.1",
 ]
 
 [build-system]
