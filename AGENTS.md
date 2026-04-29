@@ -95,6 +95,26 @@ ruff check --fix .   # Auto-fix style issues
 - Trailing whitespace: remove
 - Use double quotes for strings (convention in this project)
 
+### Collection Literals (Lists, Sets, Tuples)
+
+When a list, set, or tuple of literals (strings, numbers) spans multiple items, format with **one element per line**, aligned to the opening bracket:
+
+```python
+# GOOD — one element per line, aligned
+pos_words = [
+    "excellent", "masterpiece", "outstanding", "brilliant", "perfect",
+    "superb", "fantastic", "wonderful", "phenomenal", "magnificent",
+    "flawless", "exceptional", "incredible"
+]
+
+# BAD — packed onto the assignment line
+pos_words = ["excellent", "masterpiece", "outstanding", "brilliant", "perfect",
+             "superb", "fantastic", "wonderful", "phenomenal", "magnificent",
+             "flawless", "exceptional", "incredible"]
+```
+
+The closing bracket sits on its own line at the outer indentation level. Elements within each line are grouped to stay within the 88-character line limit. This applies equally to sets (`{...}`), tuples (`(...)`), and any sequence of literals.
+
 ### Error Handling
 
 - Catch specific exceptions, not bare `except:`
