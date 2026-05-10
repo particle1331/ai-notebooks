@@ -1,0 +1,18 @@
+{
+  "subagents": {
+    "agentOverrides": {
+      "notebook-writer": {
+        "model": "claude-sonnet-4.6"
+      },
+      "notebook-planner": {
+        "model": "claude-opus-4.6"
+      },
+      "oracle": {
+        "model": "claude-opus-4.6"
+      },
+      "scout": {
+        "model": "claude-haiku-4.5"
+      }
+    }
+  }
+}

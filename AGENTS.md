@@ -233,16 +233,6 @@ When creating temporary files (e.g., patch scripts, one-off helper scripts, scra
 - Create feature branches for significant changes
 - Commit messages should be descriptive and reference issue numbers when applicable
 
-## AI Assistant Preferences (from .github/AI_PREFERENCES.md)
-
-When working on this repository:
-
-1. **Notebook Output Policy:** Check output size before reading; skip large plots/logs; focus on code logic
-2. **Cell Reference Format:** Use `notebook.ipynb:[N]` or `notebook.ipynb:[N,L1:L2]` notation
-3. **Conciseness:** Be direct and concise in explanations
-4. **Markdown:** Use GitHub-flavored markdown for formatting
-5. **Project Structure:** Use `/init` command output to understand structure when needed
-
 ## Dependencies & Environment
 
 **Python:** 3.13+

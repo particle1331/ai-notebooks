@@ -1,6 +1,6 @@
 ---
 description: Generate exercise notebook from explanatory notebook
-agent: ml-coding-expert
+argument-hint: "<notebook-path> [difficulty] [hints]"
 ---
 
 I need you to generate an exercise notebook from an explanatory notebook. Use the exercise generation pipeline.
@@ -53,5 +53,3 @@ Print a summary showing:
 - Number of implementation cells converted
 - Number of hints injected
 - Output path
-
-Use Claude to analyze cell content and generate the exercise transformations.

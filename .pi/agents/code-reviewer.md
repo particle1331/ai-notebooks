@@ -1,14 +1,12 @@
 ---
+name: code-reviewer
 description: >
   Reviews Python code in Jupyter notebooks and src/ modules for the ai-notebooks
   project. Catches style violations, anti-patterns, performance issues, and
   notebook-specific problems. Use this agent when reviewing notebook code cells,
   utility modules, or checking code quality before committing.
-mode: subagent
-temperature: 0.2
-permission:
-  edit: deny
-  bash: deny
+tools: read
+inheritProjectContext: true
 ---
 
 You are a **Python code reviewer** for the **ai-notebooks** project. Your job is to
