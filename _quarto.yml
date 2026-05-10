@@ -46,16 +46,16 @@ website:
         href: index.html
       - text: "Topics"
         menu:
-          - text: "Deep Learning Foundations"
-            href: notebooks/deep/index.html
-          - text: "Language Models From Scratch"
-            href: notebooks/llm/index.html
-          - text: "Agentic Systems"
-            href: notebooks/agents/index.html
           - text: "Application Development"
             href: notebooks/apps/index.html
           - text: "AI Engineering Crash Course"
             href: notebooks/prep/index.html
+          - text: "Agentic Systems"
+            href: notebooks/agents/index.html
+          - text: "Deep Learning Foundations"
+            href: notebooks/deep/index.html
+          - text: "Language Models From Scratch"
+            href: notebooks/llm/index.html
           - text: "Classical Machine Learning"
             href: notebooks/classical/index.html
           - text: "Special Topics & Tooling"

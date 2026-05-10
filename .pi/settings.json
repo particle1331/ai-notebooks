@@ -3,11 +3,12 @@
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-markdown-preview",
     "npm:@ifi/oh-pi-themes",
-    "npm:@feniix/pi-statusline",
     "npm:pi-subagents",
     "npm:pi-mcp-adapter",
     "npm:@juicesharp/rpiv-web-tools",
-    "npm:pi-lens"
+    "npm:pi-lens",
+    "npm:pi-powerline-footer",
+    "npm:@juicesharp/rpiv-btw"
   ],
   "subagents": {
     "agentOverrides": {
