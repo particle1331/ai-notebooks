@@ -93,6 +93,9 @@ website:
               href: notebooks/deep/08-rnn.ipynb
             - text: "09. Attention & Transformers"
               href: notebooks/deep/09-attention-transformers.ipynb
+        - section: "Appendix"
+          href: notebooks/deep/index.ipynb
+          contents:
             - text: "11. Activation Patterns"
               href: notebooks/deep/11-appendix-expressivity.ipynb
             - text: "12. ResNet from Scratch"
