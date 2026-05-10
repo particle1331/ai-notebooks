@@ -1,4 +1,14 @@
 {
+  "packages": [
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-markdown-preview",
+    "npm:@ifi/oh-pi-themes",
+    "npm:@feniix/pi-statusline",
+    "npm:pi-subagents",
+    "npm:pi-mcp-adapter",
+    "npm:@juicesharp/rpiv-web-tools",
+    "npm:pi-lens"
+  ],
   "subagents": {
     "agentOverrides": {
       "notebook-writer": {

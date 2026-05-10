@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This document provides guidelines for agentic coding systems and AI assistants working on the ai-notebooks project.
+Guidelines for agentic coding systems working on the ai-notebooks project.
 
 ## Project Overview
 
@@ -12,210 +12,95 @@ This document provides guidelines for agentic coding systems and AI assistants w
 - **Documentation:** Quarto-rendered website published to GitHub Pages
 - **Structure:** Notebooks organized by topic (deep learning, LLMs, agents, apps, tooling)
 
-## Build & Development Commands
+## Commands
 
-### Environment Setup
-```bash
-make uv              # Install/verify uv package manager
-make venv            # Create Python 3.13 venv and sync dependencies
-make requirements    # Generate requirements.txt from pyproject.toml
-```
-
-### Documentation & Preview
-```bash
-make docs            # Preview documentation with quarto (http://localhost:4200)
-```
-
-### Running Code
-```bash
-jupyter notebook     # Launch Jupyter server (notebooks auto-discovered)
-python -m notebook   # Alternative Jupyter launch
-```
-
-### Package Development
-```bash
-uv sync              # Sync dependencies from uv.lock
-uv add <package>     # Add new dependency
-uv remove <package>  # Remove dependency
-```
+| Task                          | Command              |
+| ----------------------------- | -------------------- |
+| Install/verify uv             | `make uv`            |
+| Create venv + sync deps       | `make venv`          |
+| Generate requirements.txt     | `make requirements`  |
+| Preview docs (localhost:4200) | `make docs`          |
+| Launch Jupyter                | `jupyter notebook`   |
+| Sync deps from lockfile       | `uv sync`            |
+| Add dependency                | `uv add <package>`   |
+| Lint                          | `ruff check .`       |
+| Auto-fix lint                 | `ruff check --fix .` |
 
 ## Testing & Validation
 
-**Note:** This is a research/educational repository, not a production system.
-- **No formal testing framework** is configured (no pytest, unittest, tox)
-- **Notebooks serve as executable documentation** – validation occurs via cell execution
-- **Manual testing approach:** Run cells to verify outputs match expected behavior
-- **Code in src/notebooks/** should be validated through import and manual testing in notebooks
+This is a research/educational repository — no formal test framework is configured.
 
-When modifying code, verify changes by:
-1. Running affected notebook cells
-2. Checking that expected outputs are produced
-3. Running `make docs` to ensure documentation builds without errors
+- **Notebooks are executable documentation** — validation occurs via cell execution
+- **Code in `src/notebooks/`** should be validated through import and manual testing in notebooks
 
-## Code Style & Standards
+When modifying code, verify by: (1) running affected notebook cells, (2) checking expected outputs, and (3) running `make docs` to ensure documentation builds without errors.
 
-### Python Code Style
+## Python Code Style
 
-**Linting:** Ruff (configured in pyproject.toml)
-```bash
-ruff check .         # Run linter
-ruff check --fix .   # Auto-fix style issues
-```
+**Linting:** Ruff (configured in `pyproject.toml`). Ignores E731 (lambda assignment allowed). Enforces PEP 8 otherwise.
 
-**Configuration** (pyproject.toml):
-- Ignores E731 (lambda assignment expressions allowed)
-- Enforces PEP 8 standards otherwise
-- No explicit formatter; uses Ruff defaults
+**Naming:** `snake_case` for functions/variables, `PascalCase` for classes, `UPPERCASE` for constants, `_` prefix for private/internal.
 
-**Naming Conventions:**
-- Functions/variables: `snake_case`
-- Classes: `PascalCase`
-- Constants: `UPPERCASE_WITH_UNDERSCORES`
-- Private/internal: prefix with `_`
+**Imports:** Three groups (stdlib → third-party → local). Prefer explicit imports (`from module import item`). Use absolute imports; avoid relative imports in packages.
 
-### Imports
+**Type hints:** Required for function signatures in `src/`. Use standard types (`str`, `int`, `list[T]`, `dict[K, V]`, `Optional[T]`). Notebooks can be more flexible.
 
-- Organize in three groups: stdlib → third-party → local (PEP 8 style)
-- Prefer explicit imports: `from module import specific_item` over `import module`
-- Use absolute imports; avoid relative imports in packages
-- Group related imports together
+**Formatting:** 88-char line length, 4-space indent, double quotes, 2 blank lines between top-level definitions. Remove trailing whitespace.
 
-### Type Hints
-
-- Use type hints for function signatures in production code (src/ directory)
-- Use standard types: `str`, `int`, `list[T]`, `dict[K, V]`, `tuple[...]`, `Optional[T]`
-- Complex types: import from `typing` module if needed (Union, Callable, etc.)
-- Notebooks can be more flexible with types; include hints in code cells for clarity
-
-### Formatting & Whitespace
-
-- **Line length:** 88 characters (Ruff default)
-- **Indentation:** 4 spaces
-- **Blank lines:** 2 between top-level definitions, 1 between methods
-- Trailing whitespace: remove
-- Use double quotes for strings (convention in this project)
-
-### Collection Literals (Lists, Sets, Tuples)
-
-When a list, set, or tuple of literals (strings, numbers) spans multiple items, format with **one element per line**, aligned to the opening bracket:
+**Collection literals:** When spanning multiple items, format with one element per line:
 
 ```python
-# GOOD — one element per line, aligned
+# GOOD
 pos_words = [
     "excellent", "masterpiece", "outstanding", "brilliant", "perfect",
     "superb", "fantastic", "wonderful", "phenomenal", "magnificent",
-    "flawless", "exceptional", "incredible"
 ]
 
 # BAD — packed onto the assignment line
 pos_words = ["excellent", "masterpiece", "outstanding", "brilliant", "perfect",
-             "superb", "fantastic", "wonderful", "phenomenal", "magnificent",
-             "flawless", "exceptional", "incredible"]
+             "superb", "fantastic", "wonderful", "phenomenal", "magnificent"]
 ```
 
-The closing bracket sits on its own line at the outer indentation level. Elements within each line are grouped to stay within the 88-character line limit. This applies equally to sets (`{...}`), tuples (`(...)`), and any sequence of literals.
+**Error handling:** Catch specific exceptions, not bare `except:`. Log errors with context using `rich` when available.
 
-### Error Handling
+**Documentation:** Triple-quoted docstrings for functions/classes/modules. Comments explain "why", not "what".
 
-- Catch specific exceptions, not bare `except:`
-- Use try/except/else/finally as appropriate
-- Log errors with context using `rich` library when available
-- In notebooks: display error context with clear explanations for debugging
+## Jupyter Notebook Conventions
 
-### Documentation & Comments
-
-- **Docstrings:** Use triple-quoted strings for functions, classes, modules
-- **Comments:** Explain "why", not "what"; code should be self-explanatory
-- **Notebooks:** Precede every code cell with markdown explaining intent (see notebook guidelines below)
-
-## Jupyter Notebook Writing Standards
-
-Notebooks in `notebooks/` follow structured pedagogical patterns:
+Notebooks follow structured pedagogical patterns. For detailed prose style (voice, emphasis, math rigor), load the `notebook-writing-style` skill. For Quarto-specific syntax (directives, callouts, cross-references, index pages, sidebar), load the `quarto-dev` skill.
 
 ### Structure
-- **Title** + **Introduction** (1-3 paragraphs overview)
+
+- **Title** + **Introduction** (1–3 paragraphs overview)
 - **Sections** with theory followed by implementation
 - **Optional appendices** for advanced topics
+- **Micro-pattern:** motivating question → theory → boxed result → code cell → observation
 
 ### Code Cell Conventions
+
 - **Every cell preceded by descriptive markdown** explaining the cell's purpose
-- Use **bold structural labels** (`**Data.**`, `**Model.**`, `**Training.**`, etc.) to organize cell content
-- **Numbered annotations** (`# <1>`, `# <2>`) for comments on non-obvious lines — Quarto renders these as clickable callouts when `highlight-annotations: true` is set
+- Use **bold structural labels** (`**Data.**`, `**Model.**`, `**Training.**`, etc.) as mini-headers
+- **Numbered annotations** (`# <1>`, `# <2>`) for line-level commentary — annotation list in the following markdown cell
 
-### Markdown & Prose
-- **Action-first style:** "We compute X" rather than "Computing X is done"
-- **Inline enumeration** for lists within sentences
-- **Math:** Use inline LaTeX (`$...$`) for all quantities; display equations in `$$...$$` blocks
-- **Emphasis:** Bold for technical terms and labels only; italics for informal usage
-- **Callouts:** Use Quarto syntax:
-  - `:::{.callout-note}` for enriching information
-  - `:::{.callout-caution}` for pitfalls/warnings
-  - `:::{.callout-important}` for hard constraints
+### Cell References
 
-### Cell References in Documentation
-When referring to notebook cells in code or documentation, use:
-- `path/to/notebook.ipynb:[N]` – cell with execution count N
-- `path/to/notebook.ipynb:[N,L1:L2]` – lines L1-L2 within that cell
+When referring to notebook cells in code or documentation:
 
-Examples:
-- `deep/03.ipynb:[50]` – execution count 50 in notebooks/deep/03.ipynb
-- `deep/03.ipynb:[50,11:23]` – lines 11-23 of that cell
+- `path/to/notebook.ipynb:[N]` — cell with execution count N
+- `path/to/notebook.ipynb:[N,L1:L2]` — lines L1–L2 within that cell
 
 ### Output Handling
+
 When reading notebooks:
+
 - **Skip large outputs:** SVG, PNG, plots, binary data, training logs (>1000 lines)
 - **Read small text outputs:** Model summaries, error messages, results tables
-- **Focus on code cells:** The actual logic and logic explanations matter most
-
-### Index Notebook Structure
-
-The gold standard for index notebooks is `notebooks/apps/index.ipynb`. All series and sub-series index files must follow this structure exactly:
-
-- **Cell 0:** `# Series Title` — title only, nothing else
-- **Cell 1:** Single plain paragraph — the hook. No heading. Establishes stakes and context.
-- **Cell 2:** `## About This Series` — with bold labels **Audience.**, **Stack.**, and a goal/project description. Use `[text]{.mark}` for 1–2 highlighted key phrases.
-- **Cells 3–N:** One cell per part/section, each containing `## Part X. Name` (or `## Course Notebooks` for flat series) followed by a Quarto table. Table format rules:
-  - `#` column: **plain text number** (e.g. `01`, `02`) — never a link
-  - `#` column: **plain text number** (e.g. `01`, `02`) for top-level series. Sub-series referenced from a parent index use a series prefix with colon separator in the `#` column: `NBX:01`, `CDA:01`, `DS:01`, `DD:01`.
-  - `Title` column: **linked title** — plain descriptive text, no number prefix. Format: `[Notebook Title](/notebooks/path.html)`.
-  - Table ends with `: {tbl-colwidths="[...]"}` on a new line
-- **Final cell:** `## Prerequisites` and `## How to Read This Series` combined in one cell. "How to Read" uses 3–5 bolded `**If you...**` navigation entries.
-- No trailing empty cells.
-- Each cell's `"source"` is a single string (not a list of lines).
-
-### Title Numbering in Index Tables
-
-The `#` column of index tables carries the notebook number. This applies to all series except `tooling/`.
-
-**Within a series' own index** (e.g. `deep/index.ipynb`, `apps/cda/index.ipynb`), the `#` column uses plain numbers:
-- `| 01 | [Softmax Regression](01-softmax-regression.ipynb) | ... |`
-
-**Sub-series referenced from a parent index** use a series prefix with colon separator in the `#` column:
-- NBX (in `apps/index.ipynb`): `| NBX:01 | [Platform Architecture](/notebooks/apps/nbx/01-architecture.html) | ... |`
-- CDA (in `apps/index.ipynb`): `| CDA:01 | [Streaming LLM Client](/notebooks/apps/cda/01-client.html) | ... |`
-- DeepSeek (in `llm/index.ipynb`): `| DS:01 | [MLA & Mixture of Experts](/notebooks/llm/deepseek/01-deepseek-architecture.html) | ... |`
-- Deep Dives (in `prep/index.ipynb`): `| DD:01 | [Advanced RAG](/notebooks/prep/deep-dives/01-advanced-rag.html) | ... |`
-
-**Deep Dives in their own index** (`prep/deep-dives/index.ipynb`) also use the `DD:` prefix since that is their canonical numbering scheme.
-
-### Sidebar Numbering in `_quarto.yml`
-
-The Quarto sidebar `text:` entries in `_quarto.yml` carry the number prefix so the sidebar is easy to scan. The format is `"NN. Title"` (zero-padded two digits, period, space). This applies to all series except `tooling/`.
-
-Examples:
-- `- text: "01. Softmax Regression"`
-- `- text: "13. Machine Translation"`
-
-Sub-series entries within their parent sidebar section use plain numbers (the section header like `"NBX: Compute Platform"` already provides context):
-- `- text: "01. Platform Architecture"` (under `NBX: Compute Platform`)
-- `- text: "01. Streaming LLM Client"` (under `CDA: Coding Agent From Scratch`)
-- `- text: "01. MLA & Mixture of Experts"` (under `DeepSeek`)
-
-Deep dives use bare paths (no explicit `text:`), so Quarto infers the title from the notebook.
+- **Focus on code cells:** The actual logic and explanations matter most
 
 ## Project-Specific Utilities
 
-**src/notebooks/** provides helper modules:
+**`src/notebooks/`** provides helper modules:
+
 - `agents.chat`: ChatHistory and ChatCompletions classes for LLM interactions
 - `agents.tools`: Tool class for wrapping functions as callable tools
 - `agents.utils`: Deployment utilities, HTML tag extraction
@@ -224,7 +109,7 @@ When enhancing these utilities, maintain backward compatibility and update docst
 
 ## Temporary Files
 
-When creating temporary files (e.g., patch scripts, one-off helper scripts, scratch files), always write them to the `tmp/` folder at the project root (i.e., `<project_root>/tmp/`), not the OS-level `/tmp/`. Never create temporary files elsewhere in the workspace unless they are meant to be committed.
+Always write temporary files to `tmp/` at the project root, not `/tmp/`. Never create temporary files elsewhere in the workspace unless meant to be committed.
 
 ## Git Workflow
 
@@ -233,35 +118,19 @@ When creating temporary files (e.g., patch scripts, one-off helper scripts, scra
 - Create feature branches for significant changes
 - Commit messages should be descriptive and reference issue numbers when applicable
 
-## Dependencies & Environment
+## Dependencies
 
 **Python:** 3.13+
 
-**Key Dependencies:**
-- **ML/DL:** numpy, torch, torchvision, scikit-learn, matplotlib, seaborn
-- **LLMs:** openai, langchain, langgraph, groq, dspy, ollama
-- **Data:** pandas, datasets, boto3, chromadb
-- **Dev:** jupyter, ipykernel, ipywidgets, nbdime
-- **Utilities:** rich (for styled output), tqdm (progress bars), flet (UI apps)
-
-**Installing Packages:**
-```bash
-uv add package_name    # Add and sync
-uv sync                # Sync existing deps from lock file
-```
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Setup environment | `make venv` |
-| Run notebooks | `jupyter notebook` |
-| Preview docs | `make docs` |
-| Check style | `ruff check .` |
-| Fix style | `ruff check --fix .` |
-| Add dependency | `uv add <package>` |
+| Category  | Packages                                                     |
+| --------- | ------------------------------------------------------------ |
+| ML/DL     | numpy, torch, torchvision, scikit-learn, matplotlib, seaborn |
+| LLMs      | openai, langchain, langgraph, groq, dspy, ollama             |
+| Data      | pandas, datasets, boto3, chromadb                            |
+| Dev       | jupyter, ipykernel, ipywidgets, nbdime                       |
+| Utilities | rich, tqdm, flet                                             |
 
 ---
 
-**Last Updated:** 2026-04-06  
+**Last Updated:** 2026-05-11
 **Project Root:** `/Users/particle1331/code/latest/ai-notebooks`
