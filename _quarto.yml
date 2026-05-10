@@ -174,28 +174,28 @@ website:
           contents:
             - text: "Runpod Setup"
               href: notebooks/tooling/01-runpod.ipynb
-            - text: "OpenCode"
-              href: notebooks/tooling/02-opencode.ipynb
-            - text: "Singular Value Decomposition"
-              href: notebooks/tooling/03-svd.ipynb
-            - text: "MCP Servers"
-              href: notebooks/tooling/04-mcp.ipynb
-            - text: "Security Tooling"
-              href: notebooks/tooling/05-security.ipynb
-            - text: "RL1: Foundations"
-              href: notebooks/tooling/06-rl-foundations.ipynb
-            - text: "RL2: Policy Gradients"
-              href: notebooks/tooling/07-rl-policy-gradients.ipynb
-            - text: "RL3: Proximal Policy Optimization"
-              href: notebooks/tooling/08-rl-ppo.ipynb
-            - text: "RL4: RL for Language Models"
-              href: notebooks/tooling/09-rl-for-llms.ipynb
             - text: "Weak Supervision"
-              href: notebooks/tooling/10-weak-supervision.ipynb
-            - text: "11. Text-to-LoRA"
-              href: notebooks/tooling/11-text-to-lora.ipynb
+              href: notebooks/tooling/02-weak-supervision.ipynb
             - text: "Prompt Optimization"
-              href: notebooks/tooling/12-prompt-optimization.ipynb
+              href: notebooks/tooling/03-prompt-optimization.ipynb
+            - text: "OpenCode"
+              href: notebooks/tooling/04-opencode.ipynb
+            - text: "Singular Value Decomposition"
+              href: notebooks/tooling/05-svd.ipynb
+            - text: "MCP Servers"
+              href: notebooks/tooling/06-mcp.ipynb
+            - text: "Security Tooling"
+              href: notebooks/tooling/07-security.ipynb
+            - text: "RL1: Foundations"
+              href: notebooks/tooling/08-rl-foundations.ipynb
+            - text: "RL2: Policy Gradients"
+              href: notebooks/tooling/09-rl-policy-gradients.ipynb
+            - text: "RL3: Proximal Policy Optimization"
+              href: notebooks/tooling/10-rl-ppo.ipynb
+            - text: "RL4: RL for Language Models"
+              href: notebooks/tooling/11-rl-for-llms.ipynb
+            - text: "Text-to-LoRA"
+              href: notebooks/tooling/12-text-to-lora.ipynb
 
     - id: agents
       style: "floating"
