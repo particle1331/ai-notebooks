@@ -1,0 +1,136 @@
+# AGENTS.md
+
+Guidelines for agentic coding systems working on the ai-notebooks project.
+
+## Project Overview
+
+**ai-notebooks** is a research-focused monorepo combining Jupyter notebooks documenting AI/ML topics with supporting Python utilities and Flet applications. The project emphasizes educational clarity and reproducible research over production code patterns.
+
+- **Primary Language:** Python 3.13+
+- **Notebook Framework:** Jupyter with Quarto web publishing
+- **Package Manager:** `uv` (Astral's fast Python package manager)
+- **Documentation:** Quarto-rendered website published to GitHub Pages
+- **Structure:** Notebooks organized by topic (deep learning, LLMs, agents, apps, tooling)
+
+## Commands
+
+| Task                          | Command              |
+| ----------------------------- | -------------------- |
+| Install/verify uv             | `make uv`            |
+| Create venv + sync deps       | `make venv`          |
+| Generate requirements.txt     | `make requirements`  |
+| Preview docs (localhost:4200) | `make docs`          |
+| Launch Jupyter                | `jupyter notebook`   |
+| Sync deps from lockfile       | `uv sync`            |
+| Add dependency                | `uv add <package>`   |
+| Lint                          | `ruff check .`       |
+| Auto-fix lint                 | `ruff check --fix .` |
+
+## Testing & Validation
+
+This is a research/educational repository — no formal test framework is configured.
+
+- **Notebooks are executable documentation** — validation occurs via cell execution
+- **Code in `src/notebooks/`** should be validated through import and manual testing in notebooks
+
+When modifying code, verify by: (1) running affected notebook cells, (2) checking expected outputs, and (3) running `make docs` to ensure documentation builds without errors.
+
+## Python Code Style
+
+**Linting:** Ruff (configured in `pyproject.toml`). Ignores E731 (lambda assignment allowed). Enforces PEP 8 otherwise.
+
+**Naming:** `snake_case` for functions/variables, `PascalCase` for classes, `UPPERCASE` for constants, `_` prefix for private/internal.
+
+**Imports:** Three groups (stdlib → third-party → local). Prefer explicit imports (`from module import item`). Use absolute imports; avoid relative imports in packages.
+
+**Type hints:** Required for function signatures in `src/`. Use standard types (`str`, `int`, `list[T]`, `dict[K, V]`, `Optional[T]`). Notebooks can be more flexible.
+
+**Formatting:** 88-char line length, 4-space indent, double quotes, 2 blank lines between top-level definitions. Remove trailing whitespace.
+
+**Collection literals:** When spanning multiple items, format with one element per line:
+
+```python
+# GOOD
+pos_words = [
+    "excellent", "masterpiece", "outstanding", "brilliant", "perfect",
+    "superb", "fantastic", "wonderful", "phenomenal", "magnificent",
+]
+
+# BAD — packed onto the assignment line
+pos_words = ["excellent", "masterpiece", "outstanding", "brilliant", "perfect",
+             "superb", "fantastic", "wonderful", "phenomenal", "magnificent"]
+```
+
+**Error handling:** Catch specific exceptions, not bare `except:`. Log errors with context using `rich` when available.
+
+**Documentation:** Triple-quoted docstrings for functions/classes/modules. Comments explain "why", not "what".
+
+## Jupyter Notebook Conventions
+
+Notebooks follow structured pedagogical patterns. For detailed prose style (voice, emphasis, math rigor), load the `notebook-writing-style` skill. For Quarto-specific syntax (directives, callouts, cross-references, index pages, sidebar), load the `quarto-dev` skill.
+
+### Structure
+
+- **Title** + **Introduction** (1–3 paragraphs overview)
+- **Sections** with theory followed by implementation
+- **Optional appendices** for advanced topics
+- **Micro-pattern:** motivating question → theory → boxed result → code cell → observation
+
+### Code Cell Conventions
+
+- **Every cell preceded by descriptive markdown** explaining the cell's purpose
+- Use **bold structural labels** (`**Data.**`, `**Model.**`, `**Training.**`, etc.) as mini-headers
+- **Numbered annotations** (`# <1>`, `# <2>`) for line-level commentary — annotation list in the following markdown cell
+
+### Cell References
+
+When referring to notebook cells in code or documentation:
+
+- `path/to/notebook.ipynb:[N]` — cell with execution count N
+- `path/to/notebook.ipynb:[N,L1:L2]` — lines L1–L2 within that cell
+
+### Output Handling
+
+When reading notebooks:
+
+- **Skip large outputs:** SVG, PNG, plots, binary data, training logs (>1000 lines)
+- **Read small text outputs:** Model summaries, error messages, results tables
+- **Focus on code cells:** The actual logic and explanations matter most
+
+## Project-Specific Utilities
+
+**`src/notebooks/`** provides helper modules:
+
+- `agents.chat`: ChatHistory and ChatCompletions classes for LLM interactions
+- `agents.tools`: Tool class for wrapping functions as callable tools
+- `agents.utils`: Deployment utilities, HTML tag extraction
+
+When enhancing these utilities, maintain backward compatibility and update docstrings.
+
+## Temporary Files
+
+Always write temporary files to `tmp/` at the project root, not `/tmp/`. Never create temporary files elsewhere in the workspace unless meant to be committed.
+
+## Git Workflow
+
+- **Commit only when explicitly asked** by the user
+- **Push only when explicitly requested**; do not push without user consent
+- Create feature branches for significant changes
+- Commit messages should be descriptive and reference issue numbers when applicable
+
+## Dependencies
+
+**Python:** 3.13+
+
+| Category  | Packages                                                     |
+| --------- | ------------------------------------------------------------ |
+| ML/DL     | numpy, torch, torchvision, scikit-learn, matplotlib, seaborn |
+| LLMs      | openai, langchain, langgraph, groq, dspy, ollama             |
+| Data      | pandas, datasets, boto3, chromadb                            |
+| Dev       | jupyter, ipykernel, ipywidgets, nbdime                       |
+| Utilities | rich, tqdm, flet                                             |
+
+---
+
+**Last Updated:** 2026-05-11
+**Project Root:** `/Users/particle1331/code/latest/ai-notebooks`

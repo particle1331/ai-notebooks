@@ -1,0 +1,1566 @@
+{
+  "todo": [
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "category": "Meta",
+      "creation_time": "2025-10-28T20:13:56.073Z",
+      "description": {
+        "content": "**Planned paths**: 6. **Current:** 4\n   - Deep Learning\n   - Reinforcement Learning (*)\n   - LLM Engineering (*)\n   - Agentic Systems\n   - Dev Tooling\n   - App Development",
+        "mime": "text/markdown"
+      },
+      "details": {
+        "content": "## Guidelines / Demarcation\n\n**DL, RL**: clear. basically theory.\n\n**Agentic systems**: AI agents concepts + Patterns\n\n**LLM engg**: fine-tuning, reason, pre/post-training\n\n**Dev tooling:** tools that can be easily incorporated to improve existing workflows, infra, dev practices. For example new databases. duckdb, pandas -> polars. mlflow. prefect. or platforms like docker, runpod. designed for one-off things & mostly things useful for development, improve dev QoL.\n\n**App development:** Frontend / fullstack apps, large-scale data applications, system design. Maybe include 3-4 notebooks series covering a project. So these are more project based instead of documentation based like the above. Also include devops / mlops frameworks if its more \"production\" oriented than dev / tooling. Maybe include some Terraform, data engg. See datatalks.club zoom camps. \n\n## Resources\n\n- DL: UFAL course -> sgrivnod pytorch tutorials\n- RL: lapan book 3e. maybe alberta coursera (?)\n- LLME: raschka books LLM + reasoning models\n- Agentic: Ghassemi course + YT vids\n- App development: YT vids + udemy. \n\nNOTE: always try to incorporate / re-use old stuff / old notebooks.",
+        "mime": "text/markdown"
+      },
+      "id": "2",
+      "prio": 5,
+      "references": [],
+      "title": "ROADMAP"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "10",
+      "category": "Prep",
+      "description": {
+        "content": "Week 02 - Prep track\n\n**Path:** prep/03\n**Title:** RAG: Embeddings, Retrieval & Chunking",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 02 | prep/03 RAG: Embeddings, Retrieval & Chunking"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "11",
+      "category": "Prep",
+      "description": {
+        "content": "Week 02 - Prep track\n\n**Path:** prep/04\n**Title:** LLM Evaluation Concepts",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 02 | prep/04 LLM Evaluation Concepts"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "12",
+      "category": "Prep",
+      "description": {
+        "content": "Week 03 - Prep track\n\n**Path:** prep/05\n**Title:** ReAct & Tool Orchestration",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 03 | prep/05 ReAct & Tool Orchestration"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "13",
+      "category": "Prep",
+      "description": {
+        "content": "Week 03 - Prep track\n\n**Path:** prep/06\n**Title:** Prompt Management & Observability",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 03 | prep/06 Prompt Management & Observability"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "14",
+      "category": "Prep",
+      "description": {
+        "content": "Week 04 - Prep track\n\n**Path:** prep/07\n**Title:** Production RAG Pipeline",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 04 | prep/07 Production RAG Pipeline"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "15",
+      "category": "Prep",
+      "description": {
+        "content": "Week 04 - Prep track\n\n**Path:** prep/08\n**Title:** LangGraph & Multi-Agent Systems",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 04 | prep/08 LangGraph & Multi-Agent Systems"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "69",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 05 - Foundational track\n\n**Path:** deep/05\n**Title:** Activations and Gradients",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 05 | deep/05 Activations and Gradients"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "70",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 05 - Foundational track | Milestone: Core RAG + agents + eval + serving working\n\n**Path:** deep/06\n**Title:** Convolutional Networks",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 05 | deep/06 Convolutional Networks"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "16",
+      "category": "Prep",
+      "description": {
+        "content": "Week 05 - Prep track\n\n**Path:** prep/09\n**Title:** Fine-Tuning & Model Selection",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 05 | prep/09 Fine-Tuning & Model Selection"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "17",
+      "category": "Prep",
+      "description": {
+        "content": "Week 05 - Prep track | Milestone: Core RAG + agents + eval + serving working\n\n**Path:** prep/10\n**Title:** Model Serving & Deployment",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 05 | prep/10 Model Serving & Deployment"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "71",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 06 - Foundational track\n\n**Path:** deep/07\n**Title:** Language Modeling",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 06 | deep/07 Language Modeling"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "72",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 06 - Foundational track\n\n**Path:** deep/08\n**Title:** Recurrent Neural Networks",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 06 | deep/08 Recurrent Neural Networks"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "18",
+      "category": "Prep",
+      "description": {
+        "content": "Week 06 - Prep track\n\n**Path:** prep/11\n**Title:** Cost Optimization for LLM Workloads",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 06 | prep/11 Cost Optimization for LLM Workloads"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "19",
+      "category": "Prep",
+      "description": {
+        "content": "Week 06 - Prep track\n\n**Path:** prep/12\n**Title:** Docker, Kubernetes & IaC",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 06 | prep/12 Docker, Kubernetes & IaC"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "73",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 07 - Foundational track | Milestone: Core prep complete\n\n**Path:** deep/09\n**Title:** Attention and Transformers",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 07 | deep/09 Attention and Transformers"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "20",
+      "category": "Prep",
+      "description": {
+        "content": "Week 07 - Prep track | Milestone: Core prep complete\n\n**Path:** prep/13\n**Title:** Capstone: Compliance Document Reviewer",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 07 | prep/13 Capstone: Compliance Document Reviewer"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "21",
+      "category": "Prep",
+      "description": {
+        "content": "Week 08 - Prep track (Deep Dive)\n\n**Path:** prep/dd/01\n**Title:** Advanced RAG",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 08 | prep/dd/01 Advanced RAG"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "22",
+      "category": "Prep",
+      "description": {
+        "content": "Week 08 - Prep track (Deep Dive)\n\n**Path:** prep/dd/02\n**Title:** Automated Eval Pipelines",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 08 | prep/dd/02 Automated Eval Pipelines"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "74",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 09 - Foundational track (Advanced)\n\n**Path:** deep/adv/13\n**Title:** Machine Translation",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 09 | deep/adv/13 Machine Translation"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "23",
+      "category": "Prep",
+      "description": {
+        "content": "Week 09 - Prep track (Deep Dive)\n\n**Path:** prep/dd/03\n**Title:** Agent Memory",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 09 | prep/dd/03 Agent Memory"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "24",
+      "category": "Prep",
+      "description": {
+        "content": "Week 09 - Prep track (Deep Dive)\n\n**Path:** prep/dd/04\n**Title:** Resilience Patterns",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 09 | prep/dd/04 Resilience Patterns"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "75",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 10 - Foundational track (Advanced)\n\n**Path:** deep/adv/14\n**Title:** Generative Models (VAEs & GANs)",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 10 | deep/adv/14 Generative Models (VAEs & GANs)"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "25",
+      "category": "Prep",
+      "description": {
+        "content": "Week 10 - Prep track (Deep Dive)\n\n**Path:** prep/dd/05\n**Title:** MLOps: CI/CD for AI",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 10 | prep/dd/05 MLOps: CI/CD for AI"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "26",
+      "category": "Prep",
+      "description": {
+        "content": "Week 10 - Prep track (Deep Dive)\n\n**Path:** prep/dd/06\n**Title:** AI Security & Compliance",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 10 | prep/dd/06 AI Security & Compliance"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "76",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 11 - Foundational track (Advanced)\n\n**Path:** deep/adv/15\n**Title:** Diffusion Models",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 11 | deep/adv/15 Diffusion Models"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "27",
+      "category": "Prep",
+      "description": {
+        "content": "Week 11 - Prep track (Deep Dive)\n\n**Path:** prep/dd/07\n**Title:** Advanced Embeddings",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 11 | prep/dd/07 Advanced Embeddings"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "28",
+      "category": "Prep",
+      "description": {
+        "content": "Week 11 - Prep track (Deep Dive)\n\n**Path:** prep/dd/08\n**Title:** Multimodal LLMs",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 11 | prep/dd/08 Multimodal LLMs"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "29",
+      "category": "Prep",
+      "description": {
+        "content": "Week 12 - Prep track (Deep Dive) | Milestone: All prep deep dives complete\n\n**Path:** prep/dd/09\n**Title:** IaC & Container Orchestration",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 12 | prep/dd/09 IaC & Container Orchestration"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "30",
+      "category": "Agents",
+      "description": {
+        "content": "Week 13 - Agents track\n\n**Path:** agents/00\n**Title:** Using LLMs as Agents",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 13 | agents/00 Using LLMs as Agents"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "31",
+      "category": "Agents",
+      "description": {
+        "content": "Week 13 - Agents track\n\n**Path:** agents/01\n**Title:** Giving Agents Access to Tools",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 13 | agents/01 Giving Agents Access to Tools"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "77",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 13 - Foundational track (Advanced)\n\n**Path:** deep/adv/16\n**Title:** Semantic Segmentation",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 13 | deep/adv/16 Semantic Segmentation"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "78",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 13 - Foundational track (Advanced)\n\n**Path:** deep/adv/17\n**Title:** Image Captioning",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 13 | deep/adv/17 Image Captioning"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "32",
+      "category": "Agents",
+      "description": {
+        "content": "Week 14 - Agents track\n\n**Path:** agents/02\n**Title:** Chain-of-Thought & Reasoning",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 14 | agents/02 Chain-of-Thought & Reasoning"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "33",
+      "category": "Agents",
+      "description": {
+        "content": "Week 14 - Agents track\n\n**Path:** agents/03\n**Title:** Building and Running an Agent Loop",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 14 | agents/03 Building and Running an Agent Loop"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "79",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 14 - Foundational track (Advanced)\n\n**Path:** deep/11-app\n**Title:** Activation Patterns & Expressivity",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 14 | deep/11-app Activation Patterns & Expressivity"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "80",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 14 - Foundational track (Advanced)\n\n**Path:** deep/12-app\n**Title:** ResNet from Scratch",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 14 | deep/12-app ResNet from Scratch"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "34",
+      "category": "Agents",
+      "description": {
+        "content": "Week 15 - Agents track | Milestone: DL foundations complete\n\n**Path:** agents/04\n**Title:** Managing What the Agent Sees",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 15 | agents/04 Managing What the Agent Sees"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "35",
+      "category": "Agents",
+      "description": {
+        "content": "Week 15 - Agents track\n\n**Path:** agents/05\n**Title:** Long-Term Memory",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 15 | agents/05 Long-Term Memory"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "81",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 15 - Foundational track (Advanced) | Milestone: DL foundations complete\n\n**Path:** deep/18-app\n**Title:** Double Descent",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 15 | deep/18-app Double Descent"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "36",
+      "category": "Agents",
+      "description": {
+        "content": "Week 16 - Agents track\n\n**Path:** agents/06\n**Title:** Keeping Agents Safe in Production",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 16 | agents/06 Keeping Agents Safe in Production"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "37",
+      "category": "Agents",
+      "description": {
+        "content": "Week 16 - Agents track\n\n**Path:** agents/07\n**Title:** Evaluating Agent Behavior",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 16 | agents/07 Evaluating Agent Behavior"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "82",
+      "category": "LLM",
+      "description": {
+        "content": "Week 16 - Foundational track (LLM)\n\n**Path:** llm/01\n**Title:** Building a GPT from Scratch",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 16 | llm/01 Building a GPT from Scratch"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "38",
+      "category": "Agents",
+      "description": {
+        "content": "Week 17 - Agents track\n\n**Path:** agents/08\n**Title:** Structured Workflows vs Full Autonomy",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 17 | agents/08 Structured Workflows vs Full Autonomy"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "39",
+      "category": "Agents",
+      "description": {
+        "content": "Week 17 - Agents track\n\n**Path:** agents/09\n**Title:** Multi-Agent Coordination",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 17 | agents/09 Multi-Agent Coordination"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "40",
+      "category": "Agents",
+      "description": {
+        "content": "Week 18 - Agents track | Milestone: Full agent lifecycle mastered\n\n**Path:** agents/10\n**Title:** MCP and Plugin Architectures",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 18 | agents/10 MCP and Plugin Architectures"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "83",
+      "category": "LLM",
+      "description": {
+        "content": "Week 18 - Foundational track (LLM)\n\n**Path:** llm/02\n**Title:** Byte Pair Encoding & Vocabulary Design",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 18 | llm/02 Byte Pair Encoding & Vocabulary Design"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "41",
+      "category": "Apps",
+      "description": {
+        "content": "Week 19 - Apps track\n\n**Path:** apps/01\n**Title:** Flet I: Basics",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 19 | apps/01 Flet I: Basics"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "42",
+      "category": "Apps",
+      "description": {
+        "content": "Week 19 - Apps track\n\n**Path:** apps/03\n**Title:** Flet II: Declarative UI",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 19 | apps/03 Flet II: Declarative UI"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "84",
+      "category": "LLM",
+      "description": {
+        "content": "Week 19 - Foundational track (LLM)\n\n**Path:** llm/03\n**Title:** Data Pipelines for LM Pretraining",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 19 | llm/03 Data Pipelines for LM Pretraining"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "85",
+      "category": "LLM",
+      "description": {
+        "content": "Week 19 - Foundational track (LLM)\n\n**Path:** llm/04\n**Title:** Pretraining Loop: Optimizer, Schedule, Mixed Precision",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 19 | llm/04 Pretraining Loop: Optimizer, Schedule, Mixed Precision"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "43",
+      "category": "Apps",
+      "description": {
+        "content": "Week 20 - Apps track\n\n**Path:** apps/05\n**Title:** FastAPI Fundamentals",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 20 | apps/05 FastAPI Fundamentals"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "44",
+      "category": "Apps",
+      "description": {
+        "content": "Week 20 - Apps track\n\n**Path:** apps/06\n**Title:** Docker & Local Infrastructure",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 20 | apps/06 Docker & Local Infrastructure"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "86",
+      "category": "LLM",
+      "description": {
+        "content": "Week 20 - Foundational track (LLM)\n\n**Path:** llm/05\n**Title:** Gradient and Activation Diagnostics",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 20 | llm/05 Gradient and Activation Diagnostics"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "87",
+      "category": "LLM",
+      "description": {
+        "content": "Week 20 - Foundational track (LLM)\n\n**Path:** llm/06\n**Title:** Pretraining nanoGPT on TinyShakespeare",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 20 | llm/06 Pretraining nanoGPT on TinyShakespeare"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "45",
+      "category": "Apps",
+      "description": {
+        "content": "Week 21 - Apps track\n\n**Path:** apps/07\n**Title:** Database Design & ORM",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 21 | apps/07 Database Design & ORM"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "46",
+      "category": "Apps",
+      "description": {
+        "content": "Week 21 - Apps track\n\n**Path:** apps/08\n**Title:** S3 Integration & Batch Pipelines",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 21 | apps/08 S3 Integration & Batch Pipelines"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "47",
+      "category": "Apps",
+      "description": {
+        "content": "Week 22 - Apps track\n\n**Path:** apps/09\n**Title:** Embeddings & Vector Search",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 22 | apps/09 Embeddings & Vector Search"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "48",
+      "category": "Apps",
+      "description": {
+        "content": "Week 22 - Apps track\n\n**Path:** apps/10\n**Title:** People Clustering (MTCNN + FaceNet)",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 22 | apps/10 People Clustering (MTCNN + FaceNet)"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "88",
+      "category": "LLM",
+      "description": {
+        "content": "Week 22 - Foundational track (LLM)\n\n**Path:** llm/07\n**Title:** Multi-GPU Training with DDP and FSDP",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 22 | llm/07 Multi-GPU Training with DDP and FSDP"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "49",
+      "category": "Apps",
+      "description": {
+        "content": "Week 23 - Apps track | Milestone: Can pretrain an LLM from scratch on multiple GPUs\n\n**Path:** apps/11\n**Title:** Connecting Flet to FastAPI",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 23 | apps/11 Connecting Flet to FastAPI"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "50",
+      "category": "Apps",
+      "description": {
+        "content": "Week 23 - Apps track\n\n**Path:** apps/12\n**Title:** Realtime Data & WebSockets",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 23 | apps/12 Realtime Data & WebSockets"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "51",
+      "category": "Apps",
+      "description": {
+        "content": "Week 24 - Apps track\n\n**Path:** apps/13\n**Title:** AI Summaries & Multimodal Queries",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 24 | apps/13 AI Summaries & Multimodal Queries"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "52",
+      "category": "Apps",
+      "description": {
+        "content": "Week 24 - Apps track | Milestone: Photo app shipped\n\n**Path:** apps/14\n**Title:** Photo App: End-to-End",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 24 | apps/14 Photo App: End-to-End"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "89",
+      "category": "LLM",
+      "description": {
+        "content": "Week 24 - Foundational track (LLM)\n\n**Path:** llm/08\n**Title:** Instruction Tuning with SFT and LoRA",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 24 | llm/08 Instruction Tuning with SFT and LoRA"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "90",
+      "category": "LLM",
+      "description": {
+        "content": "Week 24 - Foundational track (LLM) | Milestone: Photo app shipped\n\n**Path:** llm/09\n**Title:** DPO and Reward Modeling",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 24 | llm/09 DPO and Reward Modeling"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "53",
+      "category": "Apps",
+      "description": {
+        "content": "Week 25 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/01\n**Title:** Streaming LLM Client",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 25 | apps/cda/01 Streaming LLM Client"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "54",
+      "category": "Apps",
+      "description": {
+        "content": "Week 25 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/02\n**Title:** The Tool System",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 25 | apps/cda/02 The Tool System"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "91",
+      "category": "LLM",
+      "description": {
+        "content": "Week 25 - Foundational track (LLM)\n\n**Path:** llm/10\n**Title:** GRPO: RL from Verifiable Rewards",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 25 | llm/10 GRPO: RL from Verifiable Rewards"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "55",
+      "category": "Apps",
+      "description": {
+        "content": "Week 26 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/03\n**Title:** The Agent Loop",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 26 | apps/cda/03 The Agent Loop"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "56",
+      "category": "Apps",
+      "description": {
+        "content": "Week 26 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/04\n**Title:** Hardening the Agent",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 26 | apps/cda/04 Hardening the Agent"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "92",
+      "category": "LLM",
+      "description": {
+        "content": "Week 26 - Foundational track (LLM) | Milestone: Can fine-tune and align LLMs\n\n**Path:** llm/11\n**Title:** Knowledge Distillation",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 26 | llm/11 Knowledge Distillation"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "93",
+      "category": "LLM",
+      "description": {
+        "content": "Week 26 - Foundational track (LLM)\n\n**Path:** llm/12\n**Title:** INT8/INT4 Quantization",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 26 | llm/12 INT8/INT4 Quantization"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "57",
+      "category": "Apps",
+      "description": {
+        "content": "Week 27 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/05\n**Title:** GUI 1: Chat Interface",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 27 | apps/cda/05 GUI 1: Chat Interface"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "58",
+      "category": "Apps",
+      "description": {
+        "content": "Week 27 - Apps track (CDA sub-series)\n\n**Path:** apps/cda/06\n**Title:** GUI 2: Persistence & Slash Commands",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 27 | apps/cda/06 GUI 2: Persistence & Slash Commands"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "94",
+      "category": "LLM",
+      "description": {
+        "content": "Week 27 - Foundational track (LLM)\n\n**Path:** llm/13\n**Title:** KV Cache, Flash Attention, Speculative Decoding",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 27 | llm/13 KV Cache, Flash Attention, Speculative Decoding"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "95",
+      "category": "LLM",
+      "description": {
+        "content": "Week 27 - Foundational track (LLM)\n\n**Path:** llm/14\n**Title:** Inference-Time Scaling: Search & Self-Consistency",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 27 | llm/14 Inference-Time Scaling: Search & Self-Consistency"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "59",
+      "category": "Apps",
+      "description": {
+        "content": "Week 28 - Apps track (CDA sub-series) | Milestone: Coding agent complete\n\n**Path:** apps/cda/07\n**Title:** GUI 3: MCP Integration",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 28 | apps/cda/07 GUI 3: MCP Integration"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "96",
+      "category": "LLM",
+      "description": {
+        "content": "Week 28 - Foundational track (LLM) | Milestone: Coding agent complete\n\n**Path:** llm/15\n**Title:** End-to-End Reasoning Model Training",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 28 | llm/15 End-to-End Reasoning Model Training"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "60",
+      "category": "Apps",
+      "description": {
+        "content": "Week 29 - Apps track (NBX sub-series)\n\n**Path:** apps/nbx/01\n**Title:** Platform Architecture",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 29 | apps/nbx/01 Platform Architecture"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "61",
+      "category": "Apps",
+      "description": {
+        "content": "Week 29 - Apps track (NBX sub-series)\n\n**Path:** apps/nbx/02\n**Title:** Machine Registry & Dashboard",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 29 | apps/nbx/02 Machine Registry & Dashboard"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "62",
+      "category": "Apps",
+      "description": {
+        "content": "Week 30 - Apps track (NBX sub-series)\n\n**Path:** apps/nbx/03\n**Title:** Job Packaging & Execution",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 30 | apps/nbx/03 Job Packaging & Execution"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "63",
+      "category": "Apps",
+      "description": {
+        "content": "Week 30 - Apps track (NBX sub-series)\n\n**Path:** apps/nbx/04\n**Title:** Task Queue & Multi-Provider Dispatch",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 30 | apps/nbx/04 Task Queue & Multi-Provider Dispatch"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "97",
+      "category": "LLM",
+      "description": {
+        "content": "Week 30 - Foundational track (LLM - DeepSeek sub-series)\n\n**Path:** llm/ds/01\n**Title:** DeepSeek: MLA & Mixture of Experts",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 30 | llm/ds/01 DeepSeek: MLA & Mixture of Experts"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "98",
+      "category": "LLM",
+      "description": {
+        "content": "Week 30 - Foundational track (LLM - DeepSeek sub-series)\n\n**Path:** llm/ds/02\n**Title:** Training NanoDeepSeek",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 30 | llm/ds/02 Training NanoDeepSeek"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "64",
+      "category": "Apps",
+      "description": {
+        "content": "Week 31 - Apps track (NBX sub-series) | Milestone: All apps complete; full LLM lifecycle including frontier architectures\n\n**Path:** apps/nbx/05\n**Title:** Log Streaming & Artifact Retrieval",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 31 | apps/nbx/05 Log Streaming & Artifact Retrieval"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "99",
+      "category": "LLM",
+      "description": {
+        "content": "Week 31 - Foundational track (LLM - DeepSeek sub-series) | Milestone: All apps complete; full LLM lifecycle including frontier architectures\n\n**Path:** llm/ds/03\n**Title:** The Engram Layer",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 31 | llm/ds/03 The Engram Layer"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "100",
+      "category": "RL",
+      "description": {
+        "content": "Week 32 - Foundational track (RL/Tooling)\n\n**Path:** tooling/06\n**Title:** RL Foundations: MDPs & Dynamic Programming",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 32 | tooling/06 RL Foundations: MDPs & Dynamic Programming"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "101",
+      "category": "RL",
+      "description": {
+        "content": "Week 32 - Foundational track (RL/Tooling)\n\n**Path:** tooling/07\n**Title:** Policy Gradients: REINFORCE to Actor-Critic",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 32 | tooling/07 Policy Gradients: REINFORCE to Actor-Critic"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "102",
+      "category": "RL",
+      "description": {
+        "content": "Week 33 - Foundational track (RL/Tooling)\n\n**Path:** tooling/08\n**Title:** Proximal Policy Optimization",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 33 | tooling/08 Proximal Policy Optimization"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "103",
+      "category": "RL",
+      "description": {
+        "content": "Week 35 - Foundational track (RL/Tooling) | Milestone: Can derive and implement RL behind RLHF/GRPO\n\n**Path:** tooling/09\n**Title:** RL for Language Models: PPO to GRPO",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 35 | tooling/09 RL for Language Models: PPO to GRPO"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "104",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 36 - Foundational track (Classical ML)\n\n**Path:** classical/01\n**Title:** Bias, Variance & Regularization",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 36 | classical/01 Bias, Variance & Regularization"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "105",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 36 - Foundational track (Classical ML)\n\n**Path:** classical/02\n**Title:** Tree-Based Methods",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 36 | classical/02 Tree-Based Methods"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "106",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 37 - Foundational track (Classical ML)\n\n**Path:** classical/03\n**Title:** Bayesian Thinking",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 37 | classical/03 Bayesian Thinking"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "107",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 37 - Foundational track (Classical ML)\n\n**Path:** classical/04\n**Title:** Feature Engineering & Unsupervised Learning",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 37 | classical/04 Feature Engineering & Unsupervised Learning"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "108",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 38 - Foundational track (Classical ML)\n\n**Path:** classical/05\n**Title:** Evaluation & Causal Reasoning",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 38 | classical/05 Evaluation & Causal Reasoning"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "109",
+      "category": "ClassicalML",
+      "description": {
+        "content": "Week 38 - Foundational track (Classical ML) | Milestone: Classical ML complete\n\n**Path:** classical/06\n**Title:** Tabular Deep Learning",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 38 | classical/06 Tabular Deep Learning"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "110",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 39 - Foundational track (Tooling)\n\n**Path:** tooling/01\n**Title:** RunPod Environment Setup",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 39 | tooling/01 RunPod Environment Setup"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "111",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 39 - Foundational track (Tooling)\n\n**Path:** tooling/02\n**Title:** OpenCode: AI Coding Agent in Terminal",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 39 | tooling/02 OpenCode: AI Coding Agent in Terminal"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "112",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 39 - Foundational track (Tooling)\n\n**Path:** tooling/03\n**Title:** Singular Value Decomposition",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 39 | tooling/03 Singular Value Decomposition"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "113",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 40 - Foundational track (Tooling)\n\n**Path:** tooling/04\n**Title:** MCP Servers with FastMCP",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 40 | tooling/04 MCP Servers with FastMCP"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "114",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 40 - Foundational track (Tooling)\n\n**Path:** tooling/05\n**Title:** Security Tooling for Developers",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 40 | tooling/05 Security Tooling for Developers"
+    },
+
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-18T00:00:00.000Z",
+      "id": "118",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 41 - Foundational track (Tooling)\n\n**Path:** tooling/11\n**Title:** Text-to-LoRA",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 41 | tooling/11 Text-to-LoRA | Milestone: All 109 notebooks complete"
+    }
+  ],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "8",
+      "category": "Prep",
+      "description": {
+        "content": "Week 01 - Prep track\n\n**Path:** prep/01\n**Title:** LLM APIs & Chat Completions",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 01 | prep/01 LLM APIs & Chat Completions"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "9",
+      "category": "Prep",
+      "description": {
+        "content": "Week 01 - Prep track\n\n**Path:** prep/02\n**Title:** Prompt Engineering",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 01 | prep/02 Prompt Engineering"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "68",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 04 - Foundational track\n\n**Path:** deep/04\n**Title:** Optimizers: SGD to AdamW",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 04 | deep/04 Optimizers: SGD to AdamW"
+    }
+  ],
+  "testing": [],
+  "done": [
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "category": "Tooling",
+      "creation_time": "2025-10-28T19:48:47.733Z",
+      "id": "1",
+      "prio": 5,
+      "references": [],
+      "title": "Security: Fix runpod github PAT. <!>"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "65",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 01 - Foundational track\n\n**Path:** deep/01\n**Title:** Softmax Regression",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 01 | deep/01 Softmax Regression"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "66",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 02 - Foundational track\n\n**Path:** deep/02\n**Title:** Neural Networks",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 02 | deep/02 Neural Networks"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "67",
+      "category": "DeepLearning",
+      "description": {
+        "content": "Week 03 - Foundational track\n\n**Path:** deep/03\n**Title:** Automatic Differentiation",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 03 | deep/03 Automatic Differentiation"
+    },
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "116",
+      "category": "Tooling",
+      "description": {
+        "content": "Week 41 - Foundational track (Tooling)\n\n**Path:** tooling/10\n**Title:** Weak Supervision",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 41 | tooling/10 Weak Supervision"
+    }
+  ]
+}

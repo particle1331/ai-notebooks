@@ -5,29 +5,44 @@ description = "Notes and experiments in machine learning & AI."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "jupyter>=1.1.1",
-    "jupyterlab>=4.4.3",
-    "ipykernel>=6.29.5",
     "numpy>=2.3.1",
-    "pip>=25.1.1",
     "torch>=2.7.1",
     "matplotlib>=3.10.3",
     "pandas>=2.3.0",
-    "scikit-learn>=1.7.0",
+    "scikit-learn>=1.8.0",
     "torchvision>=0.22.1",
     "tqdm>=4.67.1",
     "torchviz>=0.0.3",
     "torchview>=0.2.7",
     "seaborn>=0.13.2",
-    "nbformat>=5.10.4",
-    "diff-match-patch>=20241021",
     "openai>=1.101.0",
     "nltk>=3.9.1",
     "langgraph>=0.6.6",
     "langchain>=0.3.27",
     "langchain-openai>=0.3.32",
     "groq>=0.31.0",
-    "colorama>=0.4.6",
+    "chromadb>=1.1.0",
+    "ollama>=0.6.0",
+    "datasets>=4.1.1",
+    "boto3>=1.40.45",
+    "rich>=14.1.0",
+    "flet[all]==0.80.1",
+    "flet-cli==0.80.1",
+    "flet-desktop==0.80.1",
+    "flet-web==0.80.1",
+    "ipykernel>=7.1.0",
+    "gunicorn>=23.0.0",
+    "dspy>=3.1.3",
+    "nbdime>=4.0.4",
+    "nbdiff>=1.0.3",
+    "ipywidgets>=8.1.8",
+    "jupyter>=1.1.1",
+    "papermill>=2.7.0",
+    "fastmcp>=3.2.0",
+    "gymnasium>=1.2.3",
+    "torchsummary>=1.5.1",
+    "opencv-python>=4.13.0.92",
+    "sentence-transformers>=5.4.1",
 ]
 
 [build-system]
@@ -39,3 +54,6 @@ packages = ["src/notebooks"]
 
 [tool.ruff]
 ignore = ["E731"]
+
+[tool.uv.workspace]
+members = ["projects/flet-basics"]

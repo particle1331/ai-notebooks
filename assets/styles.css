@@ -5,7 +5,7 @@ body, p {
 
 /* For Jupyter and nbconvert, sometimes table cells need extra specificity: */
 table, thead, tbody, tr, td, th {
-  text-align: justify !important;
+  text-align: left !important;
   hyphens: auto;
 }
 
@@ -43,6 +43,10 @@ img {
   border-radius: 4px;           /* optional: rounded corners */
 }
 
+.cell-output table {
+  margin-bottom: 1.5em;
+}
+
 code {
   word-break: break-word;
   hyphens: none;
@@ -56,7 +60,7 @@ table.dataframe th {
 /* WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width:   4px;
-  height: 20px;
+  height: 16px;
 }
 
 ::-webkit-scrollbar-track {
@@ -92,4 +96,8 @@ body:not(.quarto-dark) .tippy-box {
   border: 1px solid #ccc !important;
   color: #222 !important;
   box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+}
+
+h2 {
+  margin-top: 0.75em !important;
 }
