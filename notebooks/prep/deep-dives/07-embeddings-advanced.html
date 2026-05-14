@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Advanced Embeddings – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/prep/deep-dives/08-multimodal.html" rel="next">
+<link href="../../../notebooks/prep/deep-dives/06-ai-security.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html">07. Advanced Embeddings</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#embedding-model-landscape" id="toc-embedding-model-landscape" class="nav-link active" data-scroll-target="#embedding-model-landscape">Embedding Model Landscape</a></li>
+  <li><a href="#the-sec-filings-corpus" id="toc-the-sec-filings-corpus" class="nav-link" data-scroll-target="#the-sec-filings-corpus">The SEC Filings Corpus</a></li>
+  <li><a href="#matryoshka-representation-learning-and-the-dimensions-parameter" id="toc-matryoshka-representation-learning-and-the-dimensions-parameter" class="nav-link" data-scroll-target="#matryoshka-representation-learning-and-the-dimensions-parameter">Matryoshka Representation Learning and the <code>dimensions</code> Parameter</a></li>
+  <li><a href="#fine-tuning-embeddings-for-domain-adaptation" id="toc-fine-tuning-embeddings-for-domain-adaptation" class="nav-link" data-scroll-target="#fine-tuning-embeddings-for-domain-adaptation">Fine-Tuning Embeddings for Domain Adaptation</a></li>
+  <li><a href="#dimensionality-reduction-for-visualization" id="toc-dimensionality-reduction-for-visualization" class="nav-link" data-scroll-target="#dimensionality-reduction-for-visualization">Dimensionality Reduction for Visualization</a></li>
+  <li><a href="#colbert-late-interaction" id="toc-colbert-late-interaction" class="nav-link" data-scroll-target="#colbert-late-interaction">ColBERT Late Interaction</a></li>
+  <li><a href="#embedding-storage-and-indexing" id="toc-embedding-storage-and-indexing" class="nav-link" data-scroll-target="#embedding-storage-and-indexing">Embedding Storage and Indexing</a></li>
+  <li><a href="#benchmarking-all-approaches" id="toc-benchmarking-all-approaches" class="nav-link" data-scroll-target="#benchmarking-all-approaches">Benchmarking All Approaches</a></li>
+  <li><a href="#appendix-contrastive-loss-derivation" id="toc-appendix-contrastive-loss-derivation" class="nav-link" data-scroll-target="#appendix-contrastive-loss-derivation">Appendix: Contrastive Loss Derivation</a></li>
+  <li><a href="#appendix-hnsw-parameter-reference" id="toc-appendix-hnsw-parameter-reference" class="nav-link" data-scroll-target="#appendix-hnsw-parameter-reference">Appendix: HNSW Parameter Reference</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html">07. Advanced Embeddings</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Advanced Embeddings</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../../../notebooks/prep/03-rag-concepts.html">Notebooks 03</a> and <a href="../../../notebooks/prep/07-rag-pipeline.html">07</a> treat <code>text-embedding-3-small</code> as a black box: hand it text, receive a 1536-dimensional vector. This deep dive opens that box. We survey the embedding model landscape — the MTEB benchmark, bi-encoder vs.&nbsp;cross-encoder families, and how to read retrieval metrics for financial corpora — then work through four concrete techniques that a principal AI engineer must be able to reason about: (1) <strong>Matryoshka Representation Learning</strong>, which allows <code>text-embedding-3-*</code> vectors to be truncated without catastrophic quality loss, with implications for storage cost; (2) <strong>contrastive fine-tuning</strong>, the supervised objective that adapts a general-purpose encoder to domain-specific text using query–passage pairs with hard negatives; (3) <strong>dimensionality reduction via PCA + UMAP</strong>, which surfaces the geometric structure of SEC filing embeddings and reveals clustering by document section; and (4) <strong>ColBERT late interaction</strong>, a retrieval paradigm that operates on token-level vectors rather than a single document embedding and achieves higher precision at the cost of index size. All experiments run against the 20-chunk SEC filings corpus from notebook 07.</p>
+<p>Setup:</p>
+<section id="embedding-model-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="embedding-model-landscape">Embedding Model Landscape</h2>
+<p>The <a href="https://huggingface.co/spaces/mteb/leaderboard">Massive Text Embedding Benchmark (MTEB)</a> is the standard evaluation harness for embedding models. It covers 56 datasets across eight task types: retrieval, clustering, classification, reranking, summarization, semantic textual similarity, bitext mining, and pair classification. For RAG systems the most relevant task is <strong>retrieval</strong>, scored by <strong>NDCG@10</strong> (Normalized Discounted Cumulative Gain at rank 10), which penalizes models that place relevant documents in lower positions more than those that miss them entirely. <strong>Clustering</strong> scores — typically V-measure or NMI — tell us how well the embedding geometry separates topically distinct document sets, relevant when we want to understand whether section-level metadata filtering is necessary or whether the geometry handles it automatically.</p>
+<p><br></p>
+<p><strong>Bi-encoder vs.&nbsp;cross-encoder.</strong> The embedding models we use in RAG are <strong>bi-encoders</strong>: they encode query and document independently into fixed-length vectors, and similarity is a simple dot product or cosine at retrieval time. This is efficient — documents can be pre-encoded offline, and a query lookup is a single forward pass plus an ANN search. <strong>Cross-encoders</strong> take the query and document concatenated and run full bidirectional self-attention over the pair, producing a single relevance score. Cross-encoders are dramatically more accurate but cannot pre-encode documents: every (query, document) pair requires a separate forward pass, so they are used only as rerankers over a small candidate set (as in notebook 07).</p>
+<p><br></p>
+<p><strong>Symmetric vs.&nbsp;asymmetric similarity.</strong> <strong>Symmetric</strong> models are trained on sentence pairs where both items are of the same type (e.g., two news sentences). They work well for semantic textual similarity but poorly for retrieval, where a short query must be matched against a long passage. <strong>Asymmetric</strong> models are trained on (query, passage) pairs from human-annotated datasets like MS MARCO, natural questions, or — for domain-adapted models — proprietary corpora. <code>text-embedding-3-small</code>, the OpenAI <code>e5</code> family, and <code>BAAI/bge-*</code> are all asymmetric retrieval-oriented models.</p>
+<p><br></p>
+<p>The table below compares five models relevant to financial text retrieval. MTEB Retrieval scores are NDCG@10 averaged over the 15 BEIR datasets; Clustering scores are V-measure averaged over MTEB clustering datasets. The financial text adjustment is qualitative, reflecting model-specific evaluations on SEC/10-K-style corpora reported in open literature.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 14%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Model</th>
+<th style="text-align: center;">Dimensions</th>
+<th style="text-align: center;">MTEB Retrieval (NDCG@10)</th>
+<th style="text-align: center;">MTEB Clustering</th>
+<th style="text-align: left;">Financial Text Notes</th>
+<th style="text-align: center;">Cost / 1M tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>text-embedding-3-small</code></td>
+<td style="text-align: center;">1536 (trunc.)</td>
+<td style="text-align: center;">55.4</td>
+<td style="text-align: center;">49.0</td>
+<td style="text-align: left;">Strong general baseline; MRL truncation to 256 dims retains ~95% retrieval quality</td>
+<td style="text-align: center;">$0.02</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>text-embedding-3-large</code></td>
+<td style="text-align: center;">3072 (trunc.)</td>
+<td style="text-align: center;">64.6</td>
+<td style="text-align: center;">56.0</td>
+<td style="text-align: left;">Best-in-class for financial entity disambiguation; 2× cost vs.&nbsp;small</td>
+<td style="text-align: center;">$0.13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>BAAI/bge-large-en-v1.5</code></td>
+<td style="text-align: center;">1024</td>
+<td style="text-align: center;">54.3</td>
+<td style="text-align: center;">46.1</td>
+<td style="text-align: left;">Open weights; fine-tunable; good on regulatory dense text; requires self-hosting</td>
+<td style="text-align: center;">free (self-hosted)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>intfloat/e5-large-v2</code></td>
+<td style="text-align: center;">1024</td>
+<td style="text-align: center;">56.0</td>
+<td style="text-align: center;">44.6</td>
+<td style="text-align: left;">Consistent on financial NLP; needs <code>"query: "</code> / <code>"passage: "</code> prefix at inference</td>
+<td style="text-align: center;">free (self-hosted)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>thenlper/gte-large</code></td>
+<td style="text-align: center;">1024</td>
+<td style="text-align: center;">52.2</td>
+<td style="text-align: center;">46.2</td>
+<td style="text-align: left;">No special prefixes required; slightly weaker on long passages (&gt;256 tokens)</td>
+<td style="text-align: center;">free (self-hosted)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>NOTE:</strong> NDCG@10 on general BEIR benchmarks does not directly predict performance on your specific financial corpus. The right evaluation discipline is: (1) embed your actual corpus, (2) curate 50–100 representative queries with human-labeled relevant passages, (3) compute Recall@<span class="math inline">k</span> and MRR against that labeled set. We build exactly this in the benchmarking section at the end of this notebook.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a production fintech system, start with <code>text-embedding-3-small</code> at default 1536 dimensions. It offers the best balance of quality, cost, and zero deployment overhead (no GPU, no self-hosting). Move to <code>text-embedding-3-large</code> if retrieval quality on your labeled test set is insufficient; move to a fine-tuned open model only if you have <span class="math inline">\geq 1{,}000</span> labeled query–passage pairs and a reproducible training pipeline.</p>
+</div>
+</div>
+</section>
+<section id="the-sec-filings-corpus" class="level2">
+<h2 class="anchored" data-anchor-id="the-sec-filings-corpus">The SEC Filings Corpus</h2>
+<p>We reuse the 20-chunk corpus from <a href="../../../notebooks/prep/07-rag-pipeline.html">notebook 07</a> verbatim so that all experiments are directly comparable. The corpus is structured into four sections — <code>risk_factors</code>, <code>mda</code>, <code>capital_liquidity</code>, and <code>guidance</code> — each with five passages drawn from realistic 10-K language. We tag each chunk with its section so we can use section labels as ground-truth cluster assignments in the visualization section.</p>
+<div id="e1b2c3d4" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CORPUS <span class="op">=</span> [</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: risk_factors (indices 0-4)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Interest rate risk represents one of the most significant market risks facing the firm. A 100 basis point increase in interest rates would reduce the fair value of our fixed-rate debt portfolio by approximately $2.3 billion."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Credit risk arises from the potential that a counterparty will fail to perform its obligations. We manage credit risk through diversification, collateral requirements, and credit limits by counterparty."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Operational risk includes the risk of loss resulting from inadequate or failed internal processes, people, systems, or external events, including cybersecurity threats and technology failures."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our derivatives portfolio had a notional value of $1.2 trillion at year-end. Net market value exposure after netting and collateral was $18.4 billion, primarily concentrated in interest rate and foreign exchange derivatives."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our Value at Risk (VaR) at the 99th percentile for a one-day holding period was $142 million, reflecting the diversified nature of our trading portfolios across equities, fixed income, and commodities."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: mda (indices 5-9)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Net revenues for the fiscal year were $47.4 billion, an increase of 8</span><span class="sc">% c</span><span class="st">ompared to the prior year. The increase was driven primarily by higher net interest income reflecting the rising interest rate environment."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Investment banking revenues decreased 23% to $6.1 billion, reflecting lower advisory fees amid reduced M&amp;A activity and a challenging environment for equity and debt underwriting."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Return on equity for the year was 12.4%, compared to 15.1</span><span class="sc">% i</span><span class="st">n the prior year. Book value per share increased to $312.50, up from $290.20."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Net interest margin expanded 18 basis points to 2.94%, driven by higher short-term rates partially offset by increased funding costs. Provision for credit losses increased to $2.1 billion, reflecting normalization from historically low levels."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Assets under management in our investment management segment grew to $2.8 trillion, an increase of 6</span><span class="sc">% f</span><span class="st">rom prior year. Prime brokerage revenues increased 12% to $4.3 billion on higher client balances and margin loan activity."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: capital_liquidity (indices 10-14)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our Common Equity Tier 1 (CET1) capital ratio was 14.8% at year-end, well above the regulatory minimum of 4.5% and our internal target of 13%."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We maintain a liquidity coverage ratio (LCR) of 128%, exceeding the regulatory requirement of 100%. Our high-quality liquid assets totaled $280 billion at year-end."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Under Basel III framework requirements, our leverage ratio was 5.8%, comfortably above the 3% minimum. Our total risk-weighted assets were $1.47 trillion at year-end, consistent with prior year."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We are subject to FINRA Rule 4110 and SEC Rule 15c3-1 (the Net Capital Rule), which require us to maintain minimum net capital of not less than the greater of $250,000 or 2</span><span class="sc">% o</span><span class="st">f aggregate debit items. Our net capital exceeded the minimum by $12.4 billion."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"The liquidity stress test results indicate the firm could withstand a 30-day severe market stress scenario while maintaining positive liquidity. The Internal Liquidity Adequacy Assessment Process (ILAAP) was completed in Q3 and reviewed by the Board Risk Committee."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: guidance (indices 15-19)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Looking ahead to fiscal 2025, management expects continued revenue growth in the range of 4-6%, supported by a stable rate environment and improving capital markets activity."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We plan to return $8 billion to shareholders through dividends and share repurchases in fiscal 2025, subject to regulatory approval and market conditions."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Earnings per share for fiscal 2024 were $42.30, compared to $47.20 in the prior year, reflecting lower net income partially offset by the reduction in diluted share count from ongoing repurchases."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Management has identified three strategic priorities for fiscal 2025: (1) expanding the wealth management client base to $500 billion in AUM, (2) growing transaction banking revenues by 15%, and (3) reducing the expense ratio below 65%."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We expect our CET1 ratio to remain in the 13.5-15.0</span><span class="sc">% r</span><span class="st">ange through fiscal 2025, subject to regulatory stress test outcomes. Any excess capital above 14.5% will be returned to shareholders under our capital return policy."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>TEXTS <span class="op">=</span> [c[<span class="st">"text"</span>] <span class="cf">for</span> c <span class="kw">in</span> CORPUS]</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>SECTIONS <span class="op">=</span> [c[<span class="st">"section"</span>] <span class="cf">for</span> c <span class="kw">in</span> CORPUS]</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Corpus: </span><span class="sc">{</span><span class="bu">len</span>(CORPUS)<span class="sc">}</span><span class="ss"> chunks"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> [<span class="st">"risk_factors"</span>, <span class="st">"mda"</span>, <span class="st">"capital_liquidity"</span>, <span class="st">"guidance"</span>]:</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>s<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> c <span class="kw">in</span> CORPUS <span class="cf">if</span> c[<span class="st">'section'</span>] <span class="op">==</span> s)<span class="sc">}</span><span class="ss"> chunks"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We define a thin embedding helper that supports an optional <code>dimensions</code> parameter — the key API feature explored in the next section:</p>
+<div id="a3d4e5f6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> embed(</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    texts: <span class="bu">list</span>[<span class="bu">str</span>],</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    model: <span class="bu">str</span> <span class="op">=</span> <span class="st">"text-embedding-3-small"</span>,</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    dimensions: <span class="bu">int</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return embedding matrix of shape (len(texts), d)."""</span></span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> openai.OpenAI()</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>    kwargs <span class="op">=</span> {<span class="st">"input"</span>: texts, <span class="st">"model"</span>: model}</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> dimensions <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-10" class="code-annotation-target"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>        kwargs[<span class="st">"dimensions"</span>] <span class="op">=</span> dimensions</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>    resp <span class="op">=</span> client.embeddings.create(<span class="op">**</span>kwargs)</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([item.embedding <span class="cf">for</span> item <span class="kw">in</span> resp.data], dtype<span class="op">=</span>np.float32)</span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cosine_sim(a: np.ndarray, b: np.ndarray) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Cosine similarity between two 1-D or batched vectors."""</span></span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> a.ndim <span class="op">==</span> <span class="dv">1</span> <span class="kw">and</span> b.ndim <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">float</span>(np.dot(a, b) <span class="op">/</span> (np.linalg.norm(a) <span class="op">*</span> np.linalg.norm(b) <span class="op">+</span> <span class="fl">1e-9</span>))</span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># batched: (n, d) vs (d,)</span></span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(b) <span class="op">+</span> <span class="fl">1e-9</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-21" class="code-annotation-target"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (b <span class="op">/</span> norms) <span class="op">@</span> a.T</span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute full-dimension corpus embeddings for reuse</span></span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>CORPUS_VECS <span class="op">=</span> embed(TEXTS)  <span class="co"># (20, 1536)</span></span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Corpus embedding matrix: </span><span class="sc">{</span>CORPUS_VECS<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="10" data-code-annotation="1">The <code>dimensions</code> parameter is only supported by <code>text-embedding-3-*</code> models. Passing it to older models raises an API error.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="21" data-code-annotation="2">For batched retrieval we normalize <code>b</code> (the query vector) and compute its dot product with the full corpus matrix in one call — this is the same <span class="math inline">\hat{\mathbf{M}} \hat{\mathbf{q}}</span> computation from notebook 03.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="matryoshka-representation-learning-and-the-dimensions-parameter" class="level2">
+<h2 class="anchored" data-anchor-id="matryoshka-representation-learning-and-the-dimensions-parameter">Matryoshka Representation Learning and the <code>dimensions</code> Parameter</h2>
+<p><strong>Matryoshka Representation Learning (MRL)</strong> is a training technique introduced by <a href="https://arxiv.org/abs/2205.13147">Kusupati et al.&nbsp;(2022)</a> that trains an embedding model to simultaneously optimize representations at multiple nested dimensionalities. The idea: rather than training only the full <span class="math inline">d</span>-dimensional output, MRL adds auxiliary losses at each of a set of prefixes <span class="math inline">\{m_1, m_2, \ldots, m_L\}</span> where <span class="math inline">m_1 &lt; m_2 &lt; \cdots &lt; m_L = d.</span> The total training objective is:</p>
+<p><span class="math display">\mathcal{L}_{\text{MRL}} = \sum_{l=1}^{L} c_l \cdot \mathcal{L}\bigl(\mathbf{z}_{[1:m_l]}\bigr)</span></p>
+<p>where <span class="math inline">\mathbf{z}_{[1:m_l]}</span> denotes the first <span class="math inline">m_l</span> coordinates of the embedding and <span class="math inline">c_l &gt; 0</span> are importance weights. The practical consequence is that the <mark>first <span class="math inline">m</span> dimensions</mark> of an MRL embedding are themselves a good <span class="math inline">m</span>-dimensional embedding — you can truncate the vector after training and retain most of the retrieval quality, without any separate training run or dimensionality reduction step.</p>
+<p>OpenAI’s <code>text-embedding-3-small</code> (1536-dim) and <code>text-embedding-3-large</code> (3072-dim) are both trained with MRL. The API exposes this via the <code>dimensions</code> parameter, which truncates and re-normalizes the output server-side. This is significant for a production system:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Dimension</th>
+<th style="text-align: center;">Vector bytes (float32)</th>
+<th style="text-align: center;">Relative storage</th>
+<th style="text-align: left;">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1536</td>
+<td style="text-align: center;">6,144 B</td>
+<td style="text-align: center;">100%</td>
+<td style="text-align: left;">Default</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1024</td>
+<td style="text-align: center;">4,096 B</td>
+<td style="text-align: center;">67%</td>
+<td style="text-align: left;">Modest saving, minimal quality drop</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">512</td>
+<td style="text-align: center;">2,048 B</td>
+<td style="text-align: center;">33%</td>
+<td style="text-align: left;">Good Pareto point for financial text</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">256</td>
+<td style="text-align: center;">1,024 B</td>
+<td style="text-align: center;">17%</td>
+<td style="text-align: left;">Noticeable quality drop on hard queries</td>
+</tr>
+</tbody>
+</table>
+<p>We implement <code>EmbeddingDimensionStudy</code> to measure Recall@5 against dimension size on our 10-question labeled test set:</p>
+<div id="f8c9d0e1" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Labeled test set: (query, ground-truth chunk index)</span></span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>EVAL_SET <span class="op">=</span> [</span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the CET1 capital ratio?"</span>, <span class="dv">10</span>),</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the LCR and HQLA balance?"</span>, <span class="dv">11</span>),</span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"How did investment banking revenues perform?"</span>, <span class="dv">6</span>),</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the net interest margin?"</span>, <span class="dv">8</span>),</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What are the cybersecurity and technology risks?"</span>, <span class="dv">2</span>),</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the Basel III leverage ratio?"</span>, <span class="dv">12</span>),</span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the VaR at the 99th percentile?"</span>, <span class="dv">4</span>),</span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"FINRA Rule 4110 Net Capital Rule compliance"</span>, <span class="dv">13</span>),</span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the earnings per share?"</span>, <span class="dv">17</span>),</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What are AUM and prime brokerage revenues?"</span>, <span class="dv">9</span>),</span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EmbeddingDimensionStudy:</span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Measure Recall@k across embedding dimension sizes."""</span></span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, corpus: <span class="bu">list</span>[<span class="bu">dict</span>], eval_set: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">int</span>]]):</span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._corpus <span class="op">=</span> corpus</span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._texts <span class="op">=</span> [c[<span class="st">"text"</span>] <span class="cf">for</span> c <span class="kw">in</span> corpus]</span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._eval <span class="op">=</span> eval_set</span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> recall_at_k(</span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a>        dimensions: <span class="bu">int</span>,</span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a>        k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="annotated-cell-3-28"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a>        model: <span class="bu">str</span> <span class="op">=</span> <span class="st">"text-embedding-3-small"</span>,</span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return Recall@k for the given embedding dimension."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-31" class="code-annotation-target"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a>        doc_vecs <span class="op">=</span> embed(<span class="va">self</span>._texts, model<span class="op">=</span>model, dimensions<span class="op">=</span>dimensions)</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a>        doc_norms <span class="op">=</span> np.linalg.norm(doc_vecs, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span></span>
+<span id="annotated-cell-3-33"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>        doc_vecs_n <span class="op">=</span> doc_vecs <span class="op">/</span> doc_norms</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-35"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a>        hits <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> query, gt_idx <span class="kw">in</span> <span class="va">self</span>._eval:</span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a>            q_vec <span class="op">=</span> embed([query], model<span class="op">=</span>model, dimensions<span class="op">=</span>dimensions)[<span class="dv">0</span>]</span>
+<span id="annotated-cell-3-38"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>            q_vec <span class="op">=</span> q_vec <span class="op">/</span> (np.linalg.norm(q_vec) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> doc_vecs_n <span class="op">@</span> q_vec  <span class="co"># (20,)</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-40" class="code-annotation-target"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a>            top_k <span class="op">=</span> <span class="bu">set</span>(np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:k])</span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> gt_idx <span class="kw">in</span> top_k:</span>
+<span id="annotated-cell-3-42"><a href="#annotated-cell-3-42" aria-hidden="true" tabindex="-1"></a>                hits <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-3-43"><a href="#annotated-cell-3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-44"><a href="#annotated-cell-3-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hits <span class="op">/</span> <span class="bu">len</span>(<span class="va">self</span>._eval)</span>
+<span id="annotated-cell-3-45"><a href="#annotated-cell-3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-46"><a href="#annotated-cell-3-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> sweep(</span>
+<span id="annotated-cell-3-47"><a href="#annotated-cell-3-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-3-48"><a href="#annotated-cell-3-48" aria-hidden="true" tabindex="-1"></a>        dimensions: <span class="bu">list</span>[<span class="bu">int</span>],</span>
+<span id="annotated-cell-3-49"><a href="#annotated-cell-3-49" aria-hidden="true" tabindex="-1"></a>        k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="annotated-cell-3-50"><a href="#annotated-cell-3-50" aria-hidden="true" tabindex="-1"></a>        model: <span class="bu">str</span> <span class="op">=</span> <span class="st">"text-embedding-3-small"</span>,</span>
+<span id="annotated-cell-3-51"><a href="#annotated-cell-3-51" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">int</span>, <span class="bu">float</span>]:</span>
+<span id="annotated-cell-3-52"><a href="#annotated-cell-3-52" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Run recall measurement for each dimension size."""</span></span>
+<span id="annotated-cell-3-53"><a href="#annotated-cell-3-53" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> {}</span>
+<span id="annotated-cell-3-54"><a href="#annotated-cell-3-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> d <span class="kw">in</span> dimensions:</span>
+<span id="annotated-cell-3-55"><a href="#annotated-cell-3-55" aria-hidden="true" tabindex="-1"></a>            r <span class="op">=</span> <span class="va">self</span>.recall_at_k(d, k<span class="op">=</span>k, model<span class="op">=</span>model)</span>
+<span id="annotated-cell-3-56"><a href="#annotated-cell-3-56" aria-hidden="true" tabindex="-1"></a>            results[d] <span class="op">=</span> r</span>
+<span id="annotated-cell-3-57"><a href="#annotated-cell-3-57" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  dim=</span><span class="sc">{</span>d<span class="sc">:4d}</span><span class="ss">  Recall@</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">=</span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-3-58"><a href="#annotated-cell-3-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results</span>
+<span id="annotated-cell-3-59"><a href="#annotated-cell-3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-60"><a href="#annotated-cell-3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-61"><a href="#annotated-cell-3-61" aria-hidden="true" tabindex="-1"></a>study <span class="op">=</span> EmbeddingDimensionStudy(CORPUS, EVAL_SET)</span>
+<span id="annotated-cell-3-62"><a href="#annotated-cell-3-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Sweeping dimension sizes for text-embedding-3-small:"</span>)</span>
+<span id="annotated-cell-3-63"><a href="#annotated-cell-3-63" aria-hidden="true" tabindex="-1"></a>sweep_results <span class="op">=</span> study.sweep([<span class="dv">256</span>, <span class="dv">512</span>, <span class="dv">1024</span>, <span class="dv">1536</span>], k<span class="op">=</span><span class="dv">5</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="31" data-code-annotation="1">Both the corpus and each query must be embedded at the same <code>dimensions</code> setting — mixing dimension sizes produces incomparable vectors since the truncation removes different coordinate subsets.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="40" data-code-annotation="2">We use a set for <span class="math inline">O(1)</span> membership testing; the ground-truth index is either in the top-<span class="math inline">k</span> or not.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We plot the Pareto frontier — Recall@5 vs.&nbsp;storage cost — to show the diminishing returns of larger dimensions:</p>
+<div id="c1f2a3b4" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dims <span class="op">=</span> <span class="bu">sorted</span>(sweep_results.keys())</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>recalls <span class="op">=</span> [sweep_results[d] <span class="cf">for</span> d <span class="kw">in</span> dims]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Storage cost in bytes for 1M vectors at float32</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>storage_gb <span class="op">=</span> [d <span class="op">*</span> <span class="dv">4</span> <span class="op">*</span> <span class="dv">1_000_000</span> <span class="op">/</span> <span class="fl">1e9</span> <span class="cf">for</span> d <span class="kw">in</span> dims]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">4</span>))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: Recall vs dimension</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>ax.plot(dims, recalls, marker<span class="op">=</span><span class="st">"o"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">"#2166ac"</span>, markersize<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ax.axhline(recalls[<span class="op">-</span><span class="dv">1</span>], linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.4</span>, color<span class="op">=</span><span class="st">"gray"</span>, label<span class="op">=</span><span class="st">"1536-dim baseline"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d, r <span class="kw">in</span> <span class="bu">zip</span>(dims, recalls):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ax.annotate(<span class="ss">f"</span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">"</span>, (d, r), textcoords<span class="op">=</span><span class="st">"offset points"</span>, xytext<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">8</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                ha<span class="op">=</span><span class="st">"center"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Embedding dimensions"</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Recall@5"</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Recall@5 vs. dimension (MRL truncation)"</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="fl">1.15</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: Recall vs storage</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>ax2.plot(storage_gb, recalls, marker<span class="op">=</span><span class="st">"s"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">"#d6604d"</span>, markersize<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d, gb, r <span class="kw">in</span> <span class="bu">zip</span>(dims, storage_gb, recalls):</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    ax2.annotate(<span class="ss">f"dim=</span><span class="sc">{</span>d<span class="sc">}</span><span class="ss">"</span>, (gb, r), textcoords<span class="op">=</span><span class="st">"offset points"</span>, xytext<span class="op">=</span>(<span class="dv">4</span>, <span class="dv">4</span>),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                 fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">"Storage for 1M vectors (GB, float32)"</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">"Recall@5"</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">"Pareto frontier: quality vs. storage"</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>ax2.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> Left: Recall@5 as a function of the <code>dimensions</code> parameter. The MRL training objective means the first 512 coordinates already capture most of the retrieval signal. Right: the storage Pareto frontier — moving from 1536 to 512 dimensions reduces vector storage by 67% with negligible quality loss on this corpus, a compelling trade-off for large-scale deployments.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On small corpora (20 chunks) the Recall@5 ceiling is easily saturated at all dimension sizes. The dimension effect becomes more pronounced at scale — 100k+ chunks — where the ANN index must separate many geometrically similar vectors. When calibrating on your own corpus, always evaluate on a corpus that is representative of production size.</p>
+</div>
+</div>
+</section>
+<section id="fine-tuning-embeddings-for-domain-adaptation" class="level2">
+<h2 class="anchored" data-anchor-id="fine-tuning-embeddings-for-domain-adaptation">Fine-Tuning Embeddings for Domain Adaptation</h2>
+<p>General-purpose embedding models are trained on broad web corpora. Financial text uses specialized vocabulary — CUSIP, CET1, LCR, FINRA Rule 4110, ILAAP — that is either absent from training data or treated as low-frequency noise. <strong>Contrastive fine-tuning</strong> adapts a bi-encoder to this domain by training on (query, positive passage, hard negatives) triples curated from the target corpus.</p>
+<p>The training objective is the <strong>InfoNCE</strong> (in-batch contrastive) loss. Given a query <span class="math inline">q</span>, a positive passage <span class="math inline">p^+</span>, and <span class="math inline">N</span> in-batch negatives <span class="math inline">\{p^-_i\}</span>:</p>
+<p><span class="math display">\mathcal{L} = -\log \frac{\exp(\text{sim}(q, p^+) / \tau)}{\exp(\text{sim}(q, p^+) / \tau) + \sum_{i=1}^{N} \exp(\text{sim}(q, p^-_i) / \tau)}</span></p>
+<p>where <span class="math inline">\text{sim}(\mathbf{a}, \mathbf{b}) = \mathbf{a}^\top \mathbf{b} / (\|\mathbf{a}\| \|\mathbf{b}\|)</span> is cosine similarity and <span class="math inline">\tau &gt; 0</span> is a temperature hyperparameter that controls the sharpness of the distribution. Lower <span class="math inline">\tau</span> makes the loss harder — the model must assign a much higher similarity to the positive than to any negative.</p>
+<p><strong>Hard negatives</strong> are critical for model quality. A random negative is a document that has nothing to do with the query — trivially distinguishable. A <strong>hard negative</strong> is a document that is topically related but not the correct answer. For our SEC corpus, a hard negative for the query “What is the CET1 capital ratio?” might be the LCR passage (also capital section, similar vocabulary) rather than the investment banking revenues passage. We mine hard negatives using BM25 top-<span class="math inline">k</span>: retrieve the top-20 BM25 results and discard the ground-truth passage — the remaining passages are strong hard negatives because they share keywords with the query but are not the answer.</p>
+<p>We implement <code>FineTuningDatasetBuilder</code> that generates training triples from the labeled evaluation set via BM25 hard negative mining:</p>
+<div id="b6e7f8a9" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rank_bm25 <span class="im">import</span> BM25Okapi</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FineTuningDatasetBuilder:</span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Build contrastive training triples from a labeled query-passage set."""</span></span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, corpus: <span class="bu">list</span>[<span class="bu">dict</span>]):</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._corpus <span class="op">=</span> corpus</span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._texts <span class="op">=</span> [c[<span class="st">"text"</span>] <span class="cf">for</span> c <span class="kw">in</span> corpus]</span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>        tokenized <span class="op">=</span> [t.lower().split() <span class="cf">for</span> t <span class="kw">in</span> <span class="va">self</span>._texts]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-11" class="code-annotation-target"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._bm25 <span class="op">=</span> BM25Okapi(tokenized)</span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _hard_negatives(</span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>        query: <span class="bu">str</span>,</span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>        gt_index: <span class="bu">int</span>,</span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a>        n_neg: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>,</span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a>        candidate_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">15</span>,</span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return top BM25 results excluding the ground-truth passage."""</span></span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> query.lower().split()</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> <span class="va">self</span>._bm25.get_scores(tokens)</span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>        ranked <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>        negatives <span class="op">=</span> [</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._texts[i]</span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> ranked[:candidate_k]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-27" class="code-annotation-target"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">!=</span> gt_index</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>        ][:n_neg]</span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> negatives</span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> build(</span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a>        eval_set: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">int</span>]],</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>        n_neg: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>,</span>
+<span id="annotated-cell-5-35"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return training triples: {query, positive, negatives}."""</span></span>
+<span id="annotated-cell-5-37"><a href="#annotated-cell-5-37" aria-hidden="true" tabindex="-1"></a>        triples <span class="op">=</span> []</span>
+<span id="annotated-cell-5-38"><a href="#annotated-cell-5-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> query, gt_idx <span class="kw">in</span> eval_set:</span>
+<span id="annotated-cell-5-39"><a href="#annotated-cell-5-39" aria-hidden="true" tabindex="-1"></a>            positive <span class="op">=</span> <span class="va">self</span>._texts[gt_idx]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-40" class="code-annotation-target"><a href="#annotated-cell-5-40" aria-hidden="true" tabindex="-1"></a>            negatives <span class="op">=</span> <span class="va">self</span>._hard_negatives(query, gt_idx, n_neg<span class="op">=</span>n_neg)</span>
+<span id="annotated-cell-5-41"><a href="#annotated-cell-5-41" aria-hidden="true" tabindex="-1"></a>            triples.append({</span>
+<span id="annotated-cell-5-42"><a href="#annotated-cell-5-42" aria-hidden="true" tabindex="-1"></a>                <span class="st">"query"</span>: query,</span>
+<span id="annotated-cell-5-43"><a href="#annotated-cell-5-43" aria-hidden="true" tabindex="-1"></a>                <span class="st">"positive"</span>: positive,</span>
+<span id="annotated-cell-5-44"><a href="#annotated-cell-5-44" aria-hidden="true" tabindex="-1"></a>                <span class="st">"negatives"</span>: negatives,</span>
+<span id="annotated-cell-5-45"><a href="#annotated-cell-5-45" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="annotated-cell-5-46"><a href="#annotated-cell-5-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> triples</span>
+<span id="annotated-cell-5-47"><a href="#annotated-cell-5-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-48"><a href="#annotated-cell-5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-49"><a href="#annotated-cell-5-49" aria-hidden="true" tabindex="-1"></a>builder <span class="op">=</span> FineTuningDatasetBuilder(CORPUS)</span>
+<span id="annotated-cell-5-50"><a href="#annotated-cell-5-50" aria-hidden="true" tabindex="-1"></a>triples <span class="op">=</span> builder.build(EVAL_SET, n_neg<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="annotated-cell-5-51"><a href="#annotated-cell-5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-52"><a href="#annotated-cell-5-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect one triple</span></span>
+<span id="annotated-cell-5-53"><a href="#annotated-cell-5-53" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> triples[<span class="dv">0</span>]</span>
+<span id="annotated-cell-5-54"><a href="#annotated-cell-5-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Query:    </span><span class="sc">{</span>t[<span class="st">'query'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-5-55"><a href="#annotated-cell-5-55" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Positive: </span><span class="sc">{</span>t[<span class="st">'positive'</span>][:<span class="dv">80</span>]<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="annotated-cell-5-56"><a href="#annotated-cell-5-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Hard negatives (</span><span class="sc">{</span><span class="bu">len</span>(t[<span class="st">'negatives'</span>])<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="annotated-cell-5-57"><a href="#annotated-cell-5-57" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, neg <span class="kw">in</span> <span class="bu">enumerate</span>(t[<span class="st">"negatives"</span>]):</span>
+<span id="annotated-cell-5-58"><a href="#annotated-cell-5-58" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>neg[:<span class="dv">80</span>]<span class="sc">}</span><span class="ss">..."</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="11" data-code-annotation="1">BM25 is used for hard negative mining because it retrieves lexically similar passages — exactly the kind of near-miss that a fine-tuned model must learn to discriminate.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="27" data-code-annotation="2">We exclude the ground-truth index by direct comparison; in a real corpus with duplicate or paraphrase passages, exclude by chunk ID rather than text equality.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="40" data-code-annotation="3">In practice, <code>n_neg = 7</code> to <code>15</code> negatives per query is common. More negatives per batch increases gradient signal but also GPU memory usage. With the <code>sentence-transformers</code> library, <code>MultipleNegativesRankingLoss</code> handles in-batch negatives automatically, so you only need to provide (query, positive) pairs.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We verify that the BM25 hard negatives are indeed topically related to the queries — the key property that makes them useful as training signal:</p>
+<div id="e9b0c1d2" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Hard negative section distribution across all triples:"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Map text → section for analysis</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>text_to_section <span class="op">=</span> {c[<span class="st">"text"</span>]: c[<span class="st">"section"</span>] <span class="cf">for</span> c <span class="kw">in</span> CORPUS}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>neg_sections <span class="op">=</span> Counter()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>pos_sections <span class="op">=</span> Counter()</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> triples:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    pos_sections[text_to_section[t[<span class="st">"positive"</span>]]] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> neg <span class="kw">in</span> t[<span class="st">"negatives"</span>]:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        neg_sections[text_to_section[neg]] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Positive sections: </span><span class="sc">{</span><span class="bu">dict</span>(pos_sections)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Negative sections: </span><span class="sc">{</span><span class="bu">dict</span>(neg_sections)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>When is fine-tuning worth the effort?</strong> The honest answer is: rarely for the average deployment. Fine-tuning requires (1) <span class="math inline">\geq 500</span> high-quality labeled (query, passage) pairs, (2) a reproducible training pipeline, (3) model serving infrastructure to host the custom weights, and (4) an eval harness that can detect regression on future prompt or corpus changes. All of this has ongoing maintenance cost. The practical decision rule: if <code>text-embedding-3-large</code> fails to meet your Recall@5 target on your labeled test set, fine-tune a self-hosted model like <code>bge-large-en-v1.5</code>; otherwise, use the API model and spend the engineering budget on hard negative mining for BM25 and metadata filtering.</p>
+</section>
+<section id="dimensionality-reduction-for-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="dimensionality-reduction-for-visualization">Dimensionality Reduction for Visualization</h2>
+<p>A 1536-dimensional vector is not human-inspectable. We reduce it to 2D using a two-stage pipeline: first <strong>PCA</strong> (Principal Component Analysis) to 50 dimensions, which removes noise while preserving most variance cheaply; then <strong>UMAP</strong> (Uniform Manifold Approximation and Projection) from 50 to 2 dimensions, which preserves local neighborhood structure better than PCA alone at low dimensionality.</p>
+<p>The reason for the two-stage approach: UMAP is <span class="math inline">O(n^2)</span> in its naive form and benefits from a reduced input space. PCA is <span class="math inline">O(n d^2)</span> but fast in practice because <code>sklearn</code>’s implementation uses randomized SVD. The combination is the standard recipe in the embedding visualization literature — it is used in the original UMAP paper, the Sentence-BERT paper, and every embedding visualization we have seen in industry practice.</p>
+<p>We implement <code>EmbeddingVisualizer</code> that wraps this pipeline and produces a color-coded scatter plot by document section:</p>
+<div id="c3f4a5b6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> umap</span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EmbeddingVisualizer:</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""PCA → UMAP dimensionality reduction for embedding visualization."""</span></span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, pca_components: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>, random_state: <span class="bu">int</span> <span class="op">=</span> <span class="dv">42</span>):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-9" class="code-annotation-target"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._pca <span class="op">=</span> PCA(n_components<span class="op">=</span>pca_components, random_state<span class="op">=</span>random_state)</span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._umap <span class="op">=</span> umap.UMAP(</span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>            n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-12" class="code-annotation-target"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>            n_neighbors<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>            min_dist<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a>            metric<span class="op">=</span><span class="st">"cosine"</span>,</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a>            random_state<span class="op">=</span>random_state,</span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-18"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit_transform(<span class="va">self</span>, vectors: np.ndarray) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-7-19"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return 2D coordinates for each input vector."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-7-20" class="code-annotation-target"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>        reduced_pca <span class="op">=</span> <span class="va">self</span>._pca.fit_transform(vectors)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-7-21" class="code-annotation-target"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a>        reduced_2d <span class="op">=</span> <span class="va">self</span>._umap.fit_transform(reduced_pca)</span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> reduced_2d</span>
+<span id="annotated-cell-7-23"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-24"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>visualizer <span class="op">=</span> EmbeddingVisualizer(pca_components<span class="op">=</span><span class="bu">min</span>(<span class="dv">50</span>, CORPUS_VECS.shape[<span class="dv">0</span>] <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="annotated-cell-7-26"><a href="#annotated-cell-7-26" aria-hidden="true" tabindex="-1"></a>coords_2d <span class="op">=</span> visualizer.fit_transform(CORPUS_VECS)</span>
+<span id="annotated-cell-7-27"><a href="#annotated-cell-7-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"2D coordinates shape: </span><span class="sc">{</span>coords_2d<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="9" data-code-annotation="1">We cap PCA components at <code>n_samples - 1</code> to avoid the rank constraint issue on small corpora; in production with <span class="math inline">n \gg 50</span> this is never binding.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="12" data-code-annotation="2"><code>n_neighbors=5</code> is deliberately small because our corpus has only 20 points. For a real corpus of 10k+ chunks, use <code>n_neighbors=15</code> to <code>30</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="20" data-code-annotation="3">PCA is applied first: it is a global linear projection that efficiently removes the long tail of near-zero variance dimensions from a 1536-dimensional vector.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="21" data-code-annotation="4">UMAP then finds a non-linear 2D manifold that preserves local neighborhoods in the 50-dimensional PCA space.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Plotting the 2D projection, colored by section:</p>
+<div id="f6c7d8e9" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.patches <span class="im">as</span> mpatches</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>SECTION_COLORS <span class="op">=</span> {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"risk_factors"</span>:     <span class="st">"#d6604d"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mda"</span>:              <span class="st">"#4393c3"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"capital_liquidity"</span>: <span class="st">"#4dac26"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guidance"</span>:         <span class="st">"#b35900"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>SECTION_LABELS <span class="op">=</span> {</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"risk_factors"</span>: <span class="st">"Risk Factors"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mda"</span>: <span class="st">"MD&amp;A"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"capital_liquidity"</span>: <span class="st">"Capital &amp; Liquidity"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guidance"</span>: <span class="st">"Guidance"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (x, y) <span class="kw">in</span> <span class="bu">enumerate</span>(coords_2d):</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    section <span class="op">=</span> SECTIONS[i]</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> SECTION_COLORS[section]</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, color<span class="op">=</span>color, s<span class="op">=</span><span class="dv">80</span>, alpha<span class="op">=</span><span class="fl">0.85</span>, zorder<span class="op">=</span><span class="dv">3</span>, edgecolors<span class="op">=</span><span class="st">"white"</span>, linewidths<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    ax.annotate(<span class="bu">str</span>(i), (x, y), fontsize<span class="op">=</span><span class="dv">7</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>, color<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                fontweight<span class="op">=</span><span class="st">"bold"</span>, zorder<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>patches <span class="op">=</span> [</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    mpatches.Patch(color<span class="op">=</span>SECTION_COLORS[s], label<span class="op">=</span>SECTION_LABELS[s])</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> s <span class="kw">in</span> SECTION_COLORS</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>ax.legend(handles<span class="op">=</span>patches, loc<span class="op">=</span><span class="st">"best"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, framealpha<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"PCA (50D) → UMAP (2D) projection of 20-chunk SEC corpus"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"UMAP 1"</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"UMAP 2"</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> PCA + UMAP projection of the 20-chunk SEC corpus, with each point labeled by its chunk index (0–19) and colored by document section. Chunks within the same section tend to cluster together, confirming that the embedding geometry encodes document section as a latent structure. Note that the <code>capital_liquidity</code> and <code>risk_factors</code> sections (both deal with regulatory and financial ratios) are closer in the UMAP space than either is to <code>mda</code> — consistent with the semantic proximity of those topics in real filing language.</p>
+</section>
+<section id="colbert-late-interaction" class="level2">
+<h2 class="anchored" data-anchor-id="colbert-late-interaction">ColBERT Late Interaction</h2>
+<p>The three retrieval paradigms differ in where query–document interaction happens:</p>
+<ul>
+<li><strong>Bi-encoder</strong> (our default): query and document are encoded independently into single vectors <span class="math inline">\mathbf{q}, \mathbf{d} \in \mathbb{R}^d.</span> Interaction is a single dot product <span class="math inline">\mathbf{q}^\top \mathbf{d}.</span> Fast to index (one vector per document), but all query–document reasoning is compressed into one number.</li>
+<li><strong>Cross-encoder</strong>: query and document are concatenated and run through a transformer jointly. Full self-attention captures fine-grained interactions. Accurate but <span class="math inline">O(n)</span> latency per query — unusable for first-stage retrieval.</li>
+<li><strong>Late interaction (ColBERT)</strong>: query and document are encoded separately into <em>token-level</em> vector sequences <span class="math inline">\mathbf{E}_q \in \mathbb{R}^{|q| \times d}</span> and <span class="math inline">\mathbf{E}_d \in \mathbb{R}^{|d| \times d}.</span> The relevance score is the <strong>MaxSim</strong> operator — for each query token, find its most similar document token and sum:</li>
+</ul>
+<p><span class="math display">\text{score}(q, d) = \sum_{i \in q} \max_{j \in d} \mathbf{E}_q[i] \cdot \mathbf{E}_d[j]^\top</span></p>
+<p>This is more expressive than a single vector dot product because each query token independently retrieves its best matching document token — a query about “CET1 ratio” will match the document token “CET1” strongly and the token “ratio” separately, capturing both. Document token matrices can be pre-computed and stored (though at 32× the storage of a bi-encoder). Query token matrices are computed at query time with a fast forward pass.</p>
+<p>We implement a simplified <code>ColBERTRetriever</code> using <code>sentence-transformers</code> to produce token embeddings (we do not use the full ColBERT model or its specialized index, but the MaxSim computation is identical):</p>
+<div id="d0a1b2c3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ColBERTRetriever:</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simplified ColBERT-style late interaction retriever using MaxSim."""</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, model_name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"sentence-transformers/all-MiniLM-L6-v2"</span>):</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._model <span class="op">=</span> SentenceTransformer(model_name)</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._tokenizer <span class="op">=</span> <span class="va">self</span>._model.tokenizer</span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._doc_token_vecs: <span class="bu">list</span>[np.ndarray] <span class="op">=</span> []</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._texts: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _token_embeddings(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return per-token embeddings of shape (seq_len, d)."""</span></span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>        features <span class="op">=</span> <span class="va">self</span>._model.tokenize([text])</span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-18" class="code-annotation-target"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> <span class="va">self</span>._model.forward(features)</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># token_embeddings: (1, seq_len, d)</span></span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>        token_vecs <span class="op">=</span> out[<span class="st">"token_embeddings"</span>][<span class="dv">0</span>].cpu().numpy()  <span class="co"># (seq_len, d)</span></span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># L2-normalize each token vector</span></span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>        norms <span class="op">=</span> np.linalg.norm(token_vecs, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> token_vecs <span class="op">/</span> norms</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> index(<span class="va">self</span>, corpus: <span class="bu">list</span>[<span class="bu">dict</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Pre-compute and store token embeddings for each document."""</span></span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._texts <span class="op">=</span> [c[<span class="st">"text"</span>] <span class="cf">for</span> c <span class="kw">in</span> corpus]</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> text <span class="kw">in</span> <span class="va">self</span>._texts:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-29" class="code-annotation-target"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._doc_token_vecs.append(<span class="va">self</span>._token_embeddings(text))</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Indexed </span><span class="sc">{</span><span class="bu">len</span>(<span class="va">self</span>._texts)<span class="sc">}</span><span class="ss"> documents."</span>)</span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  Example doc token matrix shape: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_doc_token_vecs[<span class="dv">0</span>]<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _maxsim(<span class="va">self</span>, q_vecs: np.ndarray, d_vecs: np.ndarray) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""MaxSim score: sum over query tokens of their max similarity to doc tokens."""</span></span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># q_vecs: (|q|, d), d_vecs: (|d|, d)</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-36" class="code-annotation-target"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a>        sim_matrix <span class="op">=</span> q_vecs <span class="op">@</span> d_vecs.T  <span class="co"># (|q|, |d|)</span></span>
+<span id="annotated-cell-9-37"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">float</span>(sim_matrix.<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>).<span class="bu">sum</span>())</span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrieve(<span class="va">self</span>, query: <span class="bu">str</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Retrieve top-k documents by MaxSim score."""</span></span>
+<span id="annotated-cell-9-41"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>        q_vecs <span class="op">=</span> <span class="va">self</span>._token_embeddings(query)  <span class="co"># (|q|, d)</span></span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> [<span class="va">self</span>._maxsim(q_vecs, d_vecs) <span class="cf">for</span> d_vecs <span class="kw">in</span> <span class="va">self</span>._doc_token_vecs]</span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a>        ranked <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:k]</span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"text"</span>: <span class="va">self</span>._texts[i], <span class="st">"score"</span>: scores[i], <span class="st">"index"</span>: <span class="bu">int</span>(i)}</span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> ranked</span>
+<span id="annotated-cell-9-47"><a href="#annotated-cell-9-47" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-9-48"><a href="#annotated-cell-9-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-49"><a href="#annotated-cell-9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-50"><a href="#annotated-cell-9-50" aria-hidden="true" tabindex="-1"></a>colbert <span class="op">=</span> ColBERTRetriever()</span>
+<span id="annotated-cell-9-51"><a href="#annotated-cell-9-51" aria-hidden="true" tabindex="-1"></a>colbert.index(CORPUS)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="18" data-code-annotation="1">We call <code>self._model.forward(features)</code> directly (bypassing the sentence-level pooling) to access the raw per-token output from the transformer encoder. The <code>out["token_embeddings"]</code> key is set by <code>sentence-transformers</code>’ feature extraction pipeline.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="29" data-code-annotation="2">For a 20-document corpus each document token matrix fits easily in memory. At scale, ColBERT’s PLAID index compresses these token matrices using residual quantization — storing $$32 bytes per token rather than <span class="math inline">d \times 4</span> bytes.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="36" data-code-annotation="3">The <span class="math inline">|q| \times |d|</span> similarity matrix captures every pairwise token interaction. <code>max(axis=1)</code> picks the best document token for each query token; summing these maxima gives the ColBERT relevance score.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We compare ColBERT vs.&nbsp;bi-encoder retrieval on five financial queries with known ground-truth:</p>
+<div id="a3d4e5f6" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>COMPARISON_QUERIES <span class="op">=</span> [</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"What is the CET1 capital ratio?"</span>, <span class="dv">10</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"FINRA Rule 4110 Net Capital Rule compliance"</span>, <span class="dv">13</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"VaR 99th percentile one-day holding period"</span>, <span class="dv">4</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Investment banking revenue change year over year"</span>, <span class="dv">6</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Basel III leverage ratio minimum requirement"</span>, <span class="dv">12</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Bi-encoder: use full CORPUS_VECS</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>CORPUS_VECS_N <span class="op">=</span> CORPUS_VECS <span class="op">/</span> (np.linalg.norm(CORPUS_VECS, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bi_encoder_retrieve(query: <span class="bu">str</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> embed([query])[<span class="dv">0</span>]</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> q_vec <span class="op">/</span> (np.linalg.norm(q_vec) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> CORPUS_VECS_N <span class="op">@</span> q_vec</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    ranked <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:k]</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">"text"</span>: TEXTS[i], <span class="st">"score"</span>: <span class="bu">float</span>(scores[i]), <span class="st">"index"</span>: <span class="bu">int</span>(i)} <span class="cf">for</span> i <span class="kw">in</span> ranked]</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Query'</span><span class="sc">:&lt;45}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Bi-enc rank'</span><span class="sc">:&gt;11}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'ColBERT rank'</span><span class="sc">:&gt;13}</span><span class="ss">"</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">72</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> query, gt_idx <span class="kw">in</span> COMPARISON_QUERIES:</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    bi_results  <span class="op">=</span> bi_encoder_retrieve(query, k<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    col_results <span class="op">=</span> colbert.retrieve(query, k<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    bi_rank  <span class="op">=</span> <span class="bu">next</span>((r<span class="op">+</span><span class="dv">1</span> <span class="cf">for</span> r, res <span class="kw">in</span> <span class="bu">enumerate</span>(bi_results)  <span class="cf">if</span> res[<span class="st">"index"</span>] <span class="op">==</span> gt_idx), <span class="st">"&gt;5"</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    col_rank <span class="op">=</span> <span class="bu">next</span>((r<span class="op">+</span><span class="dv">1</span> <span class="cf">for</span> r, res <span class="kw">in</span> <span class="bu">enumerate</span>(col_results) <span class="cf">if</span> res[<span class="st">"index"</span>] <span class="op">==</span> gt_idx), <span class="st">"&gt;5"</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>query[:<span class="dv">44</span>]<span class="sc">:&lt;45}</span><span class="ss"> </span><span class="sc">{</span><span class="bu">str</span>(bi_rank)<span class="sc">:&gt;11}</span><span class="ss"> </span><span class="sc">{</span><span class="bu">str</span>(col_rank)<span class="sc">:&gt;13}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The FINRA Rule 4110 query illustrates the key advantage of late interaction: the query token “4110” must match the document token “4110” exactly. A bi-encoder compresses this specificity into a 1536-dimensional average; the MaxSim operator evaluates it token by token, so an exact identifier match contributes its full cosine score rather than being diluted by the rest of the passage.</p>
+</section>
+<section id="embedding-storage-and-indexing" class="level2">
+<h2 class="anchored" data-anchor-id="embedding-storage-and-indexing">Embedding Storage and Indexing</h2>
+<p>The choice of ANN index depends on three variables: corpus size <span class="math inline">n</span>, query rate (QPS), and acceptable recall tradeoff. Three index families dominate production deployments:</p>
+<p><strong>Flat index (exact).</strong> Brute-force <span class="math inline">O(n \cdot d)</span> cosine search. Recall = 100% by definition. Appropriate for <span class="math inline">n &lt; 50{,}000</span> when latency is not a constraint, or as a ground-truth baseline for benchmarking ANN quality. ChromaDB uses flat search for small collections before automatically switching to HNSW.</p>
+<p><strong>HNSW (Hierarchical Navigable Small World).</strong> A graph-based ANN index that builds a multi-layer navigable small world graph over the vector set. Query complexity is approximately <span class="math inline">O(\log n)</span> at the cost of a one-time build and increased memory usage. Two key parameters: (1) <code>M</code> — the number of bidirectional edges per node at each layer; higher <code>M</code> means better recall and faster queries at the cost of more memory and slower build. Typical values: <code>M=16</code> (default) to <code>M=64</code> (high-recall). (2) <code>ef_construction</code> — the size of the dynamic candidate list during index construction; higher values produce better graph quality at the cost of build time. Typical values: <code>ef_construction=100</code> to <code>ef_construction=400</code>. HNSW is the right choice for <span class="math inline">10^4 \leq n \leq 10^7</span> at query rates of 10–10,000 QPS.</p>
+<p><strong>IVF (Inverted File Index).</strong> Clusters the vector space into <span class="math inline">\sqrt{n}</span> Voronoi cells using <span class="math inline">k</span>-means. At query time, only the <span class="math inline">n_{\text{probe}}</span> nearest cells are searched. IVF-PQ (with product quantization for vector compression) is the right choice for <span class="math inline">n &gt; 10^7</span> where HNSW memory becomes prohibitive: IVF-PQ can represent 100M vectors in RAM while HNSW cannot.</p>
+<p>ChromaDB uses HNSW by default via <a href="https://github.com/nmslib/hnswlib">hnswlib</a>. We can inspect and adjust its settings at collection creation time:</p>
+<div id="e7b8c9d0" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> chromadb</span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> chromadb.utils.embedding_functions <span class="im">import</span> OpenAIEmbeddingFunction</span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-11-4" class="code-annotation-target"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> chromadb.EphemeralClient()</span>
+<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>embed_fn <span class="op">=</span> OpenAIEmbeddingFunction(</span>
+<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span>os.environ[<span class="st">"OPENAI_API_KEY"</span>],</span>
+<span id="annotated-cell-11-8"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a>    model_name<span class="op">=</span><span class="st">"text-embedding-3-small"</span>,</span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Default HNSW settings</span></span>
+<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>col_default <span class="op">=</span> client.create_collection(</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"default-hnsw"</span>,</span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>    embedding_function<span class="op">=</span>embed_fn,</span>
+<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a>    metadata<span class="op">=</span>{</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-11-16" class="code-annotation-target"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:space"</span>: <span class="st">"cosine"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-11-17" class="code-annotation-target"><a href="#annotated-cell-11-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:M"</span>: <span class="dv">16</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-11-18" class="code-annotation-target"><a href="#annotated-cell-11-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:construction_ef"</span>: <span class="dv">100</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-11-19" class="code-annotation-target"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:search_ef"</span>: <span class="dv">10</span>,</span>
+<span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-11-21"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-23"><a href="#annotated-cell-11-23" aria-hidden="true" tabindex="-1"></a><span class="co"># High-recall HNSW for compliance queries (quality over speed)</span></span>
+<span id="annotated-cell-11-24"><a href="#annotated-cell-11-24" aria-hidden="true" tabindex="-1"></a>col_highrecall <span class="op">=</span> client.create_collection(</span>
+<span id="annotated-cell-11-25"><a href="#annotated-cell-11-25" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"highrecall-hnsw"</span>,</span>
+<span id="annotated-cell-11-26"><a href="#annotated-cell-11-26" aria-hidden="true" tabindex="-1"></a>    embedding_function<span class="op">=</span>embed_fn,</span>
+<span id="annotated-cell-11-27"><a href="#annotated-cell-11-27" aria-hidden="true" tabindex="-1"></a>    metadata<span class="op">=</span>{</span>
+<span id="annotated-cell-11-28"><a href="#annotated-cell-11-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:space"</span>: <span class="st">"cosine"</span>,</span>
+<span id="annotated-cell-11-29"><a href="#annotated-cell-11-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:M"</span>: <span class="dv">32</span>,</span>
+<span id="annotated-cell-11-30"><a href="#annotated-cell-11-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:construction_ef"</span>: <span class="dv">200</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-11-31" class="code-annotation-target"><a href="#annotated-cell-11-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hnsw:search_ef"</span>: <span class="dv">100</span>,</span>
+<span id="annotated-cell-11-32"><a href="#annotated-cell-11-32" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-11-33"><a href="#annotated-cell-11-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-11-34"><a href="#annotated-cell-11-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-35"><a href="#annotated-cell-11-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Default collection metadata:"</span>, col_default.metadata)</span>
+<span id="annotated-cell-11-36"><a href="#annotated-cell-11-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"High-recall collection metadata:"</span>, col_highrecall.metadata)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="4" data-code-annotation="1"><code>EphemeralClient</code> stores the index in memory only — no disk writes. Equivalent to <code>PersistentClient</code> for API exploration but simpler to clean up.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="16" data-code-annotation="2"><code>hnsw:space</code> sets the distance metric for the HNSW graph. Use <code>"cosine"</code> for normalized text embeddings; <code>"l2"</code> is appropriate for image embeddings or other non-normalized vectors.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="17" data-code-annotation="3"><code>hnsw:M</code> controls graph connectivity. Each new node connects to <code>M</code> neighbors at each layer. Doubling <code>M</code> roughly doubles memory usage but improves recall significantly for <code>M &lt; 32.</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="18" data-code-annotation="4"><code>hnsw:construction_ef</code> is the size of the dynamic candidate list during index build. Higher values produce a better-connected graph but slow down indexing. Set once and do not change after documents are added.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="19" data-code-annotation="5"><code>hnsw:search_ef</code> controls the beam width during query time. Higher values trade query latency for higher recall. This can be changed per-query; ChromaDB uses <code>ef = max(n_results, search_ef)</code> internally.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="31" data-code-annotation="6">For a compliance-critical RAG system where missing a relevant document has regulatory consequences, <code>search_ef=100</code> or higher is appropriate. For a lower-stakes financial chatbot, the default <code>search_ef=10</code> is fine.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>HNSW parameters cannot be changed after documents have been indexed. Always configure <code>M</code> and <code>construction_ef</code> before adding documents. If you need to change them, you must delete the collection, recreate it with the new settings, and re-index — which on a large corpus means re-running the embedding API calls at full cost.</p>
+</div>
+</div>
+</section>
+<section id="benchmarking-all-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="benchmarking-all-approaches">Benchmarking All Approaches</h2>
+<p>We assemble <code>EmbeddingBenchmark</code> to measure Recall@5, MRR (Mean Reciprocal Rank), and p50/p99 query latency for three retrieval configurations on our 10-question labeled test set. <strong>MRR</strong> is the mean of <span class="math inline">1/\text{rank}</span> where rank is the position of the ground-truth chunk in the retrieved list; it penalizes a ground-truth chunk at rank 5 more gently than a ranking metric like NDCG but more gently than Recall@1. We add API cost per 1M tokens as a column since cost is a first-class constraint in production systems.</p>
+<div id="d2a3b4c5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EmbeddingBenchmark:</span>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Measure Recall@k, MRR, and latency for multiple retrieval methods."""</span></span>
+<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, eval_set: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">int</span>]]):</span>
+<span id="annotated-cell-12-8"><a href="#annotated-cell-12-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._eval <span class="op">=</span> eval_set</span>
+<span id="annotated-cell-12-9"><a href="#annotated-cell-12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-10"><a href="#annotated-cell-12-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _mrr(<span class="va">self</span>, retrieve_fn, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="annotated-cell-12-11"><a href="#annotated-cell-12-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return (Recall@k, MRR, p50_ms, p99_ms)."""</span></span>
+<span id="annotated-cell-12-12"><a href="#annotated-cell-12-12" aria-hidden="true" tabindex="-1"></a>        recall_hits <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-12-13"><a href="#annotated-cell-12-13" aria-hidden="true" tabindex="-1"></a>        reciprocal_ranks <span class="op">=</span> []</span>
+<span id="annotated-cell-12-14"><a href="#annotated-cell-12-14" aria-hidden="true" tabindex="-1"></a>        latencies_ms <span class="op">=</span> []</span>
+<span id="annotated-cell-12-15"><a href="#annotated-cell-12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-16"><a href="#annotated-cell-12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> query, gt_idx <span class="kw">in</span> <span class="va">self</span>._eval:</span>
+<span id="annotated-cell-12-17"><a href="#annotated-cell-12-17" aria-hidden="true" tabindex="-1"></a>            t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="annotated-cell-12-18"><a href="#annotated-cell-12-18" aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> retrieve_fn(query, k)</span>
+<span id="annotated-cell-12-19"><a href="#annotated-cell-12-19" aria-hidden="true" tabindex="-1"></a>            latencies_ms.append((time.perf_counter() <span class="op">-</span> t0) <span class="op">*</span> <span class="dv">1000</span>)</span>
+<span id="annotated-cell-12-20"><a href="#annotated-cell-12-20" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-21" class="code-annotation-target"><a href="#annotated-cell-12-21" aria-hidden="true" tabindex="-1"></a>            indices <span class="op">=</span> [r[<span class="st">"index"</span>] <span class="cf">for</span> r <span class="kw">in</span> results]</span>
+<span id="annotated-cell-12-22"><a href="#annotated-cell-12-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> gt_idx <span class="kw">in</span> indices[:k]:</span>
+<span id="annotated-cell-12-23"><a href="#annotated-cell-12-23" aria-hidden="true" tabindex="-1"></a>                recall_hits <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-12-24"><a href="#annotated-cell-12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-25"><a href="#annotated-cell-12-25" aria-hidden="true" tabindex="-1"></a>            rank <span class="op">=</span> <span class="bu">next</span>((i <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> i, idx <span class="kw">in</span> <span class="bu">enumerate</span>(indices) <span class="cf">if</span> idx <span class="op">==</span> gt_idx), <span class="va">None</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-12-26" class="code-annotation-target"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a>            reciprocal_ranks.append(<span class="fl">1.0</span> <span class="op">/</span> rank <span class="cf">if</span> rank <span class="cf">else</span> <span class="fl">0.0</span>)</span>
+<span id="annotated-cell-12-27"><a href="#annotated-cell-12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-28"><a href="#annotated-cell-12-28" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>._eval)</span>
+<span id="annotated-cell-12-29"><a href="#annotated-cell-12-29" aria-hidden="true" tabindex="-1"></a>        lats <span class="op">=</span> <span class="bu">sorted</span>(latencies_ms)</span>
+<span id="annotated-cell-12-30"><a href="#annotated-cell-12-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="annotated-cell-12-31"><a href="#annotated-cell-12-31" aria-hidden="true" tabindex="-1"></a>            recall_hits <span class="op">/</span> n,</span>
+<span id="annotated-cell-12-32"><a href="#annotated-cell-12-32" aria-hidden="true" tabindex="-1"></a>            <span class="bu">float</span>(np.mean(reciprocal_ranks)),</span>
+<span id="annotated-cell-12-33"><a href="#annotated-cell-12-33" aria-hidden="true" tabindex="-1"></a>            lats[<span class="bu">int</span>(<span class="fl">0.50</span> <span class="op">*</span> <span class="bu">len</span>(lats))],</span>
+<span id="annotated-cell-12-34"><a href="#annotated-cell-12-34" aria-hidden="true" tabindex="-1"></a>            lats[<span class="bu">int</span>(<span class="fl">0.99</span> <span class="op">*</span> <span class="bu">len</span>(lats))],</span>
+<span id="annotated-cell-12-35"><a href="#annotated-cell-12-35" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-12-36"><a href="#annotated-cell-12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-37"><a href="#annotated-cell-12-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> run(</span>
+<span id="annotated-cell-12-38"><a href="#annotated-cell-12-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-12-39"><a href="#annotated-cell-12-39" aria-hidden="true" tabindex="-1"></a>        methods: <span class="bu">dict</span>,  <span class="co"># name → (retrieve_fn, cost_per_1m_tokens)</span></span>
+<span id="annotated-cell-12-40"><a href="#annotated-cell-12-40" aria-hidden="true" tabindex="-1"></a>        k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="annotated-cell-12-41"><a href="#annotated-cell-12-41" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-12-42"><a href="#annotated-cell-12-42" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> {}</span>
+<span id="annotated-cell-12-43"><a href="#annotated-cell-12-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, (fn, cost) <span class="kw">in</span> methods.items():</span>
+<span id="annotated-cell-12-44"><a href="#annotated-cell-12-44" aria-hidden="true" tabindex="-1"></a>            recall, mrr, p50, p99 <span class="op">=</span> <span class="va">self</span>._mrr(fn, k<span class="op">=</span>k)</span>
+<span id="annotated-cell-12-45"><a href="#annotated-cell-12-45" aria-hidden="true" tabindex="-1"></a>            results[name] <span class="op">=</span> {<span class="st">"recall"</span>: recall, <span class="st">"mrr"</span>: mrr, <span class="st">"p50_ms"</span>: p50, <span class="st">"p99_ms"</span>: p99, <span class="st">"cost"</span>: cost}</span>
+<span id="annotated-cell-12-46"><a href="#annotated-cell-12-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results</span>
+<span id="annotated-cell-12-47"><a href="#annotated-cell-12-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-48"><a href="#annotated-cell-12-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-49"><a href="#annotated-cell-12-49" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bi_full_retrieve(query: <span class="bu">str</span>, k: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-12-50"><a href="#annotated-cell-12-50" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> embed([query])[<span class="dv">0</span>]</span>
+<span id="annotated-cell-12-51"><a href="#annotated-cell-12-51" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> q_vec <span class="op">/</span> (np.linalg.norm(q_vec) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-12-52"><a href="#annotated-cell-12-52" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> CORPUS_VECS_N <span class="op">@</span> q_vec</span>
+<span id="annotated-cell-12-53"><a href="#annotated-cell-12-53" aria-hidden="true" tabindex="-1"></a>    ranked <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:k]</span>
+<span id="annotated-cell-12-54"><a href="#annotated-cell-12-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">"text"</span>: TEXTS[i], <span class="st">"score"</span>: <span class="bu">float</span>(scores[i]), <span class="st">"index"</span>: <span class="bu">int</span>(i)} <span class="cf">for</span> i <span class="kw">in</span> ranked]</span>
+<span id="annotated-cell-12-55"><a href="#annotated-cell-12-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-56"><a href="#annotated-cell-12-56" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-12-57" class="code-annotation-target"><a href="#annotated-cell-12-57" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bi_256_retrieve(query: <span class="bu">str</span>, k: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-12-58"><a href="#annotated-cell-12-58" aria-hidden="true" tabindex="-1"></a>    doc_vecs <span class="op">=</span> embed(TEXTS, dimensions<span class="op">=</span><span class="dv">256</span>)</span>
+<span id="annotated-cell-12-59"><a href="#annotated-cell-12-59" aria-hidden="true" tabindex="-1"></a>    doc_vecs <span class="op">=</span> doc_vecs <span class="op">/</span> (np.linalg.norm(doc_vecs, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-12-60"><a href="#annotated-cell-12-60" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> embed([query], dimensions<span class="op">=</span><span class="dv">256</span>)[<span class="dv">0</span>]</span>
+<span id="annotated-cell-12-61"><a href="#annotated-cell-12-61" aria-hidden="true" tabindex="-1"></a>    q_vec <span class="op">=</span> q_vec <span class="op">/</span> (np.linalg.norm(q_vec) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-12-62"><a href="#annotated-cell-12-62" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> doc_vecs <span class="op">@</span> q_vec</span>
+<span id="annotated-cell-12-63"><a href="#annotated-cell-12-63" aria-hidden="true" tabindex="-1"></a>    ranked <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:k]</span>
+<span id="annotated-cell-12-64"><a href="#annotated-cell-12-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [{<span class="st">"text"</span>: TEXTS[i], <span class="st">"score"</span>: <span class="bu">float</span>(scores[i]), <span class="st">"index"</span>: <span class="bu">int</span>(i)} <span class="cf">for</span> i <span class="kw">in</span> ranked]</span>
+<span id="annotated-cell-12-65"><a href="#annotated-cell-12-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-66"><a href="#annotated-cell-12-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-67"><a href="#annotated-cell-12-67" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> colbert_retrieve(query: <span class="bu">str</span>, k: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-12-68"><a href="#annotated-cell-12-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> colbert.retrieve(query, k<span class="op">=</span>k)</span>
+<span id="annotated-cell-12-69"><a href="#annotated-cell-12-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-70"><a href="#annotated-cell-12-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-71"><a href="#annotated-cell-12-71" aria-hidden="true" tabindex="-1"></a>benchmark <span class="op">=</span> EmbeddingBenchmark(EVAL_SET)</span>
+<span id="annotated-cell-12-72"><a href="#annotated-cell-12-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-73"><a href="#annotated-cell-12-73" aria-hidden="true" tabindex="-1"></a><span class="co"># (retrieve_fn, cost_per_1M_tokens_USD)</span></span>
+<span id="annotated-cell-12-74"><a href="#annotated-cell-12-74" aria-hidden="true" tabindex="-1"></a>METHODS <span class="op">=</span> {</span>
+<span id="annotated-cell-12-75"><a href="#annotated-cell-12-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bi-encoder 1536d"</span>:  (bi_full_retrieve, <span class="fl">0.02</span>),</span>
+<span id="annotated-cell-12-76"><a href="#annotated-cell-12-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bi-encoder 256d"</span>:   (bi_256_retrieve,  <span class="fl">0.02</span>),   <span class="co"># same API price, less storage</span></span>
+<span id="annotated-cell-12-77"><a href="#annotated-cell-12-77" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ColBERT (MiniLM)"</span>: (colbert_retrieve, <span class="fl">0.00</span>),    <span class="co"># self-hosted</span></span>
+<span id="annotated-cell-12-78"><a href="#annotated-cell-12-78" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-12-79"><a href="#annotated-cell-12-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-80"><a href="#annotated-cell-12-80" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Running benchmark..."</span>)</span>
+<span id="annotated-cell-12-81"><a href="#annotated-cell-12-81" aria-hidden="true" tabindex="-1"></a>bench_results <span class="op">=</span> benchmark.run(METHODS, k<span class="op">=</span><span class="dv">5</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="21" data-code-annotation="1">We standardize on <code>index</code> (corpus position) as the identifier for all retrieval methods. The ColBERT and bi-encoder implementations both return <code>{"index": int, ...}</code> so the benchmark code is method-agnostic.</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="26" data-code-annotation="2">MRR is 0 if the ground truth does not appear anywhere in the top-<span class="math inline">k</span> results — a missed query contributes 0 to the mean, so MRR is sensitive to failures in a way that Recall@5 is not.</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="57" data-code-annotation="3">We re-embed the corpus on each call for a fair latency comparison. In production the 256-dim corpus embeddings would be pre-computed, making the latency advantage of 256d over 1536d only the ANN search time difference (modest), not the embedding time difference (significant).</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Displaying the benchmark results table:</p>
+<div id="a5d6e7f8" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Method'</span><span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Recall@5'</span><span class="sc">:&gt;9}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'MRR'</span><span class="sc">:&gt;7}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'p50 (ms)'</span><span class="sc">:&gt;10}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'p99 (ms)'</span><span class="sc">:&gt;10}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Cost/1M tok'</span><span class="sc">:&gt;12}</span><span class="ss">"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">74</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, r <span class="kw">in</span> bench_results.items():</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    cost_str <span class="op">=</span> <span class="ss">f"$</span><span class="sc">{</span>r[<span class="st">'cost'</span>]<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">if</span> r[<span class="st">"cost"</span>] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">"free"</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>name<span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'recall'</span>]<span class="sc">:&gt;9.2f}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'mrr'</span>]<span class="sc">:&gt;7.3f}</span><span class="ss">"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f" </span><span class="sc">{</span>r[<span class="st">'p50_ms'</span>]<span class="sc">:&gt;10.1f}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'p99_ms'</span>]<span class="sc">:&gt;10.1f}</span><span class="ss"> </span><span class="sc">{</span>cost_str<span class="sc">:&gt;12}</span><span class="ss">"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The benchmark table exposes a few practical takeaways. The 256-dim bi-encoder trades 83% storage cost reduction for a small MRR degradation — the Pareto point for storage-constrained deployments. ColBERT’s MiniLM-based implementation gains on exact-identifier queries (FINRA Rule 4110, VaR percentile) relative to the bi-encoder, at the cost of higher per-query latency due to the per-token forward pass and the <span class="math inline">|q| \times |d|</span> similarity matrix computation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The p99 latency for all methods is dominated by the OpenAI embedding API call, not the retrieval computation. In a production system, pre-computing corpus embeddings offline eliminates this cost from the query path — the query path then incurs only the cost of embedding the user query (one API call) plus the ANN lookup (sub-millisecond for HNSW at our corpus size).</p>
+</div>
+</div>
+</section>
+<section id="appendix-contrastive-loss-derivation" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-contrastive-loss-derivation">Appendix: Contrastive Loss Derivation</h2>
+<p>The InfoNCE loss from the fine-tuning section has a clean probabilistic interpretation. Define the conditional probability that <span class="math inline">p^+</span> is the relevant passage for query <span class="math inline">q</span> given the candidate set <span class="math inline">\{p^+\} \cup \{p^-_i\}_{i=1}^N</span>:</p>
+<p><span class="math display">P(p^+ \mid q) = \frac{\exp(\text{sim}(q, p^+) / \tau)}{\exp(\text{sim}(q, p^+) / \tau) + \sum_{i=1}^{N} \exp(\text{sim}(q, p^-_i) / \tau)}</span></p>
+<p>This is a softmax over the candidate set with temperature <span class="math inline">\tau.</span> The InfoNCE objective is simply the negative log-likelihood:</p>
+<p><span class="math display">\mathcal{L} = -\log P(p^+ \mid q) = -\frac{\text{sim}(q, p^+)}{\tau} + \log \left[ \exp\left(\frac{\text{sim}(q, p^+)}{\tau}\right) + \sum_{i=1}^N \exp\left(\frac{\text{sim}(q, p^-_i)}{\tau}\right) \right]</span></p>
+<p>Minimizing <span class="math inline">\mathcal{L}</span> is equivalent to maximizing <span class="math inline">P(p^+ \mid q)</span> — that is, assigning the highest softmax probability to the positive passage. The temperature <span class="math inline">\tau</span> controls how sharply the model must separate positives from negatives: at <span class="math inline">\tau \to \infty</span> the softmax is uniform (no gradient), at <span class="math inline">\tau \to 0</span> the loss degenerates to a winner-takes-all hard margin. Typical values in practice are <span class="math inline">\tau \in [0.01, 0.1].</span></p>
+<p><strong>In-batch negatives.</strong> In practice we do not construct explicit negative passages: within a training batch of <span class="math inline">B</span> (query, positive) pairs, each query treats all other <span class="math inline">B - 1</span> positives as its negatives. This is called <strong>in-batch negative sampling</strong>. The batch then contributes <span class="math inline">B \times (B-1)</span> implicit negative pairs per step, making each gradient update far more informative than a single (query, positive, single-negative) triple. This is the strategy used by <code>sentence-transformers</code>’ <code>MultipleNegativesRankingLoss</code>.</p>
+</section>
+<section id="appendix-hnsw-parameter-reference" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-hnsw-parameter-reference">Appendix: HNSW Parameter Reference</h2>
+<p>Quick reference table for tuning HNSW in ChromaDB / hnswlib for financial retrieval workloads.</p>
+<table class="caption-top table">
+<caption>HNSW parameter guide for ChromaDB on SEC filing corpora.</caption>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 10%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: center;">Default</th>
+<th style="text-align: center;">Low (speed)</th>
+<th style="text-align: center;">High (recall)</th>
+<th style="text-align: left;">When to increase</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>hnsw:M</code></td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">64</td>
+<td style="text-align: left;">Corpus with many near-duplicate passages (e.g., boilerplate regulatory language across filings)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>hnsw:construction_ef</code></td>
+<td style="text-align: center;">100</td>
+<td style="text-align: center;">50</td>
+<td style="text-align: center;">400</td>
+<td style="text-align: left;">When offline index build time is cheap and retrieval quality is critical</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>hnsw:search_ef</code></td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">200</td>
+<td style="text-align: left;">Compliance-critical queries; tune via Recall@k evaluation; set per-collection</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>hnsw:space</code></td>
+<td style="text-align: center;"><code>"l2"</code></td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: left;">Always set to <code>"cosine"</code> for text embeddings; <code>"l2"</code> is default but wrong for normalized vectors</td>
+</tr>
+</tbody>
+</table>
+<p><strong>NOTE:</strong> Increasing <code>M</code> from 16 to 32 roughly doubles memory usage. At 1M vectors of dimension 1536 (float32), the vector matrix alone is 6 GB; the HNSW graph overlay at <code>M=16</code> adds approximately 2 GB. At <code>M=64</code> the graph overhead approaches the vector matrix size — a significant cost at the 10M-vector scale typical of large financial institutions ingesting filings across thousands of registrants.</p>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/prep/deep-dives/06-ai-security.html" class="pagination-link" aria-label="06. AI Security &amp; Compliance">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">06. AI Security &amp; Compliance</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/prep/deep-dives/08-multimodal.html" class="pagination-link" aria-label="08. Multimodal LLMs">
+        <span class="nav-page-text">08. Multimodal LLMs</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

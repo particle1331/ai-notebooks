@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Model Serving &amp; Deployment – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/prep/11-cost-optimization.html" rel="next">
+<link href="../../notebooks/prep/09-fine-tuning.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/10-model-serving.html">10. Model Serving</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#fastapi-service" id="toc-fastapi-service" class="nav-link active" data-scroll-target="#fastapi-service">FastAPI Service</a></li>
+  <li><a href="#docker-build" id="toc-docker-build" class="nav-link" data-scroll-target="#docker-build">Docker Build</a></li>
+  <li><a href="#litellm-proxy" id="toc-litellm-proxy" class="nav-link" data-scroll-target="#litellm-proxy">LiteLLM Proxy</a></li>
+  <li><a href="#vllm-local-inference" id="toc-vllm-local-inference" class="nav-link" data-scroll-target="#vllm-local-inference">vLLM Local Inference</a></li>
+  <li><a href="#benchmarking" id="toc-benchmarking" class="nav-link" data-scroll-target="#benchmarking">Benchmarking</a></li>
+  <li><a href="#graceful-shutdown" id="toc-graceful-shutdown" class="nav-link" data-scroll-target="#graceful-shutdown">Graceful Shutdown</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/10-model-serving.html">10. Model Serving</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Model Serving &amp; Deployment</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Building a capable LLM pipeline is only half the job. The other half is making it reliably available to the rest of the system: the risk dashboard, the compliance portal, the analyst’s chat interface. This notebook walks through the full serving stack — a FastAPI service that wraps our LLM pipeline, a multi-stage Docker build that keeps the image lean, a LiteLLM proxy that decouples the API surface from the underlying model provider, and a simple benchmark harness to measure latency and throughput before traffic hits production.</p>
+<p>The running example is a <strong>filing analysis service</strong>: a POST endpoint that accepts an SEC filing excerpt and returns a structured JSON response with a one-paragraph summary and a list of key risk factors. We progressively add health checks, graceful shutdown, and request-level logging so the service is ready for a containerized deployment behind a load balancer.</p>
+<p>Setup:</p>
+<section id="fastapi-service" class="level2">
+<h2 class="anchored" data-anchor-id="fastapi-service">FastAPI Service</h2>
+<p><strong>Why FastAPI?</strong> FastAPI is the standard choice for Python LLM services: it provides automatic request validation via Pydantic, async request handling for non-blocking I/O (critical when each request may wait several seconds for an LLM response), and auto-generated OpenAPI docs. The async model is important because LLM API calls are network-bound; a synchronous server would block its worker thread while waiting for OpenAI, severely limiting concurrency.</p>
+<p><br></p>
+<p><strong>Service contract.</strong> We define (1) a <code>FilingRequest</code> input schema with a <code>text</code> field containing the raw filing excerpt and an optional <code>max_risks</code> integer, and (2) a <code>FilingResponse</code> output schema with a <code>summary</code> string and a <code>risk_factors</code> list. The LLM is instructed to respond in structured JSON, which FastAPI validates before returning it to the caller. If the LLM response fails validation the service returns a <code>422 Unprocessable Entity</code> with details — this is far more useful to a downstream service than a silent empty string.</p>
+<p><br></p>
+<p><strong>Lifespan context.</strong> FastAPI’s <code>lifespan</code> parameter replaces the deprecated <code>on_startup</code>/<code>on_shutdown</code> events. We use it to initialize the <code>LLMClient</code> once at startup (avoiding a cold-start penalty on the first request) and log a clean shutdown message. The lifespan pattern also makes it easy to close database connections or flush observability buffers on exit.</p>
+<p>The service is defined in <code>src/main.py</code>:</p>
+<div class="sourceCode" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># src/main.py</span></span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> contextlib <span class="im">import</span> asynccontextmanager</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastapi <span class="im">import</span> FastAPI, HTTPException</span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai, os, json, logging</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>logging.basicConfig(level<span class="op">=</span>logging.INFO)</span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Pydantic schemas ──────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FilingRequest(BaseModel):</span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>    text: <span class="bu">str</span></span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>    max_risks: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span></span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FilingResponse(BaseModel):</span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>    summary: <span class="bu">str</span></span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>    risk_factors: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Application state ─────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AppState:</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>    client: openai.AsyncOpenAI <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> AppState()</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a><span class="at">@asynccontextmanager</span></span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> lifespan(app: FastAPI):</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="st">"Starting up — initialising OpenAI async client"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-32" class="code-annotation-target"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>    state.client <span class="op">=</span> openai.AsyncOpenAI()</span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">yield</span></span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="st">"Shutting down — flushing client"</span>)</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> state.client.close()</span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastAPI(title<span class="op">=</span><span class="st">"Filing Analyser"</span>, lifespan<span class="op">=</span>lifespan)</span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Health check ──────────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-1-40"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/health"</span>)</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> health():</span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>}</span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-45"><a href="#annotated-cell-1-45" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Core endpoint ─────────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-1-46"><a href="#annotated-cell-1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-47"><a href="#annotated-cell-1-47" aria-hidden="true" tabindex="-1"></a>SYSTEM <span class="op">=</span> (</span>
+<span id="annotated-cell-1-48"><a href="#annotated-cell-1-48" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You are a financial analyst. Given an SEC filing excerpt, "</span></span>
+<span id="annotated-cell-1-49"><a href="#annotated-cell-1-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"return a JSON object with fields: "</span></span>
+<span id="annotated-cell-1-50"><a href="#annotated-cell-1-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"'summary' (one paragraph) and 'risk_factors' (list of short strings, "</span></span>
+<span id="annotated-cell-1-51"><a href="#annotated-cell-1-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">"at most </span><span class="sc">{max_risks}</span><span class="st">)."</span></span>
+<span id="annotated-cell-1-52"><a href="#annotated-cell-1-52" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-1-53"><a href="#annotated-cell-1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-54"><a href="#annotated-cell-1-54" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/analyse"</span>, response_model<span class="op">=</span>FilingResponse)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-55" class="code-annotation-target"><a href="#annotated-cell-1-55" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> analyse(req: FilingRequest):</span>
+<span id="annotated-cell-1-56"><a href="#annotated-cell-1-56" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> SYSTEM.<span class="bu">format</span>(max_risks<span class="op">=</span>req.max_risks)</span>
+<span id="annotated-cell-1-57"><a href="#annotated-cell-1-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="annotated-cell-1-58"><a href="#annotated-cell-1-58" aria-hidden="true" tabindex="-1"></a>        resp <span class="op">=</span> <span class="cf">await</span> state.client.chat.completions.create(</span>
+<span id="annotated-cell-1-59"><a href="#annotated-cell-1-59" aria-hidden="true" tabindex="-1"></a>            model<span class="op">=</span>os.getenv(<span class="st">"MODEL"</span>, <span class="st">"gpt-4o-mini"</span>),</span>
+<span id="annotated-cell-1-60"><a href="#annotated-cell-1-60" aria-hidden="true" tabindex="-1"></a>            messages<span class="op">=</span>[</span>
+<span id="annotated-cell-1-61"><a href="#annotated-cell-1-61" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: prompt},</span>
+<span id="annotated-cell-1-62"><a href="#annotated-cell-1-62" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: req.text},</span>
+<span id="annotated-cell-1-63"><a href="#annotated-cell-1-63" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="annotated-cell-1-64"><a href="#annotated-cell-1-64" aria-hidden="true" tabindex="-1"></a>            response_format<span class="op">=</span>{<span class="st">"type"</span>: <span class="st">"json_object"</span>},</span>
+<span id="annotated-cell-1-65"><a href="#annotated-cell-1-65" aria-hidden="true" tabindex="-1"></a>            temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="annotated-cell-1-66"><a href="#annotated-cell-1-66" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-1-67"><a href="#annotated-cell-1-67" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> json.loads(resp.choices[<span class="dv">0</span>].message.content)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-1-68" class="code-annotation-target"><a href="#annotated-cell-1-68" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> FilingResponse(<span class="op">**</span>data)</span>
+<span id="annotated-cell-1-69"><a href="#annotated-cell-1-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> (json.JSONDecodeError, <span class="pp">KeyError</span>) <span class="im">as</span> e:</span>
+<span id="annotated-cell-1-70"><a href="#annotated-cell-1-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> HTTPException(status_code<span class="op">=</span><span class="dv">422</span>, detail<span class="op">=</span><span class="bu">str</span>(e))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="32" data-code-annotation="1"><code>openai.AsyncOpenAI()</code> uses <code>httpx</code> under the hood — a single client instance is shared across all requests and manages an HTTP connection pool automatically.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="55" data-code-annotation="2">FastAPI validates <code>FilingRequest</code> before the function body executes; invalid requests are rejected with a <code>422</code> before ever reaching the LLM.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="68" data-code-annotation="3">Constructing <code>FilingResponse(**data)</code> validates the LLM’s JSON output against the schema. Any missing or wrongly-typed field raises a <code>ValidationError</code> caught by the <code>except</code> block.</span>
+</dd>
+</dl>
+</section>
+<section id="docker-build" class="level2">
+<h2 class="anchored" data-anchor-id="docker-build">Docker Build</h2>
+<p><strong>Multi-stage builds.</strong> A naive <code>pip install -r requirements.txt</code> on top of a full Python base image produces images north of 1 GB. A multi-stage build separates the <em>build environment</em> (with compilers, wheel builders, and build tools) from the <em>runtime environment</em> (a slim image containing only what the application needs to run). The result is an image typically under 200 MB — faster to push, faster to pull, and with a smaller attack surface.</p>
+<p><br></p>
+<p><strong>Layer caching discipline.</strong> Docker caches layers in order. We copy <code>requirements.txt</code> and install dependencies <em>before</em> copying application code so that dependency installation (the slow step) is only re-run when <code>requirements.txt</code> changes, not on every code change. This halves CI times once the dependency layer is cached.</p>
+<p><br></p>
+<p><strong>Non-root user.</strong> Running as root inside a container is a security anti-pattern. We create a dedicated <code>appuser</code> and switch to it before the <code>CMD</code> so that even if an attacker achieves code execution inside the container, they hold no elevated host privileges.</p>
+<p>The <code>Dockerfile</code> for the filing analyser service:</p>
+<div class="sourceCode" id="annotated-cell-2"><pre class="sourceCode dockerfile code-annotation-code code-with-copy code-annotated"><code class="sourceCode dockerfile"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Stage 1: builder ──────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> python:3.13-slim <span class="kw">AS</span> builder</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WORKDIR</span> /build</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> requirements.txt .</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">pip</span> install <span class="at">--upgrade</span> pip <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-7" class="code-annotation-target"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a> <span class="kw">&amp;&amp;</span> <span class="ex">pip</span> install <span class="at">--no-cache-dir</span> <span class="at">--prefix</span><span class="op">=</span>/install <span class="at">-r</span> requirements.txt</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Stage 2: runtime ──────────────────────────────────────────────────────────</span></span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> python:3.13-slim</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> PYTHONDONTWRITEBYTECODE=1 <span class="op">\</span></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>    PYTHONUNBUFFERED=1 <span class="op">\</span></span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>    PORT=8000</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">WORKDIR</span> /app</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-17" class="code-annotation-target"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> <span class="op">--from=builder</span> /install /usr/local</span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> src/ ./src/</span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">adduser</span> <span class="at">--disabled-password</span> <span class="at">--gecos</span> <span class="st">""</span> appuser <span class="dt">\</span></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a> <span class="kw">&amp;&amp;</span> <span class="fu">chown</span> <span class="at">-R</span> appuser /app</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-22" class="code-annotation-target"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">USER</span> appuser</span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a><span class="kw">HEALTHCHECK</span> <span class="op">--interval=30s</span> <span class="op">--timeout=5s</span> <span class="op">--start-period=10s</span> <span class="op">--retries=3</span> \</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">CMD</span> <span class="ex">python</span> <span class="at">-c</span> <span class="st">"import urllib.request; urllib.request.urlopen('http://localhost:</span><span class="va">$PORT</span><span class="st">/health')"</span></span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"uvicorn"</span>, <span class="st">"src.main:app"</span>, <span class="st">"--host"</span>, <span class="st">"0.0.0.0"</span>, <span class="st">"--port"</span>, <span class="st">"8000"</span>, <span class="op">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-2-28" class="code-annotation-target"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>     <span class="st">"--workers"</span>, <span class="st">"2"</span>, <span class="st">"--timeout-graceful-shutdown"</span>, <span class="st">"30"</span>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="7" data-code-annotation="1"><code>--prefix=/install</code> installs everything into a directory we can <code>COPY</code> wholesale into the runtime stage, leaving the builder image’s system Python untouched.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="17" data-code-annotation="2">The entire <code>/install</code> tree (site-packages, scripts) is copied into <code>/usr/local</code> in the slim runtime image — no pip, no compiler, no build cache.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="22" data-code-annotation="3">All subsequent instructions and the final <code>CMD</code> run as <code>appuser</code>, not root.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="28" data-code-annotation="4"><code>--timeout-graceful-shutdown 30</code> gives in-flight requests up to 30 seconds to complete before uvicorn forcefully terminates workers on <code>SIGTERM</code> — essential for Kubernetes rolling deploys.</span>
+</dd>
+</dl>
+</section>
+<section id="litellm-proxy" class="level2">
+<h2 class="anchored" data-anchor-id="litellm-proxy">LiteLLM Proxy</h2>
+<p><strong>The provider abstraction problem.</strong> Application code that calls <code>openai.chat.completions.create(model="gpt-4o-mini", ...)</code> is tightly coupled to OpenAI. Switching to Anthropic, a self-hosted Llama model, or a fine-tuned endpoint requires touching every callsite. LiteLLM solves this by exposing a single OpenAI-compatible API surface while routing to any backend based on the <code>model</code> string.</p>
+<p><br></p>
+<p><strong>What the proxy gives us.</strong> Running LiteLLM as a sidecar or dedicated service adds: (1) <strong>model aliasing</strong> — <code>model: gpt-4o-mini</code> in code can map to <code>azure/gpt-4o-mini-prod</code> in the proxy config without code changes; (2) <strong>fallbacks</strong> — if OpenAI is degraded the proxy automatically retries against Anthropic; (3) <strong>budget controls</strong> — per-team or per-key spend limits enforced at the proxy layer before any token is consumed; (4) <strong>unified logging</strong> — every request logged to a database regardless of backend.</p>
+<p><br></p>
+<p><strong>Deployment pattern.</strong> In a Kubernetes deployment the proxy runs as a separate <code>Deployment</code> with its own <code>Service</code>. Application pods send all LLM traffic to <code>http://litellm-proxy/v1</code> and never hold provider API keys — keys are stored as Kubernetes <code>Secret</code> objects mounted only into the proxy pod.</p>
+<p>A minimal LiteLLM proxy configuration covering OpenAI and a self-hosted Ollama endpoint:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># litellm_config.yaml</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">model_list</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">model_name</span><span class="kw">:</span><span class="at"> gpt-4o-mini</span><span class="co">          # alias used by application code</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">litellm_params</span><span class="kw">:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> openai/gpt-4o-mini</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> os.environ/OPENAI_API_KEY</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">model_name</span><span class="kw">:</span><span class="at"> gpt-4o</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">litellm_params</span><span class="kw">:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> openai/gpt-4o</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> os.environ/OPENAI_API_KEY</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">model_name</span><span class="kw">:</span><span class="at"> llama3.2</span><span class="co">             # self-hosted Ollama endpoint</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">litellm_params</span><span class="kw">:</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> ollama/llama3.2</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_base</span><span class="kw">:</span><span class="at"> http://ollama-service:11434</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">router_settings</span><span class="kw">:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">fallbacks</span><span class="kw">:</span><span class="co">                         # automatic failover</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="kw">{</span><span class="fu">gpt-4o-mini</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">llama3</span><span class="fl">.2</span><span class="kw">]}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">retry_after</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">num_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">general_settings</span><span class="kw">:</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">master_key</span><span class="kw">:</span><span class="at"> os.environ/LITELLM_MASTER_KEY</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">database_url</span><span class="kw">:</span><span class="at"> os.environ/DATABASE_URL</span><span class="co">  # request logs</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_budget</span><span class="kw">:</span><span class="at"> </span><span class="fl">50.0</span><span class="co">                   # USD/month hard cap across all keys</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>With the proxy running, we can point our <code>LLMClient</code> at it by changing only the base URL:</p>
+<div id="b0c1d2e3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># When LITELLM_PROXY_URL is set in the environment, all requests route</span></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># through the proxy; otherwise fall back to the OpenAI endpoint directly.</span></span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>PROXY_URL <span class="op">=</span> os.getenv(<span class="st">"LITELLM_PROXY_URL"</span>)  <span class="co"># e.g. "http://localhost:4000"</span></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>client_kwargs <span class="op">=</span> {<span class="st">"api_key"</span>: os.getenv(<span class="st">"OPENAI_API_KEY"</span>)}</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> PROXY_URL:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-9" class="code-annotation-target"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>    client_kwargs[<span class="st">"base_url"</span>] <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>PROXY_URL<span class="sc">}</span><span class="ss">/v1"</span></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>proxied_client <span class="op">=</span> openai.OpenAI(<span class="op">**</span>client_kwargs)</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick sanity check — model name routes through proxy alias:</span></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>    resp <span class="op">=</span> proxied_client.chat.completions.create(</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>,</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"reply with: ok"</span>}],</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(resp.choices[<span class="dv">0</span>].message.content)</span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"proxy not running locally — skipping: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="9" data-code-annotation="1"><code>base_url</code> overrides the default <code>https://api.openai.com/v1</code> — the rest of the client API is identical, so no other changes are needed anywhere in the application.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="vllm-local-inference" class="level2">
+<h2 class="anchored" data-anchor-id="vllm-local-inference">vLLM Local Inference</h2>
+<p><strong>Why vLLM?</strong> When you self-host an open-weight model (Llama 3, Mistral, Phi-3, etc.) the naïve approach is to call <code>model.generate()</code> in a loop — one request at a time, one KV-cache allocation per request. Under any real concurrency this is catastrophically slow: each new request waits for the previous one to finish before its tokens are even scheduled on the GPU.</p>
+<p>vLLM solves this with two techniques. <strong>PagedAttention</strong> partitions the GPU’s KV-cache into fixed-size pages (analogous to virtual memory), allowing many requests to share the same physical memory without pre-allocating a contiguous block for each sequence’s maximum length. <strong>Continuous batching</strong> (also called iteration-level scheduling) retires finished sequences mid-flight and slots new requests into the batch at the token level rather than waiting for the longest sequence to finish. Together these deliver throughputs 10–24× higher than HuggingFace <code>generate()</code> at the same hardware cost.</p>
+<p><br></p>
+<p><strong>OpenAI-compatible server.</strong> vLLM ships a FastAPI server that exposes <code>POST /v1/chat/completions</code> with the same wire format as OpenAI. Any code that already calls <code>openai.chat.completions.create(...)</code> works unchanged — you only swap the <code>base_url</code>. This makes it a natural drop-in for the LiteLLM proxy config: add one entry in <code>model_list</code> and all application code gains access to the self-hosted model under an alias of your choosing.</p>
+<p><br></p>
+<p><strong>Hardware requirements.</strong> vLLM requires CUDA and runs on any NVIDIA GPU with at least 8 GB VRAM for 7B-parameter models at 4-bit quantisation (<code>bitsandbytes</code>), or 16 GB for full-precision 7B. Multi-GPU tensor parallelism (<code>--tensor-parallel-size N</code>) scales to larger models across N GPUs. For CPU-only or Apple Silicon environments, use Ollama (already shown in the LiteLLM config above) as the local inference backend instead.</p>
+<p>Launching a vLLM server for <code>meta-llama/Llama-3.2-3B-Instruct</code> on one GPU:</p>
+<div class="sourceCode" id="annotated-cell-5"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install (requires CUDA 12+ and Python 3.10+)</span></span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install vllm</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the OpenAI-compatible server</span></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> vllm.entrypoints.openai.api_server <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-6" class="code-annotation-target"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model</span> meta-llama/Llama-3.2-3B-Instruct <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-7" class="code-annotation-target"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dtype</span> bfloat16 <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-8" class="code-annotation-target"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--max-model-len</span> 8192 <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-5-9" class="code-annotation-target"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--port</span> 8001 <span class="dt">\</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-5-10" class="code-annotation-target"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--api-key</span> local-secret</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="6" data-code-annotation="1">Any HuggingFace model ID or local path; the weights are downloaded to <code>~/.cache/huggingface</code> on first run.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="7" data-code-annotation="2"><code>bfloat16</code> is the standard precision for Ampere+ GPUs (A100, 4090); use <code>float16</code> for Turing (T4, 3090).</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="8" data-code-annotation="3">Caps the maximum sequence length to reduce KV-cache memory pressure; set lower if you see OOM errors.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="9" data-code-annotation="4">Any free port; we use <code>8001</code> to avoid conflicting with the FastAPI service on <code>8000</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="10" data-code-annotation="5">A static bearer token checked on every request; mount it from a Kubernetes <code>Secret</code> in production.</span>
+</dd>
+</dl>
+<p>With the server running, the standard <code>openai</code> client connects by overriding <code>base_url</code>:</p>
+<div id="vllm-client-code" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>VLLM_URL <span class="op">=</span> os.getenv(<span class="st">"VLLM_URL"</span>, <span class="st">"http://localhost:8001"</span>)</span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>VLLM_KEY <span class="op">=</span> os.getenv(<span class="st">"VLLM_API_KEY"</span>, <span class="st">"local-secret"</span>)</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>vllm_client <span class="op">=</span> openai.OpenAI(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-7" class="code-annotation-target"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>    base_url<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>VLLM_URL<span class="sc">}</span><span class="ss">/v1"</span>,</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span>VLLM_KEY,</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>    resp <span class="op">=</span> vllm_client.chat.completions.create(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-13" class="code-annotation-target"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"meta-llama/Llama-3.2-3B-Instruct"</span>,</span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a concise financial analyst."</span>},</span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: <span class="st">"What is PagedAttention in one sentence?"</span>},</span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">80</span>,</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(resp.choices[<span class="dv">0</span>].message.content)</span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"vLLM server not running locally — skipping: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="7" data-code-annotation="1">The path <code>/v1</code> is mandatory — vLLM mounts all OpenAI-compatible endpoints under this prefix.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="13" data-code-annotation="2">Pass the exact model ID that was given to <code>--model</code> at launch; vLLM returns a <code>404</code> for unknown model names.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>To expose the vLLM backend through LiteLLM alongside the existing OpenAI entries, add one stanza to <code>litellm_config.yaml</code>:</p>
+<div class="sourceCode" id="annotated-cell-7"><pre class="sourceCode yaml code-annotation-code code-with-copy code-annotated"><code class="sourceCode yaml"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model_list</span><span class="kw">:</span></span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a><span class="co">  # ... existing OpenAI entries ...</span></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">model_name</span><span class="kw">:</span><span class="at"> llama3-local</span><span class="co">          # alias used by application code</span></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">litellm_params</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-6" class="code-annotation-target"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> openai/meta-llama/Llama-3.2-3B-Instruct</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-7" class="code-annotation-target"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_base</span><span class="kw">:</span><span class="at"> http://vllm-service:8001</span></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> os.environ/VLLM_API_KEY</span></span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">router_settings</span><span class="kw">:</span></span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">fallbacks</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-7-12" class="code-annotation-target"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="kw">{</span><span class="fu">gpt-4o-mini</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">llama3-local</span><span class="kw">]}</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="6" data-code-annotation="1">The <code>openai/</code> prefix tells LiteLLM to use the OpenAI wire protocol against the custom <code>api_base</code>; the suffix is the model ID returned by the vLLM server’s <code>/v1/models</code> endpoint.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="7" data-code-annotation="2">In Kubernetes, <code>vllm-service</code> is a <code>ClusterIP</code> <code>Service</code> fronting the vLLM <code>Deployment</code>. GPU pods are typically scheduled on a dedicated node pool with a <code>nodeSelector</code> or <code>tolerations</code> for the GPU taint.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="12" data-code-annotation="3">Listing <code>llama3-local</code> as a fallback for <code>gpt-4o-mini</code> means that if OpenAI is rate-limited or degraded, LiteLLM automatically retries against the self-hosted model — no code changes required in the application.</span>
+</dd>
+</dl>
+<p>For containerised deployments, the official vLLM Docker image handles CUDA dependencies:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Deploy vLLM as a sidecar or standalone Deployment</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> vllm/vllm-openai:latest</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> HF_HOME=/model-cache</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">VOLUME</span> [<span class="st">"/model-cache"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"--model"</span>, <span class="st">"meta-llama/Llama-3.2-3B-Instruct"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>     <span class="st">"--dtype"</span>, <span class="st">"bfloat16"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>     <span class="st">"--max-model-len"</span>, <span class="st">"8192"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>     <span class="st">"--port"</span>, <span class="st">"8001"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Mount the model cache directory as a <code>PersistentVolume</code> in Kubernetes so weights are not re-downloaded on every pod restart. For large models (&gt;30 GB) use a <code>ReadOnlyMany</code> PVC so multiple replicas share the same cached weights without duplicating storage cost.</p>
+</div>
+</div>
+</section>
+<section id="benchmarking" class="level2">
+<h2 class="anchored" data-anchor-id="benchmarking">Benchmarking</h2>
+<p><strong>What to measure.</strong> Three metrics matter for an LLM service: (1) <strong>time-to-first-token (TTFT)</strong> — the latency a user perceives before they see any output, dominated by network RTT plus queuing at the provider; (2) <strong>tokens-per-second (TPS)</strong> — the streaming throughput once generation begins; (3) <strong>end-to-end latency (P50/P95/P99)</strong> — the full wall-clock time until the complete response arrives, relevant for synchronous API callers. For the filing analyser (a batch/API use case, not a streaming chat UI), end-to-end latency is the primary SLO metric.</p>
+<p><br></p>
+<p><strong>Concurrency matters.</strong> A single sequential benchmark measures only serial latency — it does not reveal how the service behaves under load. We run <span class="math inline">N</span> requests concurrently using <code>asyncio.gather</code> to simulate real traffic. At high concurrency the bottleneck shifts from OpenAI API latency to our application’s worker count, connection pool size, and the provider’s rate-limit tokens-per-minute bucket.</p>
+<p><br></p>
+<p><strong>Interpreting the results.</strong> P99 latency is typically 3–5× the median for LLM services because occasional slow completions and rate-limit retries have fat tails. An SLO of P99 &lt; 10 s is a reasonable target for a filing analysis service where the caller is another service (not a human waiting for a chat response). If P99 exceeds this, the fix is usually (a) reducing <code>max_tokens</code>, (b) adding a circuit breaker that fails fast under load, or (c) upgrading to a faster model tier.</p>
+<p>Defining the async benchmark harness:</p>
+<div id="a5b6c7d8" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> asyncio, time</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>SAMPLE_TEXT <span class="op">=</span> (</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Net revenues for the fiscal year were $47.4 billion, an increase of 8% "</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"compared to the prior year. Our CET1 capital ratio was 14.8% at year-end, "</span></span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"well above the 4.5</span><span class="sc">% r</span><span class="st">egulatory minimum. Interest rate risk is our most "</span></span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"significant market risk; a 100 bps increase would reduce our fixed-rate "</span></span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"portfolio fair value by $2.3 billion."</span></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BenchResult:</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>    latencies: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> report(<span class="va">self</span>):</span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>        arr <span class="op">=</span> np.sort(<span class="va">self</span>.latencies)</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>        n   <span class="op">=</span> <span class="bu">len</span>(arr)</span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  n=</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">  p50=</span><span class="sc">{</span>arr[<span class="bu">int</span>(<span class="fl">0.5</span><span class="op">*</span>n)]<span class="sc">:.2f}</span><span class="ss">s  "</span></span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>              <span class="ss">f"p95=</span><span class="sc">{</span>arr[<span class="bu">int</span>(<span class="fl">0.95</span><span class="op">*</span>n)]<span class="sc">:.2f}</span><span class="ss">s  p99=</span><span class="sc">{</span>arr[<span class="bu">min</span>(<span class="bu">int</span>(<span class="fl">0.99</span><span class="op">*</span>n), n<span class="op">-</span><span class="dv">1</span>)]<span class="sc">:.2f}</span><span class="ss">s"</span>)</span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> _single_request(aclient: openai.AsyncOpenAI) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>    t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> aclient.chat.completions.create(</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>,</span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Return a JSON with keys summary (str) and risk_factors (list[str])."</span>},</span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: SAMPLE_TEXT},</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>{<span class="st">"type"</span>: <span class="st">"json_object"</span>},</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">256</span>,</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="annotated-cell-9-36"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-37" class="code-annotation-target"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> benchmark(concurrency: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> BenchResult:</span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a>    aclient <span class="op">=</span> openai.AsyncOpenAI()</span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>    result  <span class="op">=</span> BenchResult()</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a>    tasks   <span class="op">=</span> [_single_request(aclient) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(concurrency)]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-41" class="code-annotation-target"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>    latencies <span class="op">=</span> <span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks, return_exceptions<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> lat <span class="kw">in</span> latencies:</span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(lat, <span class="bu">float</span>):</span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>            result.latencies.append(lat)</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> aclient.close()</span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="37" data-code-annotation="1"><code>concurrency</code> controls how many requests are fired simultaneously in a single <code>gather</code> batch — this simulates a burst of concurrent API callers.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="41" data-code-annotation="2"><code>return_exceptions=True</code> prevents one failed request from cancelling the entire batch; exceptions are collected alongside timings and filtered out before reporting.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Running the benchmark at concurrency 1, 5, and 10:</p>
+<div id="d8e9f0a1" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_all_benchmarks():</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>]:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"concurrency=</span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Run three batches and pool results for stable percentiles</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        all_lat <span class="op">=</span> []</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            r <span class="op">=</span> <span class="cf">await</span> benchmark(concurrency<span class="op">=</span>c)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            all_lat.extend(r.latencies)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        BenchResult(latencies<span class="op">=</span>all_lat).report()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> run_all_benchmarks()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="graceful-shutdown" class="level2">
+<h2 class="anchored" data-anchor-id="graceful-shutdown">Graceful Shutdown</h2>
+<p><strong>Why graceful shutdown matters.</strong> Kubernetes sends <code>SIGTERM</code> to a pod before terminating it during a rolling deploy or scale-down event. Without a graceful shutdown handler, in-flight requests are dropped mid-response — callers receive a connection reset and must retry. With a handler, the server stops accepting new connections but allows active requests up to a timeout to complete before exiting. This is the single most impactful reliability improvement for an LLM service that has non-trivial per-request latency.</p>
+<p><br></p>
+<p><strong>Uvicorn’s built-in support.</strong> When launched via <code>uvicorn src.main:app --timeout-graceful-shutdown 30</code>, uvicorn catches <code>SIGTERM</code>, stops the accept loop, and waits up to 30 seconds for active connections to drain before sending <code>SIGKILL</code> to any remaining workers. This requires no application code changes — only the correct <code>CMD</code> in the Dockerfile.</p>
+<p><br></p>
+<p><strong>Pre-stop hook (Kubernetes).</strong> Kubernetes also supports a <code>preStop</code> lifecycle hook that runs before <code>SIGTERM</code> is sent. We use a short <code>sleep</code> in this hook to give the load balancer time to drain traffic from the pod’s endpoint before it starts refusing connections — without this, the load balancer may still route to the pod for a second or two after <code>SIGTERM</code> arrives.</p>
+<p>The Kubernetes <code>Deployment</code> fragment with graceful shutdown configured:</p>
+<div class="sourceCode" id="annotated-cell-11"><pre class="sourceCode yaml code-annotation-code code-with-copy code-annotated"><code class="sourceCode yaml"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># k8s/deployment.yaml (relevant excerpts)</span></span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">template</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">spec</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-11-5" class="code-annotation-target"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">terminationGracePeriodSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">60</span></span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">containers</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> filing-analyser</span></span>
+<span id="annotated-cell-11-8"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">image</span><span class="kw">:</span><span class="at"> myrepo/filing-analyser:latest</span></span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">containerPort</span><span class="kw">:</span><span class="at"> </span><span class="dv">8000</span></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">lifecycle</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">preStop</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">exec</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-11-14" class="code-annotation-target"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">command</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"sleep"</span><span class="kw">,</span><span class="at"> </span><span class="st">"15"</span><span class="kw">]</span></span>
+<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">readinessProbe</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-16"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">httpGet</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-17"><a href="#annotated-cell-11-17" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /health</span></span>
+<span id="annotated-cell-11-18"><a href="#annotated-cell-11-18" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8000</span></span>
+<span id="annotated-cell-11-19"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">initialDelaySeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">periodSeconds</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="annotated-cell-11-21"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> OPENAI_API_KEY</span></span>
+<span id="annotated-cell-11-23"><a href="#annotated-cell-11-23" aria-hidden="true" tabindex="-1"></a><span class="at">              </span><span class="fu">valueFrom</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-24"><a href="#annotated-cell-11-24" aria-hidden="true" tabindex="-1"></a><span class="at">                </span><span class="fu">secretKeyRef</span><span class="kw">:</span></span>
+<span id="annotated-cell-11-25"><a href="#annotated-cell-11-25" aria-hidden="true" tabindex="-1"></a><span class="at">                  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> llm-secrets</span></span>
+<span id="annotated-cell-11-26"><a href="#annotated-cell-11-26" aria-hidden="true" tabindex="-1"></a><span class="at">                  </span><span class="fu">key</span><span class="kw">:</span><span class="at"> openai-api-key</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="5" data-code-annotation="1"><code>terminationGracePeriodSeconds: 60</code> must be greater than the sum of the <code>preStop</code> sleep (15 s) and uvicorn’s <code>--timeout-graceful-shutdown</code> (30 s), leaving a 15 s buffer for the process to exit cleanly.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="14" data-code-annotation="2">The <code>preStop</code> sleep gives Kubernetes’ endpoint controller time to remove the pod from the load balancer’s active pool before <code>SIGTERM</code> is sent and uvicorn starts draining.</span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>readinessProbe</code> must point at <code>/health</code> and have a generous <code>initialDelaySeconds</code>. LLM services often have a slow first-request penalty (loading model configs, establishing connection pools). If the readiness probe fires before the service is ready, Kubernetes will repeatedly restart a healthy pod.</p>
+</div>
+</div>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Add request-level logging middleware.</strong> Implement a FastAPI middleware that logs the <code>request_id</code> (from an <code>X-Request-ID</code> header, or generated with <code>uuid4</code>), endpoint path, status code, and wall-clock latency for every request. Emit the log as a JSON line so it can be parsed by a log aggregator. Verify by hitting <code>POST /analyse</code> twice and checking that each log line has a unique <code>request_id</code>.</p></li>
+<li><p><strong>Add a rate-limit header.</strong> Extend the <code>/analyse</code> endpoint to read the <code>x-ratelimit-remaining-requests</code> header from the OpenAI response and attach it as a custom <code>X-Upstream-Remaining</code> header on the FastAPI response. This surfaces upstream quota exhaustion to the caller without them needing to parse OpenAI error bodies.</p></li>
+<li><p><strong>Simulate a rolling deploy.</strong> Write a script that (a) sends 20 concurrent requests to a running uvicorn server, (b) sends <code>SIGTERM</code> to the server process mid-flight using <code>os.kill(pid, signal.SIGTERM)</code>, and (c) counts how many of the 20 requests received a complete response vs.&nbsp;a connection error. The target is zero dropped requests with <code>--timeout-graceful-shutdown 30</code>.</p></li>
+</ol>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/prep/09-fine-tuning.html" class="pagination-link" aria-label="09. Fine-Tuning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">09. Fine-Tuning</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/prep/11-cost-optimization.html" class="pagination-link" aria-label="11. Cost Optimization">
+        <span class="nav-page-text">11. Cost Optimization</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

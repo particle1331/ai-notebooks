@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Capstone: Compliance Document Reviewer – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/prep/deep-dives/index.html" rel="next">
+<link href="../../notebooks/prep/12-ai-infra.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/13-capstone-compliance.html">13. Capstone</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#pii-redaction" id="toc-pii-redaction" class="nav-link active" data-scroll-target="#pii-redaction">PII Redaction</a></li>
+  <li><a href="#langgraph-compliance-pipeline" id="toc-langgraph-compliance-pipeline" class="nav-link" data-scroll-target="#langgraph-compliance-pipeline">LangGraph Compliance Pipeline</a></li>
+  <li><a href="#end-to-end-demo" id="toc-end-to-end-demo" class="nav-link" data-scroll-target="#end-to-end-demo">End-to-End Demo</a></li>
+  <li><a href="#fastapi-integration" id="toc-fastapi-integration" class="nav-link" data-scroll-target="#fastapi-integration">FastAPI Integration</a></li>
+  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a></li>
+  <li><a href="#deployment-walkthrough" id="toc-deployment-walkthrough" class="nav-link" data-scroll-target="#deployment-walkthrough">Deployment Walkthrough</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/13-capstone-compliance.html">13. Capstone</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Capstone: Compliance Document Reviewer</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This notebook assembles every building block from the series into a single production-grade system: a <strong>Compliance Document Reviewer</strong> that accepts financial contract clauses, redacts personally identifiable information (PII), classifies each clause via a LangGraph multi-agent pipeline, and exposes the result through a FastAPI endpoint backed by observability, semantic caching, and intelligent model routing.</p>
+<p>The system integrates: the RAG retrieval patterns from <a href="../../notebooks/prep/07-rag-pipeline.html">notebook 07</a>, the LangGraph agent architecture from <a href="../../notebooks/prep/08-agents-langgraph.html">notebook 08</a>, the evaluation harness from <a href="../../notebooks/prep/04-eval-concepts.html">notebook 04</a>, the cost optimisation stack from <a href="../../notebooks/prep/11-cost-optimization.html">notebook 11</a>, and the serving and infrastructure patterns from <a href="../../notebooks/prep/10-model-serving.html">notebooks 10</a> and <a href="../../notebooks/prep/12-ai-infra.html">12</a>. The capstone is intentionally end-to-end: we write, test, and demonstrate every layer.</p>
+<p>Setup:</p>
+<section id="pii-redaction" class="level2">
+<h2 class="anchored" data-anchor-id="pii-redaction">PII Redaction</h2>
+<p><strong>Why redact before sending to the LLM.</strong> Financial contracts contain names, account numbers, tax identifiers, and email addresses that are PII under GDPR, CCPA, and various financial privacy regulations. Sending raw contract text to a third-party LLM API risks violating data processing agreements. The standard mitigation is <strong>pre-processing redaction</strong>: replace PII with typed placeholders before the text leaves the organisation’s boundary, process with the LLM, then optionally re-hydrate the placeholders in the response.</p>
+<p><br></p>
+<p><strong>Microsoft Presidio.</strong> <a href="https://microsoft.github.io/presidio/">Presidio</a> is the de facto open-source library for PII detection and anonymisation. It ships with recognisers for names, email addresses, phone numbers, credit card numbers, US SSNs, IBANs, and many other entity types. It uses a combination of regular expressions, named-entity recognition (a spaCy NER model), and a rule-based denial list. We use the <code>AnalyzerEngine</code> to identify PII spans and the <code>AnonymizerEngine</code> to replace them with <code>&lt;ENTITY_TYPE&gt;</code> placeholders.</p>
+<p><br></p>
+<p><strong>Re-hydration.</strong> After the LLM returns its analysis, we may want to replace <code>&lt;PERSON&gt;</code> back with the original name in the output report. Presidio’s <code>DeanonymizeEngine</code> supports this via an <code>OperatorConfig</code> map that records the original values. We implement both the redaction and re-hydration functions below.</p>
+<p>Installing and configuring Presidio:</p>
+<p>Implementing the <code>PIIRedactor</code> with a regex fallback when Presidio is unavailable:</p>
+<div id="d0e1f2a3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Regex patterns for the fallback redactor</span></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>_EMAIL_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="pp">[</span><span class="dv">\w</span><span class="pp">.+-]</span><span class="op">+</span><span class="vs">@</span><span class="pp">[</span><span class="dv">\w</span><span class="pp">-]</span><span class="op">+</span><span class="ch">\.</span><span class="pp">[a-z]</span><span class="op">{2,}</span><span class="vs">"</span>, re.I)</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>_PHONE_RE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="dv">\b</span><span class="kw">(</span><span class="ch">\+</span><span class="op">?</span><span class="vs">1</span><span class="pp">[</span><span class="dv">\s</span><span class="pp">.-]</span><span class="op">?</span><span class="kw">)</span><span class="op">?</span><span class="ch">\(</span><span class="op">?</span><span class="dv">\d</span><span class="op">{3}</span><span class="ch">\)</span><span class="op">?</span><span class="pp">[</span><span class="dv">\s</span><span class="pp">.-]</span><span class="op">?</span><span class="dv">\d</span><span class="op">{3}</span><span class="pp">[</span><span class="dv">\s</span><span class="pp">.-]</span><span class="op">?</span><span class="dv">\d</span><span class="op">{4}</span><span class="dv">\b</span><span class="vs">"</span>)</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>_SSN_RE   <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="dv">\b\d</span><span class="op">{3}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{4}</span><span class="dv">\b</span><span class="vs">"</span>)</span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>_IBAN_RE  <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="dv">\b</span><span class="pp">[A-Z]</span><span class="op">{2}</span><span class="dv">\d</span><span class="op">{2}</span><span class="pp">[A-Z0-9]</span><span class="op">{4}</span><span class="dv">\d</span><span class="op">{7}</span><span class="kw">(</span><span class="pp">[A-Z0-9]</span><span class="op">?</span><span class="kw">)</span><span class="op">{0,16}</span><span class="dv">\b</span><span class="vs">"</span>)</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RedactionResult:</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>    redacted_text: <span class="bu">str</span></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a>    mapping:       <span class="bu">dict</span> <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">dict</span>)  <span class="co"># placeholder → original</span></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PIIRedactor:</span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""PII redactor with Presidio (primary) and regex (fallback)."""</span></span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> PRESIDIO_AVAILABLE:</span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._analyzer   <span class="op">=</span> AnalyzerEngine()</span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._anonymizer <span class="op">=</span> AnonymizerEngine()</span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._counter: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">int</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> redact(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> RedactionResult:</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> PRESIDIO_AVAILABLE:</span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>._redact_presidio(text)</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._redact_regex(text)</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _redact_presidio(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> RedactionResult:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-30" class="code-annotation-target"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> <span class="va">self</span>._analyzer.analyze(text<span class="op">=</span>text, language<span class="op">=</span><span class="st">"en"</span>)</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>        mapping: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">str</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> replace_with_placeholder(entity):</span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>            etype <span class="op">=</span> entity.entity_type</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>            n     <span class="op">=</span> <span class="va">self</span>._counter.get(etype, <span class="dv">0</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._counter[etype] <span class="op">=</span> n</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a>            ph    <span class="op">=</span> <span class="ss">f"&lt;</span><span class="sc">{</span>etype<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">&gt;"</span></span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>            mapping[ph] <span class="op">=</span> text[entity.start:entity.end]</span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> ph</span>
+<span id="annotated-cell-1-40"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a>        ops     <span class="op">=</span> {r.entity_type: OperatorConfig(<span class="st">"replace"</span>, {<span class="st">"new_value"</span>: replace_with_placeholder(r)})</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">for</span> r <span class="kw">in</span> results}</span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a>        anon    <span class="op">=</span> <span class="va">self</span>._anonymizer.anonymize(text<span class="op">=</span>text, analyzer_results<span class="op">=</span>results, operators<span class="op">=</span>ops)</span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> RedactionResult(redacted_text<span class="op">=</span>anon.text, mapping<span class="op">=</span>mapping)</span>
+<span id="annotated-cell-1-45"><a href="#annotated-cell-1-45" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-46" class="code-annotation-target"><a href="#annotated-cell-1-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _redact_regex(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> RedactionResult:</span>
+<span id="annotated-cell-1-47"><a href="#annotated-cell-1-47" aria-hidden="true" tabindex="-1"></a>        mapping: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">str</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-1-48"><a href="#annotated-cell-1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-49"><a href="#annotated-cell-1-49" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> _replace(pattern, label, t):</span>
+<span id="annotated-cell-1-50"><a href="#annotated-cell-1-50" aria-hidden="true" tabindex="-1"></a>            <span class="kw">def</span> sub(m):</span>
+<span id="annotated-cell-1-51"><a href="#annotated-cell-1-51" aria-hidden="true" tabindex="-1"></a>                n  <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> k <span class="kw">in</span> mapping <span class="cf">if</span> k.startswith(<span class="ss">f"&lt;</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">_"</span>)) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="annotated-cell-1-52"><a href="#annotated-cell-1-52" aria-hidden="true" tabindex="-1"></a>                ph <span class="op">=</span> <span class="ss">f"&lt;</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">&gt;"</span></span>
+<span id="annotated-cell-1-53"><a href="#annotated-cell-1-53" aria-hidden="true" tabindex="-1"></a>                mapping[ph] <span class="op">=</span> m.group(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-54"><a href="#annotated-cell-1-54" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> ph</span>
+<span id="annotated-cell-1-55"><a href="#annotated-cell-1-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> pattern.sub(sub, t)</span>
+<span id="annotated-cell-1-56"><a href="#annotated-cell-1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-57"><a href="#annotated-cell-1-57" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> _replace(_EMAIL_RE, <span class="st">"EMAIL"</span>,  text)</span>
+<span id="annotated-cell-1-58"><a href="#annotated-cell-1-58" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> _replace(_PHONE_RE, <span class="st">"PHONE"</span>,  text)</span>
+<span id="annotated-cell-1-59"><a href="#annotated-cell-1-59" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> _replace(_SSN_RE,   <span class="st">"SSN"</span>,    text)</span>
+<span id="annotated-cell-1-60"><a href="#annotated-cell-1-60" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> _replace(_IBAN_RE,  <span class="st">"IBAN"</span>,   text)</span>
+<span id="annotated-cell-1-61"><a href="#annotated-cell-1-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> RedactionResult(redacted_text<span class="op">=</span>text, mapping<span class="op">=</span>mapping)</span>
+<span id="annotated-cell-1-62"><a href="#annotated-cell-1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-63"><a href="#annotated-cell-1-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> rehydrate(<span class="va">self</span>, text: <span class="bu">str</span>, mapping: <span class="bu">dict</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-1-64"><a href="#annotated-cell-1-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> placeholder, original <span class="kw">in</span> mapping.items():</span>
+<span id="annotated-cell-1-65"><a href="#annotated-cell-1-65" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> text.replace(placeholder, original)</span>
+<span id="annotated-cell-1-66"><a href="#annotated-cell-1-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="30" data-code-annotation="1"><code>analyzer.analyze</code> returns a list of <code>RecognizerResult</code> objects, each with <code>entity_type</code>, <code>start</code>, <code>end</code>, and <code>score</code>. We iterate over them to build a placeholder mapping before anonymisation.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="46" data-code-annotation="2">The regex fallback covers the four most common financial PII types — sufficient for testing without the Presidio dependency.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Testing the redactor on a sample contract clause:</p>
+<div id="a3b4c5d6" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>redactor <span class="op">=</span> PIIRedactor()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>sample_clause <span class="op">=</span> (</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"This agreement is entered into by John Martinez (SSN: 123-45-6789, "</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"email: j.martinez@hedgefund.com, phone: +1-212-555-0147). "</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Counterparty account IBAN: GB82WEST12345698765432. "</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The party agrees to maintain a minimum margin of 25%."</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> redactor.redact(sample_clause)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Redacted:"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.redacted_text)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Mapping:"</span>, json.dumps(result.mapping, indent<span class="op">=</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="langgraph-compliance-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="langgraph-compliance-pipeline">LangGraph Compliance Pipeline</h2>
+<p><strong>Pipeline architecture.</strong> The compliance pipeline has four nodes: (1) <strong>Classify</strong> — a fast GPT-4o-mini call that assigns one of five clause types (<code>CAPITAL_ADEQUACY</code>, <code>MARGIN</code>, <code>CREDIT_RISK</code>, <code>OPERATIONAL</code>, <code>OTHER</code>) and a risk score (1–5); (2) <strong>Retrieve</strong> — a ChromaDB lookup that fetches the three most relevant regulatory precedents for this clause type; (3) <strong>Analyse</strong> — a model-routed LLM call that produces a structured <code>ComplianceReport</code> with a verdict, confidence, and justification citing retrieved precedents; (4) <strong>Review</strong> — for high-risk (score ≥ 4) clauses, a GPT-4o call reviews the analysis output and can escalate or override the verdict.</p>
+<p><br></p>
+<p><strong>State type.</strong> The pipeline state is a <code>TypedDict</code> carrying: the original clause, its redacted version, the classification result, the retrieved context, and the final report. All nodes read from and write to this shared dict. LangGraph’s graph engine ensures nodes run in dependency order and re-runs any node whose upstream state has changed.</p>
+<p><br></p>
+<p><strong>Conditional routing.</strong> After the Analyse node, a conditional edge checks <code>state["classification"].risk_score</code>. Scores ≥ 4 route to Review; scores &lt; 4 route directly to END. This mirrors the pattern from <a href="../../notebooks/prep/08-agents-langgraph.html">notebook 08</a> but integrates PII redaction and RAG retrieval as first-class pipeline stages.</p>
+<p>Defining the Pydantic schemas and <code>TypedDict</code> state:</p>
+<div id="e7f8a9b0" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> TypedDict, Literal</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, Field</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ClauseType <span class="op">=</span> Literal[<span class="st">"CAPITAL_ADEQUACY"</span>, <span class="st">"MARGIN"</span>, <span class="st">"CREDIT_RISK"</span>, <span class="st">"OPERATIONAL"</span>, <span class="st">"OTHER"</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Verdict    <span class="op">=</span> Literal[<span class="st">"COMPLIANT"</span>, <span class="st">"NON_COMPLIANT"</span>, <span class="st">"REQUIRES_REVIEW"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Classification(BaseModel):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    clause_type: ClauseType</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    risk_score:  <span class="bu">int</span> <span class="op">=</span> Field(ge<span class="op">=</span><span class="dv">1</span>, le<span class="op">=</span><span class="dv">5</span>, description<span class="op">=</span><span class="st">"1=low, 5=critical"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    rationale:   <span class="bu">str</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ComplianceReport(BaseModel):</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    verdict:      Verdict</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    confidence:   <span class="bu">float</span> <span class="op">=</span> Field(ge<span class="op">=</span><span class="fl">0.0</span>, le<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    justification: <span class="bu">str</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    citations:    <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">=</span> Field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    escalated:    <span class="bu">bool</span>      <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PipelineState(TypedDict):</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    clause:         <span class="bu">str</span>                <span class="co"># original (may contain PII)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    redacted:       <span class="bu">str</span>                <span class="co"># PII-redacted version</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    pii_mapping:    <span class="bu">dict</span>               <span class="co"># placeholder → original</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    classification: Classification <span class="op">|</span> <span class="va">None</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    context:        <span class="bu">list</span>[<span class="bu">str</span>]          <span class="co"># retrieved regulatory passages</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    report:         ComplianceReport <span class="op">|</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Defining the four pipeline node functions:</p>
+<div id="a9b0c1d2" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal regulatory knowledge base (in production this is ChromaDB)</span></span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>REGULATORY_KB <span class="op">=</span> {</span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CAPITAL_ADEQUACY"</span>: [</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Basel III requires a minimum CET1 ratio of 4.5% and total capital ratio of 8.0%."</span>,</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"SIFI surcharges add 1–3.5% to CET1 requirements for systemically important firms."</span>,</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Capital buffers (conservation: 2.5%, countercyclical: 0–2.5%) apply above minimums."</span>,</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"MARGIN"</span>: [</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"EMIR requires daily variation margin and initial margin for OTC derivatives above threshold."</span>,</span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Reg T sets an initial margin requirement of 50</span><span class="sc">% f</span><span class="st">or equity purchases in US markets."</span>,</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Margin calls must be met within one business day under standard prime brokerage agreements."</span>,</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CREDIT_RISK"</span>: [</span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Counterparty credit risk must be managed via netting agreements and collateral."</span>,</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CVA capital charge applies to mark-to-market losses on OTC derivative exposures."</span>,</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Credit limits must be approved by the credit committee and reviewed annually."</span>,</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"OPERATIONAL"</span>: [</span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Operational risk capital under Basel III uses the Standardised Approach (SA-OPR)."</span>,</span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Business continuity plans must be tested at least annually."</span>,</span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Incident reporting to regulators is required within 72 hours of a material breach."</span>,</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"OTHER"</span>: [</span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"General contract terms should conform to ISDA Master Agreement standards."</span>,</span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Governing law and dispute resolution must be specified in financial contracts."</span>,</span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>redactor <span class="op">=</span> PIIRedactor()</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>llm_fast  <span class="op">=</span> LLMClient(model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>)</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>llm_strong <span class="op">=</span> LLMClient(model<span class="op">=</span><span class="st">"gpt-4o"</span>)</span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_classify(state: PipelineState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Node 1: redact PII, then classify clause type and risk."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-35" class="code-annotation-target"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> redactor.redact(state[<span class="st">"clause"</span>])</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>    classif <span class="op">=</span> llm_fast.complete(</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Classify the financial contract clause. "</span></span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Return JSON with clause_type (CAPITAL_ADEQUACY|MARGIN|CREDIT_RISK|OPERATIONAL|OTHER), "</span></span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a>                <span class="st">"risk_score (1-5, where 5=critical), and rationale."</span></span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a>            )},</span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: result.redacted_text},</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>Classification,</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">"redacted"</span>:       result.redacted_text,</span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pii_mapping"</span>:    result.mapping,</span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"classification"</span>: classif,</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_retrieve(state: PipelineState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Node 2: retrieve relevant regulatory passages for the clause type."""</span></span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a>    ctype   <span class="op">=</span> state[<span class="st">"classification"</span>].clause_type</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-56" class="code-annotation-target"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>    context <span class="op">=</span> REGULATORY_KB.get(ctype, REGULATORY_KB[<span class="st">"OTHER"</span>])[:<span class="dv">3</span>]</span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"context"</span>: context}</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_analyse(state: PipelineState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Node 3: produce compliance verdict using retrieved context."""</span></span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a>    ctx_str <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(<span class="ss">f"- </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> c <span class="kw">in</span> state[<span class="st">"context"</span>])</span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>    report <span class="op">=</span> llm_fast.complete(</span>
+<span id="annotated-cell-4-63"><a href="#annotated-cell-4-63" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="annotated-cell-4-64"><a href="#annotated-cell-4-64" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-4-65"><a href="#annotated-cell-4-65" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"You are a compliance analyst. Regulatory context:</span><span class="ch">\n</span><span class="sc">{</span>ctx_str<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-4-66"><a href="#annotated-cell-4-66" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Classify the clause as COMPLIANT, NON_COMPLIANT, or REQUIRES_REVIEW. "</span></span>
+<span id="annotated-cell-4-67"><a href="#annotated-cell-4-67" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Return JSON: verdict, confidence (0-1), justification, citations (list of relevant rules)."</span></span>
+<span id="annotated-cell-4-68"><a href="#annotated-cell-4-68" aria-hidden="true" tabindex="-1"></a>            )},</span>
+<span id="annotated-cell-4-69"><a href="#annotated-cell-4-69" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: state[<span class="st">"redacted"</span>]},</span>
+<span id="annotated-cell-4-70"><a href="#annotated-cell-4-70" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="annotated-cell-4-71"><a href="#annotated-cell-4-71" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>ComplianceReport,</span>
+<span id="annotated-cell-4-72"><a href="#annotated-cell-4-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-4-73"><a href="#annotated-cell-4-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"report"</span>: report}</span>
+<span id="annotated-cell-4-74"><a href="#annotated-cell-4-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-75"><a href="#annotated-cell-4-75" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_review(state: PipelineState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-4-76"><a href="#annotated-cell-4-76" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Node 4 (high-risk only): senior review with GPT-4o, may escalate."""</span></span>
+<span id="annotated-cell-4-77"><a href="#annotated-cell-4-77" aria-hidden="true" tabindex="-1"></a>    existing <span class="op">=</span> state[<span class="st">"report"</span>]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-78" class="code-annotation-target"><a href="#annotated-cell-4-78" aria-hidden="true" tabindex="-1"></a>    review <span class="op">=</span> llm_strong.complete(</span>
+<span id="annotated-cell-4-79"><a href="#annotated-cell-4-79" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="annotated-cell-4-80"><a href="#annotated-cell-4-80" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-4-81"><a href="#annotated-cell-4-81" aria-hidden="true" tabindex="-1"></a>                <span class="st">"You are a senior compliance officer reviewing a high-risk clause. "</span></span>
+<span id="annotated-cell-4-82"><a href="#annotated-cell-4-82" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"A junior analyst produced: verdict=</span><span class="sc">{</span>existing<span class="sc">.</span>verdict<span class="sc">}</span><span class="ss">, "</span></span>
+<span id="annotated-cell-4-83"><a href="#annotated-cell-4-83" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"confidence=</span><span class="sc">{</span>existing<span class="sc">.</span>confidence<span class="sc">:.2f}</span><span class="ss">, justification=</span><span class="sc">{</span>existing<span class="sc">.</span>justification<span class="sc">}</span><span class="ss">. "</span></span>
+<span id="annotated-cell-4-84"><a href="#annotated-cell-4-84" aria-hidden="true" tabindex="-1"></a>                <span class="st">"You may confirm or override. If overriding, set escalated=true. "</span></span>
+<span id="annotated-cell-4-85"><a href="#annotated-cell-4-85" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Return JSON: verdict, confidence, justification, citations, escalated."</span></span>
+<span id="annotated-cell-4-86"><a href="#annotated-cell-4-86" aria-hidden="true" tabindex="-1"></a>            )},</span>
+<span id="annotated-cell-4-87"><a href="#annotated-cell-4-87" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: state[<span class="st">"redacted"</span>]},</span>
+<span id="annotated-cell-4-88"><a href="#annotated-cell-4-88" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="annotated-cell-4-89"><a href="#annotated-cell-4-89" aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>ComplianceReport,</span>
+<span id="annotated-cell-4-90"><a href="#annotated-cell-4-90" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-4-91"><a href="#annotated-cell-4-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"report"</span>: review}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="35" data-code-annotation="1">PII redaction happens at the very first node — the redacted text flows through all subsequent nodes, and the raw <code>clause</code> string never leaves the application boundary.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="56" data-code-annotation="2">In production this is a ChromaDB ANN lookup; here we use a static dict keyed by clause type for reproducibility.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="78" data-code-annotation="3">The review node uses <code>llm_strong</code> (GPT-4o) rather than <code>llm_fast</code> — this cost is incurred only for high-risk clauses (risk_score ≥ 4), keeping the average cost close to GPT-4o-mini.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Assembling the LangGraph state machine:</p>
+<div id="d2e3f4a5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langgraph.graph <span class="im">import</span> StateGraph, END</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>    LANGGRAPH_AVAILABLE <span class="op">=</span> <span class="va">True</span></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">ImportError</span>:</span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>    LANGGRAPH_AVAILABLE <span class="op">=</span> <span class="va">False</span></span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_pipeline():</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> LANGGRAPH_AVAILABLE:</span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a>    graph <span class="op">=</span> StateGraph(PipelineState)</span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a>    graph.add_node(<span class="st">"classify"</span>, node_classify)</span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a>    graph.add_node(<span class="st">"retrieve"</span>, node_retrieve)</span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>    graph.add_node(<span class="st">"analyse"</span>,  node_analyse)</span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>    graph.add_node(<span class="st">"review"</span>,   node_review)</span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a>    graph.set_entry_point(<span class="st">"classify"</span>)</span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>    graph.add_edge(<span class="st">"classify"</span>, <span class="st">"retrieve"</span>)</span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>    graph.add_edge(<span class="st">"retrieve"</span>, <span class="st">"analyse"</span>)</span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-22" class="code-annotation-target"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> route_after_analyse(state: PipelineState) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>        score <span class="op">=</span> state[<span class="st">"classification"</span>].risk_score</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"review"</span> <span class="cf">if</span> score <span class="op">&gt;=</span> <span class="dv">4</span> <span class="cf">else</span> END</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>    graph.add_conditional_edges(<span class="st">"analyse"</span>, route_after_analyse,</span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a>                                {<span class="st">"review"</span>: <span class="st">"review"</span>, END: END})</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>    graph.add_edge(<span class="st">"review"</span>, END)</span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> graph.<span class="bu">compile</span>()</span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> build_pipeline()</span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pipeline:</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Pipeline compiled successfully"</span>)</span>
+<span id="annotated-cell-5-35"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"LangGraph not available — pipeline will run in fallback mode"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="22" data-code-annotation="1">The routing function returns either <code>"review"</code> or <code>END</code> (a special LangGraph constant). The <code>add_conditional_edges</code> call maps each possible return value to a node name or <code>END</code> — a type-safe alternative to returning raw node names.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>A fallback sequential runner for environments without LangGraph:</p>
+<div id="a5b6c7d8" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_pipeline_fallback(clause: <span class="bu">str</span>) <span class="op">-&gt;</span> PipelineState:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sequential fallback that mirrors the LangGraph pipeline."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    state: PipelineState <span class="op">=</span> {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clause"</span>: clause, <span class="st">"redacted"</span>: <span class="st">""</span>, <span class="st">"pii_mapping"</span>: {},</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"classification"</span>: <span class="va">None</span>, <span class="st">"context"</span>: [], <span class="st">"report"</span>: <span class="va">None</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    state.update(node_classify(state))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    state.update(node_retrieve(state))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    state.update(node_analyse(state))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> state[<span class="st">"classification"</span>].risk_score <span class="op">&gt;=</span> <span class="dv">4</span>:</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        state.update(node_review(state))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_pipeline(clause: <span class="bu">str</span>) <span class="op">-&gt;</span> PipelineState:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pipeline:</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pipeline.invoke({</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clause"</span>: clause, <span class="st">"redacted"</span>: <span class="st">""</span>, <span class="st">"pii_mapping"</span>: {},</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"classification"</span>: <span class="va">None</span>, <span class="st">"context"</span>: [], <span class="st">"report"</span>: <span class="va">None</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> run_pipeline_fallback(clause)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="end-to-end-demo" class="level2">
+<h2 class="anchored" data-anchor-id="end-to-end-demo">End-to-End Demo</h2>
+<p>We now run the pipeline on five representative contract clauses drawn from different risk tiers, verifying that (1) PII is redacted before processing, (2) the correct clause type is identified, (3) high-risk clauses trigger the senior review node, and (4) the compliance verdict and citations are structurally valid.</p>
+<p>Test clauses covering all five clause types at varying risk levels:</p>
+<div id="e9f0a1b2" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>TEST_CLAUSES <span class="op">=</span> [</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (label, clause)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Low-risk margin"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>     <span class="st">"The party agrees to maintain an initial margin of 60</span><span class="sc">% o</span><span class="st">n all equity positions, "</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>     <span class="st">"exceeding the standard Reg T requirement of 50%."</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"High-risk capital (with PII)"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>     <span class="st">"As agreed with John Martinez (j.martinez@hedgefund.com), the counterparty commits "</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>     <span class="st">"to maintaining a CET1 ratio of only 3.8%, which management considers adequate."</span>),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Medium-risk credit"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>     <span class="st">"Credit exposure to any single counterparty shall not exceed 15</span><span class="sc">% o</span><span class="st">f total risk-weighted "</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>     <span class="st">"assets. Exceptions require written approval from the Chief Risk Officer."</span>),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"High-risk operational"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>     <span class="st">"In the event of a cybersecurity breach, the firm is under no obligation to notify "</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>     <span class="st">"regulators unless losses exceed $10 million. Internal incident logs are optional."</span>),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Low-risk other"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>     <span class="st">"This agreement is governed by the laws of England and Wales. Any dispute shall be "</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>     <span class="st">"referred to arbitration under the LCIA rules."</span>),</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running all five clauses through the pipeline:</p>
+<div id="a1c2d3e4" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, clause <span class="kw">in</span> TEST_CLAUSES:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'='</span><span class="op">*</span><span class="dv">60</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Clause: </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    state <span class="op">=</span> run_pipeline(clause)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> state[<span class="st">"classification"</span>]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> state[<span class="st">"report"</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Type:       </span><span class="sc">{</span>c<span class="sc">.</span>clause_type<span class="sc">}</span><span class="ss">  (risk=</span><span class="sc">{</span>c<span class="sc">.</span>risk_score<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  PII redacted: </span><span class="sc">{</span><span class="bu">bool</span>(state[<span class="st">'pii_mapping'</span>])<span class="sc">}</span><span class="ss"> — placeholders: </span><span class="sc">{</span><span class="bu">list</span>(state[<span class="st">'pii_mapping'</span>].keys())<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Verdict:    </span><span class="sc">{</span>r<span class="sc">.</span>verdict<span class="sc">}</span><span class="ss">  (conf=</span><span class="sc">{</span>r<span class="sc">.</span>confidence<span class="sc">:.2f}</span><span class="ss">  escalated=</span><span class="sc">{</span>r<span class="sc">.</span>escalated<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Citations:  </span><span class="sc">{</span>r<span class="sc">.</span>citations[:<span class="dv">2</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    results.append({<span class="st">"label"</span>: label, <span class="op">**</span>c.model_dump(), <span class="op">**</span>r.model_dump()})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Summary table:</p>
+<div id="c3e4f5a6" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="sc">{</span><span class="st">'Label'</span><span class="sc">:&lt;30}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Type'</span><span class="sc">:&lt;20}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Risk'</span><span class="sc">:&gt;4}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Verdict'</span><span class="sc">:&lt;18}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Conf'</span><span class="sc">:&gt;5}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Esc'</span><span class="sc">}</span><span class="ss">"</span>)  </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">85</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> results:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>r[<span class="st">'label'</span>]<span class="sc">:&lt;30}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'clause_type'</span>]<span class="sc">:&lt;20}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'risk_score'</span>]<span class="sc">:&gt;4}</span><span class="ss"> "</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"</span><span class="sc">{</span>r[<span class="st">'verdict'</span>]<span class="sc">:&lt;18}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'confidence'</span>]<span class="sc">:&gt;5.2f}</span><span class="ss"> </span><span class="sc">{</span>r[<span class="st">'escalated'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="fastapi-integration" class="level2">
+<h2 class="anchored" data-anchor-id="fastapi-integration">FastAPI Integration</h2>
+<p><strong>Wrapping the pipeline.</strong> The compliance pipeline is a pure Python function — wrapping it in a FastAPI endpoint is straightforward. The POST <code>/review</code> endpoint accepts a <code>ReviewRequest</code> with a <code>clause</code> string and returns a <code>ReviewResponse</code> that mirrors the <code>ComplianceReport</code> schema plus the <code>clause_type</code> and <code>risk_score</code> from the classification step.</p>
+<p><br></p>
+<p><strong>Caching layer.</strong> We integrate the <code>SemanticCache</code> from <a href="../../notebooks/prep/11-cost-optimization.html">notebook 11</a> in front of the pipeline. The cache key is the <em>original</em> clause text (before PII redaction). This is safe because the cache is in-process and on-premises — the raw text never leaves the boundary via the cache path. Cache hits skip the entire pipeline and return the previously computed report in milliseconds.</p>
+<p><br></p>
+<p><strong>Async execution.</strong> The pipeline makes synchronous OpenAI calls inside node functions. To avoid blocking FastAPI’s event loop, we run the pipeline in a thread pool executor via <code>asyncio.to_thread</code>. This allows the endpoint to handle concurrent requests without each LLM call serialising the server.</p>
+<p>The FastAPI app definition for the compliance service:</p>
+<div class="sourceCode" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># src/compliance_api.py</span></span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> asyncio</span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> contextlib <span class="im">import</span> asynccontextmanager</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastapi <span class="im">import</span> FastAPI, HTTPException</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ReviewRequest(BaseModel):</span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>    clause: <span class="bu">str</span></span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ReviewResponse(BaseModel):</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>    clause_type:   <span class="bu">str</span></span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a>    risk_score:    <span class="bu">int</span></span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>    verdict:       <span class="bu">str</span></span>
+<span id="annotated-cell-10-14"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>    confidence:    <span class="bu">float</span></span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a>    justification: <span class="bu">str</span></span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a>    citations:     <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17" aria-hidden="true" tabindex="-1"></a>    escalated:     <span class="bu">bool</span></span>
+<span id="annotated-cell-10-18"><a href="#annotated-cell-10-18" aria-hidden="true" tabindex="-1"></a>    cache_hit:     <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span></span>
+<span id="annotated-cell-10-19"><a href="#annotated-cell-10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-20"><a href="#annotated-cell-10-20" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AppState:</span>
+<span id="annotated-cell-10-21"><a href="#annotated-cell-10-21" aria-hidden="true" tabindex="-1"></a>    pipeline <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-10-22"><a href="#annotated-cell-10-22" aria-hidden="true" tabindex="-1"></a>    cache    <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-10-23"><a href="#annotated-cell-10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-24"><a href="#annotated-cell-10-24" aria-hidden="true" tabindex="-1"></a>app_state <span class="op">=</span> AppState()</span>
+<span id="annotated-cell-10-25"><a href="#annotated-cell-10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-26"><a href="#annotated-cell-10-26" aria-hidden="true" tabindex="-1"></a><span class="at">@asynccontextmanager</span></span>
+<span id="annotated-cell-10-27"><a href="#annotated-cell-10-27" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> lifespan(app: FastAPI):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-28" class="code-annotation-target"><a href="#annotated-cell-10-28" aria-hidden="true" tabindex="-1"></a>    app_state.pipeline <span class="op">=</span> build_pipeline()     <span class="co"># warm up graph at startup</span></span>
+<span id="annotated-cell-10-29"><a href="#annotated-cell-10-29" aria-hidden="true" tabindex="-1"></a>    app_state.cache    <span class="op">=</span> SemanticCache(threshold<span class="op">=</span><span class="fl">0.92</span>)</span>
+<span id="annotated-cell-10-30"><a href="#annotated-cell-10-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">yield</span></span>
+<span id="annotated-cell-10-31"><a href="#annotated-cell-10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-32"><a href="#annotated-cell-10-32" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> FastAPI(title<span class="op">=</span><span class="st">"Compliance Reviewer"</span>, lifespan<span class="op">=</span>lifespan)</span>
+<span id="annotated-cell-10-33"><a href="#annotated-cell-10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-34"><a href="#annotated-cell-10-34" aria-hidden="true" tabindex="-1"></a><span class="at">@app.get</span>(<span class="st">"/health"</span>)</span>
+<span id="annotated-cell-10-35"><a href="#annotated-cell-10-35" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> health():</span>
+<span id="annotated-cell-10-36"><a href="#annotated-cell-10-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"cache_entries"</span>: <span class="bu">len</span>(app_state.cache._store)}</span>
+<span id="annotated-cell-10-37"><a href="#annotated-cell-10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-38"><a href="#annotated-cell-10-38" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">"/review"</span>, response_model<span class="op">=</span>ReviewResponse)</span>
+<span id="annotated-cell-10-39"><a href="#annotated-cell-10-39" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> review(req: ReviewRequest):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-10-40" class="code-annotation-target"><a href="#annotated-cell-10-40" aria-hidden="true" tabindex="-1"></a>    cached <span class="op">=</span> app_state.cache.get(req.clause)</span>
+<span id="annotated-cell-10-41"><a href="#annotated-cell-10-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cached:</span>
+<span id="annotated-cell-10-42"><a href="#annotated-cell-10-42" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> json.loads(cached)</span>
+<span id="annotated-cell-10-43"><a href="#annotated-cell-10-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ReviewResponse(<span class="op">**</span>data, cache_hit<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-10-44"><a href="#annotated-cell-10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-45"><a href="#annotated-cell-10-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run pipeline in thread pool to avoid blocking the event loop</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-10-46" class="code-annotation-target"><a href="#annotated-cell-10-46" aria-hidden="true" tabindex="-1"></a>    state <span class="op">=</span> <span class="cf">await</span> asyncio.to_thread(run_pipeline, req.clause)</span>
+<span id="annotated-cell-10-47"><a href="#annotated-cell-10-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-48"><a href="#annotated-cell-10-48" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> state[<span class="st">"classification"</span>]</span>
+<span id="annotated-cell-10-49"><a href="#annotated-cell-10-49" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> state[<span class="st">"report"</span>]</span>
+<span id="annotated-cell-10-50"><a href="#annotated-cell-10-50" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> ReviewResponse(</span>
+<span id="annotated-cell-10-51"><a href="#annotated-cell-10-51" aria-hidden="true" tabindex="-1"></a>        clause_type<span class="op">=</span>c.clause_type, risk_score<span class="op">=</span>c.risk_score,</span>
+<span id="annotated-cell-10-52"><a href="#annotated-cell-10-52" aria-hidden="true" tabindex="-1"></a>        verdict<span class="op">=</span>r.verdict, confidence<span class="op">=</span>r.confidence,</span>
+<span id="annotated-cell-10-53"><a href="#annotated-cell-10-53" aria-hidden="true" tabindex="-1"></a>        justification<span class="op">=</span>r.justification, citations<span class="op">=</span>r.citations,</span>
+<span id="annotated-cell-10-54"><a href="#annotated-cell-10-54" aria-hidden="true" tabindex="-1"></a>        escalated<span class="op">=</span>r.escalated,</span>
+<span id="annotated-cell-10-55"><a href="#annotated-cell-10-55" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-10-56"><a href="#annotated-cell-10-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Cache the result as JSON for future similar queries</span></span>
+<span id="annotated-cell-10-57"><a href="#annotated-cell-10-57" aria-hidden="true" tabindex="-1"></a>    app_state.cache.put(req.clause, response.model_dump_json())</span>
+<span id="annotated-cell-10-58"><a href="#annotated-cell-10-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="28" data-code-annotation="1"><code>build_pipeline()</code> compiles the LangGraph state machine at startup — this parses the graph structure and validates all edges. Without warm-up, the first request would incur this overhead.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="40" data-code-annotation="2">The semantic cache is checked with the original (un-redacted) clause text. If a near-duplicate clause was already reviewed, the result is returned immediately with <code>cache_hit=True</code> and zero LLM cost.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="46" data-code-annotation="3"><code>asyncio.to_thread</code> runs <code>run_pipeline</code> in a <code>ThreadPoolExecutor</code> thread, freeing the event loop to handle other requests while waiting for the LLM response. This is the correct pattern for wrapping synchronous I/O-bound functions in FastAPI async handlers.</span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a streaming compliance review (useful when the justification is long), replace <code>asyncio.to_thread</code> with an async generator that yields partial results using FastAPI’s <code>StreamingResponse</code>. The <code>ComplianceReport.justification</code> field streams character-by-character while <code>verdict</code> and <code>confidence</code> are returned at the end.</p>
+</div>
+</div>
+</section>
+<section id="evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
+<p><strong>What to evaluate.</strong> The compliance system has three layers to evaluate: (1) <strong>PII redaction recall</strong> — what fraction of PII entities were correctly redacted (false negatives expose sensitive data); (2) <strong>classification accuracy</strong> — are clauses assigned to the correct type and risk tier (wrong type → wrong regulatory context → wrong verdict); (3) <strong>verdict accuracy</strong> — on a labelled set, what fraction of verdicts match expert human judgement. We evaluate all three with a compact but representative test harness.</p>
+<p>Defining the evaluation dataset and running it:</p>
+<div id="a3c4d5e6" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EvalCase:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    clause:          <span class="bu">str</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    expected_type:   <span class="bu">str</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    expected_verdict: <span class="bu">str</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    has_pii:         <span class="bu">bool</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>EVAL_DATASET: <span class="bu">list</span>[EvalCase] <span class="op">=</span> [</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Our CET1 ratio is 14.8%, well above Basel III's 4.5% minimum."</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CAPITAL_ADEQUACY"</span>, <span class="st">"COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"The counterparty (contact: sarah@globalbank.com) agrees to a CET1 of 3.2%."</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CAPITAL_ADEQUACY"</span>, <span class="st">"NON_COMPLIANT"</span>, <span class="va">True</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Initial margin of 55% will be maintained on equity positions per Reg T requirements."</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"MARGIN"</span>, <span class="st">"COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Margin calls may be settled within 5 business days at the client's discretion."</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"MARGIN"</span>, <span class="st">"NON_COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"The firm disclaims all duty to report cybersecurity incidents to regulators."</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"OPERATIONAL"</span>, <span class="st">"NON_COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Business continuity plans are reviewed and tested semi-annually."</span>,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"OPERATIONAL"</span>, <span class="st">"COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"All disputes shall be resolved by arbitration under LCIA rules, English law applies."</span>,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"OTHER"</span>, <span class="st">"COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    EvalCase(</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Single counterparty exposure is capped at 10</span><span class="sc">% o</span><span class="st">f RWA with CRO sign-off for exceptions."</span>,</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CREDIT_RISK"</span>, <span class="st">"COMPLIANT"</span>, <span class="va">False</span>),</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running the eval harness and printing metrics:</p>
+<div id="c5e6f7a8" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>type_correct    <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>verdict_correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>pii_redacted    <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>pii_cases       <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> case <span class="kw">in</span> EVAL_DATASET:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    state <span class="op">=</span> run_pipeline(case.clause)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    pred_type    <span class="op">=</span> state[<span class="st">"classification"</span>].clause_type</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    pred_verdict <span class="op">=</span> state[<span class="st">"report"</span>].verdict</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    has_redaction <span class="op">=</span> <span class="bu">bool</span>(state[<span class="st">"pii_mapping"</span>])</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    type_correct    <span class="op">+=</span> (pred_type    <span class="op">==</span> case.expected_type)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    verdict_correct <span class="op">+=</span> (pred_verdict <span class="op">==</span> case.expected_verdict)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> case.has_pii:</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        pii_cases    <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        pii_redacted <span class="op">+=</span> has_redaction</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(EVAL_DATASET)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Classification accuracy: </span><span class="sc">{</span>type_correct<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">  = </span><span class="sc">{</span>type_correct<span class="op">/</span>n<span class="sc">:.0%}</span><span class="ss">"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Verdict accuracy:        </span><span class="sc">{</span>verdict_correct<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>verdict_correct<span class="op">/</span>n<span class="sc">:.0%}</span><span class="ss">"</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> pii_cases:</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"PII redaction recall:    </span><span class="sc">{</span>pii_redacted<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>pii_cases<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>pii_redacted<span class="op">/</span>pii_cases<span class="sc">:.0%}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="deployment-walkthrough" class="level2">
+<h2 class="anchored" data-anchor-id="deployment-walkthrough">Deployment Walkthrough</h2>
+<p><strong>Putting it all together.</strong> The full production deployment stack uses every pattern from the series: the Dockerfile from <a href="../../notebooks/prep/10-model-serving.html">notebook 10</a>, the Terraform ECS/ECR infrastructure from <a href="../../notebooks/prep/12-ai-infra.html">notebook 12</a>, the GitHub Actions CI/CD pipeline from <a href="../../notebooks/prep/12-ai-infra.html">notebook 12</a>, the Langfuse observability from <a href="../../notebooks/prep/06-observability.html">notebook 06</a>, and the cost optimisation stack from <a href="../../notebooks/prep/11-cost-optimization.html">notebook 11</a>. The table below shows how each component maps to a notebook and the directory in the repository where it lives.</p>
+<p><br></p>
+<p><strong>Deployment sequence.</strong> We follow this order: (1) <code>terraform init &amp;&amp; terraform apply</code> to provision ECR, ECS cluster, and Secrets Manager; (2) <code>make secrets</code> to populate AWS Secrets Manager from the local <code>.env.prod</code> file; (3) push to <code>main</code> which triggers the GitHub Actions build-push-deploy pipeline; (4) verify the <code>/health</code> endpoint; (5) run the evaluation harness against the production endpoint; (6) enable Langfuse tracing and confirm traces appear in the dashboard. Steps 3–6 take roughly five minutes once the infrastructure is provisioned.</p>
+<p>Component summary table:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Component</th>
+<th style="text-align: center;">Notebook</th>
+<th style="text-align: left;">Path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">FastAPI compliance service</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/10-model-serving.html">10</a></td>
+<td style="text-align: left;"><code>src/compliance_api.py</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PII redaction (Presidio)</td>
+<td style="text-align: center;">13 (this)</td>
+<td style="text-align: left;"><code>src/redactor.py</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LangGraph pipeline</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/08-agents-langgraph.html">08</a></td>
+<td style="text-align: left;"><code>src/pipeline.py</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Semantic cache</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/11-cost-optimization.html">11</a></td>
+<td style="text-align: left;"><code>src/cache.py</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Model router</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/11-cost-optimization.html">11</a></td>
+<td style="text-align: left;"><code>src/router.py</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Langfuse observability</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/06-observability.html">06</a></td>
+<td style="text-align: left;"><code>src/observability.py</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Docker multi-stage build</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/10-model-serving.html">10</a></td>
+<td style="text-align: left;"><code>Dockerfile</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Terraform (ECR, ECS, SM)</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/12-ai-infra.html">12</a></td>
+<td style="text-align: left;"><code>infra/</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GitHub Actions CI/CD</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/12-ai-infra.html">12</a></td>
+<td style="text-align: left;"><code>.github/workflows/deploy.yml</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Evaluation harness</td>
+<td style="text-align: center;"><a href="../../notebooks/prep/04-eval-concepts.html">04</a></td>
+<td style="text-align: left;"><code>evals/compliance_eval.py</code></td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before deploying to a financial services production environment, the PII redaction pipeline must be validated by a data privacy officer against the applicable regulation (GDPR, CCPA, or GLBA). Presidio’s default models have known gaps for domain-specific identifiers (e.g.&nbsp;CUSIP, LEI, trading account numbers) that require custom recogniser plugins.</p>
+</div>
+</div>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Add a custom Presidio recogniser.</strong> Write a <code>PatternRecognizer</code> subclass that detects CUSIP identifiers (9-character alphanumeric codes, e.g.&nbsp;<code>037833100</code>). Register it with the <code>AnalyzerEngine</code> and verify that it correctly redacts a sample clause containing a CUSIP. Check that it does not produce false positives on 9-digit numbers that are not CUSIPs (e.g.&nbsp;ZIP codes).</p></li>
+<li><p><strong>Implement re-hydration in the API.</strong> Extend <code>ReviewResponse</code> with a <code>redacted_justification</code> field that contains the justification text with PII placeholders in place, and a <code>full_justification</code> field where placeholders have been replaced by original values using <code>redactor.rehydrate</code>. Expose both fields to the caller so downstream systems can choose the appropriate level of disclosure.</p></li>
+<li><p><strong>Build an A/B test harness.</strong> Implement a <code>ComplianceABTest</code> class that routes each incoming clause to either the <code>gpt-4o-mini</code> pipeline (control) or the <code>gpt-4o</code> pipeline (treatment) using a <code>random.random() &lt; 0.2</code> flag. Log the verdict, confidence, cost, and latency for each group. After 50 clauses, compute whether the treatment group shows statistically significant improvement in verdict accuracy (use Fisher’s exact test on the confusion matrices).</p></li>
+</ol>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/prep/12-ai-infra.html" class="pagination-link" aria-label="12. AI Infrastructure">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">12. AI Infrastructure</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/prep/deep-dives/index.html" class="pagination-link" aria-label="Deep Dives">
+        <span class="nav-page-text">Deep Dives</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

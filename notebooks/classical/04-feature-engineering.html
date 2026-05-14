@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Feature Engineering &amp; Unsupervised Learning – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/classical/05-evaluation-causal.html" rel="next">
+<link href="../../notebooks/classical/03-bayesian-thinking.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/classical/index.html">Classical Machine Learning</a></li><li class="breadcrumb-item"><a href="../../notebooks/classical/04-feature-engineering.html">04. Feature Engineering &amp; Unsupervised Learning</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/classical/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classical Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/01-bias-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Bias, Variance &amp; Regularization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/02-tree-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Tree-Based Methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/03-bayesian-thinking.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Bayesian Thinking</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/04-feature-engineering.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">04. Feature Engineering &amp; Unsupervised Learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/05-evaluation-causal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Evaluation &amp; Causal Reasoning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/classical/06-tabular-dl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Tabular Deep Learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#encoding-categorical-features" id="toc-encoding-categorical-features" class="nav-link active" data-scroll-target="#encoding-categorical-features">Encoding Categorical Features</a></li>
+  <li><a href="#feature-selection" id="toc-feature-selection" class="nav-link" data-scroll-target="#feature-selection">Feature Selection</a></li>
+  <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link" data-scroll-target="#principal-component-analysis">Principal Component Analysis</a></li>
+  <li><a href="#clustering-k-means-and-hdbscan" id="toc-clustering-k-means-and-hdbscan" class="nav-link" data-scroll-target="#clustering-k-means-and-hdbscan">Clustering: K-Means and HDBSCAN</a></li>
+  <li><a href="#anomaly-detection" id="toc-anomaly-detection" class="nav-link" data-scroll-target="#anomaly-detection">Anomaly Detection</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/classical/index.html">Classical Machine Learning</a></li><li class="breadcrumb-item"><a href="../../notebooks/classical/04-feature-engineering.html">04. Feature Engineering &amp; Unsupervised Learning</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Feature Engineering &amp; Unsupervised Learning</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Raw data arrives in formats that most learning algorithms cannot consume directly. A continuous regressor expects a float matrix; a kernel SVM expects numeric inputs with finite norm; gradient-boosted trees tolerate missing values but not string categories. <strong>Feature engineering</strong> is the craft of transforming raw columns into numeric representations that expose the predictive signal a model can exploit. It is unglamorous work, but in practice it determines more of the final model quality than architecture choice does.</p>
+<p>This notebook covers the four classical pillars of feature engineering and unsupervised learning: (1) encoding categorical variables, (2) selecting and reducing features, (3) finding low-dimensional structure with PCA, and (4) discovering latent groupings with clustering. We close with anomaly detection, which sits at the intersection of unsupervised learning and applied decision-making.</p>
+<p>Imports used throughout the notebook:</p>
+<div id="e1000017" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib_inline <span class="im">import</span> backend_inline</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>backend_inline.set_matplotlib_formats(<span class="st">"svg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="encoding-categorical-features" class="level2">
+<h2 class="anchored" data-anchor-id="encoding-categorical-features">Encoding Categorical Features</h2>
+<p>Most tabular datasets contain columns whose values are categories — strings or integers that denote membership in a set rather than a position on a number line. A model that receives the raw integer code <code>{0, 1, 2}</code> for the cities <code>{"Austin", "Boston", "Chicago"}</code> will silently treat Chicago as twice Boston, which is nonsense. Choosing the right encoding is therefore not a preprocessing detail; it shapes the inductive bias baked into every downstream model.</p>
+<p><strong>Ordinal encoding</strong> replaces each category with an integer <span class="math inline">0, 1, \ldots, K-1</span> according to a specified order. It is correct when the order is meaningful — e.g.&nbsp;<code>{"cold", "warm", "hot"}</code> → <code>{0, 1, 2}</code> — and incorrect when applied to nominal categories. Tree-based models can recover from an arbitrary ordinal assignment by learning the right splits, but linear models and distance-based algorithms cannot.</p>
+<p><strong>One-hot encoding</strong> (OHE) maps each category to a binary indicator vector of length <span class="math inline">K</span>. For a feature with <span class="math inline">K</span> categories, each sample becomes a row of the <span class="math inline">K</span>-dimensional binary matrix <span class="math inline">\mathbf{E} \in \{0, 1\}^{N \times K}</span> where exactly one entry per row is <span class="math inline">1</span>. OHE is correct for nominal categories and is the standard choice for linear models. Its weakness is <strong>high cardinality</strong>: a <code>user_id</code> column with <span class="math inline">10^5</span> distinct values produces a <span class="math inline">10^5</span>-dimensional sparse matrix that overwhelms the model’s feature space and makes storage expensive.</p>
+<p><strong>Target encoding</strong> replaces each category <span class="math inline">c</span> with the conditional mean of the target:</p>
+<p><span class="math display">\hat{\mu}_c = \mathbb{E}[y \mid x = c] \approx \frac{1}{|\mathcal{D}_c|} \sum_{i \in \mathcal{D}_c} y_i,</span></p>
+<p>where <span class="math inline">\mathcal{D}_c = \{i : x_i = c\}</span> is the set of training examples belonging to category <span class="math inline">c</span>. This compresses any cardinality down to a single float and directly encodes the signal the model cares about. The danger is <strong>target leakage</strong>: if the encoding is computed on the full training set and then used as input to a model trained on the same set, the model sees the target through a side channel, inflating in-sample metrics and degrading out-of-sample performance. The remedy is cross-validated target encoding: split the training data into <span class="math inline">K</span> folds, compute the mean on the out-of-fold samples for each fold, and use those out-of-fold estimates as features. <code>sklearn.preprocessing.TargetEncoder</code> does this automatically.</p>
+<p><strong>Hash encoding</strong> (also called the <strong>hashing trick</strong>) maps each category to one of <span class="math inline">B</span> buckets by applying a hash function <span class="math inline">h(c) \mod B</span>. It handles unlimited cardinality with no vocabulary to store and is trivially parallelizable, but it introduces <strong>collision artifacts</strong> — two distinct categories that hash to the same bucket are indistinguishable — and offers no interpretability.</p>
+<p><strong>Embeddings</strong> — learned dense representations of categorical values — are covered in the tabular deep learning notebook (NB06 of this series).</p>
+<p><strong>When to use what.</strong> Ordinal encoding for ordered categories with tree models. One-hot for nominal categories with low cardinality (<span class="math inline">K \lesssim 50</span>) and linear or distance-based models. Target encoding for high-cardinality columns when you have enough data per category (at least $$20 observations) and use cross-validation correctly. Hash encoding when cardinality is unbounded and speed matters more than interpretability.</p>
+<p><strong>Example.</strong> A synthetic dataset with a nominal and an ordinal feature:</p>
+<div id="e1000019" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> [<span class="st">"Austin"</span>, <span class="st">"Boston"</span>, <span class="st">"Chicago"</span>, <span class="st">"Denver"</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>temps  <span class="op">=</span> [<span class="st">"cold"</span>, <span class="st">"warm"</span>, <span class="st">"hot"</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"city"</span>:    rng.choice(cities, N),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"temp"</span>:    rng.choice(temps, N),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"revenue"</span>: rng.integers(<span class="dv">10</span>, <span class="dv">100</span>, N).astype(<span class="bu">float</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df.head(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ordinal encoding for <code>temp</code> (preserves order) and one-hot for <code>city</code> (nominal):</p>
+<div id="e1000021" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OrdinalEncoder, OneHotEncoder</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Ordinal — explicit ordering matters</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ord_enc <span class="op">=</span> OrdinalEncoder(categories<span class="op">=</span>[[<span class="st">"cold"</span>, <span class="st">"warm"</span>, <span class="st">"hot"</span>]])</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"temp_ord"</span>] <span class="op">=</span> ord_enc.fit_transform(df[[<span class="st">"temp"</span>]])</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># One-hot — nominal, no ordering</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ohe <span class="op">=</span> OneHotEncoder(sparse_output<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>city_ohe <span class="op">=</span> ohe.fit_transform(df[[<span class="st">"city"</span>]])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ohe_df <span class="op">=</span> pd.DataFrame(city_ohe, columns<span class="op">=</span>ohe.get_feature_names_out())</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.concat([df[[<span class="st">"city"</span>, <span class="st">"temp"</span>, <span class="st">"temp_ord"</span>]], ohe_df], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>result.head(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Target encoding leakage.</strong> To see the leakage risk concretely, we encode on the full training set and measure in-sample vs.&nbsp;out-of-sample error:</p>
+<div id="e1000023" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Ridge</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Naive: encode on the whole training set, then cross-validate</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-5" class="code-annotation-target"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>city_means <span class="op">=</span> df.groupby(<span class="st">"city"</span>)[<span class="st">"revenue"</span>].transform(<span class="st">"mean"</span>)</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>X_naive <span class="op">=</span> city_means.values.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"revenue"</span>].values</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Ridge()</span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>r2_naive <span class="op">=</span> cross_val_score(model, X_naive, y, cv<span class="op">=</span><span class="dv">4</span>, scoring<span class="op">=</span><span class="st">"r2"</span>).mean()</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Naive target encoding  R² = </span><span class="sc">{</span>r2_naive<span class="sc">:.3f}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="5" data-code-annotation="1"><code>transform("mean")</code> broadcasts the per-group mean back to every row — including rows whose label contributed to that mean. This is the leakage.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Now the correct approach using <code>TargetEncoder</code> inside a pipeline — cross-validated encoding is done automatically on the held-out fold during <code>cross_val_score</code>:</p>
+<div id="e1000025" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> TargetEncoder</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct: TargetEncoder inside a pipeline with cross-validation</span></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>pipe <span class="op">=</span> Pipeline([</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-6" class="code-annotation-target"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"enc"</span>, TargetEncoder(target_type<span class="op">=</span><span class="st">"continuous"</span>, cv<span class="op">=</span><span class="dv">4</span>)),</span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"reg"</span>, Ridge()),</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>X_city <span class="op">=</span> df[[<span class="st">"city"</span>]]</span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a>r2_correct <span class="op">=</span> cross_val_score(pipe, X_city, y, cv<span class="op">=</span><span class="dv">4</span>, scoring<span class="op">=</span><span class="st">"r2"</span>).mean()</span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Pipeline target encoding R² = </span><span class="sc">{</span>r2_correct<span class="sc">:.3f}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="6" data-code-annotation="1"><code>TargetEncoder</code> with <code>cv=4</code> computes out-of-fold means during <code>fit_transform</code>, so no label leaks into the encoding of any sample.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Computing target encoding statistics on the full training set and then using that encoding as input during cross-validation inflates <span class="math inline">R^2</span> (or any metric) significantly. Always wrap <code>TargetEncoder</code> in a <code>Pipeline</code> so that <code>cross_val_score</code> or <code>GridSearchCV</code> refits the encoder on each training fold.</p>
+</div>
+</div>
+</section>
+<section id="feature-selection" class="level2">
+<h2 class="anchored" data-anchor-id="feature-selection">Feature Selection</h2>
+<p>Adding features costs nothing during data collection but imposes costs during training: more parameters, longer training, and — critically — the <strong>curse of dimensionality</strong>. As <span class="math inline">d</span> grows, the volume of the feature space grows as <span class="math inline">\mathcal{O}(r^d)</span> for a ball of radius <span class="math inline">r</span>, so any fixed training set <span class="math inline">\mathcal{D}</span> becomes exponentially sparse. Distances lose discriminative power; nearest neighbors become nearly equidistant; and models require exponentially more data to maintain the same statistical coverage. Feature selection combats this by retaining only the <span class="math inline">k \ll d</span> features that carry the most signal.</p>
+<p><strong>Filter methods</strong> score each feature independently of the model and select the top-<span class="math inline">k</span>. Pearson correlation measures linear association with the target: fast and interpretable, but blind to nonlinear relationships. <strong>Mutual information</strong> <span class="math inline">I(X_j; Y) = \mathbb{E}\left[\log \frac{p(X_j, Y)}{p(X_j)p(Y)}\right]</span> captures any statistical dependence, linear or not. It is the preferred filter for tree and kernel models. Both methods are model-agnostic and scale to millions of samples.</p>
+<p><strong>Wrapper methods</strong> treat feature subsets as a search problem. <strong>Recursive Feature Elimination</strong> (RFE) fits the model, ranks features by importance, removes the weakest, and repeats until <span class="math inline">k</span> features remain. It is model-aware and can capture interactions, but its cost is <span class="math inline">\mathcal{O}(d)</span> model fits — prohibitive for large <span class="math inline">d</span> or slow models.</p>
+<p><strong>Embedded methods</strong> perform selection during training. <span class="math inline">L_1</span> (Lasso) regularization drives irrelevant feature weights to exactly zero, yielding a sparse solution from a single fit. Tree ensembles accumulate an <strong>impurity-based importance</strong> for each feature equal to the total reduction in the Gini impurity (or variance, for regression) attributable to splits on that feature. These importances are fast and cheap but can be misleading for high-cardinality or correlated features; <strong>permutation importances</strong> are a more reliable alternative.</p>
+<p><strong>Practical rule.</strong> For a first pass, use mutual information as a filter to cut obvious dead weight. If computational budget allows, follow with RFE or embedded importances to account for feature interactions.</p>
+<p><strong>Data.</strong> The digits dataset from scikit-learn: <span class="math inline">N = 1797</span> images of hand-written digits, each flattened to <span class="math inline">d = 64</span> pixel features.</p>
+<div id="e1000028" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>digits <span class="op">=</span> load_digits()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> digits.data, digits.target</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>X_tr, X_te, y_tr, y_te <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train: </span><span class="sc">{</span>X_tr<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_te<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Selecting the top-<span class="math inline">k</span> features by mutual information with <code>SelectKBest</code>:</p>
+<div id="e1000030" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_selection <span class="im">import</span> SelectKBest, mutual_info_classif</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> {}</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> [<span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">32</span>, <span class="dv">64</span>]:</span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>    pipe <span class="op">=</span> Pipeline([</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-8" class="code-annotation-target"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"sel"</span>, SelectKBest(mutual_info_classif, k<span class="op">=</span>k)),</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"clf"</span>, LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>)),</span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>    pipe.fit(X_tr, y_tr)</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>    results[k] <span class="op">=</span> pipe.score(X_te, y_te)</span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, acc <span class="kw">in</span> results.items():</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  k=</span><span class="sc">{</span>k<span class="sc">:2d}</span><span class="ss">  test accuracy = </span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="8" data-code-annotation="1"><code>mutual_info_classif</code> estimates <span class="math inline">I(X_j; Y)</span> via <span class="math inline">k</span>-nearest-neighbor density estimation — it handles non-linear dependencies automatically.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Result.</strong> With only <span class="math inline">k = 32</span> out of <span class="math inline">64</span> features the accuracy is competitive with the full-feature model, confirming that roughly half the pixel positions carry little discriminative information (primarily the border pixels of an 8×8 image).</p>
+</section>
+<section id="principal-component-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="principal-component-analysis">Principal Component Analysis</h2>
+<p>Feature selection discards features entirely. <strong>Principal Component Analysis</strong> (PCA) takes a different approach: it constructs <span class="math inline">r \ll d</span> new features as linear combinations of the original ones, chosen to capture the directions of maximum variance in the data.</p>
+<p><strong>Mechanics.</strong> Center the data matrix <span class="math inline">\mathbf{X} \in \mathbb{R}^{N \times d}</span> by subtracting column means. The <strong>thin SVD</strong> of the centered matrix decomposes it as:</p>
+<p><span class="math display">\mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top,</span></p>
+<p>where <span class="math inline">\mathbf{U} \in \mathbb{R}^{N \times d}</span> has orthonormal columns, <span class="math inline">\mathbf{\Sigma} \in \mathbb{R}^{d \times d}</span> is diagonal with singular values <span class="math inline">\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_d \geq 0</span>, and <span class="math inline">\mathbf{V} \in \mathbb{R}^{d \times d}</span> is orthonormal. The columns <span class="math inline">\mathbf{v}_1, \ldots, \mathbf{v}_d</span> of <span class="math inline">\mathbf{V}</span> are the <strong>principal components</strong> (PCs) — the eigenvectors of the sample covariance matrix <span class="math inline">\frac{1}{N-1}\mathbf{X}^\top \mathbf{X}</span>. Projecting <span class="math inline">\mathbf{X}</span> onto the first <span class="math inline">r</span> PCs gives the low-dimensional representation:</p>
+<p><span class="math display">\mathbf{Z} = \mathbf{X} \mathbf{V}_r \in \mathbb{R}^{N \times r},</span></p>
+<p>where <span class="math inline">\mathbf{V}_r</span> contains the first <span class="math inline">r</span> columns of <span class="math inline">\mathbf{V}.</span></p>
+<p>The <strong>explained variance ratio</strong> of component <span class="math inline">j</span> is <span class="math inline">\sigma_j^2 / \sum_l \sigma_l^2</span>, measuring the fraction of total variance captured. Plotting these ratios — the <strong>scree plot</strong> — reveals the intrinsic dimensionality of the data as the elbow where additional components contribute diminishing returns.</p>
+<p><strong>When PCA helps.</strong> PCA benefits linear models (it decorrelates features and removes multicollinearity), compressed sensing tasks, and visualization (<span class="math inline">r = 2</span> or <span class="math inline">3</span>). It is less useful for tree ensembles, which are invariant to linear transformations of the features, and harmful for sparse text features, where the dense PCA projection destroys the sparsity that makes those features efficient.</p>
+<p>Fitting PCA on the digits dataset and inspecting explained variance:</p>
+<div id="e1000033" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-3" class="code-annotation-target"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA().fit(X)</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>evr <span class="op">=</span> pca.explained_variance_ratio_</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>cumulative <span class="op">=</span> np.cumsum(evr)</span>
+<span id="annotated-cell-8-6"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-8-7" class="code-annotation-target"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a>n90 <span class="op">=</span> np.searchsorted(cumulative, <span class="fl">0.90</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a>n95 <span class="op">=</span> np.searchsorted(cumulative, <span class="fl">0.95</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Components for 90% variance: </span><span class="sc">{</span>n90<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Components for 95% variance: </span><span class="sc">{</span>n95<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="3" data-code-annotation="1">Fitting with no <code>n_components</code> argument computes all <span class="math inline">\min(N, d)</span> components — useful for drawing the full scree plot before committing to <span class="math inline">r</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="7" data-code-annotation="2"><code>searchsorted</code> returns the first index where the cumulative sum exceeds the threshold; adding 1 converts to 1-indexed component count.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div id="fig-pca-variance" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>digits <span class="op">=</span> load_digits()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>pca_plot <span class="op">=</span> PCA().fit(digits.data)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>evr <span class="op">=</span> pca_plot.explained_variance_ratio_</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>cumulative <span class="op">=</span> np.cumsum(evr)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>n_components <span class="op">=</span> <span class="bu">len</span>(evr)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> np.arange(<span class="dv">1</span>, n_components <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>n90 <span class="op">=</span> np.searchsorted(cumulative, <span class="fl">0.90</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>n95 <span class="op">=</span> np.searchsorted(cumulative, <span class="fl">0.95</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Bar chart for individual explained variance</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ax.bar(idx, evr, color<span class="op">=</span><span class="st">"C0"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"Explained variance ratio"</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Cumulative line on same axis</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>ax.plot(idx, cumulative, color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Cumulative"</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Threshold lines</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="fl">0.90</span>, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, label<span class="op">=</span><span class="st">"90%"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="fl">0.95</span>, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dotted"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, label<span class="op">=</span><span class="st">"95%"</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Annotate component counts</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>ax.annotate(</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"PC </span><span class="sc">{</span>n90<span class="sc">}</span><span class="ss">"</span>, xy<span class="op">=</span>(n90, <span class="fl">0.90</span>), xytext<span class="op">=</span>(n90 <span class="op">+</span> <span class="dv">2</span>, <span class="fl">0.84</span>),</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>),</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"gray"</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>ax.annotate(</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"PC </span><span class="sc">{</span>n95<span class="sc">}</span><span class="ss">"</span>, xy<span class="op">=</span>(n95, <span class="fl">0.95</span>), xytext<span class="op">=</span>(n95 <span class="op">+</span> <span class="dv">2</span>, <span class="fl">0.89</span>),</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>),</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"gray"</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Principal component"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"Explained variance ratio"</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.5</span>, n_components <span class="op">+</span> <span class="fl">0.5</span>)<span class="op">;</span> ax.set_ylim(<span class="dv">0</span>, <span class="fl">1.05</span>)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>, loc<span class="op">=</span><span class="st">"center right"</span>)</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-pca-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> The scree plot shows that the variance concentrates sharply in the first few components. The cumulative curve reaches 90% around component 21 and 95% around component 29, out of 64 total — confirming that the 64-pixel space has substantial redundancy.</p>
+<p>Comparing a logistic regression trained on the full feature set vs.&nbsp;PCA-compressed representations:</p>
+<div id="e1000036" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>configs <span class="op">=</span> {<span class="st">"Full (d=64)"</span>: <span class="va">None</span>, <span class="st">"PCA r=21"</span>: <span class="dv">21</span>, <span class="st">"PCA r=29"</span>: <span class="dv">29</span>, <span class="st">"PCA r=10"</span>: <span class="dv">10</span>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, n_comp <span class="kw">in</span> configs.items():</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    steps <span class="op">=</span> []</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_comp <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        steps.append((<span class="st">"pca"</span>, PCA(n_components<span class="op">=</span>n_comp)))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    steps.append((<span class="st">"clf"</span>, LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>)))</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    pipe <span class="op">=</span> Pipeline(steps)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    pipe.fit(X_tr, y_tr)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> pipe.score(X_te, y_te)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>name<span class="sc">:&lt;18}</span><span class="ss">  test accuracy = </span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Result.</strong> PCA at 95% variance retention (<span class="math inline">r = 29</span>) matches the full-feature accuracy almost exactly, while <span class="math inline">r = 21</span> (90%) incurs a small drop. Compressing aggressively to <span class="math inline">r = 10</span> loses meaningful signal. This confirms the standard heuristic: choose <span class="math inline">r</span> to retain 90–95% of variance as a starting point, then tune.</p>
+</section>
+<section id="clustering-k-means-and-hdbscan" class="level2">
+<h2 class="anchored" data-anchor-id="clustering-k-means-and-hdbscan">Clustering: K-Means and HDBSCAN</h2>
+<p>Clustering partitions unlabeled data into groups of similar points without supervision. It is used for exploratory analysis, customer segmentation, anomaly pre-screening, and as a preprocessing step that creates categorical features from continuous spaces.</p>
+<p><strong>K-Means</strong> minimizes the within-cluster sum of squared distances:</p>
+<p><span class="math display">J = \sum_{j=1}^k \sum_{i \in C_j} \lVert \mathbf{x}_i - \boldsymbol{\mu}_j \rVert^2,</span></p>
+<p>where <span class="math inline">C_j</span> is the set of points assigned to cluster <span class="math inline">j</span> and <span class="math inline">\boldsymbol{\mu}_j</span> is the cluster centroid. <strong>Lloyd’s algorithm</strong> alternates between two steps: (1) assign each point to its nearest centroid (Voronoi partition), and (2) recompute each centroid as the mean of its assigned points. The algorithm converges to a local minimum, so initialization matters. <strong>K-Means++</strong> selects initial centroids with probability proportional to <span class="math inline">d^2</span> — the squared distance from the nearest existing centroid — reducing the chance of poor convergence.</p>
+<p>K-Means makes three strong assumptions: clusters are (1) convex, (2) roughly equal-sized, and (3) approximately isotropic. On elongated, crescent-shaped, or nested clusters it fails structurally — not because <span class="math inline">k</span> was chosen wrong, but because the objective function cannot represent those shapes.</p>
+<p>The <strong>elbow method</strong> plots <span class="math inline">J</span> as a function of <span class="math inline">k</span> and looks for a “knee” where adding another cluster yields diminishing returns. It works when well-separated blob clusters exist but is unreliable for complex geometries.</p>
+<p><strong>HDBSCAN</strong> (Hierarchical Density-Based Spatial Clustering of Applications with Noise) takes a fundamentally different approach: it identifies regions of high point density and treats low-density regions as cluster boundaries. Its key properties are: (1) it discovers <span class="math inline">k</span> automatically rather than requiring it as input, (2) it handles arbitrary cluster shapes, (3) it assigns a special label of <span class="math inline">-1</span> to <strong>noise points</strong> that do not belong to any dense region, and (4) it is robust to choice of the <code>min_cluster_size</code> hyperparameter. <code>sklearn.cluster.HDBSCAN</code> is available in scikit-learn 1.3+.</p>
+<div id="fig-cluster-comparison" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cluster-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans, HDBSCAN</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons, make_circles, make_blobs</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> adjusted_rand_score</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>SEED <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Datasets</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>datasets <span class="op">=</span> [</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Moons"</span>,   <span class="op">*</span>make_moons(n_samples<span class="op">=</span><span class="dv">300</span>, noise<span class="op">=</span><span class="fl">0.08</span>, random_state<span class="op">=</span>SEED)),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Circles"</span>, <span class="op">*</span>make_circles(n_samples<span class="op">=</span><span class="dv">300</span>, noise<span class="op">=</span><span class="fl">0.05</span>, factor<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span>SEED)),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Blobs"</span>,   <span class="op">*</span>make_blobs(n_samples<span class="op">=</span><span class="dv">300</span>, centers<span class="op">=</span><span class="dv">3</span>, cluster_std<span class="op">=</span><span class="fl">0.7</span>, random_state<span class="op">=</span>SEED)),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Methods: (label, constructor)</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>methods <span class="op">=</span> [</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"K-Means"</span>, <span class="kw">lambda</span> k: KMeans(n_clusters<span class="op">=</span>k, n_init<span class="op">=</span><span class="st">"auto"</span>, random_state<span class="op">=</span>SEED)),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"HDBSCAN"</span>, <span class="kw">lambda</span> _:  HDBSCAN(min_cluster_size<span class="op">=</span><span class="dv">20</span>)),</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co"># K-Means k per dataset (known ground truth)</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>k_true <span class="op">=</span> {<span class="st">"Moons"</span>: <span class="dv">2</span>, <span class="st">"Circles"</span>: <span class="dv">2</span>, <span class="st">"Blobs"</span>: <span class="dv">3</span>}</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Colormap: noise (-1) → grey, clusters → tab10</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>cmap <span class="op">=</span> plt.get_cmap(<span class="st">"tab10"</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cluster_colors(labels):</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> []</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> lbl <span class="kw">in</span> labels:</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> lbl <span class="op">==</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>            colors.append(<span class="st">"lightgrey"</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            colors.append(cmap(lbl <span class="op">%</span> <span class="dv">10</span>))</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> colors</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col, (name, X_raw, y_true) <span class="kw">in</span> <span class="bu">enumerate</span>(datasets):</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    X_scaled <span class="op">=</span> StandardScaler().fit_transform(X_raw)</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row, (method_name, constructor) <span class="kw">in</span> <span class="bu">enumerate</span>(methods):</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> axes[row, col]</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        k <span class="op">=</span> k_true[name]</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        clf <span class="op">=</span> constructor(k)</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> clf.fit_predict(X_scaled)</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        ari <span class="op">=</span> adjusted_rand_score(y_true, labels)</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        colors <span class="op">=</span> cluster_colors(labels)</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X_scaled[:, <span class="dv">0</span>], X_scaled[:, <span class="dv">1</span>], c<span class="op">=</span>colors, s<span class="op">=</span><span class="dv">8</span>, linewidths<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"</span><span class="sc">{</span>method_name<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>name<span class="sc">}</span><span class="ch">\n</span><span class="ss">ARI = </span><span class="sc">{</span>ari<span class="sc">:.2f}</span><span class="ss">"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>        ax.set_xticks([])<span class="op">;</span> ax.set_yticks([])</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-cluster-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> The Adjusted Rand Index (ARI) measures agreement between predicted and true cluster assignments, corrected for chance (<span class="math inline">\text{ARI} = 1</span> is perfect, <span class="math inline">0</span> is random). K-Means achieves near-perfect ARI on the blobs but fails on moons and circles because those datasets violate its convexity assumption. HDBSCAN recovers all three structures cleanly, with noise points (grey) marking the sparse inter-cluster regions.</p>
+<p><strong>Elbow method</strong> for selecting <span class="math inline">k</span> in K-Means:</p>
+<div id="e1000039" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>X_blob, _ <span class="op">=</span> make_blobs(n_samples<span class="op">=</span><span class="dv">500</span>, centers<span class="op">=</span><span class="dv">4</span>, cluster_std<span class="op">=</span><span class="fl">0.9</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>inertias <span class="op">=</span> []</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>ks <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> ks:</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    km <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>k, n_init<span class="op">=</span><span class="st">"auto"</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    km.fit(X_blob)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    inertias.append(km.inertia_)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="fl">3.5</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="bu">list</span>(ks), inertias, marker<span class="op">=</span><span class="st">"o"</span>, color<span class="op">=</span><span class="st">"C0"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">4</span>, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>, lw<span class="op">=</span><span class="fl">1.0</span>, label<span class="op">=</span><span class="st">"True k=4"</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Number of clusters $k$"</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Inertia (within-cluster SS)"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> The inertia drops sharply from <span class="math inline">k=1</span> to <span class="math inline">k=4</span> and flattens afterward — the elbow is visible at <span class="math inline">k=4</span>, matching the true number of blobs. On real data the elbow is often indistinct; silhouette score or gap statistic can provide a more principled alternative.</p>
+<p><strong>Choosing between K-Means and HDBSCAN.</strong> Use K-Means when: clusters are expected to be convex and roughly spherical; <span class="math inline">k</span> is known or can be determined by the elbow method; speed is critical (K-Means scales to millions of points). Use HDBSCAN when: cluster shapes are unknown or non-convex; detecting noise/outliers is part of the task; and you want to avoid specifying <span class="math inline">k</span> in advance.</p>
+</section>
+<section id="anomaly-detection" class="level2">
+<h2 class="anchored" data-anchor-id="anomaly-detection">Anomaly Detection</h2>
+<p>Anomaly detection identifies samples that deviate significantly from the bulk of the data. Unlike supervised classification, it operates without labeled anomalies — or with only normal examples — making it an unsupervised problem with asymmetric class structure.</p>
+<p><strong>Isolation Forest</strong> exploits the observation that anomalies are rare and different: they are isolated by random axis-aligned splits in far fewer steps than normal points. The algorithm builds an ensemble of random trees, each constructed by recursively splitting on a randomly chosen feature at a randomly chosen threshold. The <strong>anomaly score</strong> for a point <span class="math inline">\mathbf{x}</span> is the average path length across trees, normalized so that shorter paths yield higher anomaly scores. It scales to high-dimensional data, is insensitive to feature scale, and handles multimodal distributions without assumptions.</p>
+<p><strong>Local Outlier Factor</strong> (LOF) computes a <strong>local reachability density</strong> <span class="math inline">\text{lrd}(\mathbf{x})</span> for each point and then compares it with the densities of its <span class="math inline">k</span> nearest neighbors. Points whose neighborhood is denser than their own local region receive a high LOF score:</p>
+<p><span class="math display">\text{LOF}_k(\mathbf{x}) = \frac{\sum_{\mathbf{o} \in N_k(\mathbf{x})} \text{lrd}(\mathbf{o}) / \text{lrd}(\mathbf{x})}{|N_k(\mathbf{x})|}.</span></p>
+<p>LOF is effective when anomalies are defined relative to local neighborhood density — e.g.&nbsp;a medium-density cluster embedded in a high-density region. It is more expensive than Isolation Forest (<span class="math inline">\mathcal{O}(N^2)</span> in the worst case) and should not be used for novelty detection on new points unless fitted accordingly.</p>
+<p><strong>One-class SVM</strong> fits a hypersphere (in kernel space) that contains most of the training data. New points outside the sphere are flagged as anomalies. It is effective for smooth, unimodal distributions but sensitive to hyperparameter tuning and does not scale beyond <span class="math inline">\sim 10^4</span> samples.</p>
+<p><strong>Reconstruction error</strong> from a trained autoencoder is a powerful anomaly signal when the model is trained only on normal data: normal inputs reconstruct well (small error) while anomalies do not. This approach is covered in the deep learning series.</p>
+<p><strong>Threshold selection.</strong> All detectors produce a real-valued score, not a binary label. Choosing a threshold is a business decision: if a missed anomaly costs <span class="math inline">c_{\text{FN}}</span> and a false alarm costs <span class="math inline">c_{\text{FP}}</span>, the optimal threshold minimizes expected cost <span class="math inline">c_{\text{FN}} \cdot \text{FNR} + c_{\text{FP}} \cdot \text{FPR}</span>. When labeled examples of anomalies exist, the precision-recall curve over score thresholds guides the choice; otherwise the <code>contamination</code> parameter (expected fraction of outliers) serves as a prior.</p>
+<p><strong>Data.</strong> A 2D Gaussian inlier distribution with a small fraction of injected uniform outliers:</p>
+<div id="e1000042" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>N_in  <span class="op">=</span> <span class="dv">300</span></span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>N_out <span class="op">=</span> <span class="dv">30</span></span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6" aria-hidden="true" tabindex="-1"></a>X_in  <span class="op">=</span> rng.multivariate_normal([<span class="dv">0</span>, <span class="dv">0</span>], [[<span class="dv">1</span>, <span class="fl">0.5</span>], [<span class="fl">0.5</span>, <span class="dv">1</span>]], size<span class="op">=</span>N_in)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-7" class="code-annotation-target"><a href="#annotated-cell-13-7" aria-hidden="true" tabindex="-1"></a>X_out <span class="op">=</span> rng.uniform(<span class="op">-</span><span class="dv">5</span>, <span class="dv">5</span>, size<span class="op">=</span>(N_out, <span class="dv">2</span>))</span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a>X_all <span class="op">=</span> np.vstack([X_in, X_out])</span>
+<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9" aria-hidden="true" tabindex="-1"></a>y_true <span class="op">=</span> np.array([<span class="dv">1</span>] <span class="op">*</span> N_in <span class="op">+</span> [<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> N_out)  <span class="co"># sklearn convention: 1=inlier, -1=outlier</span></span>
+<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Inliers: </span><span class="sc">{</span>N_in<span class="sc">}</span><span class="ss">, Outliers: </span><span class="sc">{</span>N_out<span class="sc">}</span><span class="ss">, Contamination: </span><span class="sc">{</span>N_out<span class="op">/</span>(N_in<span class="op">+</span>N_out)<span class="sc">:.2%}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="7" data-code-annotation="1">Outliers are drawn uniformly over a wide box — many will appear in sparse regions far from the Gaussian core.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Fitting Isolation Forest and evaluating precision and recall:</p>
+<div id="e1000045" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> IsolationForest</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> LocalOutlierFactor</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>contamination <span class="op">=</span> N_out <span class="op">/</span> (N_in <span class="op">+</span> N_out)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>iforest <span class="op">=</span> IsolationForest(contamination<span class="op">=</span>contamination, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>y_iforest <span class="op">=</span> iforest.fit_predict(X_all)  <span class="co"># returns +1 (inlier) or -1 (outlier)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>lof <span class="op">=</span> LocalOutlierFactor(contamination<span class="op">=</span>contamination)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>y_lof <span class="op">=</span> lof.fit_predict(X_all)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Isolation Forest ==="</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true, y_iforest, target_names<span class="op">=</span>[<span class="st">"outlier"</span>, <span class="st">"inlier"</span>]))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Local Outlier Factor ==="</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true, y_lof, target_names<span class="op">=</span>[<span class="st">"outlier"</span>, <span class="st">"inlier"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Decision boundary of Isolation Forest over the 2D plane:</p>
+<div id="e1000047" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="annotated-cell-15-2"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">300</span>), np.linspace(<span class="op">-</span><span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">300</span>))</span>
+<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> np.c_[xx.ravel(), yy.ravel()]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-6" class="code-annotation-target"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> iforest.decision_function(grid).reshape(xx.shape)</span>
+<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">5</span>))</span>
+<span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Decision surface</span></span>
+<span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a>contour <span class="op">=</span> ax.contourf(xx, yy, scores, levels<span class="op">=</span><span class="dv">20</span>, cmap<span class="op">=</span><span class="st">"RdYlGn"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-15-12" class="code-annotation-target"><a href="#annotated-cell-15-12" aria-hidden="true" tabindex="-1"></a>ax.contour(xx, yy, scores, levels<span class="op">=</span>[<span class="dv">0</span>], colors<span class="op">=</span><span class="st">"k"</span>, linewidths<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="annotated-cell-15-13"><a href="#annotated-cell-15-13" aria-hidden="true" tabindex="-1"></a>plt.colorbar(contour, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="st">"Anomaly score"</span>)</span>
+<span id="annotated-cell-15-14"><a href="#annotated-cell-15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-15"><a href="#annotated-cell-15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Data points</span></span>
+<span id="annotated-cell-15-16"><a href="#annotated-cell-15-16" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_in[:, <span class="dv">0</span>],  X_in[:, <span class="dv">1</span>],  c<span class="op">=</span><span class="st">"C0"</span>, s<span class="op">=</span><span class="dv">15</span>, label<span class="op">=</span><span class="st">"Inlier"</span>,  linewidths<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="annotated-cell-15-17"><a href="#annotated-cell-15-17" aria-hidden="true" tabindex="-1"></a>ax.scatter(X_out[:, <span class="dv">0</span>], X_out[:, <span class="dv">1</span>], c<span class="op">=</span><span class="st">"red"</span>,  s<span class="op">=</span><span class="dv">40</span>, marker<span class="op">=</span><span class="st">"x"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"Outlier"</span>)</span>
+<span id="annotated-cell-15-18"><a href="#annotated-cell-15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-19"><a href="#annotated-cell-15-19" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="vs">x_1</span><span class="dv">$</span><span class="vs">"</span>)<span class="op">;</span> ax.set_ylabel(<span class="vs">r"</span><span class="dv">$</span><span class="vs">x_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="annotated-cell-15-20"><a href="#annotated-cell-15-20" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="annotated-cell-15-21"><a href="#annotated-cell-15-21" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="annotated-cell-15-22"><a href="#annotated-cell-15-22" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="annotated-cell-15-23"><a href="#annotated-cell-15-23" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="6" data-code-annotation="1"><code>decision_function</code> returns the raw anomaly score (higher = more normal); the decision boundary is at <span class="math inline">0</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="12" data-code-annotation="2">The black contour at level <span class="math inline">0</span> separates the predicted inlier region (green) from the outlier region (red).</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Figure.</strong> The Isolation Forest correctly encircles the Gaussian inlier cluster and assigns high anomaly scores to points in the sparse peripheral regions. A few uniform outliers that happen to land near the Gaussian core are missed — this is expected given that those points are indistinguishable from inliers by any density-based criterion.</p>
+<hr>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/classical/03-bayesian-thinking.html" class="pagination-link" aria-label="03. Bayesian Thinking">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">03. Bayesian Thinking</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/classical/05-evaluation-causal.html" class="pagination-link" aria-label="05. Evaluation &amp; Causal Reasoning">
+        <span class="nav-page-text">05. Evaluation &amp; Causal Reasoning</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

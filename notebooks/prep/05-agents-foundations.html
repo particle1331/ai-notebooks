@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Agentic AI I: ReAct &amp; Tool Orchestration – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/prep/06-observability.html" rel="next">
+<link href="../../notebooks/prep/04-eval-concepts.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/05-agents-foundations.html">05. Agentic AI I</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#from-single-call-to-agent-loop" id="toc-from-single-call-to-agent-loop" class="nav-link active" data-scroll-target="#from-single-call-to-agent-loop">From Single Call to Agent Loop</a></li>
+  <li><a href="#tool-registry" id="toc-tool-registry" class="nav-link" data-scroll-target="#tool-registry">Tool Registry</a></li>
+  <li><a href="#the-react-loop" id="toc-the-react-loop" class="nav-link" data-scroll-target="#the-react-loop">The ReAct Loop</a></li>
+  <li><a href="#in-context-memory" id="toc-in-context-memory" class="nav-link" data-scroll-target="#in-context-memory">In-Context Memory</a></li>
+  <li><a href="#financial-agent-demo" id="toc-financial-agent-demo" class="nav-link" data-scroll-target="#financial-agent-demo">Financial Agent Demo</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li><li class="breadcrumb-item"><a href="../../notebooks/prep/05-agents-foundations.html">05. Agentic AI I</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Agentic AI I: ReAct &amp; Tool Orchestration</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Day 3 of Week 1. A single LLM call answers a question. An agent solves a task — it decides what information to gather, which tools to invoke, and when it has enough to respond. This notebook builds the ReAct (Reasoning + Acting) loop from scratch: a while-loop that alternates between the model reasoning about its next step and executing a tool, continuing until the model decides it has an answer. We implement a small tool registry, wire up four financial tools, and build a single-agent system that can answer multi-step questions about SEC filings, portfolio positions, and market data without any framework.</p>
+<p>The ReAct pattern was introduced by Yao et al.&nbsp;(2022) as a way to interleave chain-of-thought reasoning with action execution. The key insight is that reasoning about what to do and doing it should alternate — the model’s reasoning in one step informs the action it takes, and the result of that action informs the next round of reasoning.</p>
+<p>Setup:</p>
+<section id="from-single-call-to-agent-loop" class="level2">
+<h2 class="anchored" data-anchor-id="from-single-call-to-agent-loop">From Single Call to Agent Loop</h2>
+<p><strong>Single call vs.&nbsp;agent.</strong> A single LLM call is a function: input text → output text. The model can only use the knowledge encoded in its weights plus whatever we put in the context window. An agent is an iterative process: the model can request new information by calling tools, and the results of those tool calls become part of the context for the next reasoning step.</p>
+<p><br></p>
+<p><strong>Why iteration matters.</strong> Consider the question: “Is this portfolio over-exposed to interest rate risk?” To answer this, the agent must (1) fetch the portfolio positions, (2) fetch current interest rates, (3) compute the duration-weighted exposure, and (4) compare against the risk limit. Each step’s output determines what the next step should do. A single LLM call cannot do this — it has no way to fetch live data or compute with precise arithmetic.</p>
+<p><br></p>
+<p><strong>The ReAct loop.</strong> The loop alternates between two actions:</p>
+<ul>
+<li><strong>Reason</strong>: the model receives the current context (original question + all previous tool results) and either (a) calls a tool by emitting a <code>tool_calls</code> response, or (b) emits a final text answer (<code>stop</code> finish reason).</li>
+<li><strong>Act</strong>: when the model emits a <code>tool_calls</code> response, we execute the requested tool(s), append the results to the message history, and call the model again.</li>
+</ul>
+<p>The loop terminates when the model decides it has enough information to answer, or when <code>max_steps</code> is exceeded. The message history grows with each step — this is the agent’s in-context memory.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>OpenAI’s tool-calling API handles the ReAct pattern natively: the model emits a <code>tool_calls</code> list in its response when it wants to call tools, and we append <code>tool</code> role messages with the results. The model sees this entire exchange in its context on the next call.</p>
+</div>
+</div>
+</section>
+<section id="tool-registry" class="level2">
+<h2 class="anchored" data-anchor-id="tool-registry">Tool Registry</h2>
+<p>We need a uniform interface for tools: each tool has a name, a description (which the model reads to decide whether to use it), a JSON Schema for its parameters, and a Python callable. We wrap these in a <code>Tool</code> dataclass and a <code>ToolRegistry</code> that translates the registry into the list-of-dicts format the OpenAI API expects.</p>
+<div id="c9d0e1f2" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Callable, Any</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Tool:</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>    name: <span class="bu">str</span></span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>    description: <span class="bu">str</span></span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>    parameters: <span class="bu">dict</span>  <span class="co"># JSON Schema object</span></span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>    fn: Callable[..., Any]</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ToolRegistry:</span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Registry translating Tool objects into OpenAI function-calling format."""</span></span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._tools: <span class="bu">dict</span>[<span class="bu">str</span>, Tool] <span class="op">=</span> {}</span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> register(<span class="va">self</span>, tool: Tool) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._tools[tool.name] <span class="op">=</span> tool</span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-22" class="code-annotation-target"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_schema(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return the list of tool dicts for the OpenAI tools parameter."""</span></span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">"type"</span>: <span class="st">"function"</span>,</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">"function"</span>: {</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"name"</span>: t.name,</span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"description"</span>: t.description,</span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"parameters"</span>: t.parameters,</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> t <span class="kw">in</span> <span class="va">self</span>._tools.values()</span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-36" class="code-annotation-target"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> call(<span class="va">self</span>, name: <span class="bu">str</span>, arguments: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Execute the named tool with JSON-encoded arguments."""</span></span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> name <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>._tools:</span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ss">f"Error: unknown tool '</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">'"</span></span>
+<span id="annotated-cell-1-40"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a>        kwargs <span class="op">=</span> json.loads(arguments)</span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> <span class="va">self</span>._tools[name].fn(<span class="op">**</span>kwargs)</span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> json.dumps(result) <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(result, <span class="bu">str</span>) <span class="cf">else</span> result</span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="annotated-cell-1-45"><a href="#annotated-cell-1-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ss">f"Error executing </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="22" data-code-annotation="1"><code>get_schema</code> produces the exact format the OpenAI <code>tools</code> parameter expects — a list of objects each with <code>type: "function"</code> and a nested <code>function</code> dict containing <code>name</code>, <code>description</code>, and <code>parameters</code> (JSON Schema).</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="36" data-code-annotation="2"><code>call</code> deserializes the JSON-encoded <code>arguments</code> string that the model emits, invokes the Python callable, and serializes the result back to a string for the <code>tool</code> role message.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We register four financial tools. The corpus from <a href="../../notebooks/prep/03-rag-concepts.html">notebook 03</a> serves as the filing database:</p>
+<div id="f2a3b4c5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The 10-sentence financial corpus, keyed by section</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>FILING_SECTIONS <span class="op">=</span> {</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"interest_rate_risk"</span>: <span class="st">"Interest rate risk represents one of the most significant market risks facing the firm. A 100 basis point increase in interest rates would reduce the fair value of our fixed-rate debt portfolio by approximately $2.3 billion."</span>,</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"credit_risk"</span>: <span class="st">"Credit risk arises from the potential that a counterparty will fail to perform its obligations. We manage credit risk through diversification, collateral requirements, and credit limits by counterparty."</span>,</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"operational_risk"</span>: <span class="st">"Operational risk includes the risk of loss resulting from inadequate or failed internal processes, people, systems, or external events, including cybersecurity threats and technology failures."</span>,</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"net_revenues"</span>: <span class="st">"Net revenues for the fiscal year were $47.4 billion, an increase of 8</span><span class="sc">% c</span><span class="st">ompared to the prior year. The increase was driven primarily by higher net interest income reflecting the rising interest rate environment."</span>,</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"investment_banking"</span>: <span class="st">"Investment banking revenues decreased 23% to $6.1 billion, reflecting lower advisory fees amid reduced M&amp;A activity and a challenging environment for equity and debt underwriting."</span>,</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"return_on_equity"</span>: <span class="st">"Return on equity for the year was 12.4%, compared to 15.1</span><span class="sc">% i</span><span class="st">n the prior year. Book value per share increased to $312.50, up from $290.20."</span>,</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cet1"</span>: <span class="st">"Our Common Equity Tier 1 (CET1) capital ratio was 14.8% at year-end, well above the regulatory minimum of 4.5% and our internal target of 13%."</span>,</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lcr"</span>: <span class="st">"We maintain a liquidity coverage ratio (LCR) of 128%, exceeding the regulatory requirement of 100%. Our high-quality liquid assets totaled $280 billion at year-end."</span>,</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guidance"</span>: <span class="st">"Looking ahead to fiscal 2025, management expects continued revenue growth in the range of 4-6%, supported by a stable rate environment and improving capital markets activity."</span>,</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shareholder_returns"</span>: <span class="st">"We plan to return $8 billion to shareholders through dividends and share repurchases in fiscal 2025, subject to regulatory approval and market conditions."</span>,</span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_filing_excerpt(ticker: <span class="bu">str</span>, section: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Retrieve a passage from the 10-K filing for the given section."""</span></span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>    section <span class="op">=</span> section.lower().replace(<span class="st">" "</span>, <span class="st">"_"</span>)</span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> section <span class="kw">in</span> FILING_SECTIONS:</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"[</span><span class="sc">{</span>ticker<span class="sc">}</span><span class="ss"> 10-K] </span><span class="sc">{</span>FILING_SECTIONS[section]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>    available <span class="op">=</span> <span class="bu">list</span>(FILING_SECTIONS.keys())</span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"Section '</span><span class="sc">{</span>section<span class="sc">}</span><span class="ss">' not found. Available: </span><span class="sc">{</span>available<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_var(</span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>    portfolio_value: <span class="bu">float</span>,</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>    volatility: <span class="bu">float</span>,</span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>    confidence: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute parametric Value at Risk. VaR = portfolio_value * volatility * z_alpha."""</span></span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-32" class="code-annotation-target"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> norm.ppf(confidence)</span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>    var <span class="op">=</span> portfolio_value <span class="op">*</span> volatility <span class="op">*</span> z</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">"portfolio_value"</span>: portfolio_value,</span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">"volatility"</span>: volatility,</span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">"confidence"</span>: confidence,</span>
+<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>        <span class="st">"z_alpha"</span>: <span class="bu">round</span>(z, <span class="dv">4</span>),</span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">"var"</span>: <span class="bu">round</span>(var, <span class="dv">2</span>),</span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">"var_pct"</span>: <span class="bu">round</span>(var <span class="op">/</span> portfolio_value <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>),</span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_bond_price(</span>
+<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>    face_value: <span class="bu">float</span>,</span>
+<span id="annotated-cell-2-46"><a href="#annotated-cell-2-46" aria-hidden="true" tabindex="-1"></a>    coupon_rate: <span class="bu">float</span>,</span>
+<span id="annotated-cell-2-47"><a href="#annotated-cell-2-47" aria-hidden="true" tabindex="-1"></a>    ytm: <span class="bu">float</span>,</span>
+<span id="annotated-cell-2-48"><a href="#annotated-cell-2-48" aria-hidden="true" tabindex="-1"></a>    periods: <span class="bu">int</span>,</span>
+<span id="annotated-cell-2-49"><a href="#annotated-cell-2-49" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-2-50"><a href="#annotated-cell-2-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Price a bond using the standard discounted cash flow formula."""</span></span>
+<span id="annotated-cell-2-51"><a href="#annotated-cell-2-51" aria-hidden="true" tabindex="-1"></a>    coupon <span class="op">=</span> face_value <span class="op">*</span> coupon_rate</span>
+<span id="annotated-cell-2-52"><a href="#annotated-cell-2-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Price = sum of discounted coupons + discounted face value</span></span>
+<span id="annotated-cell-2-53"><a href="#annotated-cell-2-53" aria-hidden="true" tabindex="-1"></a>    pv_coupons <span class="op">=</span> <span class="bu">sum</span>(coupon <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> ytm) <span class="op">**</span> t <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, periods <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="annotated-cell-2-54"><a href="#annotated-cell-2-54" aria-hidden="true" tabindex="-1"></a>    pv_face <span class="op">=</span> face_value <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> ytm) <span class="op">**</span> periods</span>
+<span id="annotated-cell-2-55"><a href="#annotated-cell-2-55" aria-hidden="true" tabindex="-1"></a>    price <span class="op">=</span> pv_coupons <span class="op">+</span> pv_face</span>
+<span id="annotated-cell-2-56"><a href="#annotated-cell-2-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="annotated-cell-2-57"><a href="#annotated-cell-2-57" aria-hidden="true" tabindex="-1"></a>        <span class="st">"face_value"</span>: face_value,</span>
+<span id="annotated-cell-2-58"><a href="#annotated-cell-2-58" aria-hidden="true" tabindex="-1"></a>        <span class="st">"coupon_rate"</span>: coupon_rate,</span>
+<span id="annotated-cell-2-59"><a href="#annotated-cell-2-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ytm"</span>: ytm,</span>
+<span id="annotated-cell-2-60"><a href="#annotated-cell-2-60" aria-hidden="true" tabindex="-1"></a>        <span class="st">"periods"</span>: periods,</span>
+<span id="annotated-cell-2-61"><a href="#annotated-cell-2-61" aria-hidden="true" tabindex="-1"></a>        <span class="st">"price"</span>: <span class="bu">round</span>(price, <span class="dv">2</span>),</span>
+<span id="annotated-cell-2-62"><a href="#annotated-cell-2-62" aria-hidden="true" tabindex="-1"></a>        <span class="st">"premium_discount"</span>: <span class="bu">round</span>(price <span class="op">-</span> face_value, <span class="dv">2</span>),</span>
+<span id="annotated-cell-2-63"><a href="#annotated-cell-2-63" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-2-64"><a href="#annotated-cell-2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-65"><a href="#annotated-cell-2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-66"><a href="#annotated-cell-2-66" aria-hidden="true" tabindex="-1"></a>REGULATORY_THRESHOLDS <span class="op">=</span> {</span>
+<span id="annotated-cell-2-67"><a href="#annotated-cell-2-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cet1"</span>: {<span class="st">"minimum"</span>: <span class="fl">0.045</span>, <span class="st">"description"</span>: <span class="st">"Common Equity Tier 1 capital ratio minimum"</span>},</span>
+<span id="annotated-cell-2-68"><a href="#annotated-cell-2-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lcr"</span>: {<span class="st">"minimum"</span>: <span class="fl">1.00</span>, <span class="st">"description"</span>: <span class="st">"Liquidity Coverage Ratio minimum"</span>},</span>
+<span id="annotated-cell-2-69"><a href="#annotated-cell-2-69" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tier1"</span>: {<span class="st">"minimum"</span>: <span class="fl">0.060</span>, <span class="st">"description"</span>: <span class="st">"Tier 1 capital ratio minimum"</span>},</span>
+<span id="annotated-cell-2-70"><a href="#annotated-cell-2-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">"total_capital"</span>: {<span class="st">"minimum"</span>: <span class="fl">0.080</span>, <span class="st">"description"</span>: <span class="st">"Total capital ratio minimum"</span>},</span>
+<span id="annotated-cell-2-71"><a href="#annotated-cell-2-71" aria-hidden="true" tabindex="-1"></a>    <span class="st">"leverage"</span>: {<span class="st">"minimum"</span>: <span class="fl">0.030</span>, <span class="st">"description"</span>: <span class="st">"Leverage ratio minimum"</span>},</span>
+<span id="annotated-cell-2-72"><a href="#annotated-cell-2-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-2-73"><a href="#annotated-cell-2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-74"><a href="#annotated-cell-2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-75"><a href="#annotated-cell-2-75" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lookup_regulatory_threshold(metric_name: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-2-76"><a href="#annotated-cell-2-76" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return the regulatory minimum for a given capital or liquidity metric."""</span></span>
+<span id="annotated-cell-2-77"><a href="#annotated-cell-2-77" aria-hidden="true" tabindex="-1"></a>    key <span class="op">=</span> metric_name.lower().replace(<span class="st">" "</span>, <span class="st">"_"</span>).replace(<span class="st">"-"</span>, <span class="st">"_"</span>)</span>
+<span id="annotated-cell-2-78"><a href="#annotated-cell-2-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key <span class="kw">in</span> REGULATORY_THRESHOLDS:</span>
+<span id="annotated-cell-2-79"><a href="#annotated-cell-2-79" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> REGULATORY_THRESHOLDS[key]</span>
+<span id="annotated-cell-2-80"><a href="#annotated-cell-2-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"error"</span>: <span class="ss">f"Unknown metric '</span><span class="sc">{</span>metric_name<span class="sc">}</span><span class="ss">'. Known: </span><span class="sc">{</span><span class="bu">list</span>(REGULATORY_THRESHOLDS.keys())<span class="sc">}</span><span class="ss">"</span>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="32" data-code-annotation="1">The <span class="math inline">z_{\alpha}</span> quantile of the standard normal is the number of standard deviations corresponding to the confidence level <span class="math inline">\alpha</span>. For <span class="math inline">\alpha = 0.95</span>, <span class="math inline">z_{0.95} \approx 1.645</span>. The parametric VaR formula assumes portfolio returns are normally distributed — a simplification that underestimates tail risk for heavy-tailed financial returns but is standard for back-of-envelope calculations.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We register all four tools with their JSON Schema parameter definitions:</p>
+<div id="c5d6e7f8" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> ToolRegistry()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>registry.register(Tool(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"get_filing_excerpt"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">"Retrieve a passage from a company's 10-K SEC filing by section name."</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>{</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"properties"</span>: {</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ticker"</span>: {<span class="st">"type"</span>: <span class="st">"string"</span>, <span class="st">"description"</span>: <span class="st">"Stock ticker symbol, e.g. GS"</span>},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"section"</span>: {</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"type"</span>: <span class="st">"string"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                <span class="st">"description"</span>: <span class="st">"Section name: cet1, lcr, investment_banking, net_revenues, guidance, return_on_equity, interest_rate_risk, credit_risk, operational_risk, shareholder_returns"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"required"</span>: [<span class="st">"ticker"</span>, <span class="st">"section"</span>],</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    fn<span class="op">=</span>get_filing_excerpt,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>registry.register(Tool(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"calculate_var"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">"Calculate parametric Value at Risk (VaR) for a portfolio."</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>{</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"properties"</span>: {</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            <span class="st">"portfolio_value"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Portfolio value in USD"</span>},</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            <span class="st">"volatility"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Annual volatility as a decimal (e.g. 0.15 for 15%)"</span>},</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            <span class="st">"confidence"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Confidence level, default 0.95"</span>},</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"required"</span>: [<span class="st">"portfolio_value"</span>, <span class="st">"volatility"</span>],</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    fn<span class="op">=</span>calculate_var,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>registry.register(Tool(</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"get_bond_price"</span>,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">"Price a fixed-coupon bond given face value, coupon rate, yield to maturity, and number of periods."</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>{</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">"properties"</span>: {</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            <span class="st">"face_value"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>},</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            <span class="st">"coupon_rate"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Annual coupon as decimal (e.g. 0.05 for 5%)"</span>},</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ytm"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Yield to maturity as decimal"</span>},</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            <span class="st">"periods"</span>: {<span class="st">"type"</span>: <span class="st">"integer"</span>, <span class="st">"description"</span>: <span class="st">"Number of coupon periods"</span>},</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"required"</span>: [<span class="st">"face_value"</span>, <span class="st">"coupon_rate"</span>, <span class="st">"ytm"</span>, <span class="st">"periods"</span>],</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    fn<span class="op">=</span>get_bond_price,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>registry.register(Tool(</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"lookup_regulatory_threshold"</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    description<span class="op">=</span><span class="st">"Look up the regulatory minimum for a capital or liquidity metric (CET1, LCR, Tier1, etc.)."</span>,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>{</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">"properties"</span>: {</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>            <span class="st">"metric_name"</span>: {<span class="st">"type"</span>: <span class="st">"string"</span>, <span class="st">"description"</span>: <span class="st">"Metric name, e.g. cet1, lcr, leverage"</span>},</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">"required"</span>: [<span class="st">"metric_name"</span>],</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    fn<span class="op">=</span>lookup_regulatory_threshold,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Registered </span><span class="sc">{</span><span class="bu">len</span>(registry._tools)<span class="sc">}</span><span class="ss"> tools: </span><span class="sc">{</span><span class="bu">list</span>(registry._tools.keys())<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-react-loop" class="level2">
+<h2 class="anchored" data-anchor-id="the-react-loop">The ReAct Loop</h2>
+<p>The loop is a while-loop over the OpenAI chat completion API. On each iteration, we call the API with the current message history and the tool schemas. If the model wants to call a tool (<code>finish_reason == "tool_calls"</code>), we execute each requested tool and append the results. If the model is ready to answer (<code>finish_reason == "stop"</code>), we return the final content. If we exceed <code>max_steps</code>, we raise <code>AgentTimeoutError</code>.</p>
+<div id="f8a9b0c1" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AgentTimeoutError(<span class="pp">Exception</span>):</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">pass</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_agent(</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>    question: <span class="bu">str</span>,</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>    registry: ToolRegistry,</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>    llm: LLMClient,</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>    max_steps: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>    verbose: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run the ReAct agent loop until the model emits a final answer."""</span></span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> openai.OpenAI()</span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"You are a financial analyst assistant. "</span></span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Use the available tools to gather information, then provide a concise, "</span></span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>                <span class="st">"cited answer. Always verify regulatory thresholds before stating compliance."</span></span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: question},</span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(max_steps):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-27" class="code-annotation-target"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a>        resp <span class="op">=</span> client.chat.completions.create(</span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a>            model<span class="op">=</span>llm.model,</span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>            messages<span class="op">=</span>messages,</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>            tools<span class="op">=</span>registry.get_schema(),</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>            temperature<span class="op">=</span>llm.temperature,</span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>        msg <span class="op">=</span> resp.choices[<span class="dv">0</span>].message</span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>        finish <span class="op">=</span> resp.choices[<span class="dv">0</span>].finish_reason</span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> resp.usage:</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>            llm._in <span class="op">+=</span> resp.usage.prompt_tokens</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>            llm._out <span class="op">+=</span> resp.usage.completion_tokens</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-40" class="code-annotation-target"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> finish <span class="op">==</span> <span class="st">"stop"</span>:</span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> msg.content</span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> finish <span class="op">==</span> <span class="st">"tool_calls"</span>:</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>            messages.append(msg)  <span class="co"># append assistant message with tool_calls</span></span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> verbose:</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> tc <span class="kw">in</span> msg.tool_calls:</span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"  [step </span><span class="sc">{</span>step<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>tc<span class="sc">.</span>function<span class="sc">.</span>name<span class="sc">}</span><span class="ss">(</span><span class="sc">{</span>tc<span class="sc">.</span>function<span class="sc">.</span>arguments<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-49" class="code-annotation-target"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> tool_call <span class="kw">in</span> msg.tool_calls:</span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>                result <span class="op">=</span> registry.call(</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>                    tool_call.function.name,</span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a>                    tool_call.function.arguments,</span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> verbose:</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"           → </span><span class="sc">{</span>result[:<span class="dv">120</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>                messages.append({</span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"role"</span>: <span class="st">"tool"</span>,</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"tool_call_id"</span>: tool_call.<span class="bu">id</span>,</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"content"</span>: result,</span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> AgentTimeoutError(<span class="ss">f"Agent exceeded </span><span class="sc">{</span>max_steps<span class="sc">}</span><span class="ss"> steps without finishing."</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="27" data-code-annotation="1">We call <code>client.chat.completions.create</code> directly (not <code>llm.complete</code>) so we can pass the <code>tools</code> parameter. The <code>llm</code> object is still used for token accounting.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="40" data-code-annotation="2"><code>finish_reason == "stop"</code> means the model is satisfied with the information it has gathered and is ready to produce the final answer. We return <code>msg.content</code> directly.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="49" data-code-annotation="3">A single model response can request multiple tool calls in parallel — the API returns them as a list. We execute each and append all results before calling the model again.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Running the agent on a compliance check query with verbose trace:</p>
+<div id="c1d2e3f4" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Q: Is our CET1 ratio compliant with regulatory requirements?"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> run_agent(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    question<span class="op">=</span><span class="st">"Is our CET1 ratio compliant with regulatory requirements?"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    registry<span class="op">=</span>registry,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">=</span>llm,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Final answer:"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="in-context-memory" class="level2">
+<h2 class="anchored" data-anchor-id="in-context-memory">In-Context Memory</h2>
+<p>The agent accumulates context across steps because all previous messages are included in every call to the API. This is <strong>in-context memory</strong>: the model effectively “remembers” everything in the current conversation because it literally re-reads it on each step. We demonstrate multi-step accumulation with a two-part question where the second answer depends on the first:</p>
+<div id="f4a5b6c7" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A single agent call that requires two tool invocations whose results combine</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> run_agent(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    question<span class="op">=</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"How did investment banking revenues perform this year, "</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"and what is our LCR headroom above the regulatory minimum?"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    registry<span class="op">=</span>registry,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">=</span>llm,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Final answer:"</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Why in-context memory is fragile at scale.</strong> The context window grows by one assistant message + one or more tool messages per step. For a 10-step agent with average tool result sizes of 200 tokens, the final call sees roughly 2,000 extra tokens compared to the first. At <span class="math inline">k</span> steps, cost grows roughly as <span class="math inline">O(k^2)</span> because each subsequent call pays for all previous messages. Additionally:</p>
+<ul>
+<li>If the agent crashes mid-run, the context is lost and it must restart from step 1.</li>
+<li>The context limit (128k for GPT-4o) caps the maximum conversation length.</li>
+<li>Long contexts degrade model attention on earlier messages.</li>
+</ul>
+<p>LangGraph in <a href="../../notebooks/prep/08-agents-langgraph.html">notebook 08</a> solves these problems with a typed, persistent state object that lives outside the context window.</p>
+</section>
+<section id="financial-agent-demo" class="level2">
+<h2 class="anchored" data-anchor-id="financial-agent-demo">Financial Agent Demo</h2>
+<p>We run all three multi-step financial queries to validate the full agent loop:</p>
+<div id="d8e9f0a1" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> [</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Is our CET1 ratio compliant with regulatory requirements?"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What is the VaR for a $10M portfolio with 15% annual volatility at 95</span><span class="sc">% c</span><span class="st">onfidence?"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"How did investment banking revenues perform and what is our LCR headroom?"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> q <span class="kw">in</span> queries:</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        ans <span class="op">=</span> run_agent(q, registry<span class="op">=</span>registry, llm<span class="op">=</span>llm, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>ans<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> AgentTimeoutError <span class="im">as</span> e:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"TIMEOUT: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total API cost: $</span><span class="sc">{</span>llm<span class="sc">.</span>total_cost<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Add a <code>search_news</code> tool.</strong> Implement <code>search_news(ticker: str) -&gt; str</code> that returns a mock news headline (e.g.&nbsp;<code>"GS Q3 earnings beat consensus by 8%"</code>). Register it in the tool registry and run the agent on: “What is the latest news about GS and how do their revenues compare year-over-year?”</p></li>
+<li><p><strong>Implement a step counter logger.</strong> Modify <code>run_agent</code> to accept an optional <code>log: list</code> parameter. On each tool invocation, append a dict <code>{"step": N, "tool": name, "args": kwargs, "result": result}</code> to the log. After the agent finishes, print the log as a numbered trace.</p></li>
+<li><p><strong>Detect repeated tool calls.</strong> Modify <code>run_agent</code> to track the last tool call per tool name. If the model calls the same tool with the identical arguments twice consecutively, raise a <code>AgentLoopError</code> with a descriptive message. This prevents infinite loops in cases where the model re-calls a tool after receiving an error result it cannot handle.</p></li>
+</ol>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/prep/04-eval-concepts.html" class="pagination-link" aria-label="04. LLM Evaluation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">04. LLM Evaluation</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/prep/06-observability.html" class="pagination-link" aria-label="06. Observability">
+        <span class="nav-page-text">06. Observability</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

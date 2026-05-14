@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Scaling Inference Compute with Search and Self-Consistency – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/llm/15-reasoning-model.html" rel="next">
+<link href="../../notebooks/llm/13-inference.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/14-inference-time-scaling.html">14. Inference-Time Scaling</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-inference-time-compute-tradeoff" id="toc-the-inference-time-compute-tradeoff" class="nav-link active" data-scroll-target="#the-inference-time-compute-tradeoff">The Inference-Time Compute Tradeoff</a></li>
+  <li><a href="#best-of-n-sampling" id="toc-best-of-n-sampling" class="nav-link" data-scroll-target="#best-of-n-sampling">Best-of-N Sampling</a></li>
+  <li><a href="#beam-search" id="toc-beam-search" class="nav-link" data-scroll-target="#beam-search">Beam Search</a></li>
+  <li><a href="#self-consistency" id="toc-self-consistency" class="nav-link" data-scroll-target="#self-consistency">Self-Consistency</a></li>
+  <li><a href="#process-reward-models" id="toc-process-reward-models" class="nav-link" data-scroll-target="#process-reward-models">Process Reward Models</a></li>
+  <li><a href="#tree-search" id="toc-tree-search" class="nav-link" data-scroll-target="#tree-search">Tree Search</a></li>
+  <li><a href="#compute-quality-tradeoffs" id="toc-compute-quality-tradeoffs" class="nav-link" data-scroll-target="#compute-quality-tradeoffs">Compute-Quality Tradeoffs</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/14-inference-time-scaling.html">14. Inference-Time Scaling</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Scaling Inference Compute with Search and Self-Consistency</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Training-time scaling — more parameters, more data, more compute — has a well-understood empirical law (Chinchilla). Inference-time scaling is newer and less charted: instead of a fixed forward pass, you spend more compute at inference to get better answers. The key insight is that for hard reasoning tasks, a model’s best answer under many attempts is far better than its first answer. This notebook covers the spectrum of inference-time scaling techniques: from simple <strong>best-of-N sampling</strong> to <strong>beam search</strong>, <strong>self-consistency</strong>, <strong>process reward models</strong>, and <strong>Monte Carlo Tree Search</strong> — all of which trade more inference compute for higher accuracy.</p>
+<section id="the-inference-time-compute-tradeoff" class="level2">
+<h2 class="anchored" data-anchor-id="the-inference-time-compute-tradeoff">The Inference-Time Compute Tradeoff</h2>
+<p>Given a fixed model, we can improve output quality by spending more compute at inference time. The quality improvement depends on:</p>
+<ul>
+<li><strong>What we sample:</strong> more diverse exploration vs.&nbsp;concentrated high-quality paths.</li>
+<li><strong>How we score:</strong> outcome rewards (final answer correct?) vs.&nbsp;process rewards (each reasoning step correct?).</li>
+<li><strong>How we search:</strong> independent samples, beam search, tree search.</li>
+</ul>
+<p>The fundamental question: for a fixed compute budget, is it better to train a larger model for one forward pass, or train a smaller model and use inference-time scaling? Recent work on reasoning models (DeepSeek-R1, OpenAI o1) shows that for math and coding tasks, the answer increasingly favors inference-time scaling.</p>
+</section>
+<section id="best-of-n-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="best-of-n-sampling">Best-of-N Sampling</h2>
+<p>The simplest inference-time scaling strategy: sample <span class="math inline">N</span> independent responses from the model, score each with a reward model or outcome verifier, and return the highest-scoring one.</p>
+<p><span class="math display">\text{best-of-N} = \arg\max_{y_i} r(x, y_i), \quad y_i \sim \pi(\cdot \mid x).</span></p>
+<p>For pass@1 accuracy <span class="math inline">p</span>, best-of-N achieves expected accuracy:</p>
+<p><span class="math display">P(\text{at least one correct among } N) = 1 - (1 - p)^N.</span></p>
+<p>For <span class="math inline">p = 0.3</span> and <span class="math inline">N = 10</span>: <span class="math inline">1 - 0.7^{10} \approx 0.97</span>. The model goes from 30% to 97% accuracy with 10× the inference compute — a dramatic improvement. The cost: you need a reliable way to identify the correct answer (a verifier or reward model).</p>
+<div id="cell-5" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> best_of_n(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    reward_model,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    n: <span class="bu">int</span> <span class="op">=</span> <span class="dv">8</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">256</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">list</span>[<span class="bu">float</span>]]:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sample N responses and return the highest-reward one.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">        model: language model for generation.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">        reward_model: scalar reward model; takes tokenized (prompt + response).</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer with encode/decode.</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: input prompt string.</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">        n: number of candidate responses to sample.</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">        max_new_tokens: max generation length per candidate.</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">        temperature: sampling temperature.</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">        best_response: the response string with the highest reward.</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">        rewards: list of rewards for all n candidates.</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(model.parameters()).device</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    prompt_ids <span class="op">=</span> torch.tensor(</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        [tokenizer.encode(prompt)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    candidates <span class="op">=</span> []</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> model.generate(</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>                prompt_ids,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>                max_new_tokens<span class="op">=</span>max_new_tokens,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>                temperature<span class="op">=</span>temperature,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>                do_sample<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            )[<span class="dv">0</span>, prompt_ids.size(<span class="dv">1</span>):]</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            candidates.append(output.cpu())</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Score all candidates</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    rewards <span class="op">=</span> []</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    reward_model.<span class="bu">eval</span>()</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> resp_ids <span class="kw">in</span> candidates:</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>            full_ids <span class="op">=</span> torch.cat([prompt_ids[<span class="dv">0</span>].cpu(), resp_ids]).unsqueeze(<span class="dv">0</span>).to(device)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>            reward <span class="op">=</span> reward_model(full_ids).squeeze().item()</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>            rewards.append(reward)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    best_idx <span class="op">=</span> <span class="bu">int</span>(np.argmax(rewards))</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    best_response <span class="op">=</span> tokenizer.decode(candidates[best_idx].tolist())</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best_response, rewards</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pass_at_k_curve(base_accuracy: <span class="bu">float</span>, n_values: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Theoretical pass@1 accuracy as a function of best-of-N.</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="co">        base_accuracy: single-sample accuracy p.</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="co">        n_values: list of N values to evaluate.</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="co">        List of pass@1 accuracies for each N.</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [<span class="dv">1</span> <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> base_accuracy) <span class="op">**</span> n <span class="cf">for</span> n <span class="kw">in</span> n_values]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="beam-search" class="level2">
+<h2 class="anchored" data-anchor-id="beam-search">Beam Search</h2>
+<p>Best-of-N generates <span class="math inline">N</span> independent samples. Beam search maintains <span class="math inline">B</span> <strong>beams</strong> — partial sequences — and at each step extends each beam, scores the extensions, and keeps the top-<span class="math inline">B</span> partial sequences. Unlike independent sampling, beam search concentrates exploration on the most promising prefixes.</p>
+<p>Beam search maximizes:</p>
+<p><span class="math display">\hat{y} = \arg\max_{y} \sum_{t=1}^{|y|} \log p(y_t \mid x, y_{&lt;t}) / |y|^\alpha,</span></p>
+<p>where <span class="math inline">\alpha</span> is a length penalty to prevent shorter sequences from being favored.</p>
+<p>For language model generation, beam search is <mark>mode-seeking</mark>: it finds the highest-probability completion. This is often bad for open-ended generation (produces repetitive, generic text) but good for constrained tasks with clear correct answers (translation, math, code).</p>
+<div id="cell-7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> beam_search(</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>    beam_width: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>,</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>    max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">128</span>,</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    length_penalty: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span>]]:</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Beam search for language model generation.</span></span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a><span class="co">        model: language model.</span></span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer with encode/decode and eos_id attribute.</span></span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: input prompt string.</span></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="co">        beam_width: number of beams to maintain.</span></span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a><span class="co">        max_new_tokens: maximum generation length.</span></span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a><span class="co">        length_penalty: exponent for length normalization (0 = no penalty).</span></span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a><span class="co">        List of (text, score) tuples sorted by descending score,</span></span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a><span class="co">        one per completed beam.</span></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(model.parameters()).device</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>    prompt_ids <span class="op">=</span> tokenizer.encode(prompt)</span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>    prompt_len <span class="op">=</span> <span class="bu">len</span>(prompt_ids)</span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Beams: list of (token_ids_list, cumulative_log_prob)</span></span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>    beams <span class="op">=</span> [(prompt_ids[:], <span class="fl">0.0</span>)]</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>    completed <span class="op">=</span> []</span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(max_new_tokens):</span>
+<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> beams:</span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a>            all_candidates <span class="op">=</span> []</span>
+<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> ids, score <span class="kw">in</span> beams:</span>
+<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a>                input_ids <span class="op">=</span> torch.tensor([ids], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device)</span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a>                logits <span class="op">=</span> model(input_ids)[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>, :]        <span class="co"># (V,)</span></span>
+<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>                log_probs <span class="op">=</span> F.log_softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)   <span class="co"># (V,)</span></span>
+<span id="annotated-cell-2-46"><a href="#annotated-cell-2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-47"><a href="#annotated-cell-2-47" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Expand: consider top beam_width extensions</span></span>
+<span id="annotated-cell-2-48"><a href="#annotated-cell-2-48" aria-hidden="true" tabindex="-1"></a>                topk_log_probs, topk_ids <span class="op">=</span> log_probs.topk(beam_width)</span>
+<span id="annotated-cell-2-49"><a href="#annotated-cell-2-49" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> log_p, next_id <span class="kw">in</span> <span class="bu">zip</span>(topk_log_probs.tolist(), topk_ids.tolist()):</span>
+<span id="annotated-cell-2-50"><a href="#annotated-cell-2-50" aria-hidden="true" tabindex="-1"></a>                    new_ids <span class="op">=</span> ids <span class="op">+</span> [next_id]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-51" class="code-annotation-target"><a href="#annotated-cell-2-51" aria-hidden="true" tabindex="-1"></a>                    new_score <span class="op">=</span> score <span class="op">+</span> log_p</span>
+<span id="annotated-cell-2-52"><a href="#annotated-cell-2-52" aria-hidden="true" tabindex="-1"></a>                    all_candidates.append((new_ids, new_score))</span>
+<span id="annotated-cell-2-53"><a href="#annotated-cell-2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-54"><a href="#annotated-cell-2-54" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Keep top beam_width by length-normalized score</span></span>
+<span id="annotated-cell-2-55"><a href="#annotated-cell-2-55" aria-hidden="true" tabindex="-1"></a>            <span class="kw">def</span> normalized_score(item):</span>
+<span id="annotated-cell-2-56"><a href="#annotated-cell-2-56" aria-hidden="true" tabindex="-1"></a>                ids, score <span class="op">=</span> item</span>
+<span id="annotated-cell-2-57"><a href="#annotated-cell-2-57" aria-hidden="true" tabindex="-1"></a>                response_len <span class="op">=</span> <span class="bu">len</span>(ids) <span class="op">-</span> prompt_len</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-58" class="code-annotation-target"><a href="#annotated-cell-2-58" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> score <span class="op">/</span> <span class="bu">max</span>(response_len, <span class="dv">1</span>) <span class="op">**</span> length_penalty</span>
+<span id="annotated-cell-2-59"><a href="#annotated-cell-2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-60"><a href="#annotated-cell-2-60" aria-hidden="true" tabindex="-1"></a>            all_candidates.sort(key<span class="op">=</span>normalized_score, reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-2-61"><a href="#annotated-cell-2-61" aria-hidden="true" tabindex="-1"></a>            beams <span class="op">=</span> []</span>
+<span id="annotated-cell-2-62"><a href="#annotated-cell-2-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> ids, score <span class="kw">in</span> all_candidates[:beam_width <span class="op">*</span> <span class="dv">2</span>]:</span>
+<span id="annotated-cell-2-63"><a href="#annotated-cell-2-63" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> ids[<span class="op">-</span><span class="dv">1</span>] <span class="op">==</span> tokenizer.eos_id <span class="kw">or</span> <span class="bu">len</span>(ids) <span class="op">-</span> prompt_len <span class="op">&gt;=</span> max_new_tokens:</span>
+<span id="annotated-cell-2-64"><a href="#annotated-cell-2-64" aria-hidden="true" tabindex="-1"></a>                    completed.append((ids, score))</span>
+<span id="annotated-cell-2-65"><a href="#annotated-cell-2-65" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="annotated-cell-2-66"><a href="#annotated-cell-2-66" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="bu">len</span>(beams) <span class="op">&lt;</span> beam_width:</span>
+<span id="annotated-cell-2-67"><a href="#annotated-cell-2-67" aria-hidden="true" tabindex="-1"></a>                        beams.append((ids, score))</span>
+<span id="annotated-cell-2-68"><a href="#annotated-cell-2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-69"><a href="#annotated-cell-2-69" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add any remaining active beams to completed</span></span>
+<span id="annotated-cell-2-70"><a href="#annotated-cell-2-70" aria-hidden="true" tabindex="-1"></a>    completed.extend(beams)</span>
+<span id="annotated-cell-2-71"><a href="#annotated-cell-2-71" aria-hidden="true" tabindex="-1"></a>    completed.sort(key<span class="op">=</span>normalized_score, reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-2-72"><a href="#annotated-cell-2-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-73"><a href="#annotated-cell-2-73" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> []</span>
+<span id="annotated-cell-2-74"><a href="#annotated-cell-2-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ids, score <span class="kw">in</span> completed[:beam_width]:</span>
+<span id="annotated-cell-2-75"><a href="#annotated-cell-2-75" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> tokenizer.decode(ids[prompt_len:])</span>
+<span id="annotated-cell-2-76"><a href="#annotated-cell-2-76" aria-hidden="true" tabindex="-1"></a>        response_len <span class="op">=</span> <span class="bu">len</span>(ids) <span class="op">-</span> prompt_len</span>
+<span id="annotated-cell-2-77"><a href="#annotated-cell-2-77" aria-hidden="true" tabindex="-1"></a>        norm_score <span class="op">=</span> score <span class="op">/</span> <span class="bu">max</span>(response_len, <span class="dv">1</span>) <span class="op">**</span> length_penalty</span>
+<span id="annotated-cell-2-78"><a href="#annotated-cell-2-78" aria-hidden="true" tabindex="-1"></a>        results.append((text, norm_score))</span>
+<span id="annotated-cell-2-79"><a href="#annotated-cell-2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-80"><a href="#annotated-cell-2-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="51" data-code-annotation="1">Cumulative log-probability: the score of a beam is the sum of log-probabilities of all tokens generated so far.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="58" data-code-annotation="2">Length normalization: divide by <code>response_len^alpha</code> to prevent the model from preferring short completions (which accumulate less negative log-probability).</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="self-consistency" class="level2">
+<h2 class="anchored" data-anchor-id="self-consistency">Self-Consistency</h2>
+<p>Self-consistency <span class="citation" data-cites="wang2023selfconsistency">(<a href="#ref-wang2023selfconsistency" role="doc-biblioref">Wang et al. 2023</a>)</span> is an inference-time technique for problems with verifiable answers: sample <span class="math inline">N</span> reasoning chains and return the answer that appears most frequently. Unlike best-of-N with a reward model, self-consistency requires no external scorer — it relies on the statistical regularity that correct reasoning paths are more likely to converge on the same answer.</p>
+<p>For math problems: generate <span class="math inline">N</span> solutions, extract the final numerical answer from each, and return the majority vote.</p>
+<p>This works because: - Incorrect solutions are diverse (many ways to be wrong) - Correct solutions are concentrated (few ways to arrive at the right answer)</p>
+<p>Self-consistency is <mark>most effective when the model has moderate accuracy</mark> (20%–80% per sample). At very high accuracy, best-of-1 is sufficient. At very low accuracy, self-consistency also fails because there is no correct answer to converge on.</p>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_final_answer(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extract a numeric or symbolic final answer from a reasoning chain.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Looks for patterns like 'the answer is X', 'X is the answer',</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    '= X', or the last standalone number in the text.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">        text: model-generated reasoning chain string.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">        Extracted answer string, or None if no answer found.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Try explicit answer patterns</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    patterns <span class="op">=</span> [</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span>(?:<span class="vs">the answer is</span><span class="cf">|</span><span class="vs">answer:</span><span class="cf">|</span><span class="vs">therefore,</span><span class="op">?</span><span class="cf">|</span><span class="vs">so,</span><span class="op">?</span>)<span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="ch">\-</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="vs">"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"=</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="ch">\-</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span><span class="kw">(</span><span class="pp">[</span><span class="ch">\-</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> patterns:</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        match <span class="op">=</span> re.search(pattern, text.lower().strip())</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> match:</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> match.group(<span class="dv">1</span>).strip()</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> self_consistency(</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    n: <span class="bu">int</span> <span class="op">=</span> <span class="dv">16</span>,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">512</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    extract_fn<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">dict</span>]:</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Self-consistency decoding: majority vote over N sampled solutions.</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">        model: language model.</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer.</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: input prompt.</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">        n: number of solutions to sample.</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">        max_new_tokens: max generation length per solution.</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">        temperature: sampling temperature.</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">        extract_fn: callable(text) -&gt; answer_str; defaults to extract_final_answer.</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">        majority_answer: the most common extracted answer, or None.</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">        info: dict with 'vote_counts', 'all_answers', 'all_solutions'.</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> extract_fn <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        extract_fn <span class="op">=</span> extract_final_answer</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(model.parameters()).device</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    prompt_ids <span class="op">=</span> torch.tensor(</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        [tokenizer.encode(prompt)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    all_solutions <span class="op">=</span> []</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    all_answers <span class="op">=</span> []</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> model.generate(</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>                prompt_ids,</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>                max_new_tokens<span class="op">=</span>max_new_tokens,</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>                temperature<span class="op">=</span>temperature,</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>                do_sample<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>            )[<span class="dv">0</span>, prompt_ids.size(<span class="dv">1</span>):]</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>            solution <span class="op">=</span> tokenizer.decode(output.tolist())</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>            all_solutions.append(solution)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>            all_answers.append(extract_fn(solution))</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    valid_answers <span class="op">=</span> [a <span class="cf">for</span> a <span class="kw">in</span> all_answers <span class="cf">if</span> a <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>]</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> valid_answers:</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>, {<span class="st">"vote_counts"</span>: {}, <span class="st">"all_answers"</span>: all_answers, <span class="st">"all_solutions"</span>: all_solutions}</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    vote_counts <span class="op">=</span> Counter(valid_answers)</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    majority_answer <span class="op">=</span> vote_counts.most_common(<span class="dv">1</span>)[<span class="dv">0</span>][<span class="dv">0</span>]</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> majority_answer, {</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>        <span class="st">"vote_counts"</span>: <span class="bu">dict</span>(vote_counts),</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>        <span class="st">"all_answers"</span>: all_answers,</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>        <span class="st">"all_solutions"</span>: all_solutions,</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="process-reward-models" class="level2">
+<h2 class="anchored" data-anchor-id="process-reward-models">Process Reward Models</h2>
+<p>Outcome reward models score the final answer. <strong>Process reward models (PRMs)</strong> score each individual reasoning step, providing a denser signal that can guide search more precisely.</p>
+<p>A PRM takes a partial reasoning chain as input and predicts the probability that the current step is correct, given the prompt and all previous steps:</p>
+<p><span class="math display">r_\text{PRM}(x, y_{1:t}) \in [0, 1].</span></p>
+<p>PRMs are trained on step-level annotations: human (or model-generated) labels marking each step as correct or incorrect. This is more expensive to collect than outcome labels but provides much richer training signal.</p>
+<p>In practice, a PRM can be implemented as a language model with a scalar head that is fine-tuned on step-level labels — essentially a per-step reward model rather than a per-response one.</p>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ProcessRewardModel(nn.Module):</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Reward model that scores individual reasoning steps.</span></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Takes a partial reasoning chain (prompt + steps so far) and</span></span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a><span class="co">    predicts a scalar reward for the most recent step.</span></span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a><span class="co">        base_model: language model backbone.</span></span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a><span class="co">        d_model: hidden dimension of the backbone.</span></span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, base_model: nn.Module, d_model: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base_model <span class="op">=</span> base_model</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-18" class="code-annotation-target"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reward_head <span class="op">=</span> nn.Linear(d_model, <span class="dv">1</span>)</span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, input_ids: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Score a partial reasoning chain.</span></span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a><span class="co">            input_ids: shape (B, T) — tokenized prompt + steps so far.</span></span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a><span class="co">            reward: shape (B,) — scalar score for the last step.</span></span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>        hidden <span class="op">=</span> <span class="va">self</span>.base_model(input_ids, return_hidden<span class="op">=</span><span class="va">True</span>)  <span class="co"># (B, T, d_model)</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-30" class="code-annotation-target"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        last_hidden <span class="op">=</span> hidden[:, <span class="op">-</span><span class="dv">1</span>, :]                            <span class="co"># (B, d_model)</span></span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.reward_head(last_hidden).squeeze(<span class="op">-</span><span class="dv">1</span>)          <span class="co"># (B,)</span></span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_reasoning_steps(</span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>    prm: ProcessRewardModel,</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>    steps: <span class="bu">list</span>[<span class="bu">str</span>],</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Score each step in a reasoning chain using the PRM.</span></span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a><span class="co">        prm: process reward model.</span></span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer.</span></span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: the original question prompt.</span></span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a><span class="co">        steps: list of reasoning step strings.</span></span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a><span class="co">        List of step scores, one per step.</span></span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(prm.parameters()).device</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>    prm.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> []</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>    accumulated <span class="op">=</span> prompt</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> step <span class="kw">in</span> steps:</span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>            accumulated <span class="op">=</span> accumulated <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> step</span>
+<span id="annotated-cell-4-63"><a href="#annotated-cell-4-63" aria-hidden="true" tabindex="-1"></a>            input_ids <span class="op">=</span> torch.tensor(</span>
+<span id="annotated-cell-4-64"><a href="#annotated-cell-4-64" aria-hidden="true" tabindex="-1"></a>                [tokenizer.encode(accumulated)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="annotated-cell-4-65"><a href="#annotated-cell-4-65" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-4-66"><a href="#annotated-cell-4-66" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> prm(input_ids).item()</span>
+<span id="annotated-cell-4-67"><a href="#annotated-cell-4-67" aria-hidden="true" tabindex="-1"></a>            scores.append(score)</span>
+<span id="annotated-cell-4-68"><a href="#annotated-cell-4-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-69"><a href="#annotated-cell-4-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scores</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="18" data-code-annotation="1">A single linear projection from the last hidden state to a scalar reward — the same architecture as the outcome reward model in <a href="../../notebooks/llm/09-preference-optimization.html">NB09</a>, but trained on step-level labels.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="30" data-code-annotation="2">The last token’s hidden state summarizes the full context — used as the representation for the current step.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="tree-search" class="level2">
+<h2 class="anchored" data-anchor-id="tree-search">Tree Search</h2>
+<p>Best-of-N and self-consistency generate complete solutions independently. Tree search integrates generation and evaluation more tightly: at each step, a partial solution is evaluated and the search explores the most promising branches, abandoning unlikely paths early.</p>
+<p><strong>Monte Carlo Tree Search (MCTS)</strong> adapted to language generation maintains a tree where each node is a partial reasoning chain. The four MCTS operations:</p>
+<ol type="1">
+<li><strong>Select:</strong> traverse the tree from the root using the UCB1 formula to balance exploration and exploitation.</li>
+<li><strong>Expand:</strong> generate one or more next steps from the selected node.</li>
+<li><strong>Simulate:</strong> run the partial chain to completion (or use the PRM score directly as a value estimate).</li>
+<li><strong>Backpropagate:</strong> update value estimates back up the tree.</li>
+</ol>
+<p><strong>Simpler variant: Lookahead search.</strong> At each step, generate <span class="math inline">k</span> candidate next tokens/sentences, score each with the PRM, pick the best, and repeat. This is a greedy tree search with depth 1 lookahead — much cheaper than full MCTS.</p>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field <span class="im">as</span> datafield</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SearchNode:</span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A node in the reasoning search tree.</span></span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Attributes:</span></span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a><span class="co">        steps: list of reasoning steps from root to this node.</span></span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a><span class="co">        score: cumulative PRM score.</span></span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a><span class="co">        visit_count: number of times this node was visited.</span></span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a><span class="co">        children: list of child nodes.</span></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a>    steps: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>    score: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>    visit_count: <span class="bu">int</span> <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a>    children: <span class="bu">list</span>[<span class="st">"SearchNode"</span>] <span class="op">=</span> datafield(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> depth(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.steps)</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> ucb1(<span class="va">self</span>, parent_visits: <span class="bu">int</span>, c: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.41</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""UCB1 score for tree traversal.</span></span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a><span class="co">            parent_visits: number of visits to the parent node.</span></span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a><span class="co">            c: exploration constant (sqrt(2) by default).</span></span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a><span class="co">            UCB1 value; higher = more worth exploring.</span></span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.visit_count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
+<span id="annotated-cell-5-35"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a>        exploitation <span class="op">=</span> <span class="va">self</span>.score <span class="op">/</span> <span class="va">self</span>.visit_count</span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a>        exploration <span class="op">=</span> c <span class="op">*</span> (np.log(parent_visits) <span class="op">/</span> <span class="va">self</span>.visit_count) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="annotated-cell-5-37"><a href="#annotated-cell-5-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> exploitation <span class="op">+</span> exploration</span>
+<span id="annotated-cell-5-38"><a href="#annotated-cell-5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-39"><a href="#annotated-cell-5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-40"><a href="#annotated-cell-5-40" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lookahead_search(</span>
+<span id="annotated-cell-5-41"><a href="#annotated-cell-5-41" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="annotated-cell-5-42"><a href="#annotated-cell-5-42" aria-hidden="true" tabindex="-1"></a>    prm: ProcessRewardModel,</span>
+<span id="annotated-cell-5-43"><a href="#annotated-cell-5-43" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="annotated-cell-5-44"><a href="#annotated-cell-5-44" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="annotated-cell-5-45"><a href="#annotated-cell-5-45" aria-hidden="true" tabindex="-1"></a>    n_steps: <span class="bu">int</span> <span class="op">=</span> <span class="dv">8</span>,</span>
+<span id="annotated-cell-5-46"><a href="#annotated-cell-5-46" aria-hidden="true" tabindex="-1"></a>    candidates_per_step: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>,</span>
+<span id="annotated-cell-5-47"><a href="#annotated-cell-5-47" aria-hidden="true" tabindex="-1"></a>    max_tokens_per_step: <span class="bu">int</span> <span class="op">=</span> <span class="dv">128</span>,</span>
+<span id="annotated-cell-5-48"><a href="#annotated-cell-5-48" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="annotated-cell-5-49"><a href="#annotated-cell-5-49" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-5-50"><a href="#annotated-cell-5-50" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="annotated-cell-5-51"><a href="#annotated-cell-5-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Greedy lookahead search: at each step generate k candidates,</span></span>
+<span id="annotated-cell-5-52"><a href="#annotated-cell-5-52" aria-hidden="true" tabindex="-1"></a><span class="co">    score with PRM, and select the best.</span></span>
+<span id="annotated-cell-5-53"><a href="#annotated-cell-5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-54"><a href="#annotated-cell-5-54" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-5-55"><a href="#annotated-cell-5-55" aria-hidden="true" tabindex="-1"></a><span class="co">        model: language model.</span></span>
+<span id="annotated-cell-5-56"><a href="#annotated-cell-5-56" aria-hidden="true" tabindex="-1"></a><span class="co">        prm: process reward model.</span></span>
+<span id="annotated-cell-5-57"><a href="#annotated-cell-5-57" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer.</span></span>
+<span id="annotated-cell-5-58"><a href="#annotated-cell-5-58" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: input prompt.</span></span>
+<span id="annotated-cell-5-59"><a href="#annotated-cell-5-59" aria-hidden="true" tabindex="-1"></a><span class="co">        n_steps: number of reasoning steps to generate.</span></span>
+<span id="annotated-cell-5-60"><a href="#annotated-cell-5-60" aria-hidden="true" tabindex="-1"></a><span class="co">        candidates_per_step: branching factor at each step.</span></span>
+<span id="annotated-cell-5-61"><a href="#annotated-cell-5-61" aria-hidden="true" tabindex="-1"></a><span class="co">        max_tokens_per_step: max tokens per candidate step.</span></span>
+<span id="annotated-cell-5-62"><a href="#annotated-cell-5-62" aria-hidden="true" tabindex="-1"></a><span class="co">        temperature: sampling temperature.</span></span>
+<span id="annotated-cell-5-63"><a href="#annotated-cell-5-63" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="annotated-cell-5-64"><a href="#annotated-cell-5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-65"><a href="#annotated-cell-5-65" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-5-66"><a href="#annotated-cell-5-66" aria-hidden="true" tabindex="-1"></a><span class="co">        List of selected reasoning steps (best path).</span></span>
+<span id="annotated-cell-5-67"><a href="#annotated-cell-5-67" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-5-68"><a href="#annotated-cell-5-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-5-69"><a href="#annotated-cell-5-69" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(model.parameters()).device</span>
+<span id="annotated-cell-5-70"><a href="#annotated-cell-5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-71"><a href="#annotated-cell-5-71" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-5-72"><a href="#annotated-cell-5-72" aria-hidden="true" tabindex="-1"></a>    prm.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-5-73"><a href="#annotated-cell-5-73" aria-hidden="true" tabindex="-1"></a>    accumulated_steps <span class="op">=</span> []</span>
+<span id="annotated-cell-5-74"><a href="#annotated-cell-5-74" aria-hidden="true" tabindex="-1"></a>    context <span class="op">=</span> prompt</span>
+<span id="annotated-cell-5-75"><a href="#annotated-cell-5-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-76"><a href="#annotated-cell-5-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-5-77"><a href="#annotated-cell-5-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> step_idx <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<span id="annotated-cell-5-78"><a href="#annotated-cell-5-78" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Generate candidates_per_step candidate next steps</span></span>
+<span id="annotated-cell-5-79"><a href="#annotated-cell-5-79" aria-hidden="true" tabindex="-1"></a>            candidate_texts <span class="op">=</span> []</span>
+<span id="annotated-cell-5-80"><a href="#annotated-cell-5-80" aria-hidden="true" tabindex="-1"></a>            context_ids <span class="op">=</span> torch.tensor(</span>
+<span id="annotated-cell-5-81"><a href="#annotated-cell-5-81" aria-hidden="true" tabindex="-1"></a>                [tokenizer.encode(context)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="annotated-cell-5-82"><a href="#annotated-cell-5-82" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-5-83"><a href="#annotated-cell-5-83" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(candidates_per_step):</span>
+<span id="annotated-cell-5-84"><a href="#annotated-cell-5-84" aria-hidden="true" tabindex="-1"></a>                output <span class="op">=</span> model.generate(</span>
+<span id="annotated-cell-5-85"><a href="#annotated-cell-5-85" aria-hidden="true" tabindex="-1"></a>                    context_ids,</span>
+<span id="annotated-cell-5-86"><a href="#annotated-cell-5-86" aria-hidden="true" tabindex="-1"></a>                    max_new_tokens<span class="op">=</span>max_tokens_per_step,</span>
+<span id="annotated-cell-5-87"><a href="#annotated-cell-5-87" aria-hidden="true" tabindex="-1"></a>                    temperature<span class="op">=</span>temperature,</span>
+<span id="annotated-cell-5-88"><a href="#annotated-cell-5-88" aria-hidden="true" tabindex="-1"></a>                    do_sample<span class="op">=</span><span class="va">True</span>,</span>
+<span id="annotated-cell-5-89"><a href="#annotated-cell-5-89" aria-hidden="true" tabindex="-1"></a>                    eos_token_id<span class="op">=</span>tokenizer.newline_id <span class="cf">if</span> <span class="bu">hasattr</span>(tokenizer, <span class="st">"newline_id"</span>) <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-5-90"><a href="#annotated-cell-5-90" aria-hidden="true" tabindex="-1"></a>                )[<span class="dv">0</span>, context_ids.size(<span class="dv">1</span>):]</span>
+<span id="annotated-cell-5-91"><a href="#annotated-cell-5-91" aria-hidden="true" tabindex="-1"></a>                candidate_texts.append(tokenizer.decode(output.tolist()))</span>
+<span id="annotated-cell-5-92"><a href="#annotated-cell-5-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-93"><a href="#annotated-cell-5-93" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Score each candidate with PRM</span></span>
+<span id="annotated-cell-5-94"><a href="#annotated-cell-5-94" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> []</span>
+<span id="annotated-cell-5-95"><a href="#annotated-cell-5-95" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> cand <span class="kw">in</span> candidate_texts:</span>
+<span id="annotated-cell-5-96"><a href="#annotated-cell-5-96" aria-hidden="true" tabindex="-1"></a>                cand_steps <span class="op">=</span> accumulated_steps <span class="op">+</span> [cand]</span>
+<span id="annotated-cell-5-97"><a href="#annotated-cell-5-97" aria-hidden="true" tabindex="-1"></a>                step_scores <span class="op">=</span> score_reasoning_steps(prm, tokenizer, prompt, cand_steps, device)</span>
+<span id="annotated-cell-5-98"><a href="#annotated-cell-5-98" aria-hidden="true" tabindex="-1"></a>                scores.append(step_scores[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="annotated-cell-5-99"><a href="#annotated-cell-5-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-100"><a href="#annotated-cell-5-100" aria-hidden="true" tabindex="-1"></a>            best_idx <span class="op">=</span> <span class="bu">int</span>(np.argmax(scores))</span>
+<span id="annotated-cell-5-101"><a href="#annotated-cell-5-101" aria-hidden="true" tabindex="-1"></a>            best_step <span class="op">=</span> candidate_texts[best_idx]</span>
+<span id="annotated-cell-5-102"><a href="#annotated-cell-5-102" aria-hidden="true" tabindex="-1"></a>            accumulated_steps.append(best_step)</span>
+<span id="annotated-cell-5-103"><a href="#annotated-cell-5-103" aria-hidden="true" tabindex="-1"></a>            context <span class="op">=</span> context <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> best_step</span>
+<span id="annotated-cell-5-104"><a href="#annotated-cell-5-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-105"><a href="#annotated-cell-5-105" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> accumulated_steps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Annotation:</p>
+<ol type="1">
+<li>Score only the last step — the PRM scores the most recent step given all previous context. We select the candidate whose last step receives the highest PRM score.</li>
+</ol>
+</section>
+<section id="compute-quality-tradeoffs" class="level2">
+<h2 class="anchored" data-anchor-id="compute-quality-tradeoffs">Compute-Quality Tradeoffs</h2>
+<p>All inference-time scaling methods trade compute for quality. The relevant axis is <strong>FLOPs per correct answer</strong>, not just FLOPs per token. A method that uses 10× the compute but achieves 97% accuracy (vs 30% for standard decoding) is a 3× improvement in FLOPs per correct answer.</p>
+<p>Empirical findings from the reasoning model literature:</p>
+<ul>
+<li><strong>Best-of-N with a strong verifier</strong> scales well to <span class="math inline">N \sim 100</span>–<span class="math inline">1000</span> for math problems. The scaling is approximately <span class="math inline">\log N</span> in accuracy.</li>
+<li><strong>Self-consistency</strong> plateaus earlier than best-of-N with a reward model — the majority vote saturates when many incorrect paths converge on the same wrong answer.</li>
+<li><strong>Tree search with PRM</strong> dominates best-of-N at equal compute for multi-step reasoning tasks, because it avoids wasting compute on paths that are already known to be poor.</li>
+<li><strong>Chain-of-thought length</strong> matters: longer chains of thought (more inference tokens) improve reasoning accuracy up to a point, then plateau or degrade.</li>
+</ul>
+<p>Quantifying the scaling behavior:</p>
+<div id="cell-18" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_scaling_curve(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    base_accuracy: <span class="bu">float</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    compute_multipliers: <span class="bu">list</span>[<span class="bu">float</span>],</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    method: <span class="bu">str</span> <span class="op">=</span> <span class="st">"best_of_n"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Theoretical accuracy as a function of inference compute multiplier.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">        base_accuracy: single-sample pass@1 accuracy.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">        compute_multipliers: list of compute multipliers (e.g. [1, 2, 4, 8, 16]).</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">        method: 'best_of_n' or 'self_consistency' (approximate model).</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">        List of expected accuracies at each compute multiplier.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    accuracies <span class="op">=</span> []</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> multiplier <span class="kw">in</span> compute_multipliers:</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(multiplier))</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> method <span class="op">==</span> <span class="st">"best_of_n"</span>:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Assumes a perfect verifier: accuracy = 1 - (1-p)^N</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> base_accuracy) <span class="op">**</span> n</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> method <span class="op">==</span> <span class="st">"self_consistency"</span>:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Self-consistency saturates faster — approximate with sqrt scaling</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="co"># (empirical observation, not a closed-form result)</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">=</span> <span class="bu">min</span>(<span class="fl">1.0</span>, base_accuracy <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> base_accuracy) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span> <span class="op">/</span> n <span class="op">**</span> <span class="fl">0.5</span>))</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Unknown method: </span><span class="sc">{</span>method<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        accuracies.append(acc)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> accuracies</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <strong>o1 model</strong> (OpenAI, 2024) and <strong>DeepSeek-R1</strong> demonstrate that inference-time scaling via long chain-of-thought generation can substantially outperform larger models with shorter generation on hard reasoning benchmarks. The key architectural change: training the model with RL (GRPO or similar) to generate extended internal reasoning before outputting a final answer — turning inference-time compute into a first-class optimization target.</p>
+</div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Key detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Best-of-N</td>
+<td>Sample <span class="math inline">N</span> completions, return highest-scoring. Success rate: <span class="math inline">1 - (1-p)^N</span>.</td>
+</tr>
+<tr class="even">
+<td>Beam search</td>
+<td>Expand top-<span class="math inline">k</span> partial sequences by log-probability; length-normalize to avoid short-sequence bias.</td>
+</tr>
+<tr class="odd">
+<td>Self-consistency</td>
+<td>Sample <span class="math inline">N</span> answers, majority-vote. Works without a reward model.</td>
+</tr>
+<tr class="even">
+<td>Process reward model (PRM)</td>
+<td>Scores each intermediate step, not just the final answer. <mark>Enables step-level search</mark>.</td>
+</tr>
+<tr class="odd">
+<td>MCTS</td>
+<td>Select → expand → simulate → backpropagate. PRM-guided tree search over reasoning steps.</td>
+</tr>
+<tr class="even">
+<td>Compute-quality tradeoff</td>
+<td>All methods trade inference FLOPs for accuracy; diminishing returns above a method-specific <span class="math inline">N</span>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Best-of-N scaling curve.</strong> For base accuracy <span class="math inline">p \in \{0.1, 0.3, 0.5, 0.7\}</span>, plot expected accuracy vs <span class="math inline">N \in \{1, 2, 4, 8, 16, 32, 64\}</span> using <code>compute_scaling_curve</code>. At what <span class="math inline">N</span> does the 0.3 base accuracy model match a 0.7 base accuracy model at <span class="math inline">N=1</span>?</p></li>
+<li><p><strong>Beam search vs sampling.</strong> Run both <code>beam_search</code> and top-<span class="math inline">k</span> sampling on 20 math problems. Compare pass@1 accuracy, response diversity (unique answers), and mean response length. When does beam search outperform sampling?</p></li>
+<li><p><strong>Self-consistency vote counts.</strong> Run <code>self_consistency</code> with <span class="math inline">N \in \{4, 8, 16, 32\}</span> on 50 arithmetic problems. Plot accuracy vs <span class="math inline">N</span> and compare to the best-of-N theoretical curve. At what <span class="math inline">N</span> does self-consistency plateau?</p></li>
+<li><p><strong>PRM training.</strong> Given a dataset of reasoning chains with step-level labels, train a <code>ProcessRewardModel</code> by fine-tuning a small language model backbone. Evaluate step-level precision and recall against human annotations.</p></li>
+<li><p><strong>Lookahead depth.</strong> Implement a version of <code>lookahead_search</code> that looks ahead <span class="math inline">d</span> steps (generating <span class="math inline">k^d</span> candidate paths and scoring all completions). Compare accuracy vs FLOPs for depth <span class="math inline">d \in \{1, 2, 3\}</span>. At what depth does the improvement saturate?</p></li>
+<li><p><strong>Compute-optimal allocation.</strong> Given a fixed compute budget <span class="math inline">C</span> and two options — (a) a larger model at 1× samples, (b) a smaller model (0.5× FLOPs per sample) with best-of-<span class="math inline">N</span> — find the crossover point where option (b) becomes better, as a function of base accuracy.</p></li>
+</ol>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-wang2023selfconsistency" class="csl-entry" role="listitem">
+Wang, Xuezhi, Jason Wei, Dale Schuurmans, Quoc V. Le, Ed Chi, Sharan Narang, Aakanksha Chowdhery, and Denny Zhou. 2023. <span>“Self-Consistency Improves Chain of Thought Reasoning in Language Models.”</span> <a href="https://arxiv.org/abs/2203.11171">https://arxiv.org/abs/2203.11171</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/llm/13-inference.html" class="pagination-link" aria-label="13. KV Cache &amp; Speculative Decoding">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">13. KV Cache &amp; Speculative Decoding</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/llm/15-reasoning-model.html" class="pagination-link" aria-label="15. Training a Reasoning Model">
+        <span class="nav-page-text">15. Training a Reasoning Model</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

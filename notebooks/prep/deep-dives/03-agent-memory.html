@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Agent Memory – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/prep/deep-dives/04-resilience.html" rel="next">
+<link href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/03-agent-memory.html">03. Agent Memory</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#memory-taxonomy" id="toc-memory-taxonomy" class="nav-link active" data-scroll-target="#memory-taxonomy">Memory Taxonomy</a></li>
+  <li><a href="#short-term-buffer-and-sliding-window" id="toc-short-term-buffer-and-sliding-window" class="nav-link" data-scroll-target="#short-term-buffer-and-sliding-window">Short-Term: Buffer and Sliding Window</a></li>
+  <li><a href="#short-term-summarization-memory" id="toc-short-term-summarization-memory" class="nav-link" data-scroll-target="#short-term-summarization-memory">Short-Term: Summarization Memory</a></li>
+  <li><a href="#long-term-episodic-memory" id="toc-long-term-episodic-memory" class="nav-link" data-scroll-target="#long-term-episodic-memory">Long-Term: Episodic Memory</a></li>
+  <li><a href="#long-term-semantic-memory" id="toc-long-term-semantic-memory" class="nav-link" data-scroll-target="#long-term-semantic-memory">Long-Term: Semantic Memory</a></li>
+  <li><a href="#retrieval-scoring" id="toc-retrieval-scoring" class="nav-link" data-scroll-target="#retrieval-scoring">Retrieval Scoring</a></li>
+  <li><a href="#full-agent-demo" id="toc-full-agent-demo" class="nav-link" data-scroll-target="#full-agent-demo">Full Agent Demo</a></li>
+  <li><a href="#backend-tradeoffs" id="toc-backend-tradeoffs" class="nav-link" data-scroll-target="#backend-tradeoffs">Backend Tradeoffs</a></li>
+  <li><a href="#appendix-token-counting-across-memory-strategies" id="toc-appendix-token-counting-across-memory-strategies" class="nav-link" data-scroll-target="#appendix-token-counting-across-memory-strategies">Appendix: Token Counting Across Memory Strategies</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/03-agent-memory.html">03. Agent Memory</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Agent Memory</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The LangGraph agents from <a href="../../../notebooks/prep/08-agents-langgraph.html">notebook 08</a> carry state inside the <code>TypedDict</code> that flows through the graph — a message list that grows with each turn and is discarded when the session ends. This works for single-session tasks but fails for a financial analyst assistant that needs to remember that a client prefers aggressive growth portfolios, that last quarter’s portfolio review flagged a concentration risk in tech equities, and that the client’s compliance threshold is Basel III Tier 1. These facts live across sessions, not within one. This deep dive covers the full memory taxonomy: short-term memory that manages the in-context budget, long-term episodic memory that retrieves relevant past sessions, and semantic memory that distills and persists extracted facts. We conclude by assembling all three into a <code>FinancialAnalystAgent</code> and running a three-session demo.</p>
+<p>Setup:</p>
+<section id="memory-taxonomy" class="level2">
+<h2 class="anchored" data-anchor-id="memory-taxonomy">Memory Taxonomy</h2>
+<p>Agent memory splits along two axes: <strong>duration</strong> (how long it persists) and <strong>storage</strong> (where it lives). The following table fixes the vocabulary we use throughout this notebook:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Subtype</th>
+<th>Duration</th>
+<th>Storage</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Short-term</strong></td>
+<td>Conversation buffer</td>
+<td>One session</td>
+<td>In-context</td>
+<td>Full turn history in the prompt</td>
+</tr>
+<tr class="even">
+<td><strong>Short-term</strong></td>
+<td>Sliding window</td>
+<td>One session</td>
+<td>In-context</td>
+<td>Last <span class="math inline">k</span> turns; oldest dropped</td>
+</tr>
+<tr class="odd">
+<td><strong>Short-term</strong></td>
+<td>Summarization</td>
+<td>One session</td>
+<td>In-context + LLM</td>
+<td>Compress old turns to a running summary</td>
+</tr>
+<tr class="even">
+<td><strong>Long-term</strong></td>
+<td>Episodic</td>
+<td>Cross-session</td>
+<td>Vector store</td>
+<td>Retrieve past session summaries by semantic similarity</td>
+</tr>
+<tr class="odd">
+<td><strong>Long-term</strong></td>
+<td>Semantic</td>
+<td>Cross-session</td>
+<td>Vector store</td>
+<td>Distilled facts extracted from past sessions</td>
+</tr>
+<tr class="even">
+<td><strong>External</strong></td>
+<td>Tool-backed</td>
+<td>Persistent</td>
+<td>DB / API</td>
+<td>Real-time data; the agent calls a retrieval tool</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>Context budget.</strong> Let <span class="math inline">C</span> denote the context window size in tokens (e.g.&nbsp;<span class="math inline">C = 128{,}000</span> for <code>gpt-4o</code>). At inference time, the prompt occupies a budget <span class="math inline">B \leq C</span> distributed across system instructions, retrieved memory, and the current conversation. Short-term memory strategies differ in how they spend this budget:</p>
+<ul>
+<li><strong>Buffer:</strong> all <span class="math inline">n</span> turns are included. Token usage grows as <span class="math inline">O(n)</span>, with no bound until <span class="math inline">B = C</span>.</li>
+<li><strong>Sliding window:</strong> only the last <span class="math inline">k</span> turns are included. Token usage is <span class="math inline">O(k)</span>, bounded by construction.</li>
+<li><strong>Summarization:</strong> old turns are compressed to a summary of length <span class="math inline">s \ll \sum_{i=1}^{n-k} |\text{turn}_i|</span>. Token usage is <span class="math inline">O(s + k)</span> where <span class="math inline">s</span> is the summary budget and <span class="math inline">k</span> is the recent-turn window.</li>
+</ul>
+<p>Long-term memory adds a retrieval step before assembling the prompt: the agent embeds the current query, searches the vector store, and injects the top-<span class="math inline">m</span> results. The cost is <span class="math inline">O(s_\text{ep} \cdot m)</span> where <span class="math inline">s_\text{ep}</span> is the average length of an episode summary.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The context window <span class="math inline">C</span> is a hard constraint enforced by the model API — exceeding it raises an error. In production, short-term memory management is not optional: even <code>gpt-4o</code>’s 128k window fills in roughly 200 turns of a typical analyst conversation.</p>
+</div>
+</div>
+</section>
+<section id="short-term-buffer-and-sliding-window" class="level2">
+<h2 class="anchored" data-anchor-id="short-term-buffer-and-sliding-window">Short-Term: Buffer and Sliding Window</h2>
+<p>We implement <code>BufferMemory</code> and <code>SlidingWindowMemory</code> as classes that manage the message list passed to the LLM. Both expose the same interface: <code>.add(role, content)</code> to append a turn, <code>.messages()</code> to retrieve what should go into the prompt, and <code>.token_count()</code> to report the current budget usage.</p>
+<div id="c9b0a1f2" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tiktoken</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>_enc <span class="op">=</span> tiktoken.encoding_for_model(<span class="st">"gpt-4o-mini"</span>)</span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_tokens(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Count tokens in a string using the gpt-4o-mini tokenizer."""</span></span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(_enc.encode(text))</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BufferMemory:</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stores every turn in the conversation unconditionally."""</span></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, system_prompt: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span>):</span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._system <span class="op">=</span> system_prompt</span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> add(<span class="va">self</span>, role: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns.append({<span class="st">"role"</span>: role, <span class="st">"content"</span>: content})</span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> messages(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return full prompt: system + all turns."""</span></span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>        prefix <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._system}] <span class="cf">if</span> <span class="va">self</span>._system <span class="cf">else</span> []</span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> prefix <span class="op">+</span> <span class="va">self</span>._turns</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> token_count(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">sum</span>(count_tokens(m[<span class="st">"content"</span>]) <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.messages())</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SlidingWindowMemory:</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Retains only the last k turns; older turns are dropped."""</span></span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-33" class="code-annotation-target"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, system_prompt: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span>):</span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._k <span class="op">=</span> k</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._system <span class="op">=</span> system_prompt</span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> add(<span class="va">self</span>, role: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns.append({<span class="st">"role"</span>: role, <span class="st">"content"</span>: content})</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-40" class="code-annotation-target"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(<span class="va">self</span>._turns) <span class="op">&gt;</span> <span class="va">self</span>._k:</span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._turns <span class="op">=</span> <span class="va">self</span>._turns[<span class="op">-</span><span class="va">self</span>._k :]</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> messages(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a>        prefix <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._system}] <span class="cf">if</span> <span class="va">self</span>._system <span class="cf">else</span> []</span>
+<span id="annotated-cell-1-45"><a href="#annotated-cell-1-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> prefix <span class="op">+</span> <span class="va">self</span>._turns</span>
+<span id="annotated-cell-1-46"><a href="#annotated-cell-1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-47"><a href="#annotated-cell-1-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> token_count(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-1-48"><a href="#annotated-cell-1-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">sum</span>(count_tokens(m[<span class="st">"content"</span>]) <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.messages())</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="33" data-code-annotation="1">The window parameter <span class="math inline">k</span> counts individual messages (alternating user/assistant), not turn pairs. With <span class="math inline">k = 10</span> we retain 5 full exchanges.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="40" data-code-annotation="2">After appending the new turn, we truncate <code>_turns</code> to the last <span class="math inline">k</span> entries. This is an O(1) slice — Python list slicing copies the reference list, not the underlying strings.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We simulate a 20-turn analyst session and compare token growth for both memory types:</p>
+<div id="f2e3d4c5" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>SYSTEM <span class="op">=</span> <span class="st">"You are a financial analyst assistant. Answer questions about portfolio risk concisely."</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Synthetic analyst session turns (user, assistant pairs)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ANALYST_TURNS <span class="op">=</span> [</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"What is our current CET1 ratio?"</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"The CET1 ratio is 14.8%, well above the 4.5</span><span class="sc">% r</span><span class="st">egulatory minimum and our 13</span><span class="sc">% i</span><span class="st">nternal target."</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"How does that compare to Q3?"</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"In Q3 the CET1 ratio was 14.3%. The 50bps improvement reflects retained earnings and modest RWA reduction."</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"What is our one-day 99th percentile VaR?"</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"The 99th percentile one-day VaR is $142M across the consolidated trading book."</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"How is that split across asset classes?"</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"Equities: $58M, fixed income: $47M, FX: $24M, commodities: $13M. Correlations reduce the sum to $142M."</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"What is the LCR?"</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"The LCR is 128%, meaning $280B in HQLA covers at least 100</span><span class="sc">% o</span><span class="st">f 30-day net cash outflows under stress."</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"Any margin call exposure this week?"</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"Three accounts triggered margin calls totaling $18M. All were resolved within the 24-hour cure period."</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"Is the tech equity concentration risk from last quarter resolved?"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"Yes. We reduced the FAANG position from 22% to 15</span><span class="sc">% o</span><span class="st">f the growth portfolio, within the 20</span><span class="sc">% s</span><span class="st">ingle-sector cap."</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"What is our Basel III leverage ratio?"</span>),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"The Basel III leverage ratio is 5.8%, above the 3% minimum. Total exposure measure is $1.6T."</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"Net interest margin trend?"</span>),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"NIM expanded 18bps to 2.94% this quarter, driven by higher short-term rates partially offset by deposit repricing."</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"What about credit loss provisions?"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"Provision for credit losses increased to $2.1B, reflecting normalization from the historically low post-COVID levels."</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"Investment banking revenue outlook?"</span>),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"IB revenues declined 23% to $6.1B. Improving capital markets conditions suggest a recovery in H2 2025."</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"user"</span>,      <span class="st">"Summarize the three biggest risks heading into next quarter."</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"assistant"</span>, <span class="st">"(1) Rate sensitivity: NIM expansion slows if the Fed pauses. (2) Credit normalization: provisions may increase further. (3) IB recovery risk: M&amp;A pipeline is fragile if deal conditions deteriorate."</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>buf_mem  <span class="op">=</span> BufferMemory(system_prompt<span class="op">=</span>SYSTEM)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>win_mem  <span class="op">=</span> SlidingWindowMemory(k<span class="op">=</span><span class="dv">8</span>, system_prompt<span class="op">=</span>SYSTEM)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>buf_tokens  <span class="op">=</span> []</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>win_tokens  <span class="op">=</span> []</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> role, content <span class="kw">in</span> ANALYST_TURNS:</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    buf_mem.add(role, content)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    win_mem.add(role, content)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    buf_tokens.append(buf_mem.token_count())</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    win_tokens.append(win_mem.token_count())</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"After </span><span class="sc">{</span><span class="bu">len</span>(ANALYST_TURNS)<span class="sc">}</span><span class="ss"> messages:"</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  BufferMemory:         </span><span class="sc">{</span>buf_tokens[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:,}</span><span class="ss"> tokens"</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  SlidingWindowMemory:  </span><span class="sc">{</span>win_tokens[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:,}</span><span class="ss"> tokens (k=8)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We plot the token count growth for both strategies across the 20-turn session:</p>
+<div id="b4a5f6e7" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> mticker</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>turns <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(ANALYST_TURNS) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>ax.plot(turns, buf_tokens, label<span class="op">=</span><span class="st">"Buffer (unbounded)"</span>,       color<span class="op">=</span><span class="st">"#c0392b"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ax.plot(turns, win_tokens, label<span class="op">=</span><span class="st">"Sliding window ($k=8$)"</span>,   color<span class="op">=</span><span class="st">"#2980b9"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Turn"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Tokens in prompt"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>ax.yaxis.set_major_formatter(mticker.FuncFormatter(<span class="kw">lambda</span> x, _: <span class="ss">f"</span><span class="sc">{</span><span class="bu">int</span>(x)<span class="sc">:,}</span><span class="ss">"</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ax.grid(alpha<span class="op">=</span><span class="fl">0.4</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Token budget: buffer vs. sliding window"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> Buffer memory grows linearly with each turn — the analyst session above reaches roughly 700 tokens after 20 messages. Sliding window plateaus once the buffer fills the <span class="math inline">k=8</span> window, holding steady regardless of session length. The plateau level depends only on <span class="math inline">k</span> and the average message length.</p>
+</section>
+<section id="short-term-summarization-memory" class="level2">
+<h2 class="anchored" data-anchor-id="short-term-summarization-memory">Short-Term: Summarization Memory</h2>
+<p>Sliding window drops old turns entirely — the agent genuinely cannot remember what was said at turn 1 by turn 20. Summarization memory avoids this: when the buffer exceeds a token threshold <span class="math inline">T</span>, the oldest turns are compressed by the LLM into a running summary. The prompt then contains the summary (compact) plus the <span class="math inline">k</span> most recent turns (full fidelity). Formally, if we denote the summary at step <span class="math inline">n</span> as <span class="math inline">\sigma_n</span> and the recent window as <span class="math inline">\mathcal{W}_k</span>, the context sent to the model is:</p>
+<p><span class="math display">\text{prompt} = [\text{system}] \;\|\; [\sigma_n] \;\|\; \mathcal{W}_k</span></p>
+<p>where <span class="math inline">\|</span> denotes concatenation. When a new summary is generated, the compression ratio <span class="math inline">r = |\sigma_n| \,/\, \sum_{i=1}^{n-k} |\text{turn}_i|</span> measures how much information was compressed; values of <span class="math inline">r \approx 0.1</span>–<span class="math inline">0.2</span> are typical.</p>
+<div id="f8e9d0c1" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SummarizationMemory:</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compresses old turns into a running summary when the buffer exceeds T tokens."""</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, llm_client: LLMClient, system_prompt: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-5" class="code-annotation-target"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>                 token_threshold: <span class="bu">int</span> <span class="op">=</span> <span class="dv">400</span>, recent_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span>):</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._llm <span class="op">=</span> llm_client</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._system <span class="op">=</span> system_prompt</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._threshold <span class="op">=</span> token_threshold</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._k <span class="op">=</span> recent_k</span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._summary: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span></span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.compression_log: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> add(<span class="va">self</span>, role: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns.append({<span class="st">"role"</span>: role, <span class="st">"content"</span>: content})</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-16" class="code-annotation-target"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.token_count() <span class="op">&gt;</span> <span class="va">self</span>._threshold:</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._compress()</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _compress(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Summarize turns older than the recent window and update running summary."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-21" class="code-annotation-target"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>        to_summarize <span class="op">=</span> <span class="va">self</span>._turns[: <span class="op">-</span><span class="va">self</span>._k]</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._turns   <span class="op">=</span> <span class="va">self</span>._turns[<span class="op">-</span><span class="va">self</span>._k :]</span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a>        old_tokens <span class="op">=</span> <span class="bu">sum</span>(count_tokens(t[<span class="st">"content"</span>]) <span class="cf">for</span> t <span class="kw">in</span> to_summarize)</span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a>        old_tokens <span class="op">+=</span> count_tokens(<span class="va">self</span>._summary)</span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a>        history_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(</span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="sc">{</span>t[<span class="st">'role'</span>]<span class="sc">.</span>upper()<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>t[<span class="st">'content'</span>]<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> t <span class="kw">in</span> to_summarize</span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        prompt_content <span class="op">=</span> (</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Previous summary:</span><span class="ch">\n</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_summary<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"New conversation:</span><span class="ch">\n</span><span class="sc">{</span>history_text<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Write an updated concise summary (3–5 sentences) of the full conversation "</span></span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>            <span class="st">"so far, focusing on key financial figures, risks identified, and decisions made."</span></span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._summary <span class="op">=</span> <span class="va">self</span>._llm.complete([</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt_content}</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>        ])</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>        new_tokens <span class="op">=</span> count_tokens(<span class="va">self</span>._summary)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-4-41" class="code-annotation-target"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.compression_log.append({</span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a>            <span class="st">"old_tokens"</span>: old_tokens,</span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a>            <span class="st">"new_tokens"</span>: new_tokens,</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ratio"</span>: new_tokens <span class="op">/</span> <span class="bu">max</span>(old_tokens, <span class="dv">1</span>),</span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> messages(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return [system, summary-as-user-note, recent turns]."""</span></span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>        msgs <span class="op">=</span> []</span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._system:</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>            msgs.append({<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._system})</span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._summary:</span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>            msgs.append({<span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-4-54" class="code-annotation-target"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"content"</span>: <span class="ss">f"[Conversation summary so far]:</span><span class="ch">\n</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_summary<span class="sc">}</span><span class="ss">"</span>})</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a>        msgs.extend(<span class="va">self</span>._turns)</span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> msgs</span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> token_count(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">sum</span>(count_tokens(m[<span class="st">"content"</span>]) <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.messages())</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="5" data-code-annotation="1"><code>token_threshold=400</code> is deliberately low so the compression fires during the short demo session. In production, a typical threshold is 70–80% of the context window.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="16" data-code-annotation="2">The check fires after every <code>add</code> call. If the total prompt already exceeds the threshold after appending the newest turn, we compress immediately before the next LLM call.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="21" data-code-annotation="3">We split <code>_turns</code> into the chunk to summarize (all but the last <span class="math inline">k</span>) and the recent window to keep verbatim. The split point is <code>–k</code> which is a standard Python negative index.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="41" data-code-annotation="4">We log the compression event: how many tokens were consumed by the turns-to-summarize, how many the new summary uses, and the compression ratio <span class="math inline">r = \text{new} / \text{old}</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="54" data-code-annotation="5">We inject the running summary as a second <code>system</code> message. This ensures it is never confused with a user turn by the model — the OpenAI API allows multiple <code>system</code> messages.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We replay the analyst session through <code>SummarizationMemory</code> and inspect the compression log:</p>
+<div id="c1b2a3f4" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sum_mem <span class="op">=</span> SummarizationMemory(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    llm_client<span class="op">=</span>llm,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    system_prompt<span class="op">=</span>SYSTEM,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    token_threshold<span class="op">=</span><span class="dv">400</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    recent_k<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sum_tokens <span class="op">=</span> []</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> role, content <span class="kw">in</span> ANALYST_TURNS:</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    sum_mem.add(role, content)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    sum_tokens.append(sum_mem.token_count())</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final token count: </span><span class="sc">{</span>sum_tokens[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:,}</span><span class="ss"> (summarization) vs </span><span class="sc">{</span>buf_tokens[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:,}</span><span class="ss"> (buffer)"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Compression events: </span><span class="sc">{</span><span class="bu">len</span>(sum_mem.compression_log)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ev <span class="kw">in</span> <span class="bu">enumerate</span>(sum_mem.compression_log, <span class="dv">1</span>):</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Event </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>ev[<span class="st">'old_tokens'</span>]<span class="sc">}</span><span class="ss"> → </span><span class="sc">{</span>ev[<span class="st">'new_tokens'</span>]<span class="sc">}</span><span class="ss"> tokens  (ratio=</span><span class="sc">{</span>ev[<span class="st">'ratio'</span>]<span class="sc">:.2f}</span><span class="ss">)"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Final summary:</span><span class="ch">\n</span><span class="sc">{</span>sum_mem<span class="sc">.</span>_summary<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="long-term-episodic-memory" class="level2">
+<h2 class="anchored" data-anchor-id="long-term-episodic-memory">Long-Term: Episodic Memory</h2>
+<p>Episodic memory stores summaries of past sessions in a vector store. When a new session begins, the agent embeds the opening query and retrieves the top-<span class="math inline">m</span> most semantically similar past episodes. These are injected into the system prompt as context, giving the agent access to information that would otherwise be lost between sessions.</p>
+<p>We use the same numpy vector store pattern as <a href="../../../notebooks/prep/03-rag-concepts.html">notebook 03</a> — a simple in-process store with cosine similarity search. Each episode is stored with its embedding, its summary text, and a timestamp used later for recency scoring.</p>
+<div id="f4e5d6c7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> embed(texts: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Embed a list of strings with text-embedding-3-small. Returns (n, 1536) float32."""</span></span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> openai.OpenAI()</span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>    resp <span class="op">=</span> client.embeddings.create(model<span class="op">=</span><span class="st">"text-embedding-3-small"</span>, <span class="bu">input</span><span class="op">=</span>texts)</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([e.embedding <span class="cf">for</span> e <span class="kw">in</span> resp.data], dtype<span class="op">=</span>np.float32)</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EpisodicMemory:</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Vector store of past session summaries, retrieved by semantic similarity."""</span></span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._embeddings: np.ndarray <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>   <span class="co"># (n, 1536)</span></span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._episodes: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []              <span class="co"># {summary, timestamp, session_id}</span></span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-18" class="code-annotation-target"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> store_episode(<span class="va">self</span>, summary: <span class="bu">str</span>, session_id: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Embed and store a session summary."""</span></span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>        vec <span class="op">=</span> embed([summary])  <span class="co"># (1, 1536)</span></span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._embeddings <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._embeddings <span class="op">=</span> vec</span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="annotated-cell-6-24"><a href="#annotated-cell-6-24" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._embeddings <span class="op">=</span> np.vstack([<span class="va">self</span>._embeddings, vec])</span>
+<span id="annotated-cell-6-25"><a href="#annotated-cell-6-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._episodes.append({</span>
+<span id="annotated-cell-6-26"><a href="#annotated-cell-6-26" aria-hidden="true" tabindex="-1"></a>            <span class="st">"summary"</span>: summary,</span>
+<span id="annotated-cell-6-27"><a href="#annotated-cell-6-27" aria-hidden="true" tabindex="-1"></a>            <span class="st">"session_id"</span>: session_id,</span>
+<span id="annotated-cell-6-28"><a href="#annotated-cell-6-28" aria-hidden="true" tabindex="-1"></a>            <span class="st">"timestamp"</span>: time.time(),</span>
+<span id="annotated-cell-6-29"><a href="#annotated-cell-6-29" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="annotated-cell-6-30"><a href="#annotated-cell-6-30" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-31" class="code-annotation-target"><a href="#annotated-cell-6-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrieve(<span class="va">self</span>, query: <span class="bu">str</span>, top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-6-32"><a href="#annotated-cell-6-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return top-k most relevant episodes by cosine similarity."""</span></span>
+<span id="annotated-cell-6-33"><a href="#annotated-cell-6-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._embeddings <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(<span class="va">self</span>._episodes) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-6-34"><a href="#annotated-cell-6-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="annotated-cell-6-35"><a href="#annotated-cell-6-35" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> embed([query])  <span class="co"># (1, 1536)</span></span>
+<span id="annotated-cell-6-36"><a href="#annotated-cell-6-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Cosine similarity: dot product of unit vectors</span></span>
+<span id="annotated-cell-6-37"><a href="#annotated-cell-6-37" aria-hidden="true" tabindex="-1"></a>        norms <span class="op">=</span> np.linalg.norm(<span class="va">self</span>._embeddings, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-6-38"><a href="#annotated-cell-6-38" aria-hidden="true" tabindex="-1"></a>        normed <span class="op">=</span> <span class="va">self</span>._embeddings <span class="op">/</span> np.clip(norms, <span class="fl">1e-8</span>, <span class="va">None</span>)</span>
+<span id="annotated-cell-6-39"><a href="#annotated-cell-6-39" aria-hidden="true" tabindex="-1"></a>        q_norm <span class="op">=</span> q <span class="op">/</span> np.linalg.norm(q)</span>
+<span id="annotated-cell-6-40"><a href="#annotated-cell-6-40" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> (normed <span class="op">@</span> q_norm.T).squeeze()  <span class="co"># (n,)</span></span>
+<span id="annotated-cell-6-41"><a href="#annotated-cell-6-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> scores.ndim <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-6-42"><a href="#annotated-cell-6-42" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> scores[np.newaxis]</span>
+<span id="annotated-cell-6-43"><a href="#annotated-cell-6-43" aria-hidden="true" tabindex="-1"></a>        top_idx <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:top_k]</span>
+<span id="annotated-cell-6-44"><a href="#annotated-cell-6-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="annotated-cell-6-45"><a href="#annotated-cell-6-45" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"score"</span>: <span class="bu">float</span>(scores[i]), <span class="op">**</span><span class="va">self</span>._episodes[i]}</span>
+<span id="annotated-cell-6-46"><a href="#annotated-cell-6-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> top_idx</span>
+<span id="annotated-cell-6-47"><a href="#annotated-cell-6-47" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-6-48"><a href="#annotated-cell-6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-49"><a href="#annotated-cell-6-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-6-50"><a href="#annotated-cell-6-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>._episodes)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="18" data-code-annotation="1"><code>store_episode</code> appends the embedding to the matrix by calling <code>np.vstack</code>. For small episodic stores (hundreds of sessions) this is fine. For thousands of sessions, use a pre-allocated buffer or a persistent vector store.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="31" data-code-annotation="2"><code>retrieve</code> normalizes all stored embeddings and the query to unit vectors before taking the dot product, which is equivalent to cosine similarity. The <code>np.clip</code> prevents division by zero for zero vectors.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We seed the episodic store with three past analyst sessions and then retrieve the most relevant one for a new query:</p>
+<div id="c7b8a9f0" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>PAST_SESSIONS <span class="op">=</span> [</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"session_id"</span>: <span class="st">"session-2024-10-15"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"summary"</span>: (</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Portfolio review for the Apex Growth Fund. The analyst flagged a 22</span><span class="sc">% c</span><span class="st">oncentration "</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"in FAANG equities, exceeding the 20</span><span class="sc">% s</span><span class="st">ingle-sector cap. The client agreed to reduce "</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"the position to 15</span><span class="sc">% o</span><span class="st">ver the following two weeks. CET1 ratio was 14.3%. "</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Client preference: aggressive growth, willing to accept higher volatility."</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"session_id"</span>: <span class="st">"session-2024-11-02"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"summary"</span>: (</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Margin call review session. Three accounts triggered margin calls totaling $18M. "</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"All resolved within the 24-hour cure period. The client requested that margin call "</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"thresholds be reviewed quarterly. Compliance threshold: Basel III Tier 1, minimum 13% "</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"CET1 internal target."</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"session_id"</span>: <span class="st">"session-2024-12-01"</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"summary"</span>: (</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Annual risk review. One-day 99th percentile VaR was $142M. NIM expanded 18bps to 2.94%. "</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Provisions for credit losses increased to $2.1B — normalization trend expected to continue. "</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Investment banking revenues declined 23% to $6.1B. Client asked for H2 2025 IB recovery "</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scenario analysis."</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>ep_mem <span class="op">=</span> EpisodicMemory()</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sess <span class="kw">in</span> PAST_SESSIONS:</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    ep_mem.store_episode(sess[<span class="st">"summary"</span>], sess[<span class="st">"session_id"</span>])</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Stored: </span><span class="sc">{</span>sess[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Episodic store size: </span><span class="sc">{</span><span class="bu">len</span>(ep_mem)<span class="sc">}</span><span class="ss"> episodes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Retrieving the most relevant past sessions for a new analyst query about portfolio concentration:</p>
+<div id="e9d0c1b2" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Has the tech equity concentration risk in the Apex Growth Fund been resolved?"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> ep_mem.retrieve(query, top_k<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Query: </span><span class="sc">{</span>query<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> results:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"[score=</span><span class="sc">{</span>r[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">] </span><span class="sc">{</span>r[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>r[<span class="st">'summary'</span>][:<span class="dv">120</span>]<span class="sc">}</span><span class="ss">...</span><span class="ch">\n</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="long-term-semantic-memory" class="level2">
+<h2 class="anchored" data-anchor-id="long-term-semantic-memory">Long-Term: Semantic Memory</h2>
+<p>Episodic memory retrieves full session summaries. Semantic memory goes one step further: it distills durable facts from those summaries and stores them individually. A fact like “Client prefers aggressive growth portfolios” is more useful as a standalone retrievable entry than buried inside a 200-token session summary.</p>
+<p>The extraction step uses the LLM to identify atomic, reusable facts from a conversation. Each fact is embedded and stored. On each new turn, the top-<span class="math inline">m</span> most relevant facts are retrieved and injected into the system prompt — giving the agent persistent knowledge of client preferences, constraints, and history.</p>
+<div id="b2a3e4f5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ExtractedFacts(BaseModel):</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    facts: <span class="bu">list</span>[<span class="bu">str</span>]</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SemanticMemory:</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extracts and retrieves distilled facts from conversation sessions."""</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, llm_client: LLMClient):</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._llm <span class="op">=</span> llm_client</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._embeddings: np.ndarray <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>  <span class="co"># (n, 1536)</span></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._facts: <span class="bu">list</span>[<span class="bu">dict</span>] <span class="op">=</span> []                <span class="co"># {fact, source_session, timestamp}</span></span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-13" class="code-annotation-target"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> extract_and_store(<span class="va">self</span>, conversation_text: <span class="bu">str</span>, session_id: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Extract atomic facts from conversation text and store them."""</span></span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Extract 3–7 durable, atomic facts from this financial analyst conversation. "</span></span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Focus on: client preferences, compliance thresholds, recurring risk flags, "</span></span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"agreed actions, and portfolio parameters. Each fact should be a single "</span></span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"self-contained sentence. Avoid facts that are transient (e.g. today's VaR)."</span></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: conversation_text},</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>        result: ExtractedFacts <span class="op">=</span> <span class="va">self</span>._llm.complete(messages, response_format<span class="op">=</span>ExtractedFacts)</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>        vecs <span class="op">=</span> embed(result.facts)  <span class="co"># (n_facts, 1536)</span></span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._embeddings <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._embeddings <span class="op">=</span> vecs</span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._embeddings <span class="op">=</span> np.vstack([<span class="va">self</span>._embeddings, vecs])</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> fact <span class="kw">in</span> result.facts:</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._facts.append({</span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">"fact"</span>: fact,</span>
+<span id="annotated-cell-9-36"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a>                <span class="st">"source_session"</span>: session_id,</span>
+<span id="annotated-cell-9-37"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">"timestamp"</span>: time.time(),</span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result.facts</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-41" class="code-annotation-target"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> retrieve(<span class="va">self</span>, query: <span class="bu">str</span>, top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return top-k most relevant facts by cosine similarity."""</span></span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._embeddings <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="bu">len</span>(<span class="va">self</span>._facts) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> embed([query])</span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>        norms <span class="op">=</span> np.linalg.norm(<span class="va">self</span>._embeddings, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-9-47"><a href="#annotated-cell-9-47" aria-hidden="true" tabindex="-1"></a>        normed <span class="op">=</span> <span class="va">self</span>._embeddings <span class="op">/</span> np.clip(norms, <span class="fl">1e-8</span>, <span class="va">None</span>)</span>
+<span id="annotated-cell-9-48"><a href="#annotated-cell-9-48" aria-hidden="true" tabindex="-1"></a>        q_norm <span class="op">=</span> q <span class="op">/</span> np.linalg.norm(q)</span>
+<span id="annotated-cell-9-49"><a href="#annotated-cell-9-49" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> (normed <span class="op">@</span> q_norm.T).squeeze()</span>
+<span id="annotated-cell-9-50"><a href="#annotated-cell-9-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> scores.ndim <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-9-51"><a href="#annotated-cell-9-51" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> scores[np.newaxis]</span>
+<span id="annotated-cell-9-52"><a href="#annotated-cell-9-52" aria-hidden="true" tabindex="-1"></a>        top_idx <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>][:top_k]</span>
+<span id="annotated-cell-9-53"><a href="#annotated-cell-9-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="annotated-cell-9-54"><a href="#annotated-cell-9-54" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"score"</span>: <span class="bu">float</span>(scores[i]), <span class="op">**</span><span class="va">self</span>._facts[i]}</span>
+<span id="annotated-cell-9-55"><a href="#annotated-cell-9-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> top_idx</span>
+<span id="annotated-cell-9-56"><a href="#annotated-cell-9-56" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-9-57"><a href="#annotated-cell-9-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-58"><a href="#annotated-cell-9-58" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-9-59"><a href="#annotated-cell-9-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>._facts)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="13" data-code-annotation="1"><code>extract_and_store</code> calls the LLM once per session to produce a structured <code>ExtractedFacts</code> list. We embed all facts in a single API call (batched input) to minimize latency.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="41" data-code-annotation="2">The <code>retrieve</code> method is identical in structure to <code>EpisodicMemory.retrieve</code> — both use the same cosine similarity pattern. The difference is the granularity of what is stored: full summaries vs.&nbsp;individual atomic facts.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We extract facts from all three past sessions and inspect what was stored:</p>
+<div id="e5d6f7a8" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sem_mem <span class="op">=</span> SemanticMemory(llm_client<span class="op">=</span>llm)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sess <span class="kw">in</span> PAST_SESSIONS:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    facts <span class="op">=</span> sem_mem.extract_and_store(sess[<span class="st">"summary"</span>], sess[<span class="st">"session_id"</span>])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Extracted from </span><span class="sc">{</span>sess[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(facts)<span class="sc">}</span><span class="ss"> facts):"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> f <span class="kw">in</span> facts:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  · </span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Total facts in semantic memory: </span><span class="sc">{</span><span class="bu">len</span>(sem_mem)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Retrieving relevant facts for a new query about the client’s risk preferences:</p>
+<div id="a7f8b9c0" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"What are the client's risk preferences and compliance constraints?"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>relevant_facts <span class="op">=</span> sem_mem.retrieve(query, top_k<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Query: </span><span class="sc">{</span>query<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> relevant_facts:</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"[score=</span><span class="sc">{</span>r[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">] </span><span class="sc">{</span>r[<span class="st">'fact'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"           ↳ from </span><span class="sc">{</span>r[<span class="st">'source_session'</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="retrieval-scoring" class="level2">
+<h2 class="anchored" data-anchor-id="retrieval-scoring">Retrieval Scoring</h2>
+<p>Raw cosine similarity ranks memories by semantic relevance alone. The Generative Agents paper (Park et al., 2023) proposes a composite score that also accounts for recency and importance:</p>
+<p><span class="math display">\text{score}(m, q) = \alpha \cdot \text{recency}(m) + \beta \cdot \text{importance}(m) + \gamma \cdot \text{relevance}(m, q)</span></p>
+<p>where each component is independently normalized to <span class="math inline">[0, 1]</span> before weighting. We define:</p>
+<ul>
+<li><p><strong>Recency</strong> — exponential decay from creation time: <span class="math inline">\text{recency}(m) = \exp\!\left(-\lambda \cdot \Delta t\right)</span> where <span class="math inline">\Delta t</span> is the age of the memory in hours and <span class="math inline">\lambda</span> controls the decay rate. With <span class="math inline">\lambda = 0.01</span>, a memory loses half its recency weight in about 70 hours.</p></li>
+<li><p><strong>Importance</strong> — a scalar scored 1–10 by the LLM at storage time, capturing how significant the memory is (a margin call event scores higher than a routine ratio check).</p></li>
+<li><p><strong>Relevance</strong> — cosine similarity between the memory embedding and the query embedding, as computed above.</p></li>
+</ul>
+<p>This prevents <strong>memory staleness</strong>: a highly relevant but very old memory competes against a moderately relevant but recent one. In financial services, stale memories are dangerous — a risk preference stated 18 months ago may no longer apply after a market regime change.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Set <span class="math inline">\alpha</span> high for agents where recency matters most (live market commentary), <span class="math inline">\beta</span> high for agents where importance dominates (compliance incident tracking), and <span class="math inline">\gamma</span> high for pure Q&amp;A workloads. A safe starting point for a financial analyst assistant is <span class="math inline">\alpha = 0.3, \beta = 0.3, \gamma = 0.4</span>.</p>
+</div>
+</div>
+<div id="d0c1e2f3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ImportanceScore(BaseModel):</span>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a>    score: <span class="bu">int</span>   <span class="co"># 1–10</span></span>
+<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a>    reasoning: <span class="bu">str</span></span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-8"><a href="#annotated-cell-12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-9"><a href="#annotated-cell-12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_importance(fact: <span class="bu">str</span>, llm_client: LLMClient) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-12-10"><a href="#annotated-cell-12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Ask the LLM to rate the importance of a memory on a 1-10 scale."""</span></span>
+<span id="annotated-cell-12-11"><a href="#annotated-cell-12-11" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [</span>
+<span id="annotated-cell-12-12"><a href="#annotated-cell-12-12" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="annotated-cell-12-13"><a href="#annotated-cell-12-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="annotated-cell-12-14"><a href="#annotated-cell-12-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-12-15"><a href="#annotated-cell-12-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Rate the importance of this financial analyst memory on a scale 1–10. "</span></span>
+<span id="annotated-cell-12-16"><a href="#annotated-cell-12-16" aria-hidden="true" tabindex="-1"></a>                <span class="st">"10 = critical (compliance breach, margin call, concentrated risk). "</span></span>
+<span id="annotated-cell-12-17"><a href="#annotated-cell-12-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"5 = significant (client preference, recurring metric). "</span></span>
+<span id="annotated-cell-12-18"><a href="#annotated-cell-12-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"1 = routine (standard ratio well within limits)."</span></span>
+<span id="annotated-cell-12-19"><a href="#annotated-cell-12-19" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="annotated-cell-12-20"><a href="#annotated-cell-12-20" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="annotated-cell-12-21"><a href="#annotated-cell-12-21" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: fact},</span>
+<span id="annotated-cell-12-22"><a href="#annotated-cell-12-22" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="annotated-cell-12-23"><a href="#annotated-cell-12-23" aria-hidden="true" tabindex="-1"></a>    result: ImportanceScore <span class="op">=</span> llm_client.complete(messages, response_format<span class="op">=</span>ImportanceScore)</span>
+<span id="annotated-cell-12-24"><a href="#annotated-cell-12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result.score</span>
+<span id="annotated-cell-12-25"><a href="#annotated-cell-12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-26"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-27"><a href="#annotated-cell-12-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> composite_score(</span>
+<span id="annotated-cell-12-28"><a href="#annotated-cell-12-28" aria-hidden="true" tabindex="-1"></a>    relevance: <span class="bu">float</span>,</span>
+<span id="annotated-cell-12-29"><a href="#annotated-cell-12-29" aria-hidden="true" tabindex="-1"></a>    importance: <span class="bu">float</span>,  <span class="co"># 1–10, will be normalized to 0–1</span></span>
+<span id="annotated-cell-12-30"><a href="#annotated-cell-12-30" aria-hidden="true" tabindex="-1"></a>    timestamp: <span class="bu">float</span>,   <span class="co"># Unix timestamp</span></span>
+<span id="annotated-cell-12-31"><a href="#annotated-cell-12-31" aria-hidden="true" tabindex="-1"></a>    alpha: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span id="annotated-cell-12-32"><a href="#annotated-cell-12-32" aria-hidden="true" tabindex="-1"></a>    beta:  <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span id="annotated-cell-12-33"><a href="#annotated-cell-12-33" aria-hidden="true" tabindex="-1"></a>    gamma: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-34" class="code-annotation-target"><a href="#annotated-cell-12-34" aria-hidden="true" tabindex="-1"></a>    decay_rate: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.01</span>,  <span class="co"># λ per hour</span></span>
+<span id="annotated-cell-12-35"><a href="#annotated-cell-12-35" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-12-36"><a href="#annotated-cell-12-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the Generative Agents composite memory score."""</span></span>
+<span id="annotated-cell-12-37"><a href="#annotated-cell-12-37" aria-hidden="true" tabindex="-1"></a>    age_hours <span class="op">=</span> (time.time() <span class="op">-</span> timestamp) <span class="op">/</span> <span class="fl">3600.0</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-12-38" class="code-annotation-target"><a href="#annotated-cell-12-38" aria-hidden="true" tabindex="-1"></a>    recency <span class="op">=</span> math.exp(<span class="op">-</span>decay_rate <span class="op">*</span> age_hours)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-12-39" class="code-annotation-target"><a href="#annotated-cell-12-39" aria-hidden="true" tabindex="-1"></a>    imp_norm <span class="op">=</span> (importance <span class="op">-</span> <span class="fl">1.0</span>) <span class="op">/</span> <span class="fl">9.0</span></span>
+<span id="annotated-cell-12-40"><a href="#annotated-cell-12-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> alpha <span class="op">*</span> recency <span class="op">+</span> beta <span class="op">*</span> imp_norm <span class="op">+</span> gamma <span class="op">*</span> relevance</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="34" data-code-annotation="1"><code>decay_rate=0.01</code> means a memory created 69 hours ago scores <span class="math inline">e^{-0.69} \approx 0.5</span> on recency — roughly half its original weight after about three days.</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="38" data-code-annotation="2">We compute age in hours and apply exponential decay. The recency score is always in <span class="math inline">(0, 1]</span> for non-negative ages.</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="39" data-code-annotation="3">Importance is rated 1–10 by the LLM. We normalize to <span class="math inline">[0, 1]</span> by mapping <span class="math inline">[1, 10] \mapsto [0, 1]</span> linearly: <span class="math inline">\text{imp\_norm} = (\text{score} - 1) / 9.</span></span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We demonstrate composite scoring on three toy memories with different age and importance profiles:</p>
+<div id="a3f4b5c6" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>now <span class="op">=</span> time.time()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ONE_HOUR  <span class="op">=</span> <span class="dv">3600</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>ONE_DAY   <span class="op">=</span> <span class="dv">86400</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ONE_WEEK  <span class="op">=</span> <span class="dv">7</span> <span class="op">*</span> ONE_DAY</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>toy_memories <span class="op">=</span> [</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>:     <span class="st">"Recent margin call (1h ago)"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"relevance"</span>: <span class="fl">0.82</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"importance"</span>: <span class="dv">9</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"timestamp"</span>: now <span class="op">-</span> ONE_HOUR,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>:     <span class="st">"Old client preference (1 week ago)"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"relevance"</span>: <span class="fl">0.91</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"importance"</span>: <span class="dv">6</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"timestamp"</span>: now <span class="op">-</span> ONE_WEEK,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>:     <span class="st">"Routine CET1 check (1 day ago)"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"relevance"</span>: <span class="fl">0.55</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"importance"</span>: <span class="dv">3</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"timestamp"</span>: now <span class="op">-</span> ONE_DAY,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Memory'</span><span class="sc">:&lt;42}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Recency'</span><span class="sc">:&gt;8}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Imp'</span><span class="sc">:&gt;5}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Relev'</span><span class="sc">:&gt;7}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Score'</span><span class="sc">:&gt;7}</span><span class="ss">"</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">74</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> m <span class="kw">in</span> toy_memories:</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    age_h <span class="op">=</span> (now <span class="op">-</span> m[<span class="st">"timestamp"</span>]) <span class="op">/</span> <span class="dv">3600</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    recency <span class="op">=</span> math.exp(<span class="op">-</span><span class="fl">0.01</span> <span class="op">*</span> age_h)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    sc <span class="op">=</span> composite_score(m[<span class="st">"relevance"</span>], m[<span class="st">"importance"</span>], m[<span class="st">"timestamp"</span>])</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>m[<span class="st">'label'</span>]<span class="sc">:&lt;42}</span><span class="ss"> </span><span class="sc">{</span>recency<span class="sc">:&gt;8.3f}</span><span class="ss"> </span><span class="sc">{</span>m[<span class="st">'importance'</span>]<span class="sc">:&gt;5}</span><span class="ss"> </span><span class="sc">{</span>m[<span class="st">'relevance'</span>]<span class="sc">:&gt;7.2f}</span><span class="ss"> </span><span class="sc">{</span>sc<span class="sc">:&gt;7.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="full-agent-demo" class="level2">
+<h2 class="anchored" data-anchor-id="full-agent-demo">Full Agent Demo</h2>
+<p>We assemble a <code>FinancialAnalystAgent</code> that integrates all three memory types into a LangGraph-based agent. The architecture follows the pattern from <a href="../../../notebooks/prep/08-agents-langgraph.html">notebook 08</a>: a <code>TypedDict</code> state flows through the graph, and the memory modules are managed as side-effects on node entry and exit.</p>
+<p><strong>Session flow.</strong> On session start, the agent (1) retrieves the top-3 relevant past episodes from <code>EpisodicMemory</code>, (2) retrieves the top-5 relevant facts from <code>SemanticMemory</code>, and injects both into the system prompt. During the session, <code>SummarizationMemory</code> manages the in-context budget. On session end, the agent stores a summary in <code>EpisodicMemory</code> and extracts new facts into <code>SemanticMemory</code>.</p>
+<div id="d6c7e8f9" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> TypedDict, Annotated</span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langgraph.graph <span class="im">import</span> StateGraph, END</span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langgraph.graph.message <span class="im">import</span> add_messages</span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AnalystState(TypedDict):</span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>    session_id: <span class="bu">str</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-8" class="code-annotation-target"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>    messages: Annotated[<span class="bu">list</span>, add_messages]</span>
+<span id="annotated-cell-14-9"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a>    episodic_context: <span class="bu">str</span></span>
+<span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a>    semantic_context: <span class="bu">str</span></span>
+<span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a>    user_input: <span class="bu">str</span></span>
+<span id="annotated-cell-14-12"><a href="#annotated-cell-14-12" aria-hidden="true" tabindex="-1"></a>    turn_count: <span class="bu">int</span></span>
+<span id="annotated-cell-14-13"><a href="#annotated-cell-14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-14"><a href="#annotated-cell-14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-15"><a href="#annotated-cell-14-15" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FinancialAnalystAgent:</span>
+<span id="annotated-cell-14-16"><a href="#annotated-cell-14-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""LangGraph agent with short-term, episodic, and semantic memory."""</span></span>
+<span id="annotated-cell-14-17"><a href="#annotated-cell-14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-18"><a href="#annotated-cell-14-18" aria-hidden="true" tabindex="-1"></a>    BASE_SYSTEM <span class="op">=</span> (</span>
+<span id="annotated-cell-14-19"><a href="#annotated-cell-14-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"You are a senior financial analyst assistant. You provide precise, "</span></span>
+<span id="annotated-cell-14-20"><a href="#annotated-cell-14-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"data-grounded answers about portfolio risk, capital ratios, and compliance. "</span></span>
+<span id="annotated-cell-14-21"><a href="#annotated-cell-14-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Always cite specific figures when available. Be concise."</span></span>
+<span id="annotated-cell-14-22"><a href="#annotated-cell-14-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-14-23"><a href="#annotated-cell-14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-24"><a href="#annotated-cell-14-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, llm_client: LLMClient):</span>
+<span id="annotated-cell-14-25"><a href="#annotated-cell-14-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._llm <span class="op">=</span> llm_client</span>
+<span id="annotated-cell-14-26"><a href="#annotated-cell-14-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.episodic  <span class="op">=</span> EpisodicMemory()</span>
+<span id="annotated-cell-14-27"><a href="#annotated-cell-14-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.semantic  <span class="op">=</span> SemanticMemory(llm_client)</span>
+<span id="annotated-cell-14-28"><a href="#annotated-cell-14-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._short_mem: SummarizationMemory <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-14-29"><a href="#annotated-cell-14-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._graph <span class="op">=</span> <span class="va">self</span>._build_graph()</span>
+<span id="annotated-cell-14-30"><a href="#annotated-cell-14-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-31"><a href="#annotated-cell-14-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _build_graph(<span class="va">self</span>):</span>
+<span id="annotated-cell-14-32"><a href="#annotated-cell-14-32" aria-hidden="true" tabindex="-1"></a>        builder <span class="op">=</span> StateGraph(AnalystState)</span>
+<span id="annotated-cell-14-33"><a href="#annotated-cell-14-33" aria-hidden="true" tabindex="-1"></a>        builder.add_node(<span class="st">"load_memory"</span>,  <span class="va">self</span>._load_memory_node)</span>
+<span id="annotated-cell-14-34"><a href="#annotated-cell-14-34" aria-hidden="true" tabindex="-1"></a>        builder.add_node(<span class="st">"respond"</span>,      <span class="va">self</span>._respond_node)</span>
+<span id="annotated-cell-14-35"><a href="#annotated-cell-14-35" aria-hidden="true" tabindex="-1"></a>        builder.set_entry_point(<span class="st">"load_memory"</span>)</span>
+<span id="annotated-cell-14-36"><a href="#annotated-cell-14-36" aria-hidden="true" tabindex="-1"></a>        builder.add_edge(<span class="st">"load_memory"</span>, <span class="st">"respond"</span>)</span>
+<span id="annotated-cell-14-37"><a href="#annotated-cell-14-37" aria-hidden="true" tabindex="-1"></a>        builder.add_edge(<span class="st">"respond"</span>, END)</span>
+<span id="annotated-cell-14-38"><a href="#annotated-cell-14-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> builder.<span class="bu">compile</span>()</span>
+<span id="annotated-cell-14-39"><a href="#annotated-cell-14-39" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-40" class="code-annotation-target"><a href="#annotated-cell-14-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> start_session(<span class="va">self</span>, session_id: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-14-41"><a href="#annotated-cell-14-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Initialize a new session with fresh short-term memory."""</span></span>
+<span id="annotated-cell-14-42"><a href="#annotated-cell-14-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._current_session_id <span class="op">=</span> session_id</span>
+<span id="annotated-cell-14-43"><a href="#annotated-cell-14-43" aria-hidden="true" tabindex="-1"></a>        system <span class="op">=</span> <span class="va">self</span>.BASE_SYSTEM</span>
+<span id="annotated-cell-14-44"><a href="#annotated-cell-14-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._short_mem <span class="op">=</span> SummarizationMemory(</span>
+<span id="annotated-cell-14-45"><a href="#annotated-cell-14-45" aria-hidden="true" tabindex="-1"></a>            llm_client<span class="op">=</span><span class="va">self</span>._llm,</span>
+<span id="annotated-cell-14-46"><a href="#annotated-cell-14-46" aria-hidden="true" tabindex="-1"></a>            system_prompt<span class="op">=</span>system,</span>
+<span id="annotated-cell-14-47"><a href="#annotated-cell-14-47" aria-hidden="true" tabindex="-1"></a>            token_threshold<span class="op">=</span><span class="dv">600</span>,</span>
+<span id="annotated-cell-14-48"><a href="#annotated-cell-14-48" aria-hidden="true" tabindex="-1"></a>            recent_k<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="annotated-cell-14-49"><a href="#annotated-cell-14-49" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-14-50"><a href="#annotated-cell-14-50" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-14-51" class="code-annotation-target"><a href="#annotated-cell-14-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> end_session(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-14-52"><a href="#annotated-cell-14-52" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Store session summary and extract facts into long-term memory."""</span></span>
+<span id="annotated-cell-14-53"><a href="#annotated-cell-14-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._short_mem <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-14-54"><a href="#annotated-cell-14-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="annotated-cell-14-55"><a href="#annotated-cell-14-55" aria-hidden="true" tabindex="-1"></a>        history <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(</span>
+<span id="annotated-cell-14-56"><a href="#annotated-cell-14-56" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="sc">{</span>t[<span class="st">'role'</span>]<span class="sc">.</span>upper()<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>t[<span class="st">'content'</span>]<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> t <span class="kw">in</span> <span class="va">self</span>._short_mem._turns</span>
+<span id="annotated-cell-14-57"><a href="#annotated-cell-14-57" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-14-58"><a href="#annotated-cell-14-58" aria-hidden="true" tabindex="-1"></a>        summary_prompt <span class="op">=</span> (</span>
+<span id="annotated-cell-14-59"><a href="#annotated-cell-14-59" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_short_mem<span class="sc">.</span>_summary<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Recent turns:</span><span class="ch">\n</span><span class="sc">{</span>history<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-14-60"><a href="#annotated-cell-14-60" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Write a 3–5 sentence session summary for long-term episodic memory, "</span></span>
+<span id="annotated-cell-14-61"><a href="#annotated-cell-14-61" aria-hidden="true" tabindex="-1"></a>            <span class="st">"focusing on key decisions, risk figures, and client preferences expressed."</span></span>
+<span id="annotated-cell-14-62"><a href="#annotated-cell-14-62" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-14-63"><a href="#annotated-cell-14-63" aria-hidden="true" tabindex="-1"></a>        final_summary <span class="op">=</span> <span class="va">self</span>._llm.complete([</span>
+<span id="annotated-cell-14-64"><a href="#annotated-cell-14-64" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: summary_prompt}</span>
+<span id="annotated-cell-14-65"><a href="#annotated-cell-14-65" aria-hidden="true" tabindex="-1"></a>        ])</span>
+<span id="annotated-cell-14-66"><a href="#annotated-cell-14-66" aria-hidden="true" tabindex="-1"></a>        sid <span class="op">=</span> <span class="va">self</span>._current_session_id</span>
+<span id="annotated-cell-14-67"><a href="#annotated-cell-14-67" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.episodic.store_episode(final_summary, sid)</span>
+<span id="annotated-cell-14-68"><a href="#annotated-cell-14-68" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.semantic.extract_and_store(final_summary, sid)</span>
+<span id="annotated-cell-14-69"><a href="#annotated-cell-14-69" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  [memory] Stored episode and extracted facts for </span><span class="sc">{</span>sid<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="annotated-cell-14-70"><a href="#annotated-cell-14-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-71"><a href="#annotated-cell-14-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _load_memory_node(<span class="va">self</span>, state: AnalystState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-14-72"><a href="#annotated-cell-14-72" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Retrieve episodic and semantic context relevant to the current user input."""</span></span>
+<span id="annotated-cell-14-73"><a href="#annotated-cell-14-73" aria-hidden="true" tabindex="-1"></a>        query <span class="op">=</span> state[<span class="st">"user_input"</span>]</span>
+<span id="annotated-cell-14-74"><a href="#annotated-cell-14-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-75"><a href="#annotated-cell-14-75" aria-hidden="true" tabindex="-1"></a>        ep_results <span class="op">=</span> <span class="va">self</span>.episodic.retrieve(query, top_k<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-14-76"><a href="#annotated-cell-14-76" aria-hidden="true" tabindex="-1"></a>        ep_context <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(</span>
+<span id="annotated-cell-14-77"><a href="#annotated-cell-14-77" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"- [</span><span class="sc">{</span>r[<span class="st">'session_id'</span>]<span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>r[<span class="st">'summary'</span>]<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> r <span class="kw">in</span> ep_results</span>
+<span id="annotated-cell-14-78"><a href="#annotated-cell-14-78" aria-hidden="true" tabindex="-1"></a>        ) <span class="cf">if</span> ep_results <span class="cf">else</span> <span class="st">"No prior sessions."</span></span>
+<span id="annotated-cell-14-79"><a href="#annotated-cell-14-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-80"><a href="#annotated-cell-14-80" aria-hidden="true" tabindex="-1"></a>        sem_results <span class="op">=</span> <span class="va">self</span>.semantic.retrieve(query, top_k<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="annotated-cell-14-81"><a href="#annotated-cell-14-81" aria-hidden="true" tabindex="-1"></a>        sem_context <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(</span>
+<span id="annotated-cell-14-82"><a href="#annotated-cell-14-82" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"- </span><span class="sc">{</span>r[<span class="st">'fact'</span>]<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> r <span class="kw">in</span> sem_results</span>
+<span id="annotated-cell-14-83"><a href="#annotated-cell-14-83" aria-hidden="true" tabindex="-1"></a>        ) <span class="cf">if</span> sem_results <span class="cf">else</span> <span class="st">"No stored facts."</span></span>
+<span id="annotated-cell-14-84"><a href="#annotated-cell-14-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-85"><a href="#annotated-cell-14-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">"episodic_context"</span>: ep_context, <span class="st">"semantic_context"</span>: sem_context}</span>
+<span id="annotated-cell-14-86"><a href="#annotated-cell-14-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-87"><a href="#annotated-cell-14-87" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _respond_node(<span class="va">self</span>, state: AnalystState) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-14-88"><a href="#annotated-cell-14-88" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Generate a response using short-term memory + retrieved long-term context."""</span></span>
+<span id="annotated-cell-14-89"><a href="#annotated-cell-14-89" aria-hidden="true" tabindex="-1"></a>        ep_ctx  <span class="op">=</span> state[<span class="st">"episodic_context"</span>]</span>
+<span id="annotated-cell-14-90"><a href="#annotated-cell-14-90" aria-hidden="true" tabindex="-1"></a>        sem_ctx <span class="op">=</span> state[<span class="st">"semantic_context"</span>]</span>
+<span id="annotated-cell-14-91"><a href="#annotated-cell-14-91" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-14-92" class="code-annotation-target"><a href="#annotated-cell-14-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Inject long-term memory as a system message before the conversation</span></span>
+<span id="annotated-cell-14-93"><a href="#annotated-cell-14-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ep_ctx <span class="kw">or</span> sem_ctx:</span>
+<span id="annotated-cell-14-94"><a href="#annotated-cell-14-94" aria-hidden="true" tabindex="-1"></a>            context_block <span class="op">=</span> (</span>
+<span id="annotated-cell-14-95"><a href="#annotated-cell-14-95" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"[Long-term memory: relevant past episodes]</span><span class="ch">\n</span><span class="sc">{</span>ep_ctx<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-14-96"><a href="#annotated-cell-14-96" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"[Long-term memory: relevant facts]</span><span class="ch">\n</span><span class="sc">{</span>sem_ctx<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-14-97"><a href="#annotated-cell-14-97" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-14-98"><a href="#annotated-cell-14-98" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._short_mem.add(<span class="st">"system"</span>, context_block)  <span class="co"># temporary injection</span></span>
+<span id="annotated-cell-14-99"><a href="#annotated-cell-14-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-100"><a href="#annotated-cell-14-100" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._short_mem.add(<span class="st">"user"</span>, state[<span class="st">"user_input"</span>])</span>
+<span id="annotated-cell-14-101"><a href="#annotated-cell-14-101" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="va">self</span>._llm.complete(<span class="va">self</span>._short_mem.messages())</span>
+<span id="annotated-cell-14-102"><a href="#annotated-cell-14-102" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._short_mem.add(<span class="st">"assistant"</span>, response)</span>
+<span id="annotated-cell-14-103"><a href="#annotated-cell-14-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-104"><a href="#annotated-cell-14-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="annotated-cell-14-105"><a href="#annotated-cell-14-105" aria-hidden="true" tabindex="-1"></a>            <span class="st">"messages"</span>: [{<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: response}],</span>
+<span id="annotated-cell-14-106"><a href="#annotated-cell-14-106" aria-hidden="true" tabindex="-1"></a>            <span class="st">"turn_count"</span>: state[<span class="st">"turn_count"</span>] <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="annotated-cell-14-107"><a href="#annotated-cell-14-107" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="annotated-cell-14-108"><a href="#annotated-cell-14-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-109"><a href="#annotated-cell-14-109" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> chat(<span class="va">self</span>, user_input: <span class="bu">str</span>, session_id: <span class="bu">str</span> <span class="op">=</span> <span class="st">"default"</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-14-110"><a href="#annotated-cell-14-110" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Send a message and return the agent's response."""</span></span>
+<span id="annotated-cell-14-111"><a href="#annotated-cell-14-111" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._short_mem <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-14-112"><a href="#annotated-cell-14-112" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.start_session(session_id)</span>
+<span id="annotated-cell-14-113"><a href="#annotated-cell-14-113" aria-hidden="true" tabindex="-1"></a>        init_state: AnalystState <span class="op">=</span> {</span>
+<span id="annotated-cell-14-114"><a href="#annotated-cell-14-114" aria-hidden="true" tabindex="-1"></a>            <span class="st">"session_id"</span>: session_id,</span>
+<span id="annotated-cell-14-115"><a href="#annotated-cell-14-115" aria-hidden="true" tabindex="-1"></a>            <span class="st">"messages"</span>: [],</span>
+<span id="annotated-cell-14-116"><a href="#annotated-cell-14-116" aria-hidden="true" tabindex="-1"></a>            <span class="st">"episodic_context"</span>: <span class="st">""</span>,</span>
+<span id="annotated-cell-14-117"><a href="#annotated-cell-14-117" aria-hidden="true" tabindex="-1"></a>            <span class="st">"semantic_context"</span>: <span class="st">""</span>,</span>
+<span id="annotated-cell-14-118"><a href="#annotated-cell-14-118" aria-hidden="true" tabindex="-1"></a>            <span class="st">"user_input"</span>: user_input,</span>
+<span id="annotated-cell-14-119"><a href="#annotated-cell-14-119" aria-hidden="true" tabindex="-1"></a>            <span class="st">"turn_count"</span>: <span class="dv">0</span>,</span>
+<span id="annotated-cell-14-120"><a href="#annotated-cell-14-120" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="annotated-cell-14-121"><a href="#annotated-cell-14-121" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> <span class="va">self</span>._graph.invoke(init_state)</span>
+<span id="annotated-cell-14-122"><a href="#annotated-cell-14-122" aria-hidden="true" tabindex="-1"></a>        last <span class="op">=</span> result[<span class="st">"messages"</span>][<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="annotated-cell-14-123"><a href="#annotated-cell-14-123" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> last.content <span class="cf">if</span> <span class="bu">hasattr</span>(last, <span class="st">"content"</span>) <span class="cf">else</span> last[<span class="st">"content"</span>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="8" data-code-annotation="1"><code>Annotated[list, add_messages]</code> accumulates assistant response messages across the graph invocation. This is the standard LangGraph pattern from notebook 08.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="40" data-code-annotation="2"><code>start_session</code> resets <code>SummarizationMemory</code> to a clean state. Each session begins with an empty short-term buffer; long-term memory (episodic and semantic) is shared and persistent across sessions.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="51" data-code-annotation="3"><code>end_session</code> triggers the long-term consolidation step: the LLM synthesizes a final session summary, which is stored in <code>EpisodicMemory</code>, and then <code>SemanticMemory.extract_and_store</code> distills atomic facts from it.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="92" data-code-annotation="4">Long-term context is injected as a <code>system</code> role message appended to the short-term buffer just before the LLM call. This ensures the model treats it as background context rather than a user turn.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We initialize the agent with the three past sessions already in long-term memory and run a three-session demo:</p>
+<div id="a9f0b1c2" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> FinancialAnalystAgent(llm_client<span class="op">=</span>llm)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-populate long-term memory with the three past sessions</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sess <span class="kw">in</span> PAST_SESSIONS:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    agent.episodic.store_episode(sess[<span class="st">"summary"</span>], sess[<span class="st">"session_id"</span>])</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    agent.semantic.extract_and_store(sess[<span class="st">"summary"</span>], sess[<span class="st">"session_id"</span>])</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Long-term memory initialized: </span><span class="sc">{</span><span class="bu">len</span>(agent.episodic)<span class="sc">}</span><span class="ss"> episodes, </span><span class="sc">{</span><span class="bu">len</span>(agent.semantic)<span class="sc">}</span><span class="ss"> facts."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Session 1</strong> — the analyst asks about portfolio concentration risk. The agent should recall the FAANG reduction agreement from the October session:</p>
+<div id="c1b2d3e4" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>agent.start_session(<span class="st">"session-2025-01-10"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>q1 <span class="op">=</span> <span class="st">"Has the tech equity concentration issue in the Apex Growth Fund been resolved?"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>r1 <span class="op">=</span> agent.chat(q1, session_id<span class="op">=</span><span class="st">"session-2025-01-10"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q1<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>r1<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>q2 <span class="op">=</span> <span class="st">"What is the client's stated preference on portfolio risk tolerance?"</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> agent.chat(q2, session_id<span class="op">=</span><span class="st">"session-2025-01-10"</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q2<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>r2<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>agent.end_session()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Session 2</strong> — a new session asking about margin calls. The agent should recall both the November margin call resolution and the client’s compliance threshold:</p>
+<div id="e3d4f5a6" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>agent.start_session(<span class="st">"session-2025-01-17"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>q3 <span class="op">=</span> <span class="st">"Were there any margin calls last quarter, and what is our compliance threshold for CET1?"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>r3 <span class="op">=</span> agent.chat(q3, session_id<span class="op">=</span><span class="st">"session-2025-01-17"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q3<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>r3<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>q4 <span class="op">=</span> <span class="st">"Did the client request any changes to the margin call process?"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>r4 <span class="op">=</span> agent.chat(q4, session_id<span class="op">=</span><span class="st">"session-2025-01-17"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q4<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>r4<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>agent.end_session()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Session 3</strong> — the agent should now have accumulated facts from both prior sessions stored in long-term memory. This query crosses information from multiple past sessions:</p>
+<div id="a5f6b7c8" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>agent.start_session(<span class="st">"session-2025-01-24"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>q5 <span class="op">=</span> (</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Given everything we know about this client's risk profile and compliance requirements, "</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"what are the three most important things to cover in today's quarterly review?"</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>r5 <span class="op">=</span> agent.chat(q5, session_id<span class="op">=</span><span class="st">"session-2025-01-24"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Q: </span><span class="sc">{</span>q5<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"A: </span><span class="sc">{</span>r5<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Long-term memory at end of session 3:"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Episodes: </span><span class="sc">{</span><span class="bu">len</span>(agent.episodic)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Facts:    </span><span class="sc">{</span><span class="bu">len</span>(agent.semantic)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  LLM cost so far: $</span><span class="sc">{</span>agent<span class="sc">.</span>_llm<span class="sc">.</span>total_cost<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>agent.end_session()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="backend-tradeoffs" class="level2">
+<h2 class="anchored" data-anchor-id="backend-tradeoffs">Backend Tradeoffs</h2>
+<p>The <code>EpisodicMemory</code> and <code>SemanticMemory</code> implementations above use numpy arrays in-process. This is appropriate for a notebook demo but inadequate for a production analyst assistant serving multiple users. The table below summarizes when to use each backend:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Backend</th>
+<th>Latency</th>
+<th>Persistence</th>
+<th>Scalability</th>
+<th>Cost</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>In-process numpy</strong></td>
+<td>&lt; 1 ms</td>
+<td>None (restarts wipe memory)</td>
+<td>Single process</td>
+<td>$0</td>
+<td>Prototyping, notebooks, single-user CLI tools</td>
+</tr>
+<tr class="even">
+<td><strong>Redis (with RediSearch)</strong></td>
+<td>1–5 ms</td>
+<td>Yes (append-only log)</td>
+<td>Horizontal (Redis Cluster)</td>
+<td>Low ($0.05–$0.15/hr on AWS)</td>
+<td>Low-latency read-heavy workloads, session caches, fact lookup at sub-5ms SLA</td>
+</tr>
+<tr class="odd">
+<td><strong>pgvector (PostgreSQL)</strong></td>
+<td>5–20 ms</td>
+<td>Yes (WAL, ACID)</td>
+<td>Vertical + read replicas</td>
+<td>Medium ($0.10–$0.50/hr on RDS)</td>
+<td>Multi-user production, need SQL joins (e.g.&nbsp;user_id filter), audit trail requirements</td>
+</tr>
+<tr class="even">
+<td><strong>Managed (Pinecone, Weaviate)</strong></td>
+<td>5–50 ms</td>
+<td>Yes</td>
+<td>Fully managed</td>
+<td>Higher ($0.50–$2.00/hr)</td>
+<td>Large corpora (millions of episodes), no infra team</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>Regulatory note.</strong> In financial services, long-term agent memory constitutes a processing activity under GDPR Article 5 — personal data must be accurate, limited to what is necessary, and not kept longer than needed. Episodic and semantic stores that contain client-attributable facts require (1) a defined retention policy, (2) a deletion mechanism, and (3) inclusion in the firm’s data processing register. The <code>timestamp</code> field we store on every memory entry is the minimum metadata required to implement a retention policy.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do not store raw conversation transcripts in a vector store as episodic memories. Store summaries only. Raw transcripts may contain material non-public information (MNPI), PII, or confidential client data — all of which require stricter access controls and retention rules than a summary embedding.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For pgvector, the minimum schema needed is: <code>(id UUID, user_id TEXT, content TEXT, embedding VECTOR(1536), importance FLOAT, created_at TIMESTAMPTZ)</code>. The <code>user_id</code> column enables row-level security policies so that one analyst’s memories are never retrieved for another. The <code>importance</code> column supports the composite scoring formula without a separate LLM call at retrieval time — importance is scored once at storage time and stored alongside the embedding.</p>
+</div>
+</div>
+</section>
+<section id="appendix-token-counting-across-memory-strategies" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-token-counting-across-memory-strategies">Appendix: Token Counting Across Memory Strategies</h2>
+<p>We compare the token profiles of all three short-term strategies on the 20-turn analyst session:</p>
+<div id="f0e1a2b3" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> mticker</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>turns <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(ANALYST_TURNS) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>ax.plot(turns, buf_tokens,  label<span class="op">=</span><span class="st">"Buffer (unbounded)"</span>,          color<span class="op">=</span><span class="st">"#c0392b"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>ax.plot(turns, win_tokens,  label<span class="op">=</span><span class="st">"Sliding window ($k=8$)"</span>,      color<span class="op">=</span><span class="st">"#2980b9"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>ax.plot(turns, sum_tokens,  label<span class="op">=</span><span class="st">"Summarization ($T=400, k=6$)"</span>, color<span class="op">=</span><span class="st">"#27ae60"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ev_idx, ev <span class="kw">in</span> <span class="bu">enumerate</span>(sum_mem.compression_log):</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    ax.axvline(x<span class="op">=</span>turns[ev_idx <span class="op">*</span> (<span class="bu">len</span>(turns) <span class="op">//</span> <span class="bu">max</span>(<span class="bu">len</span>(sum_mem.compression_log), <span class="dv">1</span>))],</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>               color<span class="op">=</span><span class="st">"#27ae60"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>, linestyle<span class="op">=</span><span class="st">":"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Turn"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Tokens in prompt"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>ax.yaxis.set_major_formatter(mticker.FuncFormatter(<span class="kw">lambda</span> x, _: <span class="ss">f"</span><span class="sc">{</span><span class="bu">int</span>(x)<span class="sc">:,}</span><span class="ss">"</span>))</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>ax.grid(alpha<span class="op">=</span><span class="fl">0.4</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Short-term memory strategy comparison"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> Summarization memory (green dashed) drops sharply after each compression event, then grows again as new turns accumulate. The result is bounded growth with better recall than sliding window — older turns are not discarded but compressed. Sliding window (blue) plateaus immediately at its steady-state level. Buffer memory (red) grows without bound.</p>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="pagination-link" aria-label="02. Automated Eval Pipelines">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">02. Automated Eval Pipelines</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/prep/deep-dives/04-resilience.html" class="pagination-link" aria-label="04. Resilience Patterns">
+        <span class="nav-page-text">04. Resilience Patterns</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

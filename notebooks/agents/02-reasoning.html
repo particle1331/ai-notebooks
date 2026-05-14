@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Chain-of-Thought and Other Reasoning Strategies – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/agents/03-agent-loop.html" rel="next">
+<link href="../../notebooks/agents/01-tools.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../notebooks/agents/02-reasoning.html">02. Chain-of-Thought Reasoning</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/agents/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentic Systems</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/00-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">00. LLMs as Agents</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/01-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Tool Use &amp; Function Calling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/02-reasoning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">02. Chain-of-Thought Reasoning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/03-agent-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Agent Loop</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/04-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Context &amp; Prompt Management</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/05-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Long-Term Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/06-safety.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Safety &amp; Guardrails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/07-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Evaluation &amp; Benchmarking</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/08-patterns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Workflows &amp; Agentic Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/09-multi-agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Multi-Agent Coordination</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/10-extensibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Extensibility &amp; MCP</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-cot-works-and-where-it-doesnt" id="toc-why-cot-works-and-where-it-doesnt" class="nav-link active" data-scroll-target="#why-cot-works-and-where-it-doesnt">Why CoT Works (and Where It Doesn’t)</a>
+  <ul class="collapse">
+  <li><a href="#the-commitment-problem" id="toc-the-commitment-problem" class="nav-link" data-scroll-target="#the-commitment-problem">The Commitment Problem</a></li>
+  </ul></li>
+  <li><a href="#code-cot-failure-modes" id="toc-code-cot-failure-modes" class="nav-link" data-scroll-target="#code-cot-failure-modes">Code: CoT Failure Modes</a>
+  <ul class="collapse">
+  <li><a href="#experiment-1a-error-propagation-trap" id="toc-experiment-1a-error-propagation-trap" class="nav-link" data-scroll-target="#experiment-1a-error-propagation-trap">Experiment 1a — Error Propagation Trap</a></li>
+  <li><a href="#experiment-1b-premise-sycophancy" id="toc-experiment-1b-premise-sycophancy" class="nav-link" data-scroll-target="#experiment-1b-premise-sycophancy">Experiment 1b — Premise Sycophancy</a></li>
+  <li><a href="#experiment-1c-irrelevant-context-distraction" id="toc-experiment-1c-irrelevant-context-distraction" class="nav-link" data-scroll-target="#experiment-1c-irrelevant-context-distraction">Experiment 1c — Irrelevant Context Distraction</a></li>
+  </ul></li>
+  <li><a href="#self-consistency" id="toc-self-consistency" class="nav-link" data-scroll-target="#self-consistency">Self-Consistency</a>
+  <ul class="collapse">
+  <li><a href="#the-intuition" id="toc-the-intuition" class="nav-link" data-scroll-target="#the-intuition">The Intuition</a></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a></li>
+  <li><a href="#benchmark-greedy-vs.-self-consistency" id="toc-benchmark-greedy-vs.-self-consistency" class="nav-link" data-scroll-target="#benchmark-greedy-vs.-self-consistency">Benchmark: Greedy vs.&nbsp;Self-Consistency</a></li>
+  </ul></li>
+  <li><a href="#tree-of-thoughts-lite" id="toc-tree-of-thoughts-lite" class="nav-link" data-scroll-target="#tree-of-thoughts-lite">Tree of Thoughts (Lite)</a>
+  <ul class="collapse">
+  <li><a href="#from-chain-to-tree" id="toc-from-chain-to-tree" class="nav-link" data-scroll-target="#from-chain-to-tree">From Chain to Tree</a></li>
+  <li><a href="#the-game-of-24" id="toc-the-game-of-24" class="nav-link" data-scroll-target="#the-game-of-24">The Game of 24</a></li>
+  </ul></li>
+  <li><a href="#code-tot-solver" id="toc-code-tot-solver" class="nav-link" data-scroll-target="#code-tot-solver">Code: ToT Solver</a>
+  <ul class="collapse">
+  <li><a href="#comparison-single-shot-vs.-cot-vs.-tot" id="toc-comparison-single-shot-vs.-cot-vs.-tot" class="nav-link" data-scroll-target="#comparison-single-shot-vs.-cot-vs.-tot">Comparison: Single-Shot vs.&nbsp;CoT vs.&nbsp;ToT</a></li>
+  </ul></li>
+  <li><a href="#the-inference-time-compute-landscape" id="toc-the-inference-time-compute-landscape" class="nav-link" data-scroll-target="#the-inference-time-compute-landscape">The Inference-Time Compute Landscape</a>
+  <ul class="collapse">
+  <li><a href="#test-time-compute-as-a-knob" id="toc-test-time-compute-as-a-knob" class="nav-link" data-scroll-target="#test-time-compute-as-a-knob">Test-Time Compute as a Knob</a></li>
+  <li><a href="#implementing-budget-forcing" id="toc-implementing-budget-forcing" class="nav-link" data-scroll-target="#implementing-budget-forcing">Implementing Budget Forcing</a></li>
+  </ul></li>
+  <li><a href="#reasoning-models" id="toc-reasoning-models" class="nav-link" data-scroll-target="#reasoning-models">Reasoning Models</a>
+  <ul class="collapse">
+  <li><a href="#how-reasoning-models-work" id="toc-how-reasoning-models-work" class="nav-link" data-scroll-target="#how-reasoning-models-work">How Reasoning Models Work</a></li>
+  <li><a href="#experiment-standard-vs.-reasoning-model" id="toc-experiment-standard-vs.-reasoning-model" class="nav-link" data-scroll-target="#experiment-standard-vs.-reasoning-model">Experiment — Standard vs.&nbsp;Reasoning Model</a></li>
+  <li><a href="#when-to-use-reasoning-models-in-an-agent" id="toc-when-to-use-reasoning-models-in-an-agent" class="nav-link" data-scroll-target="#when-to-use-reasoning-models-in-an-agent">When to Use Reasoning Models in an Agent</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../notebooks/agents/02-reasoning.html">02. Chain-of-Thought Reasoning</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Chain-of-Thought and Other Reasoning Strategies</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Language models generate text left-to-right, one token at a time. Each token conditions on all prior tokens — so an early mistake silently shapes every subsequent step. <strong>Chain-of-thought</strong> (CoT) prompting <span class="citation" data-cites="wei2022chain">(<a href="#ref-wei2022chain" role="doc-biblioref">Wei et al. 2022</a>)</span> exposes that internal scratchpad by instructing the model to “think step by step” before committing to a final answer. This turns out to be surprisingly effective: CoT consistently improves accuracy on multi-step arithmetic, commonsense reasoning, and symbolic manipulation tasks.</p>
+<p>But CoT is not magic — it is still left-to-right, still greedy, and still vulnerable to the same commitment dynamics of the underlying decoder. In this notebook we study three strategies that go beyond plain CoT: <strong>self-consistency</strong> (diverse sampling + majority vote), <strong>Tree of Thoughts</strong> (structured search over partial states), and <strong>budget forcing</strong> (injected reconsideration turns). We expose each failure mode experimentally, implement each remedy, and close with a discussion of <strong>reasoning models</strong> — a newer class that internalizes the reconsideration loop via training.</p>
+<section id="why-cot-works-and-where-it-doesnt" class="level2">
+<h2 class="anchored" data-anchor-id="why-cot-works-and-where-it-doesnt">Why CoT Works (and Where It Doesn’t)</h2>
+<section id="the-commitment-problem" class="level3">
+<h3 class="anchored" data-anchor-id="the-commitment-problem">The Commitment Problem</h3>
+<p>At generation time, a transformer decoder samples the next token <span class="math inline">x_t</span> from</p>
+<p><span class="math display">p(x_t \mid x_{t-1}, \ldots, x_1),</span></p>
+<p>where the context window grows left-to-right and is never revised. Under greedy decoding (temperature <span class="math inline">= 0</span>), the model takes the argmax at each step — a single deterministic path through the space of possible continuations.</p>
+<p>CoT exploits this by making the intermediate reasoning steps <span class="math inline">z_1, \ldots, z_k</span> explicit tokens in the context rather than latent activations. Formally, the probability of an answer <span class="math inline">a</span> given a question <span class="math inline">q</span> decomposes as</p>
+<p><span class="math display">p(a \mid q) = \sum_{z_1,\ldots,z_k} p(a \mid z_k, q) \prod_{i=1}^{k} p(z_i \mid z_{i-1},\ldots,z_1, q).</span></p>
+<p>By conditioning <span class="math inline">p(a \mid z_k, q)</span> on a fully elaborated chain <span class="math inline">z_k</span>, the model has access to a richer context when producing the final answer. This is the source of CoT’s power — and the source of its fragility.</p>
+<p>Two failure modes are especially important:</p>
+<p><strong>Error propagation.</strong> If any <span class="math inline">z_i</span> is wrong, every subsequent step <span class="math inline">z_{i+1}, \ldots, z_k</span> is conditioned on a false premise. The model does not backtrack; it continues confidently from a corrupted state. A single arithmetic slip early in a chain can cascade into a wildly wrong final answer.</p>
+<p><strong>Premise sycophancy.</strong> Instruction-tuned models are trained to be helpful and agreeable. When the problem statement contains a confident-sounding claim — even a false one — the model tends to accept it and reason forward from it, rather than verify it independently. This is not a prompting issue; it is a training artifact baked into the RLHF reward signal.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These failure modes are not bugs to be patched — they reveal something fundamental about how transformer-based generation works. The decoder has no mechanism to revise already-committed tokens. Every mitigation strategy in this notebook is, at its core, a way of imposing structure on top of that irreversibility.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="code-cot-failure-modes" class="level2">
+<h2 class="anchored" data-anchor-id="code-cot-failure-modes">Code: CoT Failure Modes</h2>
+<p><strong>Setup.</strong> Imports, client initialization against OpenRouter, and a convenience async wrapper for single CoT queries:</p>
+<div id="c9d0e1f2" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> asyncio</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> AsyncOpenAI</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> AsyncOpenAI(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span>os.environ[<span class="st">"OPENROUTER_API_KEY"</span>],</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    base_url<span class="op">=</span>os.environ.get(<span class="st">"OPENROUTER_BASE_URL"</span>, <span class="st">"https://openrouter.ai/api/v1"</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>MODEL <span class="op">=</span> <span class="st">"anthropic/claude-sonnet-4"</span>  <span class="co"># (1)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> chat(messages, temperature<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs):  <span class="co"># (2)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> <span class="cf">await</span> client.chat.completions.create(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>messages,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span>temperature,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> cot_answer(problem: <span class="bu">str</span>, system: <span class="bu">str</span> <span class="op">=</span> <span class="st">"Think step by step."</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> chat([</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system},</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: problem},</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    ])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>Claude Sonnet 4 via OpenRouter — a capable model for demonstrating the failure modes below.</li>
+<li>All API calls use <code>async</code>/<code>await</code>; cells that need parallel calls use <code>asyncio.gather</code> to reduce total latency.</li>
+</ol>
+<section id="experiment-1a-error-propagation-trap" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-1a-error-propagation-trap">Experiment 1a — Error Propagation Trap</h3>
+<p>We embed a planted wrong intermediate fact in a word problem — specifically, an incorrect unit-rate claim — and measure whether a standard CoT prompt accepts it. A defensive variant that explicitly instructs the model to verify stated facts before using them partially mitigates the effect:</p>
+<div id="a3b4c5d6" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>TRAP_PROBLEM <span class="op">=</span> <span class="st">"""</span><span class="op">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">A train travels at 90 km/h for 2 hours, then at 60 km/h for 3 hours.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">Note: 1 hour of travel at 90 km/h covers 150 km.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">What is the total distance traveled?</span><span class="op">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>DEFENSIVE_SYS <span class="op">=</span> (</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Think step by step. "</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Before using any fact stated in the problem, verify it independently."</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>baseline, defensive <span class="op">=</span> <span class="cf">await</span> asyncio.gather(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    cot_answer(TRAP_PROBLEM),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    cot_answer(TRAP_PROBLEM, system<span class="op">=</span>DEFENSIVE_SYS),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Displaying both responses:</p>
+<div id="c5d6e7f8" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Baseline CoT ==="</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(baseline)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Defensive CoT ==="</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(defensive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The correct answer is <span class="math inline">360</span> km: <span class="math inline">90 \times 2 + 60 \times 3 = 180 + 180 = 360.</span> The planted hint claims <span class="math inline">150</span> km for one hour at <span class="math inline">90</span> km/h — off by <span class="math inline">50\%</span>. Standard CoT typically accepts this and produces roughly <span class="math inline">420</span> km (<span class="math inline">150 \times 2 + 60 \times 3</span>). The defensive prompt sometimes catches the inconsistency, but not reliably — the verification instruction competes with the model’s prior to treat problem text as ground truth.</p>
+</section>
+<section id="experiment-1b-premise-sycophancy" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-1b-premise-sycophancy">Experiment 1b — Premise Sycophancy</h3>
+<p>A logic puzzle from the knights-and-knaves family. We inject a false premise — that <span class="math inline">A</span> is known to be a knight — as a confident assertion. The puzzle is actually inconsistent under that premise, so the correct behavior is to detect the contradiction rather than reason from it:</p>
+<div id="a9b0c1d2" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>KNIGHTS_PROBLEM <span class="op">=</span> <span class="st">"""</span><span class="op">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">On an island, knights always tell the truth and knaves always lie.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">A says: "Both B and I are knights."</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">B says: "A is a knave."</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">Given that A is known to be a knight, what type is B?</span><span class="op">\</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>SKEPTICAL_SYS <span class="op">=</span> (</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You are a strict logician. Before accepting any stated fact, "</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"verify that it is consistent with all other given constraints. "</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Think step by step."</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>no_hint, skeptical <span class="op">=</span> <span class="cf">await</span> asyncio.gather(</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    cot_answer(KNIGHTS_PROBLEM),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    cot_answer(KNIGHTS_PROBLEM, system<span class="op">=</span>SKEPTICAL_SYS),</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Displaying both responses:</p>
+<div id="c1d2e3f4" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Standard CoT ==="</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(no_hint)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Skeptical CoT ==="</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(skeptical)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The planted premise creates a contradiction: if <span class="math inline">A</span> is a knight, then <span class="math inline">A</span>’s statement “Both <span class="math inline">B</span> and I are knights” is true, making <span class="math inline">B</span> a knight as well. But then <span class="math inline">B</span>’s statement “<span class="math inline">A</span> is a knave” — spoken by a truth-telling knight — must also be true, contradicting our premise. A rigorous reasoner should identify the inconsistency. Sycophancy: the model often accepts the premise without checking and proceeds to reason from it, typically concluding that <span class="math inline">B</span> is a knight (accepting both the stated premise and <span class="math inline">A</span>’s claim at face value).</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Defensive prompting reduces but does not eliminate premise sycophancy. The model has been instruction-tuned to be agreeable and to accept user-stated “facts” — this is a training artifact, not a prompting problem.</p>
+</div>
+</div>
+</section>
+<section id="experiment-1c-irrelevant-context-distraction" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-1c-irrelevant-context-distraction">Experiment 1c — Irrelevant Context Distraction</h3>
+<p>Based on Shi et al.&nbsp;(2023), who showed that adding an irrelevant but plausible sentence to a word problem drops CoT accuracy substantially — the model treats all context as potentially relevant and is distracted by numbers or facts that should be ignored. We reproduce this on a small set of paired problems:</p>
+<div id="b6c7d8e9" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_number(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> re.search(<span class="vs">r"Answer:</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">+</span><span class="kw">)</span><span class="vs">"</span>, text, re.IGNORECASE)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m.group(<span class="dv">1</span>).replace(<span class="st">","</span>, <span class="st">""</span>).strip() <span class="cf">if</span> m <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>GSM_PAIRS <span class="op">=</span> [</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clean"</span>:      <span class="st">"Janet has 24 apples. She gives 7 to her friend. How many does she have? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"distracted"</span>: <span class="st">"Janet has 24 apples. Her neighbor also grows apples and has 15. She gives 7 to her friend. How many does Janet have? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer"</span>:     <span class="st">"17"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clean"</span>:      <span class="st">"A box has 5 rows of 8 chocolates. How many chocolates total? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"distracted"</span>: <span class="st">"A box has 5 rows of 8 chocolates. Each chocolate weighs 12 grams. How many chocolates total? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer"</span>:     <span class="st">"40"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clean"</span>:      <span class="st">"Tom buys 3 pens at $4 each and 2 notebooks at $5 each. Total cost? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"distracted"</span>: <span class="st">"Tom buys 3 pens at $4 each and 2 notebooks at $5 each. The store has been open since 1998. Total cost? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer"</span>:     <span class="st">"22"</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clean"</span>:      <span class="st">"A rope is 48 meters long. It is cut into 6 equal pieces. How many meters per piece? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"distracted"</span>: <span class="st">"A rope is 48 meters long and weighs 3 kg. It is cut into 6 equal pieces. How many meters per piece? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer"</span>:     <span class="st">"8"</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"clean"</span>:      <span class="st">"Maria reads 25 pages per day. How many pages does she read in 12 days? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"distracted"</span>: <span class="st">"Maria reads 25 pages per day. She has been reading since she was 7 years old. How many pages does she read in 12 days? Answer with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer"</span>:     <span class="st">"300"</span>,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>COT_WITH_ANSWER <span class="op">=</span> <span class="st">"Think step by step. End your response with 'Answer: &lt;number&gt;'."</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_distract_experiment():</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    tasks_clean <span class="op">=</span> [cot_answer(p[<span class="st">"clean"</span>], system<span class="op">=</span>COT_WITH_ANSWER) <span class="cf">for</span> p <span class="kw">in</span> GSM_PAIRS]</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    tasks_dist  <span class="op">=</span> [cot_answer(p[<span class="st">"distracted"</span>], system<span class="op">=</span>COT_WITH_ANSWER) <span class="cf">for</span> p <span class="kw">in</span> GSM_PAIRS]</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    clean_resps    <span class="op">=</span> <span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks_clean)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    distract_resps <span class="op">=</span> <span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks_dist)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> []</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pair, clean_resp, distract_resp <span class="kw">in</span> <span class="bu">zip</span>(GSM_PAIRS, clean_resps, distract_resps):</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        results.append({</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>            <span class="st">"answer"</span>:           pair[<span class="st">"answer"</span>],</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clean_pred"</span>:       extract_number(clean_resp),</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>            <span class="st">"distract_pred"</span>:    extract_number(distract_resp),</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clean_correct"</span>:    extract_number(clean_resp)    <span class="op">==</span> pair[<span class="st">"answer"</span>],</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>            <span class="st">"distract_correct"</span>: extract_number(distract_resp) <span class="op">==</span> pair[<span class="st">"answer"</span>],</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>distract_results <span class="op">=</span> <span class="cf">await</span> run_distract_experiment()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Displaying results as a table with per-condition accuracy:</p>
+<div id="d8e9f0a1" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(distract_results)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Clean ✓"</span>]     <span class="op">=</span> df[<span class="st">"clean_correct"</span>].<span class="bu">map</span>({<span class="va">True</span>: <span class="st">"✓"</span>, <span class="va">False</span>: <span class="st">"✗"</span>})</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Distracted ✓"</span>] <span class="op">=</span> df[<span class="st">"distract_correct"</span>].<span class="bu">map</span>({<span class="va">True</span>: <span class="st">"✓"</span>, <span class="va">False</span>: <span class="st">"✗"</span>})</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>display_df <span class="op">=</span> df[[<span class="st">"answer"</span>, <span class="st">"clean_pred"</span>, <span class="st">"Clean ✓"</span>, <span class="st">"distract_pred"</span>, <span class="st">"Distracted ✓"</span>]]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>display_df.columns <span class="op">=</span> [<span class="st">"Gold"</span>, <span class="st">"Clean pred"</span>, <span class="st">"Clean ✓"</span>, <span class="st">"Distracted pred"</span>, <span class="st">"Distracted ✓"</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pd.option_context(<span class="st">"display.max_colwidth"</span>, <span class="va">None</span>):</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    display(display_df)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>clean_acc    <span class="op">=</span> df[<span class="st">"clean_correct"</span>].mean()</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>distract_acc <span class="op">=</span> df[<span class="st">"distract_correct"</span>].mean()</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Clean accuracy:      </span><span class="sc">{</span>clean_acc<span class="sc">:.0%}</span><span class="ss">"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Distracted accuracy: </span><span class="sc">{</span>distract_acc<span class="sc">:.0%}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The accuracy drop from clean to distracted conditions illustrates the fundamental issue: the model treats all text in the problem as potentially load-bearing. A number like <span class="math inline">15</span> (the neighbor’s apple count) or a year like <span class="math inline">1998</span> can trigger spurious arithmetic. This is not unique to small models — Shi et al.&nbsp;(2023) replicate the effect on GPT-4.</p>
+</section>
+</section>
+<section id="self-consistency" class="level2">
+<h2 class="anchored" data-anchor-id="self-consistency">Self-Consistency</h2>
+<section id="the-intuition" class="level3">
+<h3 class="anchored" data-anchor-id="the-intuition">The Intuition</h3>
+<p>Greedy CoT commits to a single reasoning path. If that path contains an error, nothing corrects it. The key observation from Wang et al.&nbsp;(2022) is that correct answers tend to be <em>robust</em> — many different valid reasoning paths all converge on the same final answer — while errors are <em>fragile</em> and idiosyncratic, each error path reaching a different wrong conclusion.</p>
+<p>Self-consistency exploits this asymmetry: sample <span class="math inline">N</span> independent CoT responses at non-zero temperature, extract the final answer from each, and return the majority vote:</p>
+<p><span class="math display">\hat{a} = \operatorname{argmax}_{a} \sum_{i=1}^{N} \mathbf{1}[\text{extract}(z_i) = a].</span></p>
+<p>The cost is <span class="math inline">N \times</span> the single-call cost. Wang et al.&nbsp;(2023) found that most of the gain arrives by <span class="math inline">N = 5</span>–<span class="math inline">10</span>; beyond that, marginal returns diminish rapidly.</p>
+</section>
+<section id="implementation" class="level3">
+<h3 class="anchored" data-anchor-id="implementation">Implementation</h3>
+<p>A sampler that generates <span class="math inline">N</span> independent responses in parallel and an aggregator that counts extracted answers:</p>
+<div id="e5f6a7b8c" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **Sampler.**</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> sample_cot(problem: <span class="bu">str</span>, n: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.7</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return n independent CoT responses via parallel async calls."""</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">=</span> [</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        chat(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Think step by step. End your response with 'Answer: &lt;number&gt;'."</span>},</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: problem},</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            temperature<span class="op">=</span>temperature,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">list</span>(<span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks))  <span class="co"># (1)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># **Aggregator.**</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> majority_vote(responses: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">dict</span>]:</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    answers <span class="op">=</span> [extract_number(r) <span class="cf">for</span> r <span class="kw">in</span> responses]</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    counts  <span class="op">=</span> Counter(a <span class="cf">for</span> a <span class="kw">in</span> answers <span class="cf">if</span> a <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>)  <span class="co"># (2)</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    top     <span class="op">=</span> counts.most_common(<span class="dv">1</span>)[<span class="dv">0</span>][<span class="dv">0</span>] <span class="cf">if</span> counts <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> top, <span class="bu">dict</span>(counts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><code>asyncio.gather</code> fires all <span class="math inline">N</span> requests concurrently, so total latency is approximately one call’s worth rather than <span class="math inline">N</span> calls’ worth.</li>
+<li><code>None</code> responses (extraction failures) are excluded from the vote; a high <code>None</code> rate signals a prompt format issue.</li>
+</ol>
+</section>
+<section id="benchmark-greedy-vs.-self-consistency" class="level3">
+<h3 class="anchored" data-anchor-id="benchmark-greedy-vs.-self-consistency">Benchmark: Greedy vs.&nbsp;Self-Consistency</h3>
+<p>Ten multi-step arithmetic problems with known integer answers. For each, we compare a single greedy CoT call against <span class="math inline">N = 10</span> self-consistent samples:</p>
+<div id="c9d0e1f2a" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PROBLEMS <span class="op">=</span> [</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A store sells apples for $0.50 each and oranges for $0.75 each. Sarah buys 8 apples and 6 oranges. How many cents does she spend in total?"</span>, <span class="st">"answer"</span>: <span class="st">"850"</span>},</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A factory produces 240 widgets per hour. If it runs 8 hours per day for 5 days, then has a 15% quality reject rate, how many good widgets are produced?"</span>, <span class="st">"answer"</span>: <span class="st">"8160"</span>},</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"Train A leaves at 9am at 60 mph. Train B leaves the same station at 11am at 90 mph. At what hour does Train B catch Train A? (answer as whole hours after 9am)"</span>, <span class="st">"answer"</span>: <span class="st">"7"</span>},</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A rectangle has perimeter 56 cm. Its length is 3 times its width. What is its area in square cm?"</span>, <span class="st">"answer"</span>: <span class="st">"147"</span>},</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A tank holds 500 liters. It fills at 25 liters/min and drains at 10 liters/min. Starting empty, how many minutes to fill it?"</span>, <span class="st">"answer"</span>: <span class="st">"34"</span>},</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A class of 30 students: 40</span><span class="sc">% s</span><span class="st">cored above 80, 30</span><span class="sc">% s</span><span class="st">cored 60-80, the rest below 60. How many students scored below 60?"</span>, <span class="st">"answer"</span>: <span class="st">"9"</span>},</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A car travels 180 km in 2 hours, then 120 km in 1.5 hours. What is the average speed for the whole trip in km/h?"</span>, <span class="st">"answer"</span>: <span class="st">"84"</span>},</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"A ladder is 10m long and rests against a wall. The base is 6m from the wall. How high up the wall does it reach in meters?"</span>, <span class="st">"answer"</span>: <span class="st">"8"</span>},</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"John invests $1000 at 5</span><span class="sc">% s</span><span class="st">imple interest per year. How much interest does he earn over 3 years?"</span>, <span class="st">"answer"</span>: <span class="st">"150"</span>},</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"q"</span>: <span class="st">"There are 12 teams in a round-robin tournament where every team plays every other team exactly once. How many games are played total?"</span>, <span class="st">"answer"</span>: <span class="st">"66"</span>},</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_benchmark():</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    greedy_correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    sc_correct     <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    sc_details     <span class="op">=</span> []</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> PROBLEMS:</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        greedy_resp, samples <span class="op">=</span> <span class="cf">await</span> asyncio.gather(  <span class="co"># (1)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>            cot_answer(item[<span class="st">"q"</span>], system<span class="op">=</span><span class="st">"Think step by step. End with 'Answer: &lt;number&gt;'."</span>),</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>            sample_cot(item[<span class="st">"q"</span>], n<span class="op">=</span><span class="dv">10</span>),</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        greedy_ans <span class="op">=</span> extract_number(greedy_resp)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        greedy_ok  <span class="op">=</span> greedy_ans <span class="op">==</span> item[<span class="st">"answer"</span>]</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        greedy_correct <span class="op">+=</span> <span class="bu">int</span>(greedy_ok)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        sc_ans, votes <span class="op">=</span> majority_vote(samples)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        sc_ok         <span class="op">=</span> sc_ans <span class="op">==</span> item[<span class="st">"answer"</span>]</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        sc_correct    <span class="op">+=</span> <span class="bu">int</span>(sc_ok)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        sc_details.append({</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>            <span class="st">"q"</span>:         item[<span class="st">"q"</span>][:<span class="dv">50</span>] <span class="op">+</span> <span class="st">"..."</span>,</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>            <span class="st">"gold"</span>:      item[<span class="st">"answer"</span>],</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>            <span class="st">"greedy"</span>:    greedy_ans,</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">"greedy_ok"</span>: greedy_ok,</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">"sc"</span>:        sc_ans,</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">"sc_ok"</span>:     sc_ok,</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>            <span class="st">"votes"</span>:     votes,</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> greedy_correct, sc_correct, sc_details</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>greedy_correct, sc_correct, sc_details <span class="op">=</span> <span class="cf">await</span> run_benchmark()</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Greedy CoT:       </span><span class="sc">{</span>greedy_correct<span class="sc">}</span><span class="ss">/10"</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Self-consistency: </span><span class="sc">{</span>sc_correct<span class="sc">}</span><span class="ss">/10"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>For each problem, the greedy call and the 10-sample batch are launched concurrently — the benchmark runs in roughly the time of the longest single problem’s sampling pass.</li>
+</ol>
+<p>Displaying results with vote distributions:</p>
+<div id="e1f2a3b4c" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d <span class="kw">in</span> sc_details:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    rows.append({</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Problem"</span>:            d[<span class="st">"q"</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Gold"</span>:               d[<span class="st">"gold"</span>],</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Greedy"</span>:             d[<span class="st">"greedy"</span>],</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Greedy ✓"</span>:           <span class="st">"✓"</span> <span class="cf">if</span> d[<span class="st">"greedy_ok"</span>] <span class="cf">else</span> <span class="st">"✗"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"SC"</span>:                 d[<span class="st">"sc"</span>],</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"SC ✓"</span>:               <span class="st">"✓"</span> <span class="cf">if</span> d[<span class="st">"sc_ok"</span>] <span class="cf">else</span> <span class="st">"✗"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Vote distribution"</span>:  <span class="bu">str</span>(d[<span class="st">"votes"</span>]),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pd.option_context(<span class="st">"display.max_colwidth"</span>, <span class="va">None</span>):</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    display(pd.DataFrame(rows))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The vote distribution column tells the story: on problems where self-consistency helps, the correct answer attracts a clear plurality while error answers scatter across multiple distinct wrong values. The failure regime is when the model has a systematic conceptual error — all samples converge to the same wrong answer, so the vote simply confirms the error. Self-consistency is diversity insurance; it cannot rescue a model from a concept it genuinely does not understand.</p>
+</section>
+</section>
+<section id="tree-of-thoughts-lite" class="level2">
+<h2 class="anchored" data-anchor-id="tree-of-thoughts-lite">Tree of Thoughts (Lite)</h2>
+<section id="from-chain-to-tree" class="level3">
+<h3 class="anchored" data-anchor-id="from-chain-to-tree">From Chain to Tree</h3>
+<p>Self-consistency generates <span class="math inline">N</span> <em>complete</em> parallel paths and votes at the end — there is no pruning, no backtracking, and no evaluation of partial states. Tree of Thoughts (ToT) from Yao et al.&nbsp;(2023) introduces a richer structure: an explicit search tree where each node is a <em>partial solution state</em>, and a separate evaluator scores partial states before the search commits to them.</p>
+<p>Two LLM roles work in concert: (1) a <strong>thought generator</strong> that proposes <span class="math inline">k</span> candidate next steps from any given state, and (2) a <strong>state evaluator</strong> that classifies each partial state as <code>sure</code>, <code>maybe</code>, or <code>impossible</code>. Two search strategies are available: <strong>BFS</strong> (fixed depth <span class="math inline">d</span>, keep top-<span class="math inline">b</span> states per level) and <strong>DFS</strong> (explore to completion, backtrack on <code>impossible</code>).</p>
+<p>The contrast with prior methods:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Paths</th>
+<th>Evaluate partials?</th>
+<th>Backtrack?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CoT (greedy)</td>
+<td>1</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Self-consistency</td>
+<td><span class="math inline">N</span> complete</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>ToT</td>
+<td><span class="math inline">b^d</span> partial</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>The evaluator is the key ingredient. It converts an open-ended search into a tractable one by pruning clearly hopeless branches early, before they waste generator calls at deeper levels.</p>
+</section>
+<section id="the-game-of-24" class="level3">
+<h3 class="anchored" data-anchor-id="the-game-of-24">The Game of 24</h3>
+<p>Game of 24 is a standard benchmark for combinatorial reasoning: use each of four given numbers exactly once with <span class="math inline">+</span>, <span class="math inline">-</span>, <span class="math inline">\times</span>, <span class="math inline">\div</span> to reach <span class="math inline">24</span>. Yao et al.&nbsp;(2023) report that greedy CoT with GPT-4 solves only about <span class="math inline">4\%</span> of hard instances. The task is well-suited to ToT because partial states (the remaining numbers after one operation) are easy to evaluate — a rule-based or LLM evaluator can quickly judge whether <span class="math inline">24</span> is still reachable.</p>
+<p>We use a simplified <strong>3-number variant</strong> to keep the tree depth at <span class="math inline">2</span> — manageable for a demo without excessive API calls. In this variant, two arithmetic operations are applied in sequence: <span class="math inline">\text{op}_1(a, b) = x</span>, then <span class="math inline">\text{op}_2(x, c) = 24.</span></p>
+</section>
+</section>
+<section id="code-tot-solver" class="level2">
+<h2 class="anchored" data-anchor-id="code-tot-solver">Code: ToT Solver</h2>
+<p>The thought generator proposes <span class="math inline">k</span> candidate single-operation steps from a set of numbers, and the state evaluator classifies each resulting partial state:</p>
+<div id="b0c1d2e3f" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **Thought generator.**</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>PROPOSE_PROMPT <span class="op">=</span> <span class="st">"""</span><span class="op">\</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">You are solving a variant of Game of 24 using exactly 3 numbers.</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">Given a set of numbers, propose exactly </span><span class="sc">{k}</span><span class="st"> distinct ways to apply one arithmetic operation</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">(+, -, *, /) to two of the numbers, producing a result.</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">Format each proposal on a new line as:</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;num1&gt; &lt;op&gt; &lt;num2&gt; = &lt;result&gt; (remaining: &lt;leftover&gt;)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">Example for numbers [4, 6, 8]:</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="st">  4 + 6 = 10 (remaining: 8)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="st">  8 - 6 = 2 (remaining: 4)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="st">  4 * 6 = 24 (remaining: 8)</span><span class="op">\</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> propose_thoughts(numbers: <span class="bu">list</span>[<span class="bu">int</span> <span class="op">|</span> <span class="bu">float</span>], k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    raw <span class="op">=</span> <span class="cf">await</span> chat(</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: PROPOSE_PROMPT.<span class="bu">format</span>(k<span class="op">=</span>k)},</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Numbers: </span><span class="sc">{</span>numbers<span class="sc">}</span><span class="ss">. Propose </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> operations."</span>},</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="fl">0.7</span>,</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">=</span> [</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        line.strip()</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> line <span class="kw">in</span> raw.strip().splitlines()</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> line.strip() <span class="kw">and</span> <span class="st">"="</span> <span class="kw">in</span> line  <span class="co"># (1)</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lines[:k]</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co"># **State evaluator.**</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>EVALUATE_PROMPT <span class="op">=</span> <span class="st">"""</span><span class="op">\</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="st">You are evaluating Game of 24 states.</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="st">Given remaining numbers, respond with exactly one word:</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="st">  sure       — you can clearly reach 24 from these numbers</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="st">  maybe      — might be possible, not immediately obvious</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="st">  impossible — provably cannot reach 24 from these numbers</span><span class="op">\</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> evaluate_state(remaining: <span class="bu">list</span>[<span class="bu">int</span> <span class="op">|</span> <span class="bu">float</span>]) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    verdict <span class="op">=</span> <span class="cf">await</span> chat(</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: EVALUATE_PROMPT},</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Remaining: </span><span class="sc">{</span>remaining<span class="sc">}</span><span class="ss">. Can these reach 24?"</span>},</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="dv">0</span>,  <span class="co"># (2)</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    verdict <span class="op">=</span> verdict.strip().lower()</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> token <span class="kw">in</span> (<span class="st">"sure"</span>, <span class="st">"impossible"</span>, <span class="st">"maybe"</span>):</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token <span class="kw">in</span> verdict:</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> token</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"maybe"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>Lines without <code>=</code> are discarded — they are likely preamble or formatting noise from the model.</li>
+<li>Temperature <span class="math inline">0</span> for the evaluator: we want a consistent scoring signal, not diversity.</li>
+</ol>
+<p>The BFS solver maintains a frontier of partial states, expands each with <span class="math inline">k</span> generator proposals, prunes <code>impossible</code> states, and keeps the top-<span class="math inline">b</span> survivors by evaluator verdict at each depth:</p>
+<div id="e3f4a5b6c" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **BFS solver.**</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_result(thought_line: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extract the numeric result of the applied operation from a thought line."""</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> re.search(<span class="vs">r"=</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="vs">-</span><span class="op">?</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">.]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\(</span><span class="vs">remaining"</span>, thought_line)  <span class="co"># (3)</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(m.group(<span class="dv">1</span>)) <span class="cf">if</span> m <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> solve_game24_tot(numbers: <span class="bu">list</span>[<span class="bu">int</span>], k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>, beam_width: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""BFS over thought tree with beam search; return kept states at final depth."""</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    frontier <span class="op">=</span> [{<span class="st">"numbers"</span>: <span class="bu">list</span>(<span class="bu">map</span>(<span class="bu">float</span>, numbers)), <span class="st">"history"</span>: [], <span class="st">"verdict"</span>: <span class="st">"maybe"</span>}]</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> depth <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(numbers) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        next_frontier <span class="op">=</span> []</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> state <span class="kw">in</span> frontier:</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            thoughts <span class="op">=</span> <span class="cf">await</span> propose_thoughts(state[<span class="st">"numbers"</span>], k<span class="op">=</span>k)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> thought <span class="kw">in</span> thoughts:</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                result <span class="op">=</span> parse_result(thought)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> result <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                remaining_nums <span class="op">=</span> state[<span class="st">"numbers"</span>].copy()  <span class="co"># (4)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>                rem_match <span class="op">=</span> re.search(<span class="vs">r"remaining:</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[-</span><span class="dv">\d</span><span class="pp">.</span><span class="dv">\s</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\)</span><span class="vs">"</span>, thought)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> rem_match:</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">try</span>:</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>                        remaining_nums <span class="op">=</span> [</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                            <span class="bu">float</span>(x)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">for</span> x <span class="kw">in</span> rem_match.group(<span class="dv">1</span>).split()</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">if</span> x <span class="kw">not</span> <span class="kw">in</span> (<span class="st">"-"</span>, <span class="st">""</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>                        ]</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">except</span> <span class="pp">ValueError</span>:</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>                        remaining_nums <span class="op">=</span> [result]</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>                <span class="cf">elif</span> <span class="bu">len</span>(state[<span class="st">"numbers"</span>]) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>                    remaining_nums <span class="op">=</span> [result]</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>                verdict <span class="op">=</span> <span class="cf">await</span> evaluate_state(remaining_nums)</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> verdict <span class="op">==</span> <span class="st">"impossible"</span>:</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>                next_frontier.append({</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"numbers"</span>:  remaining_nums,</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"history"</span>:  state[<span class="st">"history"</span>] <span class="op">+</span> [thought],</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"verdict"</span>:  verdict,</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>        priority <span class="op">=</span> {<span class="st">"sure"</span>: <span class="dv">0</span>, <span class="st">"maybe"</span>: <span class="dv">1</span>}</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        next_frontier.sort(key<span class="op">=</span><span class="kw">lambda</span> s: priority.get(s.get(<span class="st">"verdict"</span>, <span class="st">"maybe"</span>), <span class="dv">1</span>))</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        frontier <span class="op">=</span> next_frontier[:beam_width] <span class="cf">if</span> next_frontier <span class="cf">else</span> frontier  <span class="co"># (5)</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frontier</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="3" type="1">
+<li>We extract the numeric result from the expression to track what single number remains at each depth.</li>
+<li>In the 3-number variant, each operation reduces the count by <span class="math inline">1</span>: <span class="math inline">[a, b, c] \to [\text{result}, c] \to [\text{final}].</span></li>
+<li>If no non-impossible states remain, the frontier is kept as-is to avoid an empty beam — graceful degradation.</li>
+</ol>
+<section id="comparison-single-shot-vs.-cot-vs.-tot" class="level3">
+<h3 class="anchored" data-anchor-id="comparison-single-shot-vs.-cot-vs.-tot">Comparison: Single-Shot vs.&nbsp;CoT vs.&nbsp;ToT</h3>
+<p>We define single-shot and zero-shot CoT baselines, then run all three approaches on a set of 3-number Game of 24 cases with known solutions:</p>
+<div id="c7d8e9f0a" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **Single-shot.**</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> single_shot_24(numbers: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> chat(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Solve Game of 24: use the given numbers with +, -, *, / to reach 24."</span>},</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Numbers: </span><span class="sc">{</span>numbers<span class="sc">}</span><span class="ss">. Show your solution."</span>},</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># **Zero-shot CoT.**</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> cot_24(numbers: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> chat(</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Think step by step to make 24 from the given numbers using +, -, *, /."</span>},</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Numbers: </span><span class="sc">{</span>numbers<span class="sc">}</span><span class="ss">."</span>},</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>TEST_CASES <span class="op">=</span> [</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"numbers"</span>: [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>], <span class="st">"solution"</span>: <span class="st">"(2*3)*4 = 24"</span>},   <span class="co"># two multiplications</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"numbers"</span>: [<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>], <span class="st">"solution"</span>: <span class="st">"4*6/1 = 24"</span>},     <span class="co"># trivial — baseline sanity check</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"numbers"</span>: [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">1</span>], <span class="st">"solution"</span>: <span class="st">"4*(5+1) = 24"</span>},   <span class="co"># add-then-multiply</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"numbers"</span>: [<span class="dv">3</span>, <span class="dv">8</span>, <span class="dv">9</span>], <span class="st">"solution"</span>: <span class="st">"(9/3)*8 = 24"</span>},   <span class="co"># divide-then-multiply, non-obvious</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running the comparison and displaying results:</p>
+<div id="e9f0a1b2c" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_24(expr: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">abs</span>(<span class="bu">eval</span>(expr.split(<span class="st">"="</span>)[<span class="dv">0</span>].strip()) <span class="op">-</span> <span class="dv">24</span>) <span class="op">&lt;</span> <span class="fl">1e-6</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> (<span class="pp">ValueError</span>, <span class="pp">ZeroDivisionError</span>, <span class="pp">SyntaxError</span>, <span class="pp">NameError</span>, <span class="pp">TypeError</span>):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_tot_comparison():</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> []</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> case <span class="kw">in</span> TEST_CASES:</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        nums <span class="op">=</span> case[<span class="st">"numbers"</span>]</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        single, cot_resp, tot <span class="op">=</span> <span class="cf">await</span> asyncio.gather(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            single_shot_24(nums),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            cot_24(nums),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>            solve_game24_tot(nums, k<span class="op">=</span><span class="dv">3</span>, beam_width<span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        tot_ans <span class="op">=</span> tot[<span class="op">-</span><span class="dv">1</span>][<span class="st">"history"</span>] <span class="cf">if</span> tot <span class="cf">else</span> []</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        rows.append({</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Numbers"</span>:     <span class="bu">str</span>(nums),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Solution"</span>:    case[<span class="st">"solution"</span>],</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Single-shot"</span>: single[:<span class="dv">100</span>].replace(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, <span class="st">" "</span>),</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">"CoT"</span>:         cot_resp[:<span class="dv">100</span>].replace(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, <span class="st">" "</span>),</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ToT steps"</span>:   <span class="st">" → "</span>.join(tot_ans) <span class="cf">if</span> tot_ans <span class="cf">else</span> <span class="st">"—"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rows</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>comparison_rows <span class="op">=</span> <span class="cf">await</span> run_tot_comparison()</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pd.option_context(<span class="st">"display.max_colwidth"</span>, <span class="va">None</span>):</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    display(pd.DataFrame(comparison_rows))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Cost analysis.</strong> ToT makes <span class="math inline">k \times \text{depth} \times 2</span> calls per puzzle (generator + evaluator at each node) versus <span class="math inline">1</span> for greedy CoT. For the 3-number variant with <span class="math inline">k = 3</span> and depth <span class="math inline">= 2</span>, that is roughly <span class="math inline">12</span> calls compared to <span class="math inline">1</span>. The overhead is worthwhile when: (a) the problem has verifiable partial states, (b) correctness matters more than latency, and (c) a cheap evaluator is available. The division-then-multiply case <span class="math inline">[3, 8, 9]</span> is the key stress test: a greedy CoT pass tends to try obvious operations first (<span class="math inline">8 + 9 = 17</span>, <span class="math inline">9 - 3 = 6</span>) and miss the non-obvious <span class="math inline">9 / 3 = 3 \to 3 \times 8 = 24</span> path. ToT explores this by design.</p>
+</section>
+</section>
+<section id="the-inference-time-compute-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="the-inference-time-compute-landscape">The Inference-Time Compute Landscape</h2>
+<section id="test-time-compute-as-a-knob" class="level3">
+<h3 class="anchored" data-anchor-id="test-time-compute-as-a-knob">Test-Time Compute as a Knob</h3>
+<p>The classical way to improve a language model is to train a larger one. It turns out there is a second axis: allocating more <em>inference</em> compute — more tokens, more calls, more search — to a fixed model. Snell et al.&nbsp;(2024) show that a compute-optimal strategy combining a smaller model with <span class="math inline">14\times</span> inference compute can match a model <span class="math inline">14\times</span> larger at training time. This reframes the scaling conversation: quality is a joint function of (a) model capacity and (b) how hard we make the model think at inference.</p>
+<p>The three strategies we have studied occupy distinct positions on this cost spectrum:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Strategy</th>
+<th>Test-time compute</th>
+<th>Mechanism</th>
+<th>Verification needed?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Greedy CoT</td>
+<td><span class="math inline">O(L)</span></td>
+<td>single chain</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td>Self-consistency (<span class="math inline">N</span>)</td>
+<td><span class="math inline">O(NL)</span></td>
+<td>ensemble + vote</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td>ToT (<span class="math inline">k, b, d</span>)</td>
+<td><span class="math inline">O(kbdL)</span></td>
+<td>tree search + eval</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Two additional results round out the picture. Brown et al.&nbsp;(2024) “Large Language Monkeys” showed that <em>coverage</em> — the probability that at least one sample is correct — scales log-linearly with <span class="math inline">N</span>, but <em>selecting</em> the correct one from many candidates requires an external verifier. This is the core bottleneck: generating good candidates is easier than identifying them. Budget forcing from Kimi k1.5 (2025) offers a low-overhead alternative: append a reconsideration prompt mid-generation, forcing the model to allocate additional tokens to the same problem serially.</p>
+</section>
+<section id="implementing-budget-forcing" class="level3">
+<h3 class="anchored" data-anchor-id="implementing-budget-forcing">Implementing Budget Forcing</h3>
+<p>We implement budget forcing as a multi-turn conversation where the model’s prior response is injected as an <code>assistant</code> turn, then a reconsideration phrase is added as a new <code>user</code> turn:</p>
+<div id="f6a7b8c9e" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># **Budget forcing.**</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> budget_forced_cot(problem: <span class="bu">str</span>, n_reconsiderations: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Force additional thinking by appending reconsideration turns."""</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="st">"Think step by step. Be careful and check your work. End with 'Answer: &lt;number&gt;'."</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: problem},</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> <span class="cf">await</span> chat(messages, temperature<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: response})  <span class="co"># (1)</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_reconsiderations):</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Wait — let me reconsider that from scratch."</span>})  <span class="co"># (2)</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="cf">await</span> chat(messages, temperature<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: response})</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>forced, baseline <span class="op">=</span> <span class="cf">await</span> asyncio.gather(</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    budget_forced_cot(TRAP_PROBLEM, n_reconsiderations<span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    cot_answer(TRAP_PROBLEM),</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Baseline ==="</span>)</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(baseline)</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== Budget-forced (2 reconsiderations) ==="</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(forced)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>Adding the first response as an <code>assistant</code> turn lets the model see its own prior reasoning as context to reconsider.</li>
+<li>The reconsideration phrase is injected as a new <code>user</code> turn — budget forcing via multi-turn conversation rather than logit manipulation.</li>
+</ol>
+<p>Budget forcing often catches the planted error in <code>TRAP_PROBLEM</code> because the reconsideration pass re-reads the problem with the prior (erroneous) answer visible, sometimes triggering a self-correction. But it is not reliable — the model may simply reaffirm its prior answer with more confidence. Unlike self-consistency (parallel diversity) and ToT (structured search), budget forcing is serial and lacks a structural scaffold. It is best understood as a near-zero-cost hedge for latency-critical settings where one additional API call is acceptable.</p>
+</section>
+</section>
+<section id="reasoning-models" class="level2">
+<h2 class="anchored" data-anchor-id="reasoning-models">Reasoning Models</h2>
+<p>The strategies in this notebook — self-consistency, ToT, budget forcing — are all external scaffolding applied on top of a base model. A newer approach trains the reasoning process <em>into</em> the model via reinforcement learning. OpenAI o1/o3, DeepSeek-R1, and Kimi k1.5 belong to this class: they generate internal reasoning traces (sometimes called <code>&lt;think&gt;</code> blocks) before producing a final answer, without requiring any prompting scaffolding.</p>
+<section id="how-reasoning-models-work" class="level3">
+<h3 class="anchored" data-anchor-id="how-reasoning-models-work">How Reasoning Models Work</h3>
+<p>Standard LLMs are trained on text prediction with RLHF for alignment. Reasoning models add a training phase that rewards correct final answers on verifiable tasks (math, code). The key insight from DeepSeek-R1 is that <strong>group relative policy optimization</strong> (GRPO) with outcome-based rewards causes models to spontaneously develop extended internal reasoning: the model learns that “thinking longer” correlates with correct answers, so it allocates more tokens to a reasoning trace before committing to an output.</p>
+<p>Three observable behaviors emerge:</p>
+<ul>
+<li><strong>Reflection:</strong> “Wait, that’s not right. Let me reconsider…”</li>
+<li><strong>Backtracking:</strong> Starting a calculation again from a different approach</li>
+<li><strong>Verification:</strong> Computing a result, then checking it via a different method</li>
+</ul>
+<p>This is structurally similar to budget forcing (injecting reconsideration turns) — but it happens inside training, not at inference time. The model has internalized the reconsideration loop.</p>
+<p>The API for reasoning models differs slightly: some models (o1, o3) accept a <code>reasoning_effort</code> parameter or a <code>max_completion_tokens</code> budget; DeepSeek-R1 via OpenRouter accepts a standard <code>messages</code> payload but returns a <code>reasoning_content</code> field alongside the answer. The “thinking” tokens are typically priced at the same rate as output tokens.</p>
+</section>
+<section id="experiment-standard-vs.-reasoning-model" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-standard-vs.-reasoning-model">Experiment — Standard vs.&nbsp;Reasoning Model</h3>
+<p>We compare three approaches on a hard probability problem — a Bayes’ theorem application where CoT frequently fails by mis-applying conditional probability:</p>
+<div id="rm07a8b9" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A problem where CoT frequently fails: conditional probability via Bayes' theorem</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>HARD_PROBLEM <span class="op">=</span> (</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You have 3 boxes. Box A contains 2 red and 2 blue balls. "</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Box B contains 3 red and 1 blue ball. Box C contains 1 red and 3 blue balls. "</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You pick a box uniformly at random, then draw one ball. "</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Given that the ball is red, what is the probability it came from Box B? "</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Express as a reduced fraction."</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct answer:</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># P(red|A)=1/2, P(red|B)=3/4, P(red|C)=1/4; P(red) = (1/2+3/4+1/4)/3 = (3/2)/3 = 1/2</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># P(B|red) = P(red|B)*P(B) / P(red) = (3/4 * 1/3) / (1/2) = (1/4) / (1/2) = 1/2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running three variants in parallel — standard greedy CoT, self-consistency with <span class="math inline">N = 5</span>, and a single call to DeepSeek-R1:</p>
+<div id="rm09c0d1" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_reasoning_comparison():</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (1) Standard greedy CoT</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    greedy_task <span class="op">=</span> chat(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Think step by step."</span>},</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: HARD_PROBLEM},</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (2) Self-consistency N=5</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    sc_tasks <span class="op">=</span> [</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        chat(</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Think step by step. End with 'Answer: &lt;fraction&gt;'."</span>},</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: HARD_PROBLEM},</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>            temperature<span class="op">=</span><span class="fl">0.7</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (3) Reasoning model (DeepSeek-R1) — single call, no system prompt needed  # (1)</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    reasoning_task <span class="op">=</span> client.chat.completions.create(</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">"deepseek/deepseek-r1"</span>,</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: HARD_PROBLEM}],</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    standard_greedy, <span class="op">*</span>sc_samples, reasoning_response <span class="op">=</span> <span class="cf">await</span> asyncio.gather(</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>        greedy_task, <span class="op">*</span>sc_tasks, reasoning_task,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    sc_counter <span class="op">=</span> Counter(</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>        s.split(<span class="st">"Answer:"</span>)[<span class="op">-</span><span class="dv">1</span>].strip()</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> s <span class="kw">in</span> sc_samples</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"Answer:"</span> <span class="kw">in</span> s</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>    reasoning_answer <span class="op">=</span> reasoning_response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> standard_greedy, sc_counter, reasoning_answer</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>standard_greedy, sc_answer, reasoning_answer <span class="op">=</span> <span class="cf">await</span> run_reasoning_comparison()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>DeepSeek-R1 via OpenRouter does not require a system prompt — the model’s internal reasoning process handles task decomposition automatically.</li>
+</ol>
+<p>Displaying responses from all three approaches:</p>
+<div id="rm12f3a4" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"STANDARD GREEDY CoT (claude-sonnet-4)"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(standard_greedy)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"SELF-CONSISTENCY N=5 — vote distribution"</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> answer, count <span class="kw">in</span> sc_answer.most_common():</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>answer<span class="sc">!r:20s}</span><span class="ss">  x</span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"REASONING MODEL (deepseek-r1)"</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(reasoning_answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The correct answer is <span class="math inline">1/2</span>: <span class="math inline">P(B \mid \text{red}) = \frac{P(\text{red} \mid B) \cdot P(B)}{P(\text{red})} = \frac{(3/4)(1/3)}{1/2} = \frac{1/4}{1/2} = \frac{1}{2}.</span> The standard CoT pass frequently errors in computing <span class="math inline">P(\text{red})</span> or applies an incorrect form of Bayes’. Self-consistency helps if the errors are sufficiently diverse across samples. The reasoning model arrives at the answer after an extended internal trace that typically includes an explicit recheck of <span class="math inline">P(\text{red}).</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Reasoning models are not uniformly better — they are slower, more expensive per problem, and may over-think simple questions. The right model depends on the task: reasoning models for hard multi-step problems; standard models with self-consistency for medium-difficulty problems; greedy CoT for easy or latency-critical tasks.</p>
+</div>
+</div>
+</section>
+<section id="when-to-use-reasoning-models-in-an-agent" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-reasoning-models-in-an-agent">When to Use Reasoning Models in an Agent</h3>
+<p>Within an agentic system, reasoning models are best suited as the “hard thinking” component rather than the orchestrator for every step:</p>
+<ul>
+<li><strong>Tool-use loops:</strong> A standard model calls tools efficiently; switch to a reasoning model when planning a complex multi-step task or when the agent is stuck in a failed state.</li>
+<li><strong>Planning:</strong> Reasoning models produce high-quality plans but are expensive — use them once at the start of a session, not on every turn.</li>
+<li><strong>Verification:</strong> A reasoning model as the evaluator in a reflection loop can catch subtle errors that a standard model misses.</li>
+<li><strong>Simple tasks:</strong> Never route simple tool calls through a reasoning model — the overhead is not justified.</li>
+</ul>
+<p>In the next notebook, we build the agent loop — the machinery that orchestrates these LLM calls. The reasoning strategies in this notebook are plug-in choices within that loop: you can swap in a reasoning model, or add self-consistency, at any decision point in the agent’s cycle.</p>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Putting it all together, the choice of reasoning strategy reduces to a question of what resources are available and what failure mode you are defending against:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Strategy</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Arithmetic / MCQ; short extractable answer</td>
+<td>Self-consistency (<span class="math inline">N = 5</span>–<span class="math inline">10</span>)</td>
+<td>Cheap; no evaluator needed</td>
+</tr>
+<tr class="even">
+<td>Multi-step planning; partial states verifiable</td>
+<td>ToT with BFS + evaluator</td>
+<td>Errors caught before propagation</td>
+</tr>
+<tr class="odd">
+<td>Latency-critical; one answer fast</td>
+<td>Greedy CoT + skeptical system prompt</td>
+<td>No extra calls</td>
+</tr>
+<tr class="even">
+<td>High-stakes; external verifier available</td>
+<td>Best-of-<span class="math inline">N</span> + verifier</td>
+<td>Direct correctness maximization</td>
+</tr>
+<tr class="odd">
+<td>Frozen model; want more “thinking” cheaply</td>
+<td>Budget forcing</td>
+<td>Near-zero implementation cost</td>
+</tr>
+<tr class="even">
+<td>Hard multi-step reasoning; correctness critical</td>
+<td>Reasoning model (o1, R1)</td>
+<td>Internalized reconsideration loop</td>
+</tr>
+</tbody>
+</table>
+<p>In the next notebook, we build the agent loop that puts these strategies to use — the scaffolding that decides which model to call, when to invoke a tool, and how to route control flow based on partial results.</p>
+<hr>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-wei2022chain" class="csl-entry" role="listitem">
+Wei, Jason, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc V. Le, and Denny Zhou. 2022. <span>“Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.”</span> <a href="https://arxiv.org/abs/2201.11903">https://arxiv.org/abs/2201.11903</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/agents/01-tools.html" class="pagination-link" aria-label="01. Tool Use &amp; Function Calling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">01. Tool Use &amp; Function Calling</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/agents/03-agent-loop.html" class="pagination-link" aria-label="03. The Agent Loop">
+        <span class="nav-page-text">03. The Agent Loop</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

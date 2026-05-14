@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Double Descent – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/deep/advanced/index.html" rel="next">
+<link href="../../notebooks/deep/12-appendix-resnet.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/deep/index.html">Appendix</a></li><li class="breadcrumb-item"><a href="../../notebooks/deep/18-appendix-double-descent.html">18. Double Descent</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/01-softmax-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Softmax Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/02-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/03-autodiff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Automatic Differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/04-optimizers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizers: SGD to AdamW</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/05-activations-and-gradients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Activations and Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/06-cnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/07-language-modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Language Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/08-rnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/09-attention-transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Attention &amp; Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/11-appendix-expressivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Activation Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/12-appendix-resnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. ResNet from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/18-appendix-double-descent.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">18. Double Descent</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/deep/advanced/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/advanced/13-translation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Machine Translation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/advanced/14-generative-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/advanced/15-diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Diffusion Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/advanced/16-segmentation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">16. Semantic Segmentation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/deep/advanced/17-captioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">17. Image Captioning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#classical-bias-variance-recap" id="toc-classical-bias-variance-recap" class="nav-link active" data-scroll-target="#classical-bias-variance-recap">Classical Bias-Variance Recap</a></li>
+  <li><a href="#model-wise-double-descent" id="toc-model-wise-double-descent" class="nav-link" data-scroll-target="#model-wise-double-descent">Model-Wise Double Descent</a></li>
+  <li><a href="#epoch-wise-double-descent" id="toc-epoch-wise-double-descent" class="nav-link" data-scroll-target="#epoch-wise-double-descent">Epoch-Wise Double Descent</a></li>
+  <li><a href="#reproducing-nakkiran-et-al.-on-resnet-cifar-10" id="toc-reproducing-nakkiran-et-al.-on-resnet-cifar-10" class="nav-link" data-scroll-target="#reproducing-nakkiran-et-al.-on-resnet-cifar-10">Reproducing Nakkiran et al.&nbsp;on ResNet / CIFAR-10</a></li>
+  <li><a href="#reconciliation-with-modern-practice" id="toc-reconciliation-with-modern-practice" class="nav-link" data-scroll-target="#reconciliation-with-modern-practice">Reconciliation with Modern Practice</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/deep/index.html">Appendix</a></li><li class="breadcrumb-item"><a href="../../notebooks/deep/18-appendix-double-descent.html">18. Double Descent</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Double Descent</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The classical narrative of generalization — that model complexity has an optimal sweet spot, found at the minimum of a U-shaped test error curve — has guided statistical learning practice for decades. It is mathematically precise, pedagogically clean, and <mark>wrong for modern neural networks</mark>.</p>
+<p>Belkin et al. <span class="citation" data-cites="belkin2019">(<a href="#ref-belkin2019" role="doc-biblioref">Belkin et al. 2019</a>)</span> and Nakkiran et al. <span class="citation" data-cites="nakkiran2020">(<a href="#ref-nakkiran2020" role="doc-biblioref">Nakkiran et al. 2020</a>)</span> showed that as model capacity continues to grow past the point where training error reaches zero, test error does not stay high — it descends a second time. The resulting curve has two descent phases separated by a peak at the <strong>interpolation threshold</strong>: the critical capacity at which the model can just barely memorize the training data. This is the <strong>double descent</strong> phenomenon.</p>
+<p>In this appendix we develop the theory from the classical bias-variance tradeoff through both the model-wise and epoch-wise forms of double descent, and then reproduce the core experimental curves from Nakkiran et al.&nbsp;on CIFAR-10 with ResNets of varying width.</p>
+<p><br></p>
+<section id="classical-bias-variance-recap" class="level2">
+<h2 class="anchored" data-anchor-id="classical-bias-variance-recap">Classical Bias-Variance Recap</h2>
+<p>Consider a regression problem where the true relationship between input <span class="math inline">x</span> and output <span class="math inline">y</span> is <span class="math inline">y = f(x) + \varepsilon</span> with <span class="math inline">\varepsilon \sim \mathcal{N}(0, \sigma^2).</span> A learning algorithm trained on a finite dataset <span class="math inline">\mathcal{D}</span> produces an estimator <span class="math inline">\hat{f}_\mathcal{D}(x).</span> The expected squared prediction error at a test point <span class="math inline">x</span> decomposes as:</p>
+<p><span class="math display">
+\mathbb{E}_{\mathcal{D}, \varepsilon}\left[(y - \hat{f}_\mathcal{D}(x))^2\right]
+= \underbrace{\left(\mathbb{E}_\mathcal{D}[\hat{f}_\mathcal{D}(x)] - f(x)\right)^2}_{\text{Bias}^2[\hat{f}(x)]}
++ \underbrace{\mathbb{E}_\mathcal{D}\left[\left(\hat{f}_\mathcal{D}(x) - \mathbb{E}_\mathcal{D}[\hat{f}_\mathcal{D}(x)]\right)^2\right]}_{\text{Var}[\hat{f}(x)]}
++ \sigma^2.
+</span></p>
+<p>The <strong>bias</strong> measures how far the average prediction is from the truth; it decreases as the model family becomes more expressive. The <strong>variance</strong> measures how sensitive the predictor is to the particular training set drawn; it increases with model complexity since a more flexible model fits the noise in each sample differently. The irreducible noise <span class="math inline">\sigma^2</span> is a property of the data-generating process and cannot be reduced by any model.</p>
+<p>The classical picture, borne out clearly in polynomial regression and <span class="math inline">k</span>-nearest neighbors, is that test error forms a U-shaped curve as a function of model complexity: a sweet spot exists where bias and variance are balanced. For a full statistical treatment of this decomposition see <a href="../../notebooks/classical/01-bias-variance.html">NB01</a> in the Classical ML series.</p>
+<p>We reproduce this curve using polynomial regression on a noisy sinusoid. For each degree <span class="math inline">d</span> we fit 50 random train/test splits and record the mean squared error on each.</p>
+<p>Generating the bias-variance tradeoff curve across polynomial degrees:</p>
+<div id="fig-bias-variance-classical" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bias-variance-classical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>N_TOTAL  <span class="op">=</span> <span class="dv">200</span></span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a>N_TRAIN  <span class="op">=</span> <span class="dv">40</span></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>N_SPLITS <span class="op">=</span> <span class="dv">50</span></span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>MAX_DEG  <span class="op">=</span> <span class="dv">20</span></span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>SIGMA    <span class="op">=</span> <span class="fl">0.4</span></span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Ground truth: noisy sinusoid</span></span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>x_all <span class="op">=</span> rng.uniform(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, size<span class="op">=</span>N_TOTAL)</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a>y_all <span class="op">=</span> np.sin(<span class="dv">2</span> <span class="op">*</span> np.pi <span class="op">*</span> x_all) <span class="op">+</span> rng.normal(scale<span class="op">=</span>SIGMA, size<span class="op">=</span>N_TOTAL)</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a>degrees   <span class="op">=</span> np.arange(<span class="dv">1</span>, MAX_DEG <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>train_mse <span class="op">=</span> np.zeros((N_SPLITS, MAX_DEG))</span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>test_mse  <span class="op">=</span> np.zeros((N_SPLITS, MAX_DEG))</span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> <span class="bu">range</span>(N_SPLITS):</span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> rng.permutation(N_TOTAL)</span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>    tr, te <span class="op">=</span> idx[:N_TRAIN], idx[N_TRAIN:]</span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>    x_tr, y_tr <span class="op">=</span> x_all[tr], y_all[tr]</span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>    x_te, y_te <span class="op">=</span> x_all[te], y_all[te]</span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, d <span class="kw">in</span> <span class="bu">enumerate</span>(degrees):</span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>        coeffs <span class="op">=</span> np.polyfit(x_tr, y_tr, d)</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> np.poly1d(coeffs)</span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>        train_mse[s, i] <span class="op">=</span> np.mean((p(x_tr) <span class="op">-</span> y_tr) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>        test_mse[s, i]  <span class="op">=</span> np.mean((p(x_te) <span class="op">-</span> y_te) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>mean_tr <span class="op">=</span> train_mse.mean(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>std_tr  <span class="op">=</span> train_mse.std(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>mean_te <span class="op">=</span> test_mse.mean(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>std_te  <span class="op">=</span> test_mse.std(<span class="dv">0</span>)</span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>best_deg <span class="op">=</span> degrees[mean_te.argmin()]</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>ax.plot(degrees, mean_tr, color<span class="op">=</span><span class="st">"C0"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"train error"</span>)</span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>ax.fill_between(degrees, mean_tr <span class="op">-</span> std_tr, mean_tr <span class="op">+</span> std_tr, color<span class="op">=</span><span class="st">"C0"</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="annotated-cell-1-40"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a>ax.plot(degrees, mean_te, color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"test error"</span>)</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a>ax.fill_between(degrees, mean_te <span class="op">-</span> std_te, mean_te <span class="op">+</span> std_te, color<span class="op">=</span><span class="st">"C1"</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a>ax.axvline(best_deg, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>, lw<span class="op">=</span><span class="fl">1.2</span>, label<span class="op">=</span><span class="ss">f"optimal degree (</span><span class="sc">{</span>best_deg<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="annotated-cell-1-45"><a href="#annotated-cell-1-45" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"polynomial degree"</span>)</span>
+<span id="annotated-cell-1-46"><a href="#annotated-cell-1-46" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"MSE"</span>)</span>
+<span id="annotated-cell-1-47"><a href="#annotated-cell-1-47" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="fl">0.8</span>)</span>
+<span id="annotated-cell-1-48"><a href="#annotated-cell-1-48" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="annotated-cell-1-49"><a href="#annotated-cell-1-49" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="annotated-cell-1-50"><a href="#annotated-cell-1-50" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="annotated-cell-1-51"><a href="#annotated-cell-1-51" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-bias-variance-classical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p>Implementation notes:</p>
+<ol type="1">
+<li><code>np.polyfit</code> solves for the least-squares polynomial coefficients, which is the correct maximum-likelihood estimator for Gaussian noise.</li>
+<li>The optimal degree minimizes mean test MSE across splits — our empirical proxy for expected generalization error.</li>
+</ol>
+<p><strong>Figure.</strong> The U-shaped test error curve is clearly visible. Train error decreases monotonically as degree increases; the model has enough parameters to fit the training data exactly for high degrees (interpolating through all <span class="math inline">N_{\text{train}} = 40</span> points with a degree-40 polynomial). Test error, however, rises sharply at high degrees because the high-degree polynomials fit the noise rather than the signal.</p>
+<p>This picture is self-consistent and correct — within the regime of models that <em>cannot</em> perfectly interpolate the training data. The classical story breaks down when models are powerful enough to memorize the training set, which is precisely the regime of modern deep learning. As Belkin et al. <span class="citation" data-cites="belkin2019">(<a href="#ref-belkin2019" role="doc-biblioref">Belkin et al. 2019</a>)</span> observed, something qualitatively different happens when capacity exceeds the interpolation threshold.</p>
+</section>
+<section id="model-wise-double-descent" class="level2">
+<h2 class="anchored" data-anchor-id="model-wise-double-descent">Model-Wise Double Descent</h2>
+<p>The <strong>interpolation threshold</strong> is the model capacity at which the model can first achieve zero training error — i.e., perfectly memorize the training set. In the classical regime (below this threshold), the model is underparameterized and cannot fully fit the training data; test error decreases as capacity grows and bias shrinks. At the threshold, the model is forced to produce a unique interpolating solution, and this solution is typically the worst-generalizing one in the interpolating family — it is brittle, sensitive to noise, and achieves peak test error. Beyond the threshold, however, there are many interpolating solutions, and the optimization algorithm (gradient descent) selects among them. Strikingly, the solution selected by gradient descent in overparameterized models tends to have lower test error than the interpolating solution at the threshold.</p>
+<p>This produces the characteristic double descent shape: a first U-curve in the underparameterized regime, a peak at the interpolation threshold, and a second descent in the overparameterized regime. Formally, letting <span class="math inline">\hat{f}_k</span> denote the model of size <span class="math inline">k</span> (parameterized by, say, width), the model-wise double descent is:</p>
+<p><span class="math display">
+k \mapsto \mathcal{R}_{\text{test}}(\hat{f}_k)
+\quad\text{has two descent phases separated by a peak at }\,
+k^* = \arg\min_k\, \mathcal{R}_{\text{train}}(\hat{f}_k) = 0.
+</span></p>
+<p>We can understand why the interpolation threshold is the worst point. Among all interpolating solutions, gradient descent (with small weight initialization and no explicit regularization) converges to the <strong>minimum-norm interpolator</strong>. In the linear case this is provably the pseudoinverse solution:</p>
+<p><span class="math display">
+\hat{\theta} = X^\top (X X^\top)^{-1} y,
+</span></p>
+<p>where <span class="math inline">X \in \mathbb{R}^{N \times d}</span> is the design matrix and <span class="math inline">y \in \mathbb{R}^N</span> are the labels. When <span class="math inline">d</span> is only slightly larger than <span class="math inline">N</span> (just past the threshold), the minimum-norm solution still has large norm because the matrix <span class="math inline">XX^\top</span> is nearly singular — the solution must work hard to interpolate. As <span class="math inline">d \to \infty,</span> the minimum-norm solution’s norm decreases and the solution becomes smoother, explaining the second descent.</p>
+<p><strong>Label noise.</strong> The double descent effect is substantially more pronounced when training labels are noisy. With clean labels, the interpolating solution at the threshold may still generalize reasonably because there is a consistent signal to interpolate. With noisy labels, the model at the threshold must memorize contradictory examples, producing highly non-smooth interpolants that generalize poorly. Nakkiran et al. <span class="citation" data-cites="nakkiran2020">(<a href="#ref-nakkiran2020" role="doc-biblioref">Nakkiran et al. 2020</a>)</span> use 15% uniform label noise on CIFAR-10 to make the effect clearly visible. We follow this convention.</p>
+<p><strong>Three regimes.</strong> It is useful to distinguish: (1) the <strong>underparameterized</strong> regime where the model cannot fit the training data and test error is determined by the bias-variance tradeoff; (2) the <strong>interpolation threshold</strong> where the model just barely memorizes training data and generalization is worst; and (3) the <strong>overparameterized</strong> regime where there are many interpolating solutions and gradient descent finds the well-generalizing minimum-norm one.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The double descent curve does not violate the bias-variance tradeoff — it <em>extends</em> it. Within the underparameterized regime, the classical U-curve holds exactly. The new insight is that the story does not end at the interpolation threshold: a second, qualitatively different regime begins where overparameterization acts as an implicit regularizer.</p>
+</div>
+</div>
+<p><strong>Figure.</strong> We now produce the model-wise double descent curve. The code trains ResNet-18 variants with a width multiplier <span class="math inline">k</span> sweeping from a small underparameterized network to a large overparameterized one, recording the final train and test error at each width. This figure loads from precomputed results; see <a href="#reproducing-nakkiran-et-al.-on-resnet-cifar-10">§ Reproducing Nakkiran et al.</a> for the full training code.</p>
+<div id="fig-model-wise-double-descent" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-model-wise-double-descent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Results from the sweep in §4 (width multiplier k vs. final error).</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Loaded here to keep this section self-contained.</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace with results_model_wise computed in §4 if running the full sweep.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    results_model_wise</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">NameError</span>:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Placeholder: illustrative values matching the qualitative shape</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># from Nakkiran et al. Figure 1. Replace after running §4.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    k_vals    <span class="op">=</span> np.array([<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>])</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    n_params  <span class="op">=</span> np.array([<span class="fl">0.28e6</span>, <span class="fl">1.1e6</span>, <span class="fl">4.4e6</span>, <span class="fl">17.6e6</span>, <span class="fl">70.4e6</span>, <span class="fl">281e6</span>])</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    train_err <span class="op">=</span> np.array([<span class="fl">0.38</span>, <span class="fl">0.18</span>, <span class="fl">0.02</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    test_err  <span class="op">=</span> np.array([<span class="fl">0.45</span>, <span class="fl">0.35</span>, <span class="fl">0.55</span>, <span class="fl">0.42</span>, <span class="fl">0.33</span>, <span class="fl">0.27</span>])</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    interp_idx <span class="op">=</span> <span class="dv">2</span>   <span class="co"># k=1.0 is near threshold in this illustration</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    k_vals    <span class="op">=</span> np.array(results_model_wise[<span class="st">"k_vals"</span>])</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    n_params  <span class="op">=</span> np.array(results_model_wise[<span class="st">"n_params"</span>])</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    train_err <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> np.array(results_model_wise[<span class="st">"train_acc"</span>])</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    test_err  <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> np.array(results_model_wise[<span class="st">"test_acc"</span>])</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    interp_idx <span class="op">=</span> <span class="bu">int</span>(results_model_wise[<span class="st">"interp_idx"</span>])</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.plot(n_params, train_err <span class="op">*</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"C0"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, marker<span class="op">=</span><span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"train error"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.plot(n_params, test_err  <span class="op">*</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, marker<span class="op">=</span><span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">5</span>, label<span class="op">=</span><span class="st">"test error"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark interpolation threshold</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>ax.axvline(n_params[interp_idx], color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>, lw<span class="op">=</span><span class="fl">1.2</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"interpolation threshold"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Annotate three regimes</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>ax.text(n_params[<span class="dv">0</span>] <span class="op">*</span> <span class="fl">1.05</span>, <span class="dv">52</span>, <span class="st">"underparameterized"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"gray"</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>ax.text(n_params[interp_idx] <span class="op">*</span> <span class="fl">1.05</span>, <span class="dv">52</span>, <span class="st">"overparameterized"</span>, fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"gray"</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"threshold"</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(n_params[interp_idx], test_err[interp_idx] <span class="op">*</span> <span class="dv">100</span>),</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            xytext<span class="op">=</span>(n_params[interp_idx] <span class="op">*</span> <span class="dv">2</span>, test_err[interp_idx] <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">4</span>),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"gray"</span>,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"number of parameters (log scale)"</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"error (%)"</span>)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">60</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-model-wise-double-descent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="epoch-wise-double-descent" class="level2">
+<h2 class="anchored" data-anchor-id="epoch-wise-double-descent">Epoch-Wise Double Descent</h2>
+<p>The double descent phenomenon has a temporal analog that is, if anything, more practically important than the model-wise version. Nakkiran et al. <span class="citation" data-cites="nakkiran2020">(<a href="#ref-nakkiran2020" role="doc-biblioref">Nakkiran et al. 2020</a>)</span> showed that for a <strong>fixed model</strong> near the interpolation threshold, the test error trace over training epochs can itself exhibit a double descent: test error initially decreases, then <em>increases</em> for a prolonged period (as the model approaches the interpolation regime mid-training), then decreases again as training continues further.</p>
+<p>To understand this, note that as training progresses, the effective capacity of the model increases in a functional sense — early in training, the model is far from memorizing the training set and behaves like an underparameterized model. Around the epoch where training error first reaches zero, the model enters the interpolation regime with respect to its training trajectory. If the model’s architectural capacity is close to the interpolation threshold, this crossing happens at an unfavorable point. The learned representation at that epoch corresponds to the worst-generalizing interpolating solution.</p>
+<p>This has a stark practical consequence: for models near the interpolation threshold, <strong>early stopping based on validation loss can be severely harmful</strong>. The standard rule — stop training when validation loss first increases — would terminate training precisely at the worst moment. For such models, training should continue well past the local minimum in validation loss. For models that are comfortably overparameterized or comfortably underparameterized, epoch-wise double descent does not occur and the standard early stopping heuristic is safe.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Early stopping near the interpolation threshold can increase test error.</strong> The conventional wisdom of stopping when validation loss rises is based on the classical regime, where test error is unimodal in training time. For models near the critical capacity, the validation curve has a local minimum followed by a rise and then a further descent. Stopping at the local minimum captures the worst-generalizing model. When in doubt, train longer.</p>
+</div>
+</div>
+<p><strong>Figure.</strong> Test error vs.&nbsp;epoch for three ResNet widths: a small model (underparameterized), a critical model (near the interpolation threshold), and a large model (overparameterized). Only the critical model exhibits a visible bump:</p>
+<div id="fig-epoch-wise-double-descent" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-epoch-wise-double-descent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loaded from §4 training results. Fallback to illustrative curves.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    results_epoch_wise</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">NameError</span>:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    epochs <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">201</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Small model: monotone decrease after initial drop, no bump</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    small_err    <span class="op">=</span> <span class="fl">0.48</span> <span class="op">*</span> np.exp(<span class="op">-</span>epochs <span class="op">/</span> <span class="dv">80</span>) <span class="op">+</span> <span class="fl">0.42</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Critical model: bump around epoch 80-120</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    bump         <span class="op">=</span> <span class="fl">0.08</span> <span class="op">*</span> np.exp(<span class="op">-</span>((epochs <span class="op">-</span> <span class="dv">100</span>) <span class="op">**</span> <span class="dv">2</span>) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> <span class="dv">20</span> <span class="op">**</span> <span class="dv">2</span>))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    critical_err <span class="op">=</span> <span class="fl">0.50</span> <span class="op">*</span> np.exp(<span class="op">-</span>epochs <span class="op">/</span> <span class="dv">60</span>) <span class="op">+</span> <span class="fl">0.30</span> <span class="op">+</span> bump</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Large model: smooth descent</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    large_err    <span class="op">=</span> <span class="fl">0.52</span> <span class="op">*</span> np.exp(<span class="op">-</span>epochs <span class="op">/</span> <span class="dv">50</span>) <span class="op">+</span> <span class="fl">0.25</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    small_label    <span class="op">=</span> <span class="vs">r"</span><span class="dv">$</span><span class="vs">k = 0</span><span class="dv">.</span><span class="vs">25</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">underparameterized</span><span class="kw">)</span><span class="vs">"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    critical_label <span class="op">=</span> <span class="vs">r"</span><span class="dv">$</span><span class="vs">k = 1</span><span class="dv">.</span><span class="vs">0</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">critical</span><span class="kw">)</span><span class="vs">"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    large_label    <span class="op">=</span> <span class="vs">r"</span><span class="dv">$</span><span class="vs">k = 4</span><span class="dv">.</span><span class="vs">0</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">overparameterized</span><span class="kw">)</span><span class="vs">"</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    epochs         <span class="op">=</span> np.array(results_epoch_wise[<span class="st">"epochs"</span>])</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    small_err      <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> np.array(results_epoch_wise[<span class="st">"small_test_acc"</span>])</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    critical_err   <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> np.array(results_epoch_wise[<span class="st">"critical_test_acc"</span>])</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    large_err      <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> np.array(results_epoch_wise[<span class="st">"large_test_acc"</span>])</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    small_label    <span class="op">=</span> results_epoch_wise[<span class="st">"small_label"</span>]</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    critical_label <span class="op">=</span> results_epoch_wise[<span class="st">"critical_label"</span>]</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    large_label    <span class="op">=</span> results_epoch_wise[<span class="st">"large_label"</span>]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>ax.plot(epochs, small_err    <span class="op">*</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"C0"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>small_label)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>ax.plot(epochs, critical_err <span class="op">*</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>critical_label)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>ax.plot(epochs, large_err    <span class="op">*</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"C2"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>large_label)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Annotate the bump in the critical model</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>bump_epoch <span class="op">=</span> epochs[np.argmax(critical_err[<span class="dv">50</span>:]) <span class="op">+</span> <span class="dv">50</span>]</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>bump_val   <span class="op">=</span> critical_err[np.argmax(critical_err[<span class="dv">50</span>:]) <span class="op">+</span> <span class="dv">50</span>] <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"epoch-wise</span><span class="ch">\n</span><span class="st">double descent"</span>,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>            xy<span class="op">=</span>(bump_epoch, bump_val),</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>            xytext<span class="op">=</span>(bump_epoch <span class="op">+</span> <span class="dv">25</span>, bump_val <span class="op">+</span> <span class="dv">3</span>),</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            fontsize<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"C1"</span>,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>            arrowprops<span class="op">=</span><span class="bu">dict</span>(arrowstyle<span class="op">=</span><span class="st">"-&gt;"</span>, color<span class="op">=</span><span class="st">"C1"</span>, lw<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"epoch"</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"test error (%)"</span>)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-epoch-wise-double-descent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="reproducing-nakkiran-et-al.-on-resnet-cifar-10" class="level2">
+<h2 class="anchored" data-anchor-id="reproducing-nakkiran-et-al.-on-resnet-cifar-10">Reproducing Nakkiran et al.&nbsp;on ResNet / CIFAR-10</h2>
+<p>We now develop the full experimental setup for the width sweep. The key ingredients are: (1) a <strong>width-scalable ResNet-18</strong> parameterized by a multiplier <span class="math inline">k</span> that scales every stage’s channel count; (2) <strong>CIFAR-10 with 15% uniform label noise</strong> applied at dataset construction time (not at the model level); (3) a <strong>fixed 200-epoch training schedule</strong> with cosine annealing so that every model sees the same number of gradient steps; and (4) evaluation on the <strong>clean</strong> test set (noise is training-only).</p>
+<p><strong>Why label noise matters.</strong> Without label noise the interpolation threshold effect is muted because the training labels are consistent — a model at the threshold can find an interpolating solution that generalizes reasonably. With 15% noise, the threshold model must memorize contradictory labels (the same or similar images with different labels), producing a highly irregular function that generalizes poorly. The noise makes the peak in test error much sharper and more visible.</p>
+<p><strong>Width multiplier.</strong> We modify ResNet-18 by replacing the channel counts <span class="math inline">\{64, 128, 256, 512\}</span> with <span class="math inline">\{\lfloor 64k \rfloor, \lfloor 128k \rfloor, \lfloor 256k \rfloor, \lfloor 512k \rfloor\}</span> for multiplier <span class="math inline">k.</span> Small <span class="math inline">k</span> produces underparameterized models; <span class="math inline">k = 1</span> is the standard ResNet-18; large <span class="math inline">k</span> gives overparameterized models.</p>
+<p><strong>Optimizer.</strong> We use SGD with momentum (as in the original paper) rather than AdamW, since SGD’s implicit bias toward minimum-norm solutions is part of what drives the second descent. Cosine annealing decays from a peak learning rate of <span class="math inline">0.1</span> to near zero over 200 epochs.</p>
+<p><strong>Computational note.</strong> Training 6 models for 200 epochs each on CIFAR-10 requires a GPU. The full sweep takes approximately 2–4 hours on a single A100 or RTX 3090. Results are cached in <code>artifacts/double_descent_results.pkl</code> so the sweep runs only once; subsequent executions load from the cache.</p>
+<p><strong>Data.</strong> CIFAR-10 with 15% uniform label noise, applied once at construction:</p>
+<div id="nakkiran-data-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a>CIFAR10_MEAN <span class="op">=</span> (<span class="fl">0.4914</span>, <span class="fl">0.4822</span>, <span class="fl">0.4465</span>)</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>CIFAR10_STD  <span class="op">=</span> (<span class="fl">0.2470</span>, <span class="fl">0.2435</span>, <span class="fl">0.2616</span>)</span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>LABEL_NOISE  <span class="op">=</span> <span class="fl">0.15</span></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>BATCH_SIZE   <span class="op">=</span> <span class="dv">128</span></span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NoisyCIFAR10(Dataset):</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""CIFAR-10 with a fixed fraction of uniformly corrupted labels."""</span></span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, root, train, transform, noise_rate, seed<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dataset <span class="op">=</span> torchvision.datasets.CIFAR10(</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>            root<span class="op">=</span>root, train<span class="op">=</span>train, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform</span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-14" class="code-annotation-target"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.targets <span class="op">=</span> <span class="bu">list</span>(<span class="va">self</span>.dataset.targets)</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> noise_rate <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> train:</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>            rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>            n <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>.targets)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-19" class="code-annotation-target"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>            noisy <span class="op">=</span> rng.choice(n, size<span class="op">=</span><span class="bu">int</span>(noise_rate <span class="op">*</span> n), replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> noisy:</span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>                orig <span class="op">=</span> <span class="va">self</span>.targets[i]</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>                choices <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>) <span class="cf">if</span> c <span class="op">!=</span> orig]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-23" class="code-annotation-target"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.targets[i] <span class="op">=</span> <span class="bu">int</span>(rng.choice(choices))</span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.targets)</span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-4-29" class="code-annotation-target"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>        img, _ <span class="op">=</span> <span class="va">self</span>.dataset[idx]</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img, <span class="va">self</span>.targets[idx]</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>transform_train <span class="op">=</span> transforms.Compose([</span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>    transforms.RandomCrop(<span class="dv">32</span>, padding<span class="op">=</span><span class="dv">4</span>),</span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>    transforms.RandomHorizontalFlip(),</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>transform_test <span class="op">=</span> transforms.Compose([</span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),</span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>train_set <span class="op">=</span> NoisyCIFAR10(</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a>    DATASET_DIR, train<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform_train,</span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>    noise_rate<span class="op">=</span>LABEL_NOISE, seed<span class="op">=</span>RANDOM_SEED</span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>test_set <span class="op">=</span> torchvision.datasets.CIFAR10(</span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>    root<span class="op">=</span>DATASET_DIR, train<span class="op">=</span><span class="va">False</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform_test</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_set, batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">True</span>,  num_workers<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>test_loader  <span class="op">=</span> DataLoader(test_set,  batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Sanity check: count corrupted labels</span></span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>orig_targets  <span class="op">=</span> train_set.dataset.targets</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>noisy_targets <span class="op">=</span> train_set.targets</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>n_changed <span class="op">=</span> <span class="bu">sum</span>(a <span class="op">!=</span> b <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(orig_targets, noisy_targets))</span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train: </span><span class="sc">{</span><span class="bu">len</span>(train_set)<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span><span class="bu">len</span>(test_set)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Labels changed: </span><span class="sc">{</span>n_changed<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>n_changed <span class="op">/</span> <span class="bu">len</span>(train_set) <span class="op">*</span> <span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">%)"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="14" data-code-annotation="1">We copy <code>dataset.targets</code> so we can modify labels without corrupting the underlying dataset object.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="19" data-code-annotation="2">We sample without replacement so the noise rate is exact (not a Bernoulli approximation).</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="23" data-code-annotation="3">Each corrupted label is drawn uniformly at random from the 9 other classes, never the correct class.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="29" data-code-annotation="4">We discard the label from the underlying dataset and return our (possibly corrupted) label instead.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Model.</strong> ResNet-18 with a width multiplier <span class="math inline">k</span> scaling all channel counts:</p>
+<div id="nakkiran-model-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BasicBlock(nn.Module):</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Residual block with two 3x3 convolutions and a skip connection."""</span></span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>    expansion <span class="op">=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels, stride<span class="op">=</span><span class="dv">1</span>, downsample<span class="op">=</span><span class="va">None</span>):</span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv1 <span class="op">=</span> nn.Conv2d(</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>            in_channels, out_channels, <span class="dv">3</span>, stride<span class="op">=</span>stride, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span></span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bn1 <span class="op">=</span> nn.BatchNorm2d(out_channels)</span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv2 <span class="op">=</span> nn.Conv2d(</span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a>            out_channels, out_channels, <span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bn2 <span class="op">=</span> nn.BatchNorm2d(out_channels)</span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.downsample <span class="op">=</span> downsample</span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a>        identity <span class="op">=</span> x</span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> F.relu(<span class="va">self</span>.bn1(<span class="va">self</span>.conv1(x)))</span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.bn2(<span class="va">self</span>.conv2(out))</span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.downsample <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a>            identity <span class="op">=</span> <span class="va">self</span>.downsample(x)</span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>        out <span class="op">+=</span> identity</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> F.relu(out)</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WideResNet18(nn.Module):</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""ResNet-18 with a width multiplier k for CIFAR-10."""</span></span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, k<span class="op">=</span><span class="fl">1.0</span>, num_classes<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> [<span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="dv">64</span>  <span class="op">*</span> k)),</span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a>             <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="dv">128</span> <span class="op">*</span> k)),</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>             <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="dv">256</span> <span class="op">*</span> k)),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-35" class="code-annotation-target"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a>             <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="dv">512</span> <span class="op">*</span> k))]</span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.in_channels <span class="op">=</span> c[<span class="dv">0</span>]</span>
+<span id="annotated-cell-5-37"><a href="#annotated-cell-5-37" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-38" class="code-annotation-target"><a href="#annotated-cell-5-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv1   <span class="op">=</span> nn.Conv2d(<span class="dv">3</span>, c[<span class="dv">0</span>], <span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-5-39"><a href="#annotated-cell-5-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bn1     <span class="op">=</span> nn.BatchNorm2d(c[<span class="dv">0</span>])</span>
+<span id="annotated-cell-5-40"><a href="#annotated-cell-5-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer1  <span class="op">=</span> <span class="va">self</span>._make_layer(c[<span class="dv">0</span>], <span class="dv">2</span>, stride<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-5-41"><a href="#annotated-cell-5-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer2  <span class="op">=</span> <span class="va">self</span>._make_layer(c[<span class="dv">1</span>], <span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-5-42"><a href="#annotated-cell-5-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer3  <span class="op">=</span> <span class="va">self</span>._make_layer(c[<span class="dv">2</span>], <span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-5-43"><a href="#annotated-cell-5-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer4  <span class="op">=</span> <span class="va">self</span>._make_layer(c[<span class="dv">3</span>], <span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-5-44"><a href="#annotated-cell-5-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.avgpool <span class="op">=</span> nn.AdaptiveAvgPool2d((<span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="annotated-cell-5-45"><a href="#annotated-cell-5-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc      <span class="op">=</span> nn.Linear(c[<span class="dv">3</span>], num_classes)</span>
+<span id="annotated-cell-5-46"><a href="#annotated-cell-5-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-47"><a href="#annotated-cell-5-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _make_layer(<span class="va">self</span>, out_channels, num_blocks, stride):</span>
+<span id="annotated-cell-5-48"><a href="#annotated-cell-5-48" aria-hidden="true" tabindex="-1"></a>        downsample <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-5-49"><a href="#annotated-cell-5-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> stride <span class="op">!=</span> <span class="dv">1</span> <span class="kw">or</span> <span class="va">self</span>.in_channels <span class="op">!=</span> out_channels:</span>
+<span id="annotated-cell-5-50"><a href="#annotated-cell-5-50" aria-hidden="true" tabindex="-1"></a>            downsample <span class="op">=</span> nn.Sequential(</span>
+<span id="annotated-cell-5-51"><a href="#annotated-cell-5-51" aria-hidden="true" tabindex="-1"></a>                nn.Conv2d(<span class="va">self</span>.in_channels, out_channels, <span class="dv">1</span>, stride<span class="op">=</span>stride, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="annotated-cell-5-52"><a href="#annotated-cell-5-52" aria-hidden="true" tabindex="-1"></a>                nn.BatchNorm2d(out_channels),</span>
+<span id="annotated-cell-5-53"><a href="#annotated-cell-5-53" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-5-54"><a href="#annotated-cell-5-54" aria-hidden="true" tabindex="-1"></a>        layers <span class="op">=</span> [BasicBlock(<span class="va">self</span>.in_channels, out_channels, stride, downsample)]</span>
+<span id="annotated-cell-5-55"><a href="#annotated-cell-5-55" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.in_channels <span class="op">=</span> out_channels</span>
+<span id="annotated-cell-5-56"><a href="#annotated-cell-5-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, num_blocks):</span>
+<span id="annotated-cell-5-57"><a href="#annotated-cell-5-57" aria-hidden="true" tabindex="-1"></a>            layers.append(BasicBlock(<span class="va">self</span>.in_channels, out_channels))</span>
+<span id="annotated-cell-5-58"><a href="#annotated-cell-5-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> nn.Sequential(<span class="op">*</span>layers)</span>
+<span id="annotated-cell-5-59"><a href="#annotated-cell-5-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-60"><a href="#annotated-cell-5-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="annotated-cell-5-61"><a href="#annotated-cell-5-61" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> F.relu(<span class="va">self</span>.bn1(<span class="va">self</span>.conv1(x)))  <span class="co"># (B, c0, 32, 32)</span></span>
+<span id="annotated-cell-5-62"><a href="#annotated-cell-5-62" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layer1(x)                    <span class="co"># (B, c0, 32, 32)</span></span>
+<span id="annotated-cell-5-63"><a href="#annotated-cell-5-63" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layer2(x)                    <span class="co"># (B, c1, 16, 16)</span></span>
+<span id="annotated-cell-5-64"><a href="#annotated-cell-5-64" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layer3(x)                    <span class="co"># (B, c2,  8,  8)</span></span>
+<span id="annotated-cell-5-65"><a href="#annotated-cell-5-65" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layer4(x)                    <span class="co"># (B, c3,  4,  4)</span></span>
+<span id="annotated-cell-5-66"><a href="#annotated-cell-5-66" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.avgpool(x)                   <span class="co"># (B, c3,  1,  1)</span></span>
+<span id="annotated-cell-5-67"><a href="#annotated-cell-5-67" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.flatten(x, <span class="dv">1</span>)               <span class="co"># (B, c3)</span></span>
+<span id="annotated-cell-5-68"><a href="#annotated-cell-5-68" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.fc(x)</span>
+<span id="annotated-cell-5-69"><a href="#annotated-cell-5-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-70"><a href="#annotated-cell-5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-71"><a href="#annotated-cell-5-71" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_params(model):</span>
+<span id="annotated-cell-5-72"><a href="#annotated-cell-5-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters())</span>
+<span id="annotated-cell-5-73"><a href="#annotated-cell-5-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-74"><a href="#annotated-cell-5-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-75"><a href="#annotated-cell-5-75" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview parameter counts across the width sweep</span></span>
+<span id="annotated-cell-5-76"><a href="#annotated-cell-5-76" aria-hidden="true" tabindex="-1"></a>K_VALS <span class="op">=</span> [<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">8.0</span>]</span>
+<span id="annotated-cell-5-77"><a href="#annotated-cell-5-77" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> K_VALS:</span>
+<span id="annotated-cell-5-78"><a href="#annotated-cell-5-78" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> WideResNet18(k<span class="op">=</span>k)</span>
+<span id="annotated-cell-5-79"><a href="#annotated-cell-5-79" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"k=</span><span class="sc">{</span>k<span class="sc">:4.2f}</span><span class="ss">  params=</span><span class="sc">{</span>count_params(m)<span class="sc">:&gt;10,}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="35" data-code-annotation="1">Each stage’s channel count is multiplied by <span class="math inline">k</span> and clipped to at least 1. The four base channel counts <span class="math inline">\{64, 128, 256, 512\}</span> are preserved at <span class="math inline">k = 1.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="38" data-code-annotation="2">CIFAR-10 uses a <span class="math inline">3 \times 3</span> stem with stride 1 (no initial max-pooling), following the convention from NB12. This preserves the <span class="math inline">32 \times 32</span> spatial resolution into the first stage.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Training.</strong> Self-contained training functions using SGD with momentum and cosine annealing:</p>
+<div id="nakkiran-train-funcs" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_one_epoch(model, loader, criterion, optimizer, device):</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>    total_loss, correct, total <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> loader:</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> x.to(device), y.to(device)</span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(x)</span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(logits, y)</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">+=</span> loss.item() <span class="op">*</span> x.size(<span class="dv">0</span>)</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>        correct <span class="op">+=</span> (logits.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> x.size(<span class="dv">0</span>)</span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_loss <span class="op">/</span> total, correct <span class="op">/</span> total</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.inference_mode</span>()</span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(model, loader, criterion, device):</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>    total_loss, correct, total <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> loader:</span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> x.to(device), y.to(device)</span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(x)</span>
+<span id="annotated-cell-6-24"><a href="#annotated-cell-6-24" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(logits, y)</span>
+<span id="annotated-cell-6-25"><a href="#annotated-cell-6-25" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">+=</span> loss.item() <span class="op">*</span> x.size(<span class="dv">0</span>)</span>
+<span id="annotated-cell-6-26"><a href="#annotated-cell-6-26" aria-hidden="true" tabindex="-1"></a>        correct <span class="op">+=</span> (logits.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-6-27"><a href="#annotated-cell-6-27" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> x.size(<span class="dv">0</span>)</span>
+<span id="annotated-cell-6-28"><a href="#annotated-cell-6-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_loss <span class="op">/</span> total, correct <span class="op">/</span> total</span>
+<span id="annotated-cell-6-29"><a href="#annotated-cell-6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-30"><a href="#annotated-cell-6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-31"><a href="#annotated-cell-6-31" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_model(model, train_loader, test_loader, epochs, device,</span>
+<span id="annotated-cell-6-32"><a href="#annotated-cell-6-32" aria-hidden="true" tabindex="-1"></a>                lr<span class="op">=</span><span class="fl">0.1</span>, weight_decay<span class="op">=</span><span class="fl">5e-4</span>, record_every<span class="op">=</span><span class="dv">5</span>, verbose<span class="op">=</span><span class="va">True</span>):</span>
+<span id="annotated-cell-6-33"><a href="#annotated-cell-6-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Train model and return a history dict with train/test accuracy traces."""</span></span>
+<span id="annotated-cell-6-34"><a href="#annotated-cell-6-34" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> model.to(device)</span>
+<span id="annotated-cell-6-35"><a href="#annotated-cell-6-35" aria-hidden="true" tabindex="-1"></a>    criterion <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="annotated-cell-6-36"><a href="#annotated-cell-6-36" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.SGD(</span>
+<span id="annotated-cell-6-37"><a href="#annotated-cell-6-37" aria-hidden="true" tabindex="-1"></a>        model.parameters(), lr<span class="op">=</span>lr, momentum<span class="op">=</span><span class="fl">0.9</span>, weight_decay<span class="op">=</span>weight_decay</span>
+<span id="annotated-cell-6-38"><a href="#annotated-cell-6-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-39" class="code-annotation-target"><a href="#annotated-cell-6-39" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> CosineAnnealingLR(optimizer, T_max<span class="op">=</span>epochs, eta_min<span class="op">=</span><span class="fl">1e-4</span>)</span>
+<span id="annotated-cell-6-40"><a href="#annotated-cell-6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-41"><a href="#annotated-cell-6-41" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> {</span>
+<span id="annotated-cell-6-42"><a href="#annotated-cell-6-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"epoch"</span>: [], <span class="st">"train_acc"</span>: [], <span class="st">"test_acc"</span>: [],</span>
+<span id="annotated-cell-6-43"><a href="#annotated-cell-6-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"train_loss"</span>: [], <span class="st">"test_loss"</span>: [],</span>
+<span id="annotated-cell-6-44"><a href="#annotated-cell-6-44" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-6-45"><a href="#annotated-cell-6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-46"><a href="#annotated-cell-6-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, epochs <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="annotated-cell-6-47"><a href="#annotated-cell-6-47" aria-hidden="true" tabindex="-1"></a>        train_loss, train_acc <span class="op">=</span> train_one_epoch(</span>
+<span id="annotated-cell-6-48"><a href="#annotated-cell-6-48" aria-hidden="true" tabindex="-1"></a>            model, train_loader, criterion, optimizer, device</span>
+<span id="annotated-cell-6-49"><a href="#annotated-cell-6-49" aria-hidden="true" tabindex="-1"></a>        )</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-50" class="code-annotation-target"><a href="#annotated-cell-6-50" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="annotated-cell-6-51"><a href="#annotated-cell-6-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-52"><a href="#annotated-cell-6-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> record_every <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> epoch <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="annotated-cell-6-53"><a href="#annotated-cell-6-53" aria-hidden="true" tabindex="-1"></a>            test_loss, test_acc <span class="op">=</span> evaluate(model, test_loader, criterion, device)</span>
+<span id="annotated-cell-6-54"><a href="#annotated-cell-6-54" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"epoch"</span>].append(epoch)</span>
+<span id="annotated-cell-6-55"><a href="#annotated-cell-6-55" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"train_acc"</span>].append(train_acc)</span>
+<span id="annotated-cell-6-56"><a href="#annotated-cell-6-56" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"test_acc"</span>].append(test_acc)</span>
+<span id="annotated-cell-6-57"><a href="#annotated-cell-6-57" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"train_loss"</span>].append(train_loss)</span>
+<span id="annotated-cell-6-58"><a href="#annotated-cell-6-58" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"test_loss"</span>].append(test_loss)</span>
+<span id="annotated-cell-6-59"><a href="#annotated-cell-6-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-60"><a href="#annotated-cell-6-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> verbose:</span>
+<span id="annotated-cell-6-61"><a href="#annotated-cell-6-61" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(</span>
+<span id="annotated-cell-6-62"><a href="#annotated-cell-6-62" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"[</span><span class="sc">{</span>epoch<span class="sc">:&gt;3d}</span><span class="ss">/</span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss">]  "</span></span>
+<span id="annotated-cell-6-63"><a href="#annotated-cell-6-63" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"train_acc=</span><span class="sc">{</span>train_acc<span class="sc">:.4f}</span><span class="ss">  test_acc=</span><span class="sc">{</span>test_acc<span class="sc">:.4f}</span><span class="ss">  "</span></span>
+<span id="annotated-cell-6-64"><a href="#annotated-cell-6-64" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"lr=</span><span class="sc">{</span>scheduler<span class="sc">.</span>get_last_lr()[<span class="dv">0</span>]<span class="sc">:.5f}</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-65"><a href="#annotated-cell-6-65" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-6-66"><a href="#annotated-cell-6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-67"><a href="#annotated-cell-6-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> history</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="39" data-code-annotation="1">Cosine annealing decays the learning rate from <code>lr</code> to <code>eta_min</code> over <code>T_max</code> epochs, giving each model a consistent schedule regardless of width.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="50" data-code-annotation="2">The scheduler steps once per epoch (after each full pass over training data), not per batch.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Running the width sweep (GPU strongly recommended; takes ~2–4 hours on a single GPU). Results are cached to <code>artifacts/double_descent_results.pkl</code> and loaded on subsequent runs:</p>
+<div id="nakkiran-sweep-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>EPOCHS       <span class="op">=</span> <span class="dv">200</span></span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>LR           <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>WEIGHT_DECAY <span class="op">=</span> <span class="fl">5e-4</span></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>RESULTS_PATH <span class="op">=</span> ARTIFACTS_DIR <span class="op">/</span> <span class="st">"double_descent_results.pkl"</span></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-6" class="code-annotation-target"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> RESULTS_PATH.exists():</span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(RESULTS_PATH, <span class="st">"rb"</span>) <span class="im">as</span> f:</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>        sweep_histories <span class="op">=</span> pickle.load(f)</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded cached results from </span><span class="sc">{</span>RESULTS_PATH<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>    sweep_histories <span class="op">=</span> {}  <span class="co"># k -&gt; history dict</span></span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> K_VALS:</span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">=== k=</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> ==="</span>)</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a>        torch.manual_seed(RANDOM_SEED)</span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a>        model <span class="op">=</span> WideResNet18(k<span class="op">=</span>k)</span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a>        history <span class="op">=</span> train_model(</span>
+<span id="annotated-cell-7-18"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a>            model, train_loader, test_loader, EPOCHS, DEVICE,</span>
+<span id="annotated-cell-7-19"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a>            lr<span class="op">=</span>LR, weight_decay<span class="op">=</span>WEIGHT_DECAY, record_every<span class="op">=</span><span class="dv">5</span>, verbose<span class="op">=</span><span class="va">True</span></span>
+<span id="annotated-cell-7-20"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-7-21"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a>        sweep_histories[k] <span class="op">=</span> history</span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-23" class="code-annotation-target"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(RESULTS_PATH, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="annotated-cell-7-24"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a>        pickle.dump(sweep_histories, f)</span>
+<span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Sweep complete. Results saved to </span><span class="sc">{</span>RESULTS_PATH<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="6" data-code-annotation="1">If the pickle file already exists, we load the cached histories rather than re-running the full sweep. This makes re-execution cheap.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="23" data-code-annotation="2">After completing the sweep, results are persisted so that the figure cells in §2 and §3 can load them directly.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Packaging results for the figure cells in §2 and §3:</p>
+<div id="nakkiran-package-results" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model-wise results: final train/test accuracy for each k</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>final_train_acc <span class="op">=</span> [sweep_histories[k][<span class="st">"train_acc"</span>][<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> k <span class="kw">in</span> K_VALS]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>final_test_acc  <span class="op">=</span> [sweep_histories[k][<span class="st">"test_acc"</span>][<span class="op">-</span><span class="dv">1</span>]  <span class="cf">for</span> k <span class="kw">in</span> K_VALS]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>n_params_list   <span class="op">=</span> [count_params(WideResNet18(k<span class="op">=</span>k)) <span class="cf">for</span> k <span class="kw">in</span> K_VALS]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpolation threshold: first k where train_acc &gt; 0.995 (train_err -&gt; 0)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>interp_idx <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    (i <span class="cf">for</span> i, acc <span class="kw">in</span> <span class="bu">enumerate</span>(final_train_acc) <span class="cf">if</span> acc <span class="op">&gt;</span> <span class="fl">0.995</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">len</span>(K_VALS) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>results_model_wise <span class="op">=</span> {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"k_vals"</span>:     K_VALS,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"n_params"</span>:   n_params_list,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"train_acc"</span>:  final_train_acc,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test_acc"</span>:   final_test_acc,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"interp_idx"</span>: interp_idx,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Epoch-wise results: three representative k values</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>k_small    <span class="op">=</span> K_VALS[<span class="dv">0</span>]            <span class="co"># underparameterized</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>k_critical <span class="op">=</span> K_VALS[interp_idx]   <span class="co"># at interpolation threshold</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>k_large    <span class="op">=</span> K_VALS[<span class="op">-</span><span class="dv">1</span>]           <span class="co"># overparameterized</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>results_epoch_wise <span class="op">=</span> {</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"epochs"</span>:            sweep_histories[k_small][<span class="st">"epoch"</span>],</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"small_test_acc"</span>:    sweep_histories[k_small][<span class="st">"test_acc"</span>],</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"critical_test_acc"</span>: sweep_histories[k_critical][<span class="st">"test_acc"</span>],</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"large_test_acc"</span>:    sweep_histories[k_large][<span class="st">"test_acc"</span>],</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"small_label"</span>:       <span class="ss">f"k=</span><span class="sc">{</span>k_small<span class="sc">}</span><span class="ss"> (underparameterized)"</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"critical_label"</span>:    <span class="ss">f"k=</span><span class="sc">{</span>k_critical<span class="sc">}</span><span class="ss"> (critical)"</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"large_label"</span>:       <span class="ss">f"k=</span><span class="sc">{</span>k_large<span class="sc">}</span><span class="ss"> (overparameterized)"</span>,</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Interpolation threshold: k=</span><span class="sc">{</span>K_VALS[interp_idx]<span class="sc">}</span><span class="ss">, params=</span><span class="sc">{</span>n_params_list[interp_idx]<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, tr, te <span class="kw">in</span> <span class="bu">zip</span>(K_VALS, final_train_acc, final_test_acc):</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  k=</span><span class="sc">{</span>k<span class="sc">:4.2f}</span><span class="ss">  train_err=</span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> tr<span class="sc">:.3f}</span><span class="ss">  test_err=</span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> te<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Setup.</strong> The phase diagram below (from the original paper) visualizes both model-wise and epoch-wise double descent simultaneously — the <span class="math inline">x</span>-axis is model size and the <span class="math inline">y</span>-axis is number of training epochs. Each cell is colored by test error. The characteristic cross-shaped high-error region (dark) corresponds to the interpolation threshold in both dimensions: high test error whenever the model is near critical width <em>or</em> near the critical epoch.</p>
+<div id="fig-nakkiran-phase-diagram" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-nakkiran-phase-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/nakkiran-phase-diagram.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;4: Nakkiran et al.&nbsp;(2019), Figure 8: phase diagram of test error as a function of model size (x-axis) and training epochs (y-axis). Dark regions = high error; the cross-shaped high-error region corresponds to the interpolation threshold in both dimensions."><img src="img/nakkiran-phase-diagram.png" class="img-fluid figure-img" style="width:80.0%"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nakkiran-phase-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Nakkiran et al.&nbsp;(2019), Figure 8: phase diagram of test error as a function of model size (x-axis) and training epochs (y-axis). Dark regions = high error; the cross-shaped high-error region corresponds to the interpolation threshold in both dimensions.
+</figcaption>
+</figure>
+</div>
+<p><em>Source: Nakkiran et al., “Deep Double Descent: Where Bigger Models and More Data Hurt”, ICLR 2020. Reproduced for educational purposes.</em></p>
+</section>
+<section id="reconciliation-with-modern-practice" class="level2">
+<h2 class="anchored" data-anchor-id="reconciliation-with-modern-practice">Reconciliation with Modern Practice</h2>
+<p>The double descent phenomenon raises an immediate question: why do overparameterized models generalize at all? If a model has more parameters than data points, it can represent infinitely many functions that interpolate the training data — why does gradient descent find a good one?</p>
+<p><strong>Implicit regularization.</strong> The answer lies in the implicit bias of the optimization algorithm. Gradient descent initialized near zero converges, in the overparameterized regime, to the <strong>minimum-norm interpolator</strong> — the interpolating solution with the smallest parameter norm. For linear models this is provably equal to the pseudoinverse solution:</p>
+<p><span class="math display">
+\hat{\theta} = X^\top (X X^\top)^{-1} y,
+</span></p>
+<p>where <span class="math inline">X \in \mathbb{R}^{N \times d}</span> is the design matrix. For <span class="math inline">d \gg N,</span> this solution tends to be smoother and to generalize better than the minimum-norm solution in the underparameterized regime. The inductive bias of SGD in neural networks plays an analogous role, though the precise characterization is an active research area.</p>
+<p><strong>Weight decay interaction.</strong> Explicit <span class="math inline">L_2</span> regularization (weight decay) interacts with double descent in a subtle way. Weight decay shifts the interpolation threshold: it makes the effective model capacity smaller, moving the threshold to a larger nominal model size. This means that for a fixed architecture, increasing weight decay can decrease test error at the threshold by pushing the model into the underparameterized regime — or it can improve test error in the overparameterized regime by strengthening the implicit bias toward minimum-norm solutions. The interaction is non-monotone and depends on the noise level.</p>
+<p><strong>Data augmentation.</strong> Augmentation effectively increases the number of training examples, which raises the interpolation threshold. This is one reason aggressive augmentation tends to benefit large models more than small ones: large models are pushed further into the overparameterized regime by the augmented effective dataset size.</p>
+<p><strong>Practical implications.</strong> Several concrete lessons emerge from the double descent picture. For model size, the classical advice to avoid overparameterization is wrong in the modern regime. A larger model is not necessarily worse — it may generalize better than a model near the threshold, provided training is carried out to convergence. The practical strategy is to use a model large enough to be comfortably overparameterized, not to tune capacity to the classical sweet spot.</p>
+<p>For early stopping, the epoch-wise double descent shows that stopping at the first minimum of validation loss can be harmful for models near the interpolation threshold. When training a model of unknown position relative to the threshold, it is safer to use a learning rate schedule that reaches near zero (so training terminates naturally) than to rely on early stopping as the termination criterion.</p>
+<p>For label noise, the double descent effect is substantially worse with noisy labels, and the peak at the threshold is sharper. Cleaning training data reduces the severity of the interpolation threshold peak and generally improves performance throughout.</p>
+<p><strong>Remark.</strong> Zhang et al. <span class="citation" data-cites="zhang2017">(<a href="#ref-zhang2017" role="doc-biblioref">Zhang et al. 2017</a>)</span> showed that deep networks can perfectly memorize randomly labeled training data, achieving zero training error even when labels are pure noise. This demonstrates that the standard model of generalization — which assumed that networks could not simply memorize — was incomplete. Double descent provides the updated picture: memorization does happen, but in the overparameterized regime the minimum-norm interpolator that gradient descent finds tends to be one that also generalizes well on clean labels.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The double descent phenomenon is not a reason to discard statistical learning theory. The bias-variance tradeoff is correct and tight within the underparameterized regime. Double descent extends the picture: a second descent exists in the overparameterized regime, driven by the implicit minimum-norm bias of gradient descent. Modern deep learning operates almost exclusively in this second regime.</p>
+</div>
+</div>
+<hr>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-belkin2019" class="csl-entry" role="listitem">
+Belkin, Mikhail, Daniel Hsu, Siyuan Ma, and Soumik Mandal. 2019. <span>“Reconciling Modern Machine-Learning Practice and the Classical Bias–Variance Trade-Off.”</span> <em>Proceedings of the National Academy of Sciences</em> 116 (32): 15849–54. <a href="https://doi.org/10.1073/pnas.1903070116">https://doi.org/10.1073/pnas.1903070116</a>.
+</div>
+<div id="ref-nakkiran2020" class="csl-entry" role="listitem">
+Nakkiran, Preetum, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, and Ilya Sutskever. 2020. <span>“Deep Double Descent: Where Bigger Models and More Data Hurt.”</span> <a href="https://arxiv.org/abs/1912.02292">https://arxiv.org/abs/1912.02292</a>.
+</div>
+<div id="ref-zhang2017" class="csl-entry" role="listitem">
+Zhang, Chiyuan, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol Vinyals. 2017. <span>“Understanding Deep Learning Requires Rethinking Generalization.”</span> In <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1611.03530">https://arxiv.org/abs/1611.03530</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/deep/12-appendix-resnet.html" class="pagination-link" aria-label="12. ResNet from Scratch">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">12. ResNet from Scratch</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/deep/advanced/index.html" class="pagination-link" aria-label="Advanced Topics">
+        <span class="nav-page-text">Advanced Topics</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Embeddings &amp; Vector Search – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/apps/10-clustering.html" rel="next">
+<link href="../../notebooks/apps/08-s3-pipeline.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/apps/index.html">Application Development</a></li><li class="breadcrumb-item"><a href="../../notebooks/apps/09-embeddings.html">09. Embeddings &amp; Vector Search</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/apps/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Application Development</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/01-flet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Flet I: Basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/03-flet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Flet II: Declarative UI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/05-fastapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. FastAPI Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/06-docker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Docker &amp; Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/07-database.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Database &amp; ORM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/08-s3-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. S3 &amp; Batch Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/09-embeddings.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">09. Embeddings &amp; Vector Search</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/10-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. People Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/11-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Flet ↔︎ FastAPI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/12-realtime.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Realtime &amp; WebSockets</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/13-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Multimodal Queries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/14-photo-app.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Photo App: End-to-End</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/apps/nbx/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">NBX: Compute Platform</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/nbx/01-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Platform Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/nbx/02-registry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Registry &amp; Dashboard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/nbx/03-packaging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Job Packaging &amp; Execution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/nbx/04-queue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Task Queue &amp; Dispatch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/nbx/05-streaming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Log Streaming &amp; Artifacts</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/apps/cda/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CDA: Coding Agent From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/01-client.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Streaming LLM Client</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/02-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. The Tool System</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/03-agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Agent Loop</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/04-hardening.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Hardening the Agent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/05-ui.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. GUI 1: Chat Interface</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/06-ui2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. GUI 2: Tools &amp; Persistence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/apps/cda/07-ui3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. GUI 3: MCP Integration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#embedding-theory" id="toc-embedding-theory" class="nav-link active" data-scroll-target="#embedding-theory">Embedding Theory</a></li>
+  <li><a href="#clip-architecture" id="toc-clip-architecture" class="nav-link" data-scroll-target="#clip-architecture">CLIP Architecture</a></li>
+  <li><a href="#embedding-pipeline" id="toc-embedding-pipeline" class="nav-link" data-scroll-target="#embedding-pipeline">Embedding Pipeline</a></li>
+  <li><a href="#pgvector-indexing" id="toc-pgvector-indexing" class="nav-link" data-scroll-target="#pgvector-indexing">pgvector Indexing</a></li>
+  <li><a href="#semantic-search-api" id="toc-semantic-search-api" class="nav-link" data-scroll-target="#semantic-search-api">Semantic Search API</a></li>
+  <li><a href="#cost-vs.-recall-tradeoffs" id="toc-cost-vs.-recall-tradeoffs" class="nav-link" data-scroll-target="#cost-vs.-recall-tradeoffs">Cost vs.&nbsp;Recall Tradeoffs</a></li>
+  <li><a href="#sec-search-modes" id="toc-sec-search-modes" class="nav-link" data-scroll-target="#sec-search-modes">Appendix: Text-to-Image vs.&nbsp;Image-to-Image Search</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/apps/index.html">Application Development</a></li><li class="breadcrumb-item"><a href="../../notebooks/apps/09-embeddings.html">09. Embeddings &amp; Vector Search</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Embeddings &amp; Vector Search</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Photos stored in S3 and indexed in Postgres give us exact lookups: retrieve photo 42, list photos from 2024, filter by camera model. What they cannot do is answer the question “show me photos that <em>feel</em> like a rainy afternoon in Tokyo.” That kind of query requires a fundamentally different data structure: an <strong>embedding index</strong>.</p>
+<p>In this notebook we compute <strong>CLIP embeddings</strong> for every photo and build the semantic search layer on top of pgvector. We cover the theory of multimodal embeddings, implement the full embedding pipeline, and expose search endpoints through the FastAPI router introduced in earlier notebooks.</p>
+<section id="embedding-theory" class="level2">
+<h2 class="anchored" data-anchor-id="embedding-theory">Embedding Theory</h2>
+<p>An <strong>embedding</strong> is a function <span class="math inline">f\colon \mathcal{X} \to \mathbb{R}^d</span> that maps raw inputs (images, text strings, audio clips) into a fixed-dimensional vector space such that distance in that space reflects semantic similarity. Formally, we want:</p>
+<p><span class="math display">\text{sim}(f(x_1), f(x_2)) \text{ is high} \iff x_1 \text{ and } x_2 \text{ are semantically similar.}</span></p>
+<p>The dimension <span class="math inline">d</span> is a design choice; common values are <span class="math inline">128</span>, <span class="math inline">512</span>, and <span class="math inline">1536</span>. Smaller <span class="math inline">d</span> means faster search and less storage but lower expressivity. The specific geometry of <span class="math inline">\mathbb{R}^d</span> that matters most is <strong>cosine similarity</strong>:</p>
+<p><span class="math display">\text{sim}(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|\|\mathbf{v}\|}</span></p>
+<p>Cosine similarity is scale-invariant: only the <em>direction</em> of the vector encodes meaning, not its magnitude. This makes it the preferred metric for text and vision embeddings, which are typically <span class="math inline">\ell_2</span>-normalized before storage. The complementary <strong>cosine distance</strong> <span class="math inline">1 - \text{sim}(\mathbf{u}, \mathbf{v}) \in [0, 2]</span> is what pgvector minimizes when you write <code>ORDER BY embedding &lt;=&gt; query_vec</code>.</p>
+<p><br></p>
+<p><strong>Contrastive learning.</strong> The embedding function <span class="math inline">f</span> must be learned. For <strong>CLIP</strong> (Contrastive Language–Image Pre-training), training proceeds on a batch of <span class="math inline">N</span> image-text pairs <span class="math inline">(\mathbf{I}_i, \mathbf{T}_i)_{i=1}^N</span> scraped from the web. The image encoder <span class="math inline">f_I</span> and text encoder <span class="math inline">f_T</span> each produce <span class="math inline">\mathbb{R}^{512}</span> vectors. The loss is the <strong>InfoNCE loss</strong>, which treats each pair as a positive and all <span class="math inline">N^2 - N</span> cross-pairs as negatives:</p>
+<p><span class="math display">\mathcal{L} = -\frac{1}{2N} \sum_{i=1}^N \left[ \log \frac{\exp(f_I(\mathbf{I}_i) \cdot f_T(\mathbf{T}_i) / \tau)}{\sum_{j=1}^N \exp(f_I(\mathbf{I}_i) \cdot f_T(\mathbf{T}_j) / \tau)} + \log \frac{\exp(f_T(\mathbf{T}_i) \cdot f_I(\mathbf{I}_i) / \tau)}{\sum_{j=1}^N \exp(f_T(\mathbf{T}_i) \cdot f_I(\mathbf{I}_j) / \tau)} \right]</span></p>
+<p>where <span class="math inline">\tau</span> is a learned temperature. Minimizing <span class="math inline">\mathcal{L}</span> pushes paired embeddings together and unrelated embeddings apart. The remarkable consequence is that after training, <code>f_I(photo_of_a_sunset)</code> and <code>f_T("sunset over the ocean")</code> end up close in the <em>same</em> <span class="math inline">\mathbb{R}^{512}</span> space, enabling cross-modal search.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The InfoNCE loss is a lower bound on mutual information between image and text representations. Larger batch sizes <span class="math inline">N</span> provide more negatives per step and tighten this bound, which is one reason CLIP was trained on batches of 32,768 pairs across 256 GPUs.</p>
+</div>
+</div>
+</section>
+<section id="clip-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="clip-architecture">CLIP Architecture</h2>
+<p>CLIP is a <strong>two-tower model</strong>: an image encoder and a text encoder that each produce vectors in a shared <span class="math inline">\mathbb{R}^{512}</span> space.</p>
+<p><strong>Image encoder.</strong> We use <strong>ViT-B/32</strong>, a Vision Transformer with <span class="math inline">32 \times 32</span> pixel patches, 12 transformer layers, and 512-dim output. The input image is divided into a <span class="math inline">7 \times 7</span> grid of patches (for <span class="math inline">224 \times 224</span> input), each patch is linearly projected, and the sequence is processed by a standard Transformer encoder. The <code>[CLS]</code> token embedding after the last layer is projected to <span class="math inline">\mathbb{R}^{512}</span> and <span class="math inline">\ell_2</span>-normalized.</p>
+<p><strong>Text encoder.</strong> A 12-layer Transformer operating on BPE tokens; the embedding of the <code>[EOS]</code> token is projected to <span class="math inline">\mathbb{R}^{512}</span> and <span class="math inline">\ell_2</span>-normalized.</p>
+<p>Both towers project to the <em>same</em> embedding space, so image and text embeddings are directly comparable with dot product or cosine similarity. This is the key property that enables text-to-image search without any image-text pair at query time — we just encode the query string and retrieve the nearest image embeddings.</p>
+<p>The <code>openai/CLIP</code> Python package exposes <code>clip.load("ViT-B/32")</code> which returns a <code>(model, preprocess)</code> pair. <code>preprocess</code> is a <code>torchvision.transforms</code> pipeline: resize to <span class="math inline">224 \times 224</span>, center-crop, convert to tensor, normalize with ImageNet statistics.</p>
+<p>Loading the CLIP model and running a forward pass:</p>
+<div id="c9f0a1b2" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> clip</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>model, preprocess <span class="op">=</span> clip.load(<span class="st">"ViT-B/32"</span>, device<span class="op">=</span>device)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Model loaded on </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Input resolution: </span><span class="sc">{</span>model<span class="sc">.</span>visual<span class="sc">.</span>input_resolution<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Embedding dimension: </span><span class="sc">{</span>model<span class="sc">.</span>visual<span class="sc">.</span>output_dim<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Encoding a synthetic image and a text prompt, then computing their cosine similarity:</p>
+<div id="e1b2c3d4" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Synthetic 224x224 RGB image (solid orange)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> Image.fromarray(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    np.full((<span class="dv">224</span>, <span class="dv">224</span>, <span class="dv">3</span>), [<span class="dv">255</span>, <span class="dv">140</span>, <span class="dv">0</span>], dtype<span class="op">=</span>np.uint8)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    image_input <span class="op">=</span> preprocess(img).unsqueeze(<span class="dv">0</span>).to(device)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    text_input  <span class="op">=</span> clip.tokenize([<span class="st">"a bright orange image"</span>]).to(device)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    image_vec <span class="op">=</span> model.encode_image(image_input)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    text_vec  <span class="op">=</span> model.encode_text(text_input)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># L2-normalize</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    image_vec <span class="op">=</span> image_vec <span class="op">/</span> image_vec.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    text_vec  <span class="op">=</span> text_vec  <span class="op">/</span> text_vec.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    similarity <span class="op">=</span> (image_vec <span class="op">@</span> text_vec.T).item()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Image embedding shape : </span><span class="sc">{</span>image_vec<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Text embedding shape  : </span><span class="sc">{</span>text_vec<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cosine similarity     : </span><span class="sc">{</span>similarity<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="embedding-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="embedding-pipeline">Embedding Pipeline</h2>
+<p>The embedding pipeline runs on every photo ingested into the system. Its entry point is <code>embed_photo(image_bytes: bytes) -&gt; np.ndarray</code>, which accepts raw bytes as downloaded from S3 and returns a normalized <code>float32</code> vector of shape <span class="math inline">(512,)</span> — the CLIP ViT-B/32 embedding dimension.</p>
+<p><strong>Interface design.</strong> The function takes bytes rather than a <code>PIL.Image</code> or a file path: S3 objects arrive as byte streams, and keeping the interface at the bytes level avoids unnecessary intermediate file I/O. The caller (the S3 pipeline worker from notebook 08) downloads the image once and passes the same bytes to both <code>extract_exif</code> and <code>embed_photo</code>, avoiding a second download.</p>
+<p><strong>CPU vs.&nbsp;GPU.</strong> On a modern GPU (A100), CLIP encodes a single image in under 1ms; on CPU, approximately 50–100ms. For the personal photo library at scale (50K photos), even CPU inference adds only ~1 hour of total embedding time — acceptable for a one-shot indexing job. Ongoing incremental indexing (new photos arrive daily) is fast enough on CPU that no GPU is required.</p>
+<p>Defining the single-image embedding function:</p>
+<div id="c5f6a7b8" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> io</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> embed_photo(image_bytes: <span class="bu">bytes</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Encode raw image bytes into a normalized CLIP embedding."""</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> Image.<span class="bu">open</span>(io.BytesIO(image_bytes)).convert(<span class="st">"RGB"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    tensor <span class="op">=</span> preprocess(img).unsqueeze(<span class="dv">0</span>).to(device)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        vec <span class="op">=</span> model.encode_image(tensor)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        vec <span class="op">=</span> vec <span class="op">/</span> vec.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vec.squeeze(<span class="dv">0</span>).cpu().numpy().astype(np.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For ingestion we need to process <span class="math inline">B</span> images at once rather than calling <code>model.encode_image</code> in a tight loop. Batching amortizes the Python/CUDA launch overhead and exploits the matrix-level parallelism of the transformer — the speedup is roughly <span class="math inline">B\times</span> on CPU and larger on GPU.</p>
+<p>Defining the batch embedding function and benchmarking against single-image calls:</p>
+<div id="f8c9d0e1" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> embed_batch(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    image_bytes_list: <span class="bu">list</span>[<span class="bu">bytes</span>],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    batch_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">32</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Encode a list of raw image bytes, returning shape (N, 512)."""</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    all_vecs <span class="op">=</span> []</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(image_bytes_list), batch_size):</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        chunk <span class="op">=</span> image_bytes_list[i : i <span class="op">+</span> batch_size]</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        imgs  <span class="op">=</span> [Image.<span class="bu">open</span>(io.BytesIO(b)).convert(<span class="st">"RGB"</span>) <span class="cf">for</span> b <span class="kw">in</span> chunk]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        tensors <span class="op">=</span> torch.stack([preprocess(im) <span class="cf">for</span> im <span class="kw">in</span> imgs]).to(device)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            vecs <span class="op">=</span> model.encode_image(tensors)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            vecs <span class="op">=</span> vecs <span class="op">/</span> vecs.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        all_vecs.append(vecs.cpu().numpy().astype(np.float32))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.concatenate(all_vecs, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># --- benchmark: 3 synthetic images ---</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _make_bytes(color: <span class="bu">tuple</span>) <span class="op">-&gt;</span> <span class="bu">bytes</span>:</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    buf <span class="op">=</span> io.BytesIO()</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    Image.fromarray(np.full((<span class="dv">224</span>, <span class="dv">224</span>, <span class="dv">3</span>), color, dtype<span class="op">=</span>np.uint8)).save(buf, <span class="bu">format</span><span class="op">=</span><span class="st">"JPEG"</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> buf.getvalue()</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>images <span class="op">=</span> [_make_bytes((r, g, b)) <span class="cf">for</span> r, g, b <span class="kw">in</span> [(<span class="dv">255</span>, <span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">0</span>, <span class="dv">255</span>, <span class="dv">0</span>), (<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">255</span>)]]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>singles <span class="op">=</span> np.stack([embed_photo(b) <span class="cf">for</span> b <span class="kw">in</span> images])</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>t_single <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>batched <span class="op">=</span> embed_batch(images, batch_size<span class="op">=</span><span class="dv">32</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>t_batch <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Single-by-single : </span><span class="sc">{</span>t_single<span class="op">*</span><span class="dv">1000</span><span class="sc">:.1f}</span><span class="ss"> ms"</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Batched          : </span><span class="sc">{</span>t_batch<span class="op">*</span><span class="dv">1000</span><span class="sc">:.1f}</span><span class="ss"> ms"</span>)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output shape     : </span><span class="sc">{</span>batched<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max abs diff     : </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">abs</span>(singles <span class="op">-</span> batched)<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Integration with the S3 pipeline.</strong> In the photo ingestion worker (introduced in notebook 08), the embedding step slots in immediately after EXIF extraction. The worker calls <code>embed_photo(image_bytes)</code> and upserts the result into <code>photos.embedding</code>. Because <code>embed_photo</code> is CPU-bound, we run it in a thread pool via <code>asyncio.to_thread</code> to avoid blocking the async event loop:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>embedding <span class="op">=</span> <span class="cf">await</span> asyncio.to_thread(embed_photo, image_bytes)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> session.execute(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    update(Photo)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .where(Photo.<span class="bu">id</span> <span class="op">==</span> photo_id)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .values(embedding<span class="op">=</span>embedding.tolist())</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="pgvector-indexing" class="level2">
+<h2 class="anchored" data-anchor-id="pgvector-indexing">pgvector Indexing</h2>
+<p>With embeddings stored in Postgres, we need an index that makes nearest-neighbor queries fast. pgvector supports two approximate index types: <strong>IVFFlat</strong> and <strong>HNSW</strong>. We use HNSW for production.</p>
+<p><strong>IVFFlat</strong> partitions the embedding space into <code>lists</code> Voronoi cells using k-means, then at query time searches only the nearest <code>probes</code> cells. Build is fast and memory usage is low, but recall can degrade when the query falls near a cell boundary.</p>
+<p><strong>HNSW</strong> (Hierarchical Navigable Small World) builds a multi-layer proximity graph. Each node at layer <span class="math inline">\ell</span> is connected to <span class="math inline">m</span> neighbors; queries traverse from the top layer downward, greedily following edges toward the query vector. Two parameters control the index: - <span class="math inline">m</span>: number of bidirectional links per node. Higher <span class="math inline">m</span> improves recall at the cost of more memory and slower build. - <span class="math inline">ef\_construction</span>: search width during index build. Higher values build a higher-quality graph at the cost of build time.</p>
+<p>Query time is <span class="math inline">O(\log N)</span> for HNSW vs.&nbsp;<span class="math inline">O(N / \text{lists})</span> for IVFFlat. For a photo library of even a few million images, HNSW is the right default.</p>
+<p>The DDL to add the column and create the index:</p>
+<div id="d2a3b4c5" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sqlalchemy <span class="im">import</span> text</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Assumes `engine` is a SQLAlchemy async engine connected to Postgres with pgvector</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>MIGRATION_DDL <span class="op">=</span> [</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CREATE EXTENSION IF NOT EXISTS vector"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ALTER TABLE photos ADD COLUMN IF NOT EXISTS embedding vector(512)"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"""</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">    CREATE INDEX IF NOT EXISTS photos_embedding_hnsw_idx</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">    ON photos</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st">    USING hnsw (embedding vector_cosine_ops)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">    WITH (m = 16, ef_construction = 64)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Dry-run: print the statements we would execute</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> stmt <span class="kw">in</span> MIGRATION_DDL:</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(stmt.strip())</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><code>CREATE EXTENSION IF NOT EXISTS vector</code>: loads the pgvector extension. This must run once per database, typically in the initial migration.</li>
+<li><code>ALTER TABLE photos ADD COLUMN IF NOT EXISTS embedding vector(512)</code>: adds the column; the <code>vector(512)</code> type is provided by pgvector and stores a fixed-length float array of dimension <span class="math inline">512</span>.</li>
+<li><code>USING hnsw (embedding vector_cosine_ops)</code>: specifies cosine distance as the metric; <code>vector_cosine_ops</code> tells the index to optimize for the <code>&lt;=&gt;</code> operator (cosine distance). Use <code>vector_l2_ops</code> for Euclidean distance (<code>&lt;-&gt;</code>) if your embeddings are not <span class="math inline">\ell_2</span>-normalized.</li>
+</ol>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>HNSW indexes in pgvector are built <em>at index creation time</em> and do not auto-rebuild when rows are inserted. Rows inserted after the index is created are still searchable (pgvector appends them to the graph), but rebuilding the index periodically with <code>REINDEX</code> improves recall as the dataset grows.</p>
+</div>
+</div>
+</section>
+<section id="semantic-search-api" class="level2">
+<h2 class="anchored" data-anchor-id="semantic-search-api">Semantic Search API</h2>
+<p>We expose two search endpoints:</p>
+<ul>
+<li><code>POST /search/</code>: text-to-image search. The body is <code>{"query": "...", "limit": 20}</code>. The handler encodes the query text with CLIP and retrieves the <code>limit</code> nearest photos by cosine distance.</li>
+<li><code>GET /photos/{id}/similar?limit=10</code>: image-to-image search. The stored embedding of photo <code>{id}</code> is used as the query vector.</li>
+</ul>
+<p>Both endpoints return a list of <code>PhotoRead</code> schemas (defined in notebook 08). The SQLAlchemy ORM pattern for the nearest-neighbor query is:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>select(Photo).order_by(Photo.embedding.cosine_distance(query_vec)).limit(k)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>where <code>cosine_distance</code> is a method added to mapped columns by the <code>pgvector-sqlalchemy</code> integration (<code>from pgvector.sqlalchemy import Vector</code>).</p>
+<p>Defining the request model and search router:</p>
+<div id="d8a9b0c1" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, Field</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> List</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Request / response schemas ---</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SearchRequest(BaseModel):</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    query: <span class="bu">str</span> <span class="op">=</span> Field(..., min_length<span class="op">=</span><span class="dv">1</span>, max_length<span class="op">=</span><span class="dv">400</span>, description<span class="op">=</span><span class="st">"Natural-language search query"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    limit: <span class="bu">int</span> <span class="op">=</span> Field(<span class="dv">20</span>, ge<span class="op">=</span><span class="dv">1</span>, le<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PhotoRead(BaseModel):</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Minimal read schema — real version mirrors the Photo ORM model."""</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">id</span>: <span class="bu">int</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    s3_key: <span class="bu">str</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    taken_at: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    score: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>  <span class="co"># cosine similarity (1 - distance)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    model_config <span class="op">=</span> {<span class="st">"from_attributes"</span>: <span class="va">True</span>}</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(SearchRequest.model_json_schema())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Defining the search router with both endpoints:</p>
+<div id="f0c1d2e3" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This cell shows the router code; it does not run standalone without a database.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>SEARCH_ROUTER <span class="op">=</span> <span class="st">'''</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">from fastapi import APIRouter, Depends, HTTPException</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">from sqlalchemy.ext.asyncio import AsyncSession</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">from sqlalchemy import select</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">import asyncio, torch, clip</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">import numpy as np</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="st">from .database import get_session   # yields AsyncSession</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="st">from .models   import Photo         # SQLAlchemy ORM model</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="st">from .schemas  import PhotoRead, SearchRequest</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="st">from .embed    import model as clip_model, preprocess, device</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="st">router = APIRouter(prefix="", tags=["search"])</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="st">def _encode_text(query: str) -&gt; list[float]:</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="st">    tokens = clip.tokenize([query]).to(device)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="st">    with torch.no_grad():</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="st">        vec = clip_model.encode_text(tokens)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="st">        vec = vec / vec.norm(dim=-1, keepdim=True)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="st">    return vec.squeeze(0).cpu().numpy().astype(float).tolist()</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="st">@router.post("/search/", response_model=list[PhotoRead])</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="st">async def search_photos(</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="st">    body: SearchRequest,</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="st">    session: AsyncSession = Depends(get_session),</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="st">):</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="st">    query_vec = await asyncio.to_thread(_encode_text, body.query)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="st">    stmt = (</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="st">        select(Photo)</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="st">        .where(Photo.embedding.isnot(None))</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="st">        .order_by(Photo.embedding.cosine_distance(query_vec))</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="st">        .limit(body.limit)</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="st">    rows = (await session.scalars(stmt)).all()</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="st">    return rows</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="st">@router.get("/photos/</span><span class="sc">{photo_id}</span><span class="st">/similar", response_model=list[PhotoRead])</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="st">async def similar_photos(</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="st">    photo_id: int,</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="st">    limit: int = 10,</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="st">    session: AsyncSession = Depends(get_session),</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="st">):</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="st">    photo = await session.get(Photo, photo_id)</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="st">    if photo is None:</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="st">        raise HTTPException(status_code=404, detail="Photo not found")</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="st">    if photo.embedding is None:</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="st">        raise HTTPException(status_code=422, detail="Photo has no embedding")</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="st">    stmt = (</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="st">        select(Photo)</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="st">        .where(Photo.id != photo_id)</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="st">        .where(Photo.embedding.isnot(None))</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="st">        .order_by(Photo.embedding.cosine_distance(photo.embedding))</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="st">        .limit(limit)</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="st">    rows = (await session.scalars(stmt)).all()</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="st">    return rows</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(SEARCH_ROUTER.strip())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="cost-vs.-recall-tradeoffs" class="level2">
+<h2 class="anchored" data-anchor-id="cost-vs.-recall-tradeoffs">Cost vs.&nbsp;Recall Tradeoffs</h2>
+<p>Approximate nearest-neighbor (ANN) search trades recall for speed. <strong>Exact KNN</strong> computes the distance from the query to every row and sorts; it is <span class="math inline">O(N \cdot d)</span> and always correct, but infeasible for large <span class="math inline">N</span>. HNSW reduces query time to <span class="math inline">O(\log N)</span> at the cost of occasionally missing the true nearest neighbor.</p>
+<p><strong>Recall at <span class="math inline">k</span></strong> is the standard metric:</p>
+<p><span class="math display">\text{Recall}@k = \frac{|\text{HNSW top-}k \cap \text{exact top-}k|}{k}</span></p>
+<p>In pgvector, the <code>ef_search</code> parameter (set per session with <code>SET hnsw.ef_search = 100</code>) controls the search width at query time: higher values traverse more candidate nodes in the graph, improving recall at the cost of latency. The default is <code>40</code>; for photo search (low latency requirements, high recall desirable) <code>100</code>–<code>200</code> is a reasonable operating point.</p>
+<p>The tradeoff can be measured with a simple benchmark: generate <span class="math inline">Q</span> random queries, retrieve top-<span class="math inline">k</span> results from both exact KNN and HNSW, compute the intersection.</p>
+<p>Mock recall benchmark using a small in-memory embedding matrix:</p>
+<div id="d4f5a6b7" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">10_000</span>   <span class="co"># number of stored embeddings</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="dv">512</span>      <span class="co"># embedding dimension</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>Q <span class="op">=</span> <span class="dv">100</span>      <span class="co"># number of query vectors</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">10</span>       <span class="co"># top-k</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalized embeddings (simulates CLIP output stored in pgvector)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> rng.standard_normal((N, d)).astype(np.float32)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>db <span class="op">/=</span> np.linalg.norm(db, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>queries <span class="op">=</span> rng.standard_normal((Q, d)).astype(np.float32)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>queries <span class="op">/=</span> np.linalg.norm(queries, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Exact KNN (brute-force) ---</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>sims <span class="op">=</span> queries <span class="op">@</span> db.T              <span class="co"># (Q, N) cosine similarities</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>exact_top_k <span class="op">=</span> np.argsort(<span class="op">-</span>sims, axis<span class="op">=</span><span class="dv">1</span>)[:, :k]   <span class="co"># (Q, k)</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Simulated HNSW: exact + 5% random noise (mimics recall ~0.95) ---</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simulate_hnsw(queries, db, k, drop_rate<span class="op">=</span><span class="fl">0.05</span>):</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    sims <span class="op">=</span> queries <span class="op">@</span> db.T</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    top_k <span class="op">=</span> np.argsort(<span class="op">-</span>sims, axis<span class="op">=</span><span class="dv">1</span>)[:, :k]</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># randomly replace a fraction of results with a non-top-k index</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> rng.random(top_k.shape) <span class="op">&lt;</span> drop_rate</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    top_k[mask] <span class="op">=</span> rng.integers(k, N, size<span class="op">=</span>mask.<span class="bu">sum</span>())</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> top_k</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>approx_top_k <span class="op">=</span> simulate_hnsw(queries, db, k, drop_rate<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Recall computation ---</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>recalls <span class="op">=</span> []</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> q <span class="kw">in</span> <span class="bu">range</span>(Q):</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    intersection <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(exact_top_k[q]) <span class="op">&amp;</span> <span class="bu">set</span>(approx_top_k[q]))</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    recalls.append(intersection <span class="op">/</span> k)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean Recall@</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>np<span class="sc">.</span>mean(recalls)<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Min  Recall@</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">min</span>(recalls)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a production photo library, run this benchmark on a representative sample of real embeddings before deploying. The default <code>m=16, ef_construction=64</code> HNSW parameters typically achieve recall <span class="math inline">&gt; 0.95</span> for <span class="math inline">N &lt; 10^6</span>; tuning <code>ef_search</code> at query time lets you shift the recall–latency tradeoff without rebuilding the index.</p>
+</div>
+</div>
+</section>
+<section id="sec-search-modes" class="level2">
+<h2 class="anchored" data-anchor-id="sec-search-modes">Appendix: Text-to-Image vs.&nbsp;Image-to-Image Search</h2>
+<p>CLIP’s shared embedding space supports three search modes that differ only in how the query vector is constructed:</p>
+<p><strong>Text-to-image.</strong> Encode the query string with the text encoder: <span class="math inline">\mathbf{q} = f_T(\text{query})</span>. This is the primary search mode exposed by <code>POST /search/</code>.</p>
+<p><strong>Image-to-image.</strong> Encode an uploaded image with the image encoder: <span class="math inline">\mathbf{q} = f_I(\text{image})</span>. The <code>GET /photos/{id}/similar</code> endpoint is a special case where the uploaded image is already in the database. For a “find photos like this” upload flow, the Flet client sends the image bytes to a new <code>POST /search/similar-image</code> endpoint, which calls <code>embed_photo</code> and queries pgvector with the result.</p>
+<p><strong>Combined (text + image).</strong> A weighted sum of the two query embeddings:</p>
+<p><span class="math display">\mathbf{q} = \frac{\alpha \, f_T(\text{text}) + (1 - \alpha) \, f_I(\text{image})}{\|\alpha \, f_T(\text{text}) + (1 - \alpha) \, f_I(\text{image})\|}</span></p>
+<p>where <span class="math inline">\alpha \in [0, 1]</span> controls how much weight to give the text vs.&nbsp;image component. This is the same technique used in DALL-E’s <em>CLIP guidance</em> and in tools like <a href="https://imagen.research.google/">Imagen</a>. For the photo app, <span class="math inline">\alpha = 0.5</span> is a sensible default; the Flet UI could expose a slider.</p>
+<p>Implementing the combined query vector:</p>
+<div id="c9e0f1a2" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> combined_query_vec(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    text: <span class="bu">str</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    image_bytes: <span class="bu">bytes</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    alpha: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return a normalized combined text+image query embedding."""</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> clip.tokenize([text]).to(device)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> Image.<span class="bu">open</span>(io.BytesIO(image_bytes)).convert(<span class="st">"RGB"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    img_tensor <span class="op">=</span> preprocess(img).unsqueeze(<span class="dv">0</span>).to(device)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        t_vec <span class="op">=</span> model.encode_text(tokens)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        i_vec <span class="op">=</span> model.encode_image(img_tensor)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        t_vec <span class="op">=</span> t_vec <span class="op">/</span> t_vec.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        i_vec <span class="op">=</span> i_vec <span class="op">/</span> i_vec.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    combined <span class="op">=</span> alpha <span class="op">*</span> t_vec <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> alpha) <span class="op">*</span> i_vec</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    combined <span class="op">=</span> combined <span class="op">/</span> combined.norm(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> combined.squeeze(<span class="dv">0</span>).cpu().numpy().astype(np.float32)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify shape with a synthetic image</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>buf <span class="op">=</span> io.BytesIO()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>Image.fromarray(np.zeros((<span class="dv">224</span>, <span class="dv">224</span>, <span class="dv">3</span>), dtype<span class="op">=</span>np.uint8)).save(buf, <span class="bu">format</span><span class="op">=</span><span class="st">"JPEG"</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> combined_query_vec(<span class="st">"night sky"</span>, buf.getvalue(), alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Combined query shape : </span><span class="sc">{</span>q<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"L2 norm              : </span><span class="sc">{</span>np<span class="sc">.</span>linalg<span class="sc">.</span>norm(q)<span class="sc">:.6f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/apps/08-s3-pipeline.html" class="pagination-link" aria-label="08. S3 &amp; Batch Pipelines">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">08. S3 &amp; Batch Pipelines</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/apps/10-clustering.html" class="pagination-link" aria-label="10. People Clustering">
+        <span class="nav-page-text">10. People Clustering</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

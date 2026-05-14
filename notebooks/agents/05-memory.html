@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Giving Agents Long-Term Memory – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/agents/06-safety.html" rel="next">
+<link href="../../notebooks/agents/04-context.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../notebooks/agents/05-memory.html">05. Long-Term Memory</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/agents/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentic Systems</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/00-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">00. LLMs as Agents</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/01-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Tool Use &amp; Function Calling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/02-reasoning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Chain-of-Thought Reasoning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/03-agent-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Agent Loop</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/04-context.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Context &amp; Prompt Management</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/05-memory.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">05. Long-Term Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/06-safety.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Safety &amp; Guardrails</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/07-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Evaluation &amp; Benchmarking</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/08-patterns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Workflows &amp; Agentic Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/09-multi-agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Multi-Agent Coordination</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/agents/10-extensibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Extensibility &amp; MCP</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#a-taxonomy-of-agent-memory" id="toc-a-taxonomy-of-agent-memory" class="nav-link active" data-scroll-target="#a-taxonomy-of-agent-memory">A Taxonomy of Agent Memory</a></li>
+  <li><a href="#working-memory-the-context-window" id="toc-working-memory-the-context-window" class="nav-link" data-scroll-target="#working-memory-the-context-window">Working Memory — The Context Window</a></li>
+  <li><a href="#episodic-memory-session-persistence" id="toc-episodic-memory-session-persistence" class="nav-link" data-scroll-target="#episodic-memory-session-persistence">Episodic Memory — Session Persistence</a></li>
+  <li><a href="#the-sentinel-manager-executor-pipeline" id="toc-the-sentinel-manager-executor-pipeline" class="nav-link" data-scroll-target="#the-sentinel-manager-executor-pipeline">The Sentinel-Manager-Executor Pipeline</a></li>
+  <li><a href="#semantic-memory-the-memorytool" id="toc-semantic-memory-the-memorytool" class="nav-link" data-scroll-target="#semantic-memory-the-memorytool">Semantic Memory — The MemoryTool</a></li>
+  <li><a href="#procedural-prospective-memory" id="toc-procedural-prospective-memory" class="nav-link" data-scroll-target="#procedural-prospective-memory">Procedural &amp; Prospective Memory</a></li>
+  <li><a href="#memory-augmented-agent" id="toc-memory-augmented-agent" class="nav-link" data-scroll-target="#memory-augmented-agent">Memory-Augmented Agent</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/agents/index.html">Agentic Systems</a></li><li class="breadcrumb-item"><a href="../../notebooks/agents/05-memory.html">05. Long-Term Memory</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Giving Agents Long-Term Memory</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The context window is an agent’s working memory — every token the model can see during a single generation pass. It is fast, immediately available, and zero-latency. It is also finite and volatile: when the session ends, everything in it disappears. A 200,000-token context window sounds generous until you realize it can be exhausted by a handful of large file reads, and even within a session, information buried in the middle of a long history is attended to less reliably than information at the edges.</p>
+<p>Agents that can operate across sessions, recall user preferences, consult stable project facts, and track pending work are qualitatively more useful than agents that start fresh every time. This notebook covers the five types of memory an agent can leverage, how the CDA library implements each one, and how to wire them together into a coherent memory strategy. We ground each type in a working code example so the abstract taxonomy connects directly to the library’s APIs.</p>
+<p>Two papers shape this landscape: Generative Agents <span class="citation" data-cites="genagents">(<a href="#ref-genagents" role="doc-biblioref">Park et al. 2023</a>)</span> introduced a <strong>memory stream</strong> architecture where observations, reflections, and plans are stored and retrieved by recency, importance, and relevance. MemGPT <span class="citation" data-cites="memgpt">(<a href="#ref-memgpt" role="doc-biblioref">Packer et al. 2023</a>)</span> formalized an OS-inspired memory hierarchy, distinguishing in-context (“main memory”) from out-of-context (“external storage”) and giving the agent explicit control over what moves between them. We take both seriously and map their concepts onto the CDA library.</p>
+<section id="a-taxonomy-of-agent-memory" class="level2">
+<h2 class="anchored" data-anchor-id="a-taxonomy-of-agent-memory">A Taxonomy of Agent Memory</h2>
+<p>Five types of memory are useful to distinguish when designing agents:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 24%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Analogy</th>
+<th>Lifetime</th>
+<th>CDA Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Working</td>
+<td>RAM</td>
+<td>One context window</td>
+<td><code>Session.messages</code></td>
+</tr>
+<tr class="even">
+<td>Episodic</td>
+<td>Diary</td>
+<td>Across sessions</td>
+<td><code>Session.save()</code> / <code>Session.load()</code></td>
+</tr>
+<tr class="odd">
+<td>Semantic</td>
+<td>Fact database</td>
+<td>Persistent</td>
+<td><code>MemoryTool</code> (key-value store)</td>
+</tr>
+<tr class="even">
+<td>Procedural</td>
+<td>Muscle memory</td>
+<td>Long-lived</td>
+<td><code>Config.developer_instructions</code></td>
+</tr>
+<tr class="odd">
+<td>Prospective</td>
+<td>To-do list</td>
+<td>Until completed</td>
+<td><code>TodoTool</code></td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>Working memory</strong> is the context window itself — the full set of tokens the model can attend to during a single generation. The CDA library manages it through <code>Session.messages</code>. Everything in the current session lives here: system prompt, user turns, assistant replies, tool results. NB04 covered strategies for keeping it from overflowing.</p>
+<p><strong>Episodic memory</strong> is the record of what happened in prior sessions. For a human, it is autobiographical narrative: “last Tuesday I diagnosed a segfault in auth.py.” For an agent, it is the serialized conversation history from a previous run. <code>Session.save()</code> writes this to disk; <code>Session.load()</code> restores it into a new session so the agent can continue where it left off.</p>
+<p><strong>Semantic memory</strong> is long-lived factual knowledge: project-specific constants, user preferences, stable configurations. Unlike episodic memory (which is a narrative), semantic memory is a lookup table. The CDA library implements this as <code>MemoryTool</code>, a persistent key-value store at <code>~/.cda/memory.json</code>.</p>
+<p><strong>Procedural memory</strong> encodes how-to knowledge: workflows, constraints, style rules. Agents don’t learn new procedures at runtime the way humans do, but the system prompt injects procedural knowledge via <code>Config.developer_instructions</code>. Instructions like “run <code>ruff check</code> before treating any code change as complete” are effectively procedural memories activated on every turn.</p>
+<p><strong>Prospective memory</strong> is the intention to do something in the future — the mental note you make when you can’t act immediately. The CDA library models this as <code>TodoTool</code>, a persistent checklist the agent can write to and consult across turns.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This notebook focuses on the three most important types for practical agents: working memory (the context window), episodic memory (session persistence), and semantic memory (the <code>MemoryTool</code>). Procedural and prospective memory are covered briefly in the final section.</p>
+</div>
+</div>
+</section>
+<section id="working-memory-the-context-window" class="level2">
+<h2 class="anchored" data-anchor-id="working-memory-the-context-window">Working Memory — The Context Window</h2>
+<p>The model’s working memory is the context window — the complete token sequence the model attends to at generation time. It feels uniform, but it isn’t. Liu et al.&nbsp;(2023) demonstrated the <strong>“lost in the middle” phenomenon</strong>: models attend most strongly to tokens near the beginning and end of the context. Performance on retrieval and reasoning tasks degrades for information buried in the middle of a long prompt.</p>
+<p>For agents, this has a concrete design implication: critical facts — user preferences, the current task goal, project-specific constraints — should appear near the start of the context (in the system prompt) or near the end (in recent turns), not buried in old tool outputs. The system prompt structure from NB03 and NB04 was designed with this in mind: identity and instructions appear first, giving them the strongest positional attention.</p>
+<p><strong>Experiment.</strong> We demonstrate the position effect directly. A long filler context is constructed with a target fact placed at the start, middle, or end. We ask the model to recall it and observe whether position affects reliability.</p>
+<p><strong>Setup.</strong> Imports and client initialization:</p>
+<div id="b8c9d0e1-f2a3-4567-bcde-567890123407" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> AsyncOpenAI</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> AsyncOpenAI(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span>os.environ[<span class="st">"OPENROUTER_API_KEY"</span>],</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    base_url<span class="op">=</span>os.environ.get(<span class="st">"OPENROUTER_BASE_URL"</span>, <span class="st">"https://openrouter.ai/api/v1"</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>MODEL <span class="op">=</span> <span class="st">"anthropic/claude-sonnet-4"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Importing from the CDA library:</p>
+<div id="d0e1f2a3-b4c5-6789-defa-789012345609" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.config <span class="im">import</span> Config</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.session <span class="im">import</span> Session, SESSIONS_DIR</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.agent <span class="im">import</span> Agent</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.events <span class="im">import</span> AgentEventType</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.tools.builtin.memory <span class="im">import</span> MemoryTool</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.tools.base <span class="im">import</span> ToolInvocation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The position experiment: we embed the target fact at the start, middle, or end of a long filler passage and ask the model to recall it:</p>
+<div id="f2a3b4c5-d6e7-8901-fabc-901234567811" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> position_test(position: <span class="bu">str</span>, context_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Test recall of a fact at different positions in a long context."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    filler <span class="op">=</span> <span class="st">"The sky is blue. The grass is green. Numbers are abstract objects. "</span> <span class="op">*</span> context_size</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    target_fact <span class="op">=</span> <span class="st">"The secret code is ALPHA-7."</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> position <span class="op">==</span> <span class="st">"start"</span>:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> target_fact <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> filler</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> position <span class="op">==</span> <span class="st">"end"</span>:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> filler <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> target_fact</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># middle</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        half <span class="op">=</span> <span class="bu">len</span>(filler) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> filler[:half] <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> target_fact <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> filler[half:]</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> <span class="cf">await</span> client.chat.completions.create(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Context: </span><span class="sc">{</span>context<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">What is the secret code mentioned in the context?"</span>},</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response.choices[<span class="dv">0</span>].message.content.strip()</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pos <span class="kw">in</span> [<span class="st">"start"</span>, <span class="st">"middle"</span>, <span class="st">"end"</span>]:</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    answer <span class="op">=</span> <span class="cf">await</span> position_test(pos)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>pos<span class="sc">:8s}</span><span class="ss">: </span><span class="sc">{</span>answer<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For agents, the practical implication is to keep critical facts near the start of the context — in the system prompt or early in the conversation — where they receive the strongest positional attention. <code>Config.developer_instructions</code> and <code>Config.user_instructions</code> are injected into the system prompt precisely for this reason. Long tool results that accumulate in the middle of the history are the most vulnerable to being effectively “forgotten” by the model.</p>
+</div>
+</div>
+</section>
+<section id="episodic-memory-session-persistence" class="level2">
+<h2 class="anchored" data-anchor-id="episodic-memory-session-persistence">Episodic Memory — Session Persistence</h2>
+<p>Episodic memory is the record of what happened. In a human, it is autobiographical: “last Tuesday I fixed a segfault in <code>auth.py</code>.” For an agent, it is the saved conversation history from a prior session — the full sequence of user turns, assistant reasoning, tool calls, and tool results that constitutes a completed work session.</p>
+<p><code>Session.save(name)</code> serializes the session to <code>~/.cda/sessions/&lt;name&gt;.json</code>. <code>Session.load(name, config)</code> restores it into a new <code>Session</code> so the agent can resume from where it left off, with the full prior context available for reference. The serialized format stores (1) the complete message history, (2) the turn count, and (3) accumulated token usage. Config is intentionally not stored — credentials and environment-specific settings belong in the environment, not in saved files.</p>
+<p>We walk through the full save/load cycle with a synthetic conversation:</p>
+<p><strong>Setup.</strong> We build a session manually, adding a short JWT refactoring conversation as history:</p>
+<div id="e7f8a9b0-c1d2-3456-efab-456789012316" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> Config()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> Session(config)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>session.add_user_message(<span class="st">"Refactor the auth module to use JWT."</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>session.add_assistant_message(<span class="st">"I'll start by reading auth.py."</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>session.add_user_message(<span class="st">"Also add refresh token support."</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>session.add_assistant_message(<span class="st">"Understood. I've added refresh token support."</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>session.turn_count <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> session.save(<span class="st">"demo-session"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved to:            </span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Messages in session: </span><span class="sc">{</span><span class="bu">len</span>(session.messages)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Loading the session into a fresh <code>Session</code> object restores the full message history and metadata:</p>
+<div id="a9b0c1d2-e3f4-5678-abcd-678901234518" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>loaded <span class="op">=</span> Session.load(<span class="st">"demo-session"</span>, config)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(loaded.messages)<span class="sc">}</span><span class="ss"> messages"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Turn count: </span><span class="sc">{</span>loaded<span class="sc">.</span>turn_count<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Message history:"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> msg <span class="kw">in</span> loaded.messages:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    role <span class="op">=</span> msg[<span class="st">"role"</span>]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    content <span class="op">=</span> <span class="bu">str</span>(msg.get(<span class="st">"content"</span>, <span class="st">""</span>))[:<span class="dv">80</span>].replace(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, <span class="st">" "</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>role<span class="sc">:10s}</span><span class="ss">] </span><span class="sc">{</span>content<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Inspecting the raw JSON on disk shows the serialization format:</p>
+<div id="c1d2e3f4-a5b6-7890-cdef-890123456720" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>raw <span class="op">=</span> json.loads(path.read_text())</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(json.dumps({k: v <span class="cf">for</span> k, v <span class="kw">in</span> raw.items() <span class="cf">if</span> k <span class="op">!=</span> <span class="st">"messages"</span>}, indent<span class="op">=</span><span class="dv">2</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">messages: </span><span class="sc">{</span><span class="bu">len</span>(raw[<span class="st">'messages'</span>])<span class="sc">}</span><span class="ss"> items"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Config is <strong>not</strong> persisted — model name, temperature, approval policy, and custom instructions must be provided again when loading a session. This is intentional: credentials and environment-specific configuration should never be embedded in saved files. The same saved session can be loaded under different configs: a development config with <code>approval=AUTO</code> and a production config with <code>approval=ON_REQUEST</code>, for instance.</p>
+</div>
+</div>
+<p><code>Session.list_saved()</code> enumerates saved sessions in the default directory:</p>
+<div id="f4a5b6c7-d8e9-0123-fabc-123456789023" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sessions <span class="op">=</span> Session.list_saved()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved sessions: </span><span class="sc">{</span>sessions<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up the demo session</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>(SESSIONS_DIR <span class="op">/</span> <span class="st">"demo-session.json"</span>).unlink(missing_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Demo session removed."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-sentinel-manager-executor-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="the-sentinel-manager-executor-pipeline">The Sentinel-Manager-Executor Pipeline</h2>
+<p>Not every message warrants a memory operation. Most user utterances are conversational — requests, acknowledgments, clarifications — that don’t contain facts worth storing. Applying expensive memory logic on every turn wastes tokens and can pollute the store with noise.</p>
+<p>The <strong>sentinel-manager-executor</strong> (SME) pipeline solves this with a three-stage soft filter:</p>
+<ol type="1">
+<li><strong>Sentinel</strong> — a binary gate that reads the user message and returns <code>TRUE</code> or <code>FALSE</code>: does this contain new information worth remembering? The sentinel uses a fast, low-temperature call to avoid over-filtering.</li>
+<li><strong>Manager</strong> — if the sentinel fires, the manager extracts the specific fact and formulates a key-value pair: what to store and under what key.</li>
+<li><strong>Executor</strong> — writes the extracted fact to the memory store.</li>
+</ol>
+<p>The gate dramatically reduces the number of memory writes in a typical session. Instead of storing every message, only the semantically significant ones (facts, preferences, constraints, decisions) are persisted.</p>
+<p>We implement the sentinel and manager as raw LLM calls:</p>
+<div id="c7d8e9f0-a1b2-3456-cdef-456789012326" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>SENTINEL_SYSTEM <span class="op">=</span> <span class="st">"""You are a classifier. Decide whether a user message contains new information worth storing as a persistent memory (facts, preferences, important decisions, project-specific rules).</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">Return exactly one word: TRUE or FALSE. No other text."""</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>MANAGER_SYSTEM <span class="op">=</span> <span class="st">"""You are a memory manager. Extract the key fact from the user message and return a JSON object:</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">{"key": "short_descriptive_key", "value": "the fact to remember"}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">Return only the JSON object, no other text. Use snake_case for keys."""</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> sentinel(message: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> <span class="cf">await</span> client.chat.completions.create(</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: SENTINEL_SYSTEM},</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: message},</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content.strip().upper()</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result <span class="op">==</span> <span class="st">"TRUE"</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> manager(message: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> <span class="cf">await</span> client.chat.completions.create(</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MODEL,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>[</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: MANAGER_SYSTEM},</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: message},</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        max_tokens<span class="op">=</span><span class="dv">100</span>,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    raw <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content.strip()</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> json.loads(raw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We wire the two stages into a <code>process_message()</code> function that routes each user message through the pipeline and writes to an in-memory dict as the store:</p>
+<div id="e9f0a1b2-c3d4-5678-efab-678901234528" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>memory: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">str</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> process_message(message: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Route a user message through the SME pipeline."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-6" class="code-annotation-target"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    should_store <span class="op">=</span> <span class="cf">await</span> sentinel(message)</span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> should_store:</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">"stored"</span>: <span class="va">False</span>, <span class="st">"message"</span>: message}</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-10" class="code-annotation-target"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>    extracted <span class="op">=</span> <span class="cf">await</span> manager(message)</span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>    key <span class="op">=</span> extracted.get(<span class="st">"key"</span>, <span class="st">"unknown"</span>)</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> extracted.get(<span class="st">"value"</span>, message)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-13" class="code-annotation-target"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>    memory[key] <span class="op">=</span> value</span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"stored"</span>: <span class="va">True</span>, <span class="st">"key"</span>: key, <span class="st">"value"</span>: value}</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>test_messages <span class="op">=</span> [</span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Hi, how are you?"</span>,</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"My name is Alice."</span>,</span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I prefer Python over JavaScript."</span>,</span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"What time is it?"</span>,</span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The database runs on port 5432."</span>,</span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Thanks, that's all for now."</span>,</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> msg <span class="kw">in</span> test_messages:</span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="cf">await</span> process_message(msg)</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>    tag <span class="op">=</span> <span class="st">"</span><span class="ch">\u2713</span><span class="st"> stored"</span> <span class="cf">if</span> result[<span class="st">"stored"</span>] <span class="cf">else</span> <span class="st">"  skipped"</span></span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> result[<span class="st">"stored"</span>]:</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tag<span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>result[<span class="st">'key'</span>]<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>result[<span class="st">'value'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tag<span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>msg<span class="sc">!r}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Memory store (</span><span class="sc">{</span><span class="bu">len</span>(memory)<span class="sc">}</span><span class="ss"> entries): </span><span class="sc">{</span>memory<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="6" data-code-annotation="1">The sentinel is called first with a low-temperature, short-max-tokens setting — a fast, cheap binary decision.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="10" data-code-annotation="2">Only if the sentinel returns <code>TRUE</code> do we pay for the heavier manager call to extract the structured fact.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="13" data-code-annotation="3">Here we write to a local dict. In a live agent session the executor would call <code>MemoryTool(action="set", key=..., value=...)</code> instead.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The SME pipeline is a soft filter — the sentinel will occasionally miss important facts or flag trivial ones. In production, combine it with explicit <code>memory(action="set", ...)</code> calls from the agent itself (NB03 showed the agent can call <code>MemoryTool</code> directly). The pipeline is best suited to passively enriching the store during conversation, not replacing deliberate agent memory writes.</p>
+</div>
+</div>
+</section>
+<section id="semantic-memory-the-memorytool" class="level2">
+<h2 class="anchored" data-anchor-id="semantic-memory-the-memorytool">Semantic Memory — The MemoryTool</h2>
+<p>The <code>MemoryTool</code> is the CDA library’s built-in persistent key-value store for semantic memory. It persists facts at <code>~/.cda/memory.json</code> across agent runs. The agent calls it like any other tool — <code>memory(action="set", key="db_port", value="5432")</code> — and the result survives session boundaries. The five supported actions are:</p>
+<ul>
+<li><code>set</code> — store a value under a key (overwrites if key exists)</li>
+<li><code>get</code> — retrieve the value for a key</li>
+<li><code>delete</code> — remove a key-value pair</li>
+<li><code>list</code> — enumerate all stored keys with value previews</li>
+<li><code>clear</code> — delete all entries</li>
+</ul>
+<p>The tool’s <code>kind</code> is <code>ToolKind.MEMORY</code>. In <code>ApprovalPolicy.ON_REQUEST</code> mode this means the user is prompted before any write — the same gate that protects file writes and shell commands. For fully automated pipelines, <code>ApprovalPolicy.AUTO</code> skips the prompt.</p>
+<p>We exercise the tool directly via <code>ToolInvocation</code>:</p>
+<div id="d4e5f6a7-b8c9-0124-debb-123456789004" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tool <span class="op">=</span> MemoryTool()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"set"</span>, <span class="st">"key"</span>: <span class="st">"db_port"</span>, <span class="st">"value"</span>: <span class="st">"5432"</span>}))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"set db_port:          "</span>, result.output)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"set"</span>, <span class="st">"key"</span>: <span class="st">"preferred_language"</span>, <span class="st">"value"</span>: <span class="st">"Python 3.13"</span>}))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"set preferred_language:"</span>, result.output)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"set"</span>, <span class="st">"key"</span>: <span class="st">"project_name"</span>, <span class="st">"value"</span>: <span class="st">"ai-notebooks"</span>}))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"set project_name:     "</span>, result.output)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"list"</span>}))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">All keys:</span><span class="ch">\n</span><span class="st">"</span>, result.output)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"get"</span>, <span class="st">"key"</span>: <span class="st">"db_port"</span>}))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">db_port:"</span>, result.output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Cleaning up the demo entries after the demonstration:</p>
+<div id="f6a7b8c9-d0e1-2346-fabd-345678901206" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> [<span class="st">"db_port"</span>, <span class="st">"preferred_language"</span>, <span class="st">"project_name"</span>]:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"delete"</span>, <span class="st">"key"</span>: key}))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Demo entries cleaned up."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>MemoryTool</code> is exact-key-match only. If you don’t know the key for a fact, use <code>list</code> first to enumerate what’s stored. For fuzzy recall — “find memories related to the database configuration” — exact key lookup is insufficient. The natural extension is embedding-based retrieval: vectorize each stored value at write time, store the embeddings alongside the keys, and at query time compute cosine similarity between the query embedding and all stored embeddings to surface the most relevant entries. This is the pattern used by long-term memory systems like LangMem and MemGPT. We don’t implement it here, but the <code>MemoryTool</code>’s <code>list</code> action gives you the full store to work with if you want to build that layer on top.</p>
+</div>
+</div>
+</section>
+<section id="procedural-prospective-memory" class="level2">
+<h2 class="anchored" data-anchor-id="procedural-prospective-memory">Procedural &amp; Prospective Memory</h2>
+<p>The remaining two memory types complete the taxonomy. Both are simpler than episodic and semantic memory — they don’t require persistence mechanisms that the agent actively manages at runtime — but they are important for well-behaved, predictable agents.</p>
+<p><strong>Procedural memory</strong> encodes how to do things: workflows, style rules, project constraints. For agents, this lives in the system prompt via <code>Config.developer_instructions</code>. Instructions injected here are “always on” — activated on every single turn without the agent needing to look them up.</p>
+<p>We construct a config with explicit procedural instructions and inspect the system prompt section they appear in:</p>
+<div id="d0e1f2a3-b4c5-6790-debb-789012345610" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.prompts <span class="im">import</span> build_system_prompt</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>config_procedural <span class="op">=</span> Config(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    developer_instructions<span class="op">=</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Always write Python code that is compatible with Python 3.13+.</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Run `ruff check` before treating any code change as complete.</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Never modify files in the `migrations/` directory without explicit user approval."</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> build_system_prompt(config_procedural, [])</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> prompt.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>in_section <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, line <span class="kw">in</span> <span class="bu">enumerate</span>(lines):</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"# Project Instructions"</span> <span class="kw">in</span> line:</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        in_section <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> in_section:</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(line)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> in_section <span class="kw">and</span> i <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> line.startswith(<span class="st">"# "</span>) <span class="kw">and</span> <span class="st">"Project Instructions"</span> <span class="kw">not</span> <span class="kw">in</span> line:</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The developer instructions appear verbatim in the system prompt under the <code># Project Instructions</code> heading, placed early in the prompt where positional attention is strongest.</p>
+<p><br></p>
+<p><strong>Prospective memory</strong> encodes future intentions — tasks the agent intends to complete but cannot act on immediately. The CDA library models this as <code>TodoTool</code>, a persistent checklist backed by <code>~/.cda/todos.json</code>. The agent writes <code>todo(action="add", text="Run tests after refactor")</code> when it identifies a pending task, and marks it complete with <code>todo(action="done", id=...)</code> once finished.</p>
+<p>We inspect the <code>TodoTool</code> schema via the default registry:</p>
+<div id="f2a3b4c5-d6e7-8902-fabd-901234567812" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.tools.registry <span class="im">import</span> create_default_registry</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> create_default_registry(Config())</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>schemas <span class="op">=</span> registry.get_schemas()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>todo_schema <span class="op">=</span> <span class="bu">next</span>((s <span class="cf">for</span> s <span class="kw">in</span> schemas <span class="cf">if</span> s[<span class="st">"function"</span>][<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"todo"</span>), <span class="va">None</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> todo_schema:</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(json.dumps(todo_schema, indent<span class="op">=</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The schema exposes the five actions — <code>add</code>, <code>done</code>, <code>delete</code>, <code>list</code>, <code>clear</code> — and the two parameters: <code>text</code> (required for <code>add</code>) and <code>id</code> (required for <code>done</code> and <code>delete</code>). The agent uses this to maintain a running task list across turns, treating prospective memory as a lightweight project manager embedded in the session.</p>
+</section>
+<section id="memory-augmented-agent" class="level2">
+<h2 class="anchored" data-anchor-id="memory-augmented-agent">Memory-Augmented Agent</h2>
+<p>We now run a live agent session that uses working memory (context window, managed automatically), episodic memory (session persistence), and semantic memory (<code>MemoryTool</code>). The agent is given a task that requires storing a fact, and we verify the fact persists after the session is saved and reloaded.</p>
+<p><strong>Setup.</strong> We build an agent restricted to the <code>memory</code> tool to keep the demo focused:</p>
+<div id="d6e7f8a9-b0c1-2346-dcba-345678901216" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_and_display(agent: Agent, prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stream agent events and print a live trace; return the final text."""</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    final <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="cf">for</span> event <span class="kw">in</span> agent.run(prompt):</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> event.<span class="bu">type</span> <span class="op">==</span> AgentEventType.TEXT_DELTA:</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(event.data.get(<span class="st">"content"</span>, <span class="st">""</span>), end<span class="op">=</span><span class="st">""</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> event.<span class="bu">type</span> <span class="op">==</span> AgentEventType.TOOL_CALL_START:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            tool_name <span class="op">=</span> event.data.get(<span class="st">"name"</span>, <span class="st">""</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            args <span class="op">=</span> event.data.get(<span class="st">"arguments"</span>, {})</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">[tool: </span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss">(</span><span class="sc">{</span>args<span class="sc">}</span><span class="ss">)]"</span>, end<span class="op">=</span><span class="st">""</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> event.<span class="bu">type</span> <span class="op">==</span> AgentEventType.TOOL_CALL_COMPLETE:</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> event.data.get(<span class="st">"output"</span>, <span class="st">""</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f" </span><span class="ch">\u2192</span><span class="ss"> </span><span class="sc">{</span><span class="bu">str</span>(output)[:<span class="dv">60</span>]<span class="sc">}</span><span class="ss">"</span>, end<span class="op">=</span><span class="st">""</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> event.<span class="bu">type</span> <span class="op">==</span> AgentEventType.TEXT_COMPLETE:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            final <span class="op">=</span> event.data.get(<span class="st">"content"</span>, <span class="st">""</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> final</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Experiment.</strong> First turn: the agent stores a database fact to semantic memory.</p>
+<div id="f8a9b0c1-d2e3-4568-feab-567890123418" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> Config(allowed_tools<span class="op">=</span>[<span class="st">"memory"</span>])</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> Agent(config)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>response1 <span class="op">=</span> <span class="cf">await</span> run_and_display(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    agent,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Please remember that our primary database is PostgreSQL 15 on port 5432."</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Turn 1 response: </span><span class="sc">{</span>response1[:<span class="dv">200</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Saving the session to episodic memory:</p>
+<div id="b0c1d2e3-f4a5-6790-bcda-789012345620" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> agent.session.save(<span class="st">"memory-demo"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Session saved to: </span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Turns: </span><span class="sc">{</span>agent<span class="sc">.</span>session<span class="sc">.</span>turn_count<span class="sc">}</span><span class="ss">, Messages: </span><span class="sc">{</span><span class="bu">len</span>(agent.session.messages)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Loading the session in a fresh agent and verifying that semantic memory persisted independently of the session:</p>
+<div id="d2e3f4a5-b6c7-8902-dcab-901234567822" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>config2 <span class="op">=</span> Config(allowed_tools<span class="op">=</span>[<span class="st">"memory"</span>])</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>loaded_session <span class="op">=</span> Session.load(<span class="st">"memory-demo"</span>, config2)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(loaded_session.messages)<span class="sc">}</span><span class="ss"> messages, </span><span class="sc">{</span>loaded_session<span class="sc">.</span>turn_count<span class="sc">}</span><span class="ss"> turns"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>tool <span class="op">=</span> MemoryTool()</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"list"</span>}))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Persisted memory:</span><span class="ch">\n</span><span class="sc">{</span>result<span class="sc">.</span>output<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Cleaning up the demo session and memory entries:</p>
+<div id="f4a5b6c7-d8e9-0124-febc-123456789024" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>demo_path <span class="op">=</span> SESSIONS_DIR <span class="op">/</span> <span class="st">"memory-demo.json"</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> demo_path.exists():</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    demo_path.unlink()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Demo session deleted."</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tool.execute(ToolInvocation(params<span class="op">=</span>{<span class="st">"action"</span>: <span class="st">"clear"</span>}))</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Memory cleared."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Memory and session persistence give agents continuity across runs — but they also accumulate stale information. A fact that was true last week may no longer hold: the database may have migrated to a new port, the user’s preferred language may have changed, the project structure may have been reorganized. Design memory operations deliberately: use descriptive, namespaced keys (<code>project.db_port</code> rather than just <code>db_port</code>), prefer <code>set</code> over duplicating keys, and periodically audit the store with <code>list</code>. Stale semantic memory is harder to debug than an empty one.</p>
+</div>
+</div>
+<hr>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-memgpt" class="csl-entry" role="listitem">
+Packer, Charles, Vivian Fang, Shishir G. Patil, Kevin Lin, Sarah Wooders, and Joseph E. Gonzalez. 2023. <span>“<span>MemGPT</span>: Towards <span>LLMs</span> as Operating Systems.”</span> <a href="https://arxiv.org/abs/2310.08560">https://arxiv.org/abs/2310.08560</a>.
+</div>
+<div id="ref-genagents" class="csl-entry" role="listitem">
+Park, Joon Sung, Joseph C. O’Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, and Michael S. Bernstein. 2023. <span>“Generative Agents: Interactive Simulacra of Human Behavior.”</span> <a href="https://arxiv.org/abs/2304.03442">https://arxiv.org/abs/2304.03442</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/agents/04-context.html" class="pagination-link" aria-label="04. Context &amp; Prompt Management">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">04. Context &amp; Prompt Management</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/agents/06-safety.html" class="pagination-link" aria-label="06. Safety &amp; Guardrails">
+        <span class="nav-page-text">06. Safety &amp; Guardrails</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

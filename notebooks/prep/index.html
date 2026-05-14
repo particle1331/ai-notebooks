@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>AI Engineering Crash Course – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/prep/01-llm-api.html" rel="next">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/prep/index.html">Crash Course</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#learning-paths" id="toc-learning-paths" class="nav-link active" data-scroll-target="#learning-paths">Learning Paths</a></li>
+  <li><a href="#crash-course-week-1" id="toc-crash-course-week-1" class="nav-link" data-scroll-target="#crash-course-week-1">Crash Course (Week 1)</a></li>
+  <li><a href="#extended-path-weeks-24" id="toc-extended-path-weeks-24" class="nav-link" data-scroll-target="#extended-path-weeks-24">Extended Path (Weeks 2–4)</a></li>
+  <li><a href="#sec-capstone" id="toc-sec-capstone" class="nav-link" data-scroll-target="#sec-capstone">Capstone: Compliance Document Reviewer</a></li>
+  <li><a href="#deep-dives" id="toc-deep-dives" class="nav-link" data-scroll-target="#deep-dives">Deep Dives</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#how-to-use-this-series" id="toc-how-to-use-this-series" class="nav-link" data-scroll-target="#how-to-use-this-series">How to Use This Series</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">AI Engineering Crash Course</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This series is a structured preparation path for <mark>mid-career engineers</mark> looking to move into <mark>senior AI engineering roles</mark><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> — particularly in regulated domains such as financial services, where LLM integration intersects with compliance obligations, audit requirements, and strict reliability targets. The assumption is that you arrive with solid software engineering fundamentals and ML experience but want to close the gap between what you know and what production &amp; enterprise AI engineering actually demands.</p>
+<p>The series is organized into two paths. The <strong>Crash Course</strong> (notebooks 01–13) is a linear progression from API fundamentals through evaluation, agents, observability, fine-tuning, model serving, cost optimization, and infrastructure — culminating in a <strong>capstone project</strong>: a fully deployed, publicly accessible compliance document reviewer that synthesizes every skill in the series. The <strong><a href="../../notebooks/prep/deep-dives/index.html">Deep Dives</a></strong> are standalone notebooks that extend specific topics from the main path for readers who want to go further on a particular subject.</p>
+<section id="learning-paths" class="level2">
+<h2 class="anchored" data-anchor-id="learning-paths">Learning Paths</h2>
+<p>Two tracks, one dependency graph:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Track</th>
+<th>Notebooks</th>
+<th>Commitment</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Crash Course</strong></td>
+<td>01–13</td>
+<td>1 week (dense, 3–4 hr/day)</td>
+<td>End-to-end deployed AI system</td>
+</tr>
+<tr class="even">
+<td><strong>Extended Main Path</strong></td>
+<td>01–13 (paced)</td>
+<td>1 month</td>
+<td>Same outcome, deeper absorption</td>
+</tr>
+<tr class="odd">
+<td><strong>Deep Dives</strong></td>
+<td>DD:01–08 (any order)</td>
+<td>+1–3 months</td>
+<td>Expertise in chosen sub-domains</td>
+</tr>
+</tbody>
+</table>
+<p>The crash course covers one notebook per day. Notebooks 01–03 are review on Day 1; the new material runs Days 2–7, then the extended path picks up weeks 2–4 at a more deliberate pace.</p>
+</section>
+<section id="crash-course-week-1" class="level2">
+<h2 class="anchored" data-anchor-id="crash-course-week-1">Crash Course (Week 1)</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 6%">
+<col style="width: 28%">
+<col style="width: 54%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Day</th>
+<th>#</th>
+<th>Title</th>
+<th>Key Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1 (review)</td>
+<td>01</td>
+<td><a href="../../notebooks/prep/01-llm-api.html">LLM APIs</a></td>
+<td>Tokens, cost, streaming, structured output, tool use, <code>LLMClient</code> wrapper</td>
+</tr>
+<tr class="even">
+<td>1 (review)</td>
+<td>02</td>
+<td><a href="../../notebooks/prep/02-prompt-engg.html">Prompt Engineering</a></td>
+<td>Anatomy, few-shot, CoT, templates, version control, injection defense</td>
+</tr>
+<tr class="odd">
+<td>1 (review)</td>
+<td>03</td>
+<td><a href="../../notebooks/prep/03-rag-concepts.html">RAG Concepts</a></td>
+<td>Dense embeddings, chunking, vector store, minimal RAG pipeline, BM25 hybrid</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>04</td>
+<td><a href="../../notebooks/prep/04-eval-concepts.html">LLM Evaluation</a></td>
+<td>Eval anatomy, faithfulness / relevance / recall metrics, RAGAS, custom harness, prompt regression</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>05</td>
+<td><a href="../../notebooks/prep/05-agents-foundations.html">Agentic AI I</a></td>
+<td>ReAct loop, planning, in-context memory, tool registry, single-agent fintech tasks</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>06</td>
+<td><a href="../../notebooks/prep/06-observability.html">Observability</a></td>
+<td>Langfuse setup, traces &amp; spans, prompt versioning, cost/latency dashboards, SLO design</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>07</td>
+<td><a href="../../notebooks/prep/07-rag-pipeline.html">Production RAG</a></td>
+<td>ChromaDB, SEC filings corpus, hybrid retrieval (BM25 + dense + RRF), reranking, RAGAS eval</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>08</td>
+<td><a href="../../notebooks/prep/08-agents-langgraph.html">Agentic AI II</a></td>
+<td>LangGraph state machines, supervisor/worker pattern, human-in-the-loop, agent eval</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>—</td>
+<td>Review</td>
+<td>Re-run notebooks 04–08; timed mock implementation exercises</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="extended-path-weeks-24" class="level2">
+<h2 class="anchored" data-anchor-id="extended-path-weeks-24">Extended Path (Weeks 2–4)</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 6%">
+<col style="width: 28%">
+<col style="width: 54%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Week</th>
+<th>#</th>
+<th>Title</th>
+<th>Key Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>09</td>
+<td><a href="../../notebooks/prep/09-fine-tuning.html">Fine-Tuning</a></td>
+<td>When to fine-tune vs.&nbsp;RAG; OpenAI fine-tune API; LoRA/QLoRA on open models; eval before/after</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>10</td>
+<td><a href="../../notebooks/prep/10-model-serving.html">Model Serving</a></td>
+<td>vLLM, LiteLLM, Dockerized inference service, latency/throughput benchmarking, health checks</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>11</td>
+<td><a href="../../notebooks/prep/11-cost-optimization.html">Cost Optimization</a></td>
+<td>Prompt caching, semantic caching (Redis), model routing, batch API, cost–quality trade-off curves</td>
+</tr>
+<tr class="even">
+<td>3–4</td>
+<td>12</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">AI Infrastructure</a></td>
+<td>Multi-stage Docker builds, GPU pods on Kubernetes, Terraform for AWS (EKS + ECR + S3 + IAM), GitHub Actions CI/CD, Helm</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>13</td>
+<td><a href="../../notebooks/prep/13-capstone-compliance.html"><strong>Capstone</strong></a></td>
+<td>End-to-end deployed system — see below</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sec-capstone" class="level2">
+<h2 class="anchored" data-anchor-id="sec-capstone">Capstone: Compliance Document Reviewer</h2>
+<p><a href="../../notebooks/prep/13-capstone-compliance.html">Notebook 13</a> is the series capstone. It builds and deploys a production-grade LLM-powered compliance document reviewer targeting financial services use cases. The system accepts a contract, regulatory filing, or disclosure document and returns a structured compliance report: flagged issues with severity scores, citations to relevant regulatory passages, and recommended remediation actions — all with a complete audit trail.</p>
+<p>Every notebook in the series contributes a component:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Capstone Component</th>
+<th>Draws From</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PII detection and redaction (pre-LLM)</td>
+<td><a href="../../notebooks/prep/02-prompt-engg.html">02</a> (security mindset), <a href="../../notebooks/prep/deep-dives/06-ai-security.html">DD:06</a> (AI security)</td>
+</tr>
+<tr class="even">
+<td>Model routing: triage tier vs.&nbsp;review tier</td>
+<td><a href="../../notebooks/prep/01-llm-api.html">01</a> (API), <a href="../../notebooks/prep/11-cost-optimization.html">11</a> (cost optimization)</td>
+</tr>
+<tr class="odd">
+<td>Policy RAG store (SEC/FINRA rules)</td>
+<td><a href="../../notebooks/prep/03-rag-concepts.html">03</a>, <a href="../../notebooks/prep/07-rag-pipeline.html">07</a> (ChromaDB + hybrid retrieval)</td>
+</tr>
+<tr class="even">
+<td>LangGraph review pipeline</td>
+<td><a href="../../notebooks/prep/08-agents-langgraph.html">08</a> (multi-agent)</td>
+</tr>
+<tr class="odd">
+<td>Structured compliance report (Pydantic)</td>
+<td><a href="../../notebooks/prep/01-llm-api.html">01</a> (structured output)</td>
+</tr>
+<tr class="even">
+<td>Langfuse audit trace (cost, latency, doc hash)</td>
+<td><a href="../../notebooks/prep/06-observability.html">06</a> (observability)</td>
+</tr>
+<tr class="odd">
+<td>Automated eval regression suite</td>
+<td><a href="../../notebooks/prep/04-eval-concepts.html">04</a> (eval concepts), <a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html">DD:02</a> (eval pipelines)</td>
+</tr>
+<tr class="even">
+<td>Dockerized FastAPI service</td>
+<td><a href="../../notebooks/prep/10-model-serving.html">10</a> (serving), <a href="../../notebooks/prep/12-ai-infra.html">12</a> (infra)</td>
+</tr>
+<tr class="odd">
+<td>AWS ECS Fargate + ALB + HTTPS</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">12</a> (Terraform + IaC)</td>
+</tr>
+<tr class="even">
+<td>GitHub Actions CI/CD (build → push → deploy)</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">12</a> (CI/CD)</td>
+</tr>
+<tr class="odd">
+<td>Secrets Manager (API keys, no hardcoded secrets)</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">12</a> (security)</td>
+</tr>
+</tbody>
+</table>
+<p>The finished artifact is a publicly accessible HTTPS endpoint you can put in a portfolio or demonstrate in a system design interview.</p>
+</section>
+<section id="deep-dives" class="level2">
+<h2 class="anchored" data-anchor-id="deep-dives">Deep Dives</h2>
+<p>The <a href="../../notebooks/prep/deep-dives/index.html">Deep Dives</a> are nine standalone notebooks in <code>deep-dives/</code>. Each extends a specific main-path notebook and can be read in any order after its parent. They are not required for the capstone but build the depth expected at staff/principal level in job interviews and design reviews.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 6%">
+<col style="width: 28%">
+<col style="width: 54%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Parent</th>
+<th>Title</th>
+<th>Topic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DD:01</td>
+<td><a href="../../notebooks/prep/07-rag-pipeline.html">07</a></td>
+<td><a href="../../notebooks/prep/deep-dives/01-advanced-rag.html">Advanced RAG</a></td>
+<td>Query rewriting, HyDE, cross-encoder reranking, multi-vector indexing</td>
+</tr>
+<tr class="even">
+<td>DD:02</td>
+<td><a href="../../notebooks/prep/04-eval-concepts.html">04</a></td>
+<td><a href="../../notebooks/prep/deep-dives/02-eval-pipelines.html">Automated Eval Pipelines</a></td>
+<td>Eval harness CI/CD, prompt regression, dataset curation, LLM-as-judge</td>
+</tr>
+<tr class="odd">
+<td>DD:03</td>
+<td><a href="../../notebooks/prep/08-agents-langgraph.html">08</a></td>
+<td><a href="../../notebooks/prep/deep-dives/03-agent-memory.html">Agent Memory</a></td>
+<td>Short-term, long-term, episodic memory; memory compression; retrieval scoring</td>
+</tr>
+<tr class="even">
+<td>DD:04</td>
+<td><a href="../../notebooks/prep/10-model-serving.html">10</a>, <a href="../../notebooks/prep/12-ai-infra.html">12</a></td>
+<td><a href="../../notebooks/prep/deep-dives/04-resilience.html">Resilience Patterns</a></td>
+<td>Circuit breakers, retries, fallback chains, graceful degradation, 99.99% uptime</td>
+</tr>
+<tr class="odd">
+<td>DD:05</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">12</a></td>
+<td><a href="../../notebooks/prep/deep-dives/05-mlops.html">MLOps: CI/CD for AI</a></td>
+<td>Model registry, drift detection, automated retraining pipelines, shadow deployment</td>
+</tr>
+<tr class="even">
+<td>DD:06</td>
+<td><a href="../../notebooks/prep/02-prompt-engg.html">02</a></td>
+<td><a href="../../notebooks/prep/deep-dives/06-ai-security.html">AI Security &amp; Compliance</a></td>
+<td>PII handling, indirect prompt injection, Guardrails AI, output filtering, OWASP LLM Top 10</td>
+</tr>
+<tr class="odd">
+<td>DD:07</td>
+<td><a href="../../notebooks/prep/03-rag-concepts.html">03</a>, <a href="../../notebooks/prep/07-rag-pipeline.html">07</a></td>
+<td><a href="../../notebooks/prep/deep-dives/07-embeddings-advanced.html">Advanced Embeddings</a></td>
+<td>Embedding model fine-tuning, Matryoshka representations, dimensionality reduction, ColBERT</td>
+</tr>
+<tr class="even">
+<td>DD:08</td>
+<td><a href="../../notebooks/prep/01-llm-api.html">01</a></td>
+<td><a href="../../notebooks/prep/deep-dives/08-multimodal.html">Multimodal LLMs</a></td>
+<td>Vision + text, document understanding, financial chart Q&amp;A, GPT-4o vision API</td>
+</tr>
+<tr class="odd">
+<td>DD:09</td>
+<td><a href="../../notebooks/prep/12-ai-infra.html">12</a></td>
+<td><a href="../../notebooks/prep/deep-dives/09-iac-containers.html">IaC &amp; Container Orchestration</a></td>
+<td>Terraform modules/workspaces, EKS + GPU node groups, KEDA, Helm advanced, GitOps/ArgoCD, cost governance</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="prerequisites" class="level2">
+<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
+<ul>
+<li><strong>Python:</strong> Comfortable with classes, decorators, async/await, type hints, and Pydantic models.</li>
+<li><strong>ML fundamentals:</strong> Embeddings, transformers at a conceptual level, supervised learning.</li>
+<li><strong>APIs:</strong> REST API consumption, JSON handling, environment variables for secrets.</li>
+<li><strong>Git:</strong> Basic branching and commit workflow.</li>
+</ul>
+<p>The series does not assume prior LLM engineering experience. It does assume you learn by reading and running code — every notebook is executable top to bottom.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An <u>OpenAI API key</u> is required from notebook 01 onwards. Notebooks 12 and 13 additionally require an AWS account with permissions to create ECS, ECR, VPC, IAM, and ACM resources. Estimated AWS cost for the capstone deployment is under $5/month on Fargate free tier.</p>
+</div>
+</div>
+</section>
+<section id="how-to-use-this-series" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use-this-series">How to Use This Series</h2>
+<p><strong>If you have one week:</strong> Follow the crash course schedule above. Run every cell. Do not skip the exercises at the end of each notebook — they are short implementation tasks designed to surface gaps before an interview.</p>
+<p><strong>If you have one month:</strong> Follow the same order at a slower pace. After each notebook, read the corresponding <a href="../../notebooks/prep/deep-dives/index.html">deep dive</a> if the topic is one of your target areas. Use the <a href="../../notebooks/prep/13-capstone-compliance.html">capstone</a> as a week-4 project.</p>
+<p><strong>If you are preparing for a system design interview:</strong> Read the capstone architecture section (<a href="../../notebooks/prep/13-capstone-compliance.html">13</a>) first to understand where the series is heading, then work forward from <a href="../../notebooks/prep/01-llm-api.html">notebook 01</a>. Every design decision in the capstone is motivated by a concept introduced in an earlier notebook.</p>
+<p><strong>If you are already strong in one area:</strong> The series is modular from <a href="../../notebooks/prep/04-eval-concepts.html">notebook 04</a> onwards. If you are solid on RAG fundamentals (<a href="../../notebooks/prep/03-rag-concepts.html">03</a>), skip ahead to evaluation (<a href="../../notebooks/prep/04-eval-concepts.html">04</a>) or agents (<a href="../../notebooks/prep/05-agents-foundations.html">05</a>). Cross-references in each notebook tell you what to review if something is unclear.</p>
+
+
+</section>
+
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>There is no standard definition of a “senior engineer”. In some context, this can mean Sr.&nbsp;engineer to Staff or Principal. In any case, the series will prepare the reader for advanced roles that demand technical expertise across the full LLM system stack — from API integration and evaluation through infrastructure, enterprise security, and production deployment.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/prep/01-llm-api.html" class="pagination-link" aria-label="01. LLM APIs">
+        <span class="nav-page-text">01. LLM APIs</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

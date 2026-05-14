@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>End-to-End Training of a Reasoning Model – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/llm/deepseek/index.html" rel="next">
+<link href="../../notebooks/llm/14-inference-time-scaling.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/15-reasoning-model.html">15. Training a Reasoning Model</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#two-configurations-pico-and-nano" id="toc-two-configurations-pico-and-nano" class="nav-link active" data-scroll-target="#two-configurations-pico-and-nano">Two Configurations: Pico and Nano</a></li>
+  <li><a href="#stage-1-pretraining" id="toc-stage-1-pretraining" class="nav-link" data-scroll-target="#stage-1-pretraining">Stage 1: Pretraining</a></li>
+  <li><a href="#stage-2-supervised-fine-tuning" id="toc-stage-2-supervised-fine-tuning" class="nav-link" data-scroll-target="#stage-2-supervised-fine-tuning">Stage 2: Supervised Fine-Tuning</a></li>
+  <li><a href="#stage-3-reward-model" id="toc-stage-3-reward-model" class="nav-link" data-scroll-target="#stage-3-reward-model">Stage 3: Reward Model</a></li>
+  <li><a href="#stage-4-grpo" id="toc-stage-4-grpo" class="nav-link" data-scroll-target="#stage-4-grpo">Stage 4: GRPO</a></li>
+  <li><a href="#stage-5-deployment" id="toc-stage-5-deployment" class="nav-link" data-scroll-target="#stage-5-deployment">Stage 5: Deployment</a></li>
+  <li><a href="#stage-6-evaluation" id="toc-stage-6-evaluation" class="nav-link" data-scroll-target="#stage-6-evaluation">Stage 6: Evaluation</a></li>
+  <li><a href="#interpreting-the-output" id="toc-interpreting-the-output" class="nav-link" data-scroll-target="#interpreting-the-output">Interpreting the Output</a></li>
+  <li><a href="#helper-functions" id="toc-helper-functions" class="nav-link" data-scroll-target="#helper-functions">Helper Functions</a></li>
+  <li><a href="#the-main-entrypoint" id="toc-the-main-entrypoint" class="nav-link" data-scroll-target="#the-main-entrypoint">The Main Entrypoint</a></li>
+  <li><a href="#running-the-pipeline" id="toc-running-the-pipeline" class="nav-link" data-scroll-target="#running-the-pipeline">Running the Pipeline</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/15-reasoning-model.html">15. Training a Reasoning Model</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">End-to-End Training of a Reasoning Model</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The preceding notebooks in this series treated each stage of the LLM pipeline in isolation: pretraining, tokenization, data pipelines, the training loop, diagnostics, SFT + LoRA, preference optimization, GRPO, distillation, quantization, inference, and inference-time scaling. This notebook composes all of them into a single end-to-end program — from random initialization to a deployed, quantized, instruction-following model. <mark>No external pretrained weights are used.</mark> All modules are drawn directly from prior notebooks in this series.</p>
+<p>The model is the NanoGPT from <a href="../../notebooks/llm/01-gpt-architecture.html">NB01</a>: 29.9M parameters with SwiGLU FFN, RMSNorm, and RoPE, trained on TinyShakespeare. Since the model is trained solely on Shakespeare data, it cannot answer general questions about other domains. But running <code>engine.generate("What should Hamlet do about his father's murder?")</code> produces coherent Shakespearean prose with a recommendation and a reason — evidence that the full pipeline has learned something real. Understanding every step that produces this output is the exercise.</p>
+<section id="two-configurations-pico-and-nano" class="level2">
+<h2 class="anchored" data-anchor-id="two-configurations-pico-and-nano">Two Configurations: Pico and Nano</h2>
+<p>Before committing GPU time, verify the pipeline runs correctly on a local machine. The <code>pico</code> configuration uses a deliberately tiny model trained for very few steps — small enough to complete in roughly 6 minutes on a laptop CPU. The <code>nano</code> configuration is the full run, targeting ~20–50 minutes on a GPU.</p>
+<table class="caption-top table">
+<caption>Pipeline configurations.</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 35%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>pico</th>
+<th>nano</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d_model</td>
+<td>64</td>
+<td>384</td>
+</tr>
+<tr class="even">
+<td>n_layers</td>
+<td>2</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>vocab_size</td>
+<td>512</td>
+<td>4096</td>
+</tr>
+<tr class="even">
+<td>Pretrain steps</td>
+<td>200</td>
+<td>5,000</td>
+</tr>
+<tr class="odd">
+<td>SFT steps</td>
+<td>30</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>RM steps</td>
+<td>20</td>
+<td>300</td>
+</tr>
+<tr class="odd">
+<td>GRPO steps</td>
+<td>20</td>
+<td>400</td>
+</tr>
+<tr class="even">
+<td>Expected runtime</td>
+<td>~6 min (CPU)</td>
+<td>~20–50 min (GPU)</td>
+</tr>
+</tbody>
+</table>
+<p>Recommended workflow: run <code>pico</code> first on your development machine and confirm all sanity checks pass, then run <code>nano</code> on a GPU.</p>
+<div id="cell-4" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> textwrap</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field, asdict</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader, Dataset, random_split</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Configuration dataclasses.</strong> All hyperparameters are bundled into two nested dataclasses so that a single <code>cfg</code> object can be passed through all pipeline stages:</p>
+<div id="cell-6" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ModelConfig:</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Model architecture hyperparameters."""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    vocab_size:  <span class="bu">int</span>   <span class="op">=</span> <span class="dv">4096</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    d_model:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">384</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    n_layers:    <span class="bu">int</span>   <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    n_heads:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    d_ff:        <span class="bu">int</span>   <span class="op">=</span> <span class="dv">1536</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    max_seq_len: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    dropout:     <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PipelineConfig:</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Full pipeline configuration."""</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Paths</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    run_dir:  <span class="bu">str</span> <span class="op">=</span> <span class="st">"runs/nano_reasoning"</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    data_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"data"</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Model</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    model: ModelConfig <span class="op">=</span> field(default_factory<span class="op">=</span>ModelConfig)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pretraining</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    pretrain_steps: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    pretrain_batch: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    pretrain_seq:   <span class="bu">int</span>   <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    pretrain_lr:    <span class="bu">float</span> <span class="op">=</span> <span class="fl">3e-4</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    pretrain_grad_clip: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    pretrain_accumulation: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># SFT</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    sft_steps:  <span class="bu">int</span>   <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    sft_batch:  <span class="bu">int</span>   <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    sft_lr:     <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-4</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    lora_rank:  <span class="bu">int</span>   <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reward model</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    rm_steps: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">300</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    rm_batch: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    rm_lr:    <span class="bu">float</span> <span class="op">=</span> <span class="fl">2e-5</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GRPO</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    grpo_steps: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">400</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    grpo_G:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    grpo_beta:  <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.04</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    grpo_lr:    <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-5</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Deployment</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    quantize:        <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    quant_bits:      <span class="bu">int</span>  <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    use_speculative: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    spec_k:          <span class="bu">int</span>  <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># System</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    device: <span class="bu">str</span>   <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    dtype:  <span class="bu">str</span>   <span class="op">=</span> <span class="st">"bfloat16"</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    seed:   <span class="bu">int</span>   <span class="op">=</span> <span class="dv">42</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, path: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        Path(path).parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>            json.dump(asdict(<span class="va">self</span>), f, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pico_config() <span class="op">-&gt;</span> PipelineConfig:</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Tiny configuration for local sanity-checking (CPU, ~6 min)."""</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> PipelineConfig(</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>        run_dir<span class="op">=</span><span class="st">"runs/pico"</span>,</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>ModelConfig(vocab_size<span class="op">=</span><span class="dv">512</span>, d_model<span class="op">=</span><span class="dv">64</span>, n_layers<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>                          n_heads<span class="op">=</span><span class="dv">2</span>, d_ff<span class="op">=</span><span class="dv">256</span>, max_seq_len<span class="op">=</span><span class="dv">128</span>, dropout<span class="op">=</span><span class="fl">0.0</span>),</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        pretrain_steps<span class="op">=</span><span class="dv">200</span>, pretrain_batch<span class="op">=</span><span class="dv">4</span>, pretrain_seq<span class="op">=</span><span class="dv">128</span>, pretrain_lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>        pretrain_accumulation<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>        sft_steps<span class="op">=</span><span class="dv">30</span>, sft_batch<span class="op">=</span><span class="dv">4</span>, sft_lr<span class="op">=</span><span class="fl">5e-4</span>, lora_rank<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>        rm_steps<span class="op">=</span><span class="dv">20</span>, rm_batch<span class="op">=</span><span class="dv">4</span>, rm_lr<span class="op">=</span><span class="fl">5e-4</span>,</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>        grpo_steps<span class="op">=</span><span class="dv">20</span>, grpo_G<span class="op">=</span><span class="dv">4</span>, grpo_beta<span class="op">=</span><span class="fl">0.1</span>, grpo_lr<span class="op">=</span><span class="fl">5e-5</span>,</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>        quantize<span class="op">=</span><span class="va">False</span>, use_speculative<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>        device<span class="op">=</span><span class="st">"cpu"</span>, dtype<span class="op">=</span><span class="st">"float32"</span>,</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nano_config() <span class="op">-&gt;</span> PipelineConfig:</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Full configuration for GPU training."""</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> PipelineConfig()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="stage-1-pretraining" class="level2">
+<h2 class="anchored" data-anchor-id="stage-1-pretraining">Stage 1: Pretraining</h2>
+<p>Stage 1 trains the model from random initialization on raw text using the next-token prediction objective. The output is a language model that has learned the statistical structure of Shakespearean English — the prior on which all subsequent stages build.</p>
+<p><strong>Pico sanity check:</strong> pretraining loss should decrease from ~<span class="math inline">\log(\text{vocab\_size})</span> toward a lower value over 200 steps. A flat or rising curve indicates a bug in the optimizer, data loader, or forward pass.</p>
+<div id="cell-8" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_pretrain(cfg: PipelineConfig) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Pretrain on raw text using next-token prediction.</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Saves a checkpoint and skips if one already exists.</span></span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a><span class="co">        Path to the saved checkpoint.</span></span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 1 — PRETRAINING"</span>)</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>    ckpt_path <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/pretrained.pt"</span></span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Path(ckpt_path).exists():</span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"  Checkpoint found — skipping."</span>)</span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ckpt_path</span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Lazy import from NB01 architecture</span></span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb01_gpt_architecture <span class="im">import</span> GPT, GPTConfig</span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb03_data_pipelines <span class="im">import</span> PretrainingDataset</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb04_training_loop <span class="im">import</span> make_cosine_schedule</span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-28"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> GPT(GPTConfig(</span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a>        vocab_size<span class="op">=</span>cfg.model.vocab_size,</span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a>        d_model<span class="op">=</span>cfg.model.d_model,</span>
+<span id="annotated-cell-3-31"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a>        n_layers<span class="op">=</span>cfg.model.n_layers,</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a>        n_heads<span class="op">=</span>cfg.model.n_heads,</span>
+<span id="annotated-cell-3-33"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>        max_seq_len<span class="op">=</span>cfg.model.max_seq_len,</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a>        dropout<span class="op">=</span>cfg.model.dropout,</span>
+<span id="annotated-cell-3-35"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a>    )).to(device)</span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a>    n_params <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters())</span>
+<span id="annotated-cell-3-38"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Parameters : </span><span class="sc">{</span>n_params<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.2f}</span><span class="ss">M"</span>)</span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Device     : </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-3-40"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a>    raw_path <span class="op">=</span> Path(cfg.data_dir) <span class="op">/</span> <span class="st">"tinyshakespeare.txt"</span></span>
+<span id="annotated-cell-3-42"><a href="#annotated-cell-3-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> raw_path.exists():</span>
+<span id="annotated-cell-3-43"><a href="#annotated-cell-3-43" aria-hidden="true" tabindex="-1"></a>        _download_tinyshakespeare(raw_path)</span>
+<span id="annotated-cell-3-44"><a href="#annotated-cell-3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-45"><a href="#annotated-cell-3-45" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb02_tokenization <span class="im">import</span> Tokenizer</span>
+<span id="annotated-cell-3-46"><a href="#annotated-cell-3-46" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.train(</span>
+<span id="annotated-cell-3-47"><a href="#annotated-cell-3-47" aria-hidden="true" tabindex="-1"></a>        <span class="bu">str</span>(raw_path),</span>
+<span id="annotated-cell-3-48"><a href="#annotated-cell-3-48" aria-hidden="true" tabindex="-1"></a>        vocab_size<span class="op">=</span>cfg.model.vocab_size,</span>
+<span id="annotated-cell-3-49"><a href="#annotated-cell-3-49" aria-hidden="true" tabindex="-1"></a>        model_path<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/tokenizer.model"</span>,</span>
+<span id="annotated-cell-3-50"><a href="#annotated-cell-3-50" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-3-51"><a href="#annotated-cell-3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-52"><a href="#annotated-cell-3-52" aria-hidden="true" tabindex="-1"></a>    dataset <span class="op">=</span> PretrainingDataset(<span class="bu">str</span>(raw_path), tok, cfg.pretrain_seq)</span>
+<span id="annotated-cell-3-53"><a href="#annotated-cell-3-53" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">=</span> DataLoader(dataset, batch_size<span class="op">=</span>cfg.pretrain_batch, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-3-54"><a href="#annotated-cell-3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-55"><a href="#annotated-cell-3-55" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW(model.parameters(), lr<span class="op">=</span>cfg.pretrain_lr, weight_decay<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="annotated-cell-3-56"><a href="#annotated-cell-3-56" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> make_cosine_schedule(</span>
+<span id="annotated-cell-3-57"><a href="#annotated-cell-3-57" aria-hidden="true" tabindex="-1"></a>        optimizer, cfg.pretrain_lr, cfg.pretrain_lr <span class="op">*</span> <span class="fl">0.1</span>,</span>
+<span id="annotated-cell-3-58"><a href="#annotated-cell-3-58" aria-hidden="true" tabindex="-1"></a>        warmup_steps<span class="op">=</span><span class="bu">min</span>(<span class="dv">100</span>, cfg.pretrain_steps <span class="op">//</span> <span class="dv">10</span>),</span>
+<span id="annotated-cell-3-59"><a href="#annotated-cell-3-59" aria-hidden="true" tabindex="-1"></a>        max_steps<span class="op">=</span>cfg.pretrain_steps,</span>
+<span id="annotated-cell-3-60"><a href="#annotated-cell-3-60" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-3-61"><a href="#annotated-cell-3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-62"><a href="#annotated-cell-3-62" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="annotated-cell-3-63"><a href="#annotated-cell-3-63" aria-hidden="true" tabindex="-1"></a>    data_iter <span class="op">=</span> <span class="bu">iter</span>(loader)</span>
+<span id="annotated-cell-3-64"><a href="#annotated-cell-3-64" aria-hidden="true" tabindex="-1"></a>    best_loss <span class="op">=</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
+<span id="annotated-cell-3-65"><a href="#annotated-cell-3-65" aria-hidden="true" tabindex="-1"></a>    log_every <span class="op">=</span> <span class="bu">max</span>(<span class="dv">50</span>, cfg.pretrain_steps <span class="op">//</span> <span class="dv">20</span>)</span>
+<span id="annotated-cell-3-66"><a href="#annotated-cell-3-66" aria-hidden="true" tabindex="-1"></a>    t0 <span class="op">=</span> time.time()</span>
+<span id="annotated-cell-3-67"><a href="#annotated-cell-3-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-68"><a href="#annotated-cell-3-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(cfg.pretrain_steps):</span>
+<span id="annotated-cell-3-69"><a href="#annotated-cell-3-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="annotated-cell-3-70"><a href="#annotated-cell-3-70" aria-hidden="true" tabindex="-1"></a>            x, y <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="annotated-cell-3-71"><a href="#annotated-cell-3-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">StopIteration</span>:</span>
+<span id="annotated-cell-3-72"><a href="#annotated-cell-3-72" aria-hidden="true" tabindex="-1"></a>            data_iter <span class="op">=</span> <span class="bu">iter</span>(loader)</span>
+<span id="annotated-cell-3-73"><a href="#annotated-cell-3-73" aria-hidden="true" tabindex="-1"></a>            x, y <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="annotated-cell-3-74"><a href="#annotated-cell-3-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-75"><a href="#annotated-cell-3-75" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> x.to(device), y.to(device)</span>
+<span id="annotated-cell-3-76"><a href="#annotated-cell-3-76" aria-hidden="true" tabindex="-1"></a>        _, loss <span class="op">=</span> model(x, y)</span>
+<span id="annotated-cell-3-77"><a href="#annotated-cell-3-77" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss <span class="op">/</span> cfg.pretrain_accumulation</span>
+<span id="annotated-cell-3-78"><a href="#annotated-cell-3-78" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="annotated-cell-3-79"><a href="#annotated-cell-3-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-80"><a href="#annotated-cell-3-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (step <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> cfg.pretrain_accumulation <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-3-81"><a href="#annotated-cell-3-81" aria-hidden="true" tabindex="-1"></a>            torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.pretrain_grad_clip)</span>
+<span id="annotated-cell-3-82"><a href="#annotated-cell-3-82" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="annotated-cell-3-83"><a href="#annotated-cell-3-83" aria-hidden="true" tabindex="-1"></a>            scheduler.step()</span>
+<span id="annotated-cell-3-84"><a href="#annotated-cell-3-84" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="annotated-cell-3-85"><a href="#annotated-cell-3-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-86"><a href="#annotated-cell-3-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> log_every <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> step <span class="op">==</span> cfg.pretrain_steps <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="annotated-cell-3-87"><a href="#annotated-cell-3-87" aria-hidden="true" tabindex="-1"></a>            elapsed <span class="op">=</span> time.time() <span class="op">-</span> t0</span>
+<span id="annotated-cell-3-88"><a href="#annotated-cell-3-88" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  step </span><span class="sc">{</span>step<span class="sc">:5d}</span><span class="ss"> | loss </span><span class="sc">{</span>loss<span class="sc">.</span>item() <span class="op">*</span> cfg<span class="sc">.</span>pretrain_accumulation<span class="sc">:.4f}</span><span class="ss"> "</span></span>
+<span id="annotated-cell-3-89"><a href="#annotated-cell-3-89" aria-hidden="true" tabindex="-1"></a>                  <span class="ss">f"| </span><span class="sc">{</span>elapsed<span class="sc">:.0f}</span><span class="ss">s"</span>)</span>
+<span id="annotated-cell-3-90"><a href="#annotated-cell-3-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-91"><a href="#annotated-cell-3-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> loss.item() <span class="op">&lt;</span> best_loss:</span>
+<span id="annotated-cell-3-92"><a href="#annotated-cell-3-92" aria-hidden="true" tabindex="-1"></a>            best_loss <span class="op">=</span> loss.item()</span>
+<span id="annotated-cell-3-93"><a href="#annotated-cell-3-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-94"><a href="#annotated-cell-3-94" aria-hidden="true" tabindex="-1"></a>    Path(cfg.run_dir).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-3-95"><a href="#annotated-cell-3-95" aria-hidden="true" tabindex="-1"></a>    torch.save({<span class="st">"model"</span>: model.state_dict(), <span class="st">"step"</span>: cfg.pretrain_steps},</span>
+<span id="annotated-cell-3-96"><a href="#annotated-cell-3-96" aria-hidden="true" tabindex="-1"></a>               ckpt_path)</span>
+<span id="annotated-cell-3-97"><a href="#annotated-cell-3-97" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Saved → </span><span class="sc">{</span>ckpt_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-3-98"><a href="#annotated-cell-3-98" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ckpt_path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Annotation:</p>
+<ol type="1">
+<li>Gradient accumulation: loss is divided by <code>accumulation</code> before backward so gradient magnitudes are consistent regardless of accumulation factor (see <a href="../../notebooks/llm/06-pretraining.html">NB06</a>).</li>
+</ol>
+</section>
+<section id="stage-2-supervised-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="stage-2-supervised-fine-tuning">Stage 2: Supervised Fine-Tuning</h2>
+<p>Stage 2 fine-tunes the pretrained model on an instruction dataset using LoRA (see <a href="../../notebooks/llm/08-sft-lora.html">NB08</a>). The base weights are frozen; only the LoRA adapters are trained. After fine-tuning, the LoRA adapters are merged back into the base weights and the merged checkpoint is saved.</p>
+<p><strong>Pico sanity check:</strong> SFT eval loss should be lower than random. The model will not follow instructions coherently at pico scale, but the loss should be finite and decreasing.</p>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_sft(cfg: PipelineConfig, pretrain_ckpt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Supervised fine-tuning with LoRA adapters.</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Loads the pretrained checkpoint, injects LoRA adapters, trains on</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">    an instruction dataset, merges adapters back into base weights,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">    and saves the merged checkpoint.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">        pretrain_ckpt: path to pretrained model checkpoint.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">        Path to the merged SFT checkpoint.</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 2 — SFT + LoRA"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    ckpt_path <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/sft_merged.pt"</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Path(ckpt_path).exists():</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"  Checkpoint found — skipping."</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ckpt_path</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb01_gpt_architecture <span class="im">import</span> GPT, GPTConfig</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb02_tokenization <span class="im">import</span> Tokenizer</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb08_sft_lora <span class="im">import</span> inject_lora, freeze_base_model, merge_lora, sft_loss</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb04_training_loop <span class="im">import</span> make_cosine_schedule</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.load(<span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/tokenizer.model"</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> GPT(GPTConfig(<span class="op">**</span>asdict(cfg.model))).to(device)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    ckpt <span class="op">=</span> torch.load(pretrain_ckpt, map_location<span class="op">=</span>device)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    model.load_state_dict(ckpt[<span class="st">"model"</span>])</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  Loaded pretrained weights."</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    inject_lora(model, rank<span class="op">=</span>cfg.lora_rank)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    freeze_base_model(model)</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    sft_data <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/sft_data.jsonl"</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> Path(sft_data).exists():</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>        raw <span class="op">=</span> (Path(cfg.data_dir) <span class="op">/</span> <span class="st">"tinyshakespeare.txt"</span>).read_text()</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        _make_shakespeare_sft(raw, sft_data, n_samples<span class="op">=</span><span class="bu">max</span>(<span class="dv">100</span>, cfg.sft_steps <span class="op">//</span> <span class="dv">2</span>))</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb08_sft_lora <span class="im">import</span> InstructDataset, collate_sft</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    dataset <span class="op">=</span> InstructDataset(sft_data, tok, max_length<span class="op">=</span>cfg.pretrain_seq)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    val_n <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">len</span>(dataset) <span class="op">//</span> <span class="dv">10</span>)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    train_ds, val_ds <span class="op">=</span> random_split(dataset, [<span class="bu">len</span>(dataset) <span class="op">-</span> val_n, val_n])</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    train_loader <span class="op">=</span> DataLoader(train_ds, batch_size<span class="op">=</span>cfg.sft_batch,</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_sft)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    val_loader   <span class="op">=</span> DataLoader(val_ds, batch_size<span class="op">=</span>cfg.sft_batch,</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">False</span>, collate_fn<span class="op">=</span>collate_sft)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    lora_params <span class="op">=</span> [p <span class="cf">for</span> p <span class="kw">in</span> model.parameters() <span class="cf">if</span> p.requires_grad]</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW(lora_params, lr<span class="op">=</span>cfg.sft_lr, weight_decay<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> make_cosine_schedule(</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        optimizer, cfg.sft_lr, cfg.sft_lr <span class="op">*</span> <span class="fl">0.1</span>,</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>        warmup_steps<span class="op">=</span><span class="bu">min</span>(<span class="dv">30</span>, cfg.sft_steps <span class="op">//</span> <span class="dv">10</span>),</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        max_steps<span class="op">=</span>cfg.sft_steps,</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    data_iter <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    log_every <span class="op">=</span> <span class="bu">max</span>(<span class="dv">10</span>, cfg.sft_steps <span class="op">//</span> <span class="dv">20</span>)</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(cfg.sft_steps):</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>            batch <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">StopIteration</span>:</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>            data_iter <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>            batch <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>        input_ids <span class="op">=</span> batch[<span class="st">"input_ids"</span>].to(device)</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> batch[<span class="st">"labels"</span>].to(device)</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(input_ids)</span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> sft_loss(logits, labels)</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>        torch.nn.utils.clip_grad_norm_(lora_params, <span class="fl">1.0</span>)</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> log_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  step </span><span class="sc">{</span>step<span class="sc">:4d}</span><span class="ss"> | loss </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Merge LoRA adapters back into base weights</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    merge_lora(model)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    torch.save({<span class="st">"model"</span>: model.state_dict(), <span class="st">"step"</span>: cfg.sft_steps}, ckpt_path)</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Saved (merged) → </span><span class="sc">{</span>ckpt_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ckpt_path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="stage-3-reward-model" class="level2">
+<h2 class="anchored" data-anchor-id="stage-3-reward-model">Stage 3: Reward Model</h2>
+<p>Stage 3 trains a reward model on preference pairs (see <a href="../../notebooks/llm/09-preference-optimization.html">NB09</a>). Chosen responses are real Shakespeare excerpts; rejected responses are word-shuffled versions of the same excerpts. The reward model will score these pairs, providing the scalar signal for GRPO.</p>
+<p><strong>Pico sanity check:</strong> reward model accuracy should exceed 0.5 (random chance) after even 20 training steps, because the chosen/rejected split is stark.</p>
+<div id="cell-13" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_reward_model(cfg: PipelineConfig, sft_ckpt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Train the reward model on preference pairs.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Uses the SFT model as the backbone. Chosen = real Shakespeare excerpt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">    rejected = word-shuffled version.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">        sft_ckpt: path to the merged SFT checkpoint.</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">        Path to the saved reward model checkpoint.</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 3 — REWARD MODEL"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ckpt_path <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/reward_model.pt"</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Path(ckpt_path).exists():</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"  Checkpoint found — skipping."</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ckpt_path</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb09_preference_optimization <span class="im">import</span> RewardModel</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb02_tokenization <span class="im">import</span> Tokenizer</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb04_training_loop <span class="im">import</span> make_cosine_schedule</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.load(<span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/tokenizer.model"</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    reward_model <span class="op">=</span> RewardModel(cfg.model, backbone_path<span class="op">=</span>sft_ckpt).to(device)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    pref_data <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/preference_data.jsonl"</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> Path(pref_data).exists():</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        raw <span class="op">=</span> (Path(cfg.data_dir) <span class="op">/</span> <span class="st">"tinyshakespeare.txt"</span>).read_text()</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        _make_preference_data(raw, pref_data, n_samples<span class="op">=</span><span class="bu">max</span>(<span class="dv">60</span>, cfg.rm_steps <span class="op">//</span> <span class="dv">2</span>))</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb09_preference_optimization <span class="im">import</span> RewardDataset, collate_reward</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    dataset <span class="op">=</span> RewardDataset(pref_data, tok, max_length<span class="op">=</span>cfg.pretrain_seq)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    val_n <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">len</span>(dataset) <span class="op">//</span> <span class="dv">10</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    train_ds, val_ds <span class="op">=</span> random_split(dataset, [<span class="bu">len</span>(dataset) <span class="op">-</span> val_n, val_n])</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    train_loader <span class="op">=</span> DataLoader(train_ds, batch_size<span class="op">=</span>cfg.rm_batch,</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_reward)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    val_loader   <span class="op">=</span> DataLoader(val_ds, batch_size<span class="op">=</span>cfg.rm_batch,</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">False</span>, collate_fn<span class="op">=</span>collate_reward)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW([</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"params"</span>: reward_model.reward_head.parameters(), <span class="st">"lr"</span>: cfg.rm_lr <span class="op">*</span> <span class="dv">10</span>},</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"params"</span>: [p <span class="cf">for</span> p <span class="kw">in</span> reward_model.backbone.parameters()</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> p.requires_grad], <span class="st">"lr"</span>: cfg.rm_lr},</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    ], weight_decay<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> make_cosine_schedule(</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        optimizer, cfg.rm_lr, cfg.rm_lr <span class="op">*</span> <span class="fl">0.1</span>,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        warmup_steps<span class="op">=</span><span class="bu">min</span>(<span class="dv">30</span>, cfg.rm_steps <span class="op">//</span> <span class="dv">10</span>),</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        max_steps<span class="op">=</span>cfg.rm_steps,</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    data_iter <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    log_every <span class="op">=</span> <span class="bu">max</span>(<span class="dv">5</span>, cfg.rm_steps <span class="op">//</span> <span class="dv">10</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(cfg.rm_steps):</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>            batch <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">StopIteration</span>:</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>            data_iter <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>            batch <span class="op">=</span> <span class="bu">next</span>(data_iter)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        reward_model.train()</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        chosen_ids <span class="op">=</span> batch[<span class="st">"chosen"</span>].to(device)</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        rejected_ids <span class="op">=</span> batch[<span class="st">"rejected"</span>].to(device)</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        r_chosen <span class="op">=</span> reward_model(chosen_ids)</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>        r_rejected <span class="op">=</span> reward_model(rejected_ids)</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="op">-</span>F.logsigmoid(r_chosen <span class="op">-</span> r_rejected).mean()</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> (r_chosen <span class="op">&gt;</span> r_rejected).<span class="bu">float</span>().mean().item()</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> log_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  step </span><span class="sc">{</span>step<span class="sc">:4d}</span><span class="ss"> | loss </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss"> | acc </span><span class="sc">{</span>acc<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>    torch.save({<span class="st">"model"</span>: reward_model.state_dict()}, ckpt_path)</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Saved → </span><span class="sc">{</span>ckpt_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ckpt_path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="stage-4-grpo" class="level2">
+<h2 class="anchored" data-anchor-id="stage-4-grpo">Stage 4: GRPO</h2>
+<p>Stage 4 runs GRPO policy optimization (see <a href="../../notebooks/llm/10-grpo.html">NB10</a>). The policy is the SFT model with LoRA adapters; the reference is a frozen copy of the same SFT checkpoint; the reward signal comes from the trained reward model.</p>
+<p><strong>Pico sanity check:</strong> GRPO reward margin should trend upward. With only 20 steps the improvement will be small, but the mean reward should be non-negative by the end.</p>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_grpo(cfg: PipelineConfig, sft_ckpt: <span class="bu">str</span>, rm_ckpt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""GRPO policy optimization.</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Loads the SFT model as the policy and a frozen copy as the reference.</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Trains LoRA adapters on the GRPO objective against the reward model.</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">        sft_ckpt: path to merged SFT checkpoint.</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">        rm_ckpt: path to reward model checkpoint.</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">        Path to the final policy checkpoint.</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 4 — GRPO"</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    ckpt_path <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/grpo_final.pt"</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Path(ckpt_path).exists():</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"  Checkpoint found — skipping."</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ckpt_path</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb01_gpt_architecture <span class="im">import</span> GPT, GPTConfig</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb09_preference_optimization <span class="im">import</span> RewardModel</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb08_sft_lora <span class="im">import</span> inject_lora</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb10_grpo <span class="im">import</span> (</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        GRPOConfig, compute_group_advantages, grpo_loss,</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        get_response_log_probs, GRPOEarlyStopper,</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb02_tokenization <span class="im">import</span> Tokenizer</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb04_training_loop <span class="im">import</span> make_cosine_schedule</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.load(<span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/tokenizer.model"</span>)</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Policy: SFT model + fresh LoRA adapters</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> GPT(GPTConfig(<span class="op">**</span>asdict(cfg.model))).to(device)</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    sft_st <span class="op">=</span> torch.load(sft_ckpt, map_location<span class="op">=</span>device)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    policy.load_state_dict(sft_st[<span class="st">"model"</span>])</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    inject_lora(policy, rank<span class="op">=</span>cfg.lora_rank)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reference: frozen copy of SFT weights, no LoRA</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    ref_model <span class="op">=</span> GPT(GPTConfig(<span class="op">**</span>asdict(cfg.model))).to(device)</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    ref_model.load_state_dict(sft_st[<span class="st">"model"</span>])</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    ref_model.<span class="bu">eval</span>()</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> ref_model.parameters():</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        p.requires_grad_(<span class="va">False</span>)</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reward model: frozen</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    reward_model <span class="op">=</span> RewardModel(cfg.model).to(device)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    rm_st <span class="op">=</span> torch.load(rm_ckpt, map_location<span class="op">=</span>device)</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    reward_model.load_state_dict(rm_st[<span class="st">"model"</span>])</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    reward_model.<span class="bu">eval</span>()</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> reward_model.parameters():</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        p.requires_grad_(<span class="va">False</span>)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    grpo_cfg <span class="op">=</span> GRPOConfig(</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>        G<span class="op">=</span>cfg.grpo_G,</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>        kl_coef<span class="op">=</span>cfg.grpo_beta,</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>        max_steps<span class="op">=</span>cfg.grpo_steps,</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        lr<span class="op">=</span>cfg.grpo_lr,</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        lora_rank<span class="op">=</span>cfg.lora_rank,</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW(</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>        [p <span class="cf">for</span> p <span class="kw">in</span> policy.parameters() <span class="cf">if</span> p.requires_grad],</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        lr<span class="op">=</span>grpo_cfg.lr,</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>        weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> make_cosine_schedule(</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>        optimizer, grpo_cfg.lr, grpo_cfg.lr <span class="op">*</span> <span class="fl">0.1</span>,</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>        warmup_steps<span class="op">=</span><span class="bu">min</span>(<span class="dv">20</span>, cfg.grpo_steps <span class="op">//</span> <span class="dv">10</span>),</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>        max_steps<span class="op">=</span>cfg.grpo_steps,</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    stopper <span class="op">=</span> GRPOEarlyStopper(kl_threshold<span class="op">=</span><span class="fl">1.0</span>, patience<span class="op">=</span><span class="dv">40</span>)</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    prompts <span class="op">=</span> _make_grpo_prompts()</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    log_every <span class="op">=</span> <span class="bu">max</span>(<span class="dv">5</span>, cfg.grpo_steps <span class="op">//</span> <span class="dv">20</span>)</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> {<span class="st">"step"</span>: [], <span class="st">"reward"</span>: [], <span class="st">"kl"</span>: []}</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(cfg.grpo_steps):</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>        prompt_text <span class="op">=</span> random.choice(prompts)</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>        prompt_ids <span class="op">=</span> torch.tensor(</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>            [tok.encode(prompt_text)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>        )[<span class="dv">0</span>]</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sample G responses</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>        policy.<span class="bu">eval</span>()</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>        response_ids_list <span class="op">=</span> [</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>            policy.generate(</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>                prompt_ids.unsqueeze(<span class="dv">0</span>),</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>                max_new_tokens<span class="op">=</span><span class="bu">min</span>(<span class="dv">80</span>, cfg.pretrain_seq <span class="op">//</span> <span class="dv">2</span>),</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>                temperature<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>                do_sample<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>            )[<span class="dv">0</span>, prompt_ids.size(<span class="dv">0</span>):].cpu()</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(grpo_cfg.G)</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>        policy.train()</span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Score responses</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>        rewards <span class="op">=</span> []</span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>        reward_model.<span class="bu">eval</span>()</span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> resp <span class="kw">in</span> response_ids_list:</span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>                full <span class="op">=</span> torch.cat([prompt_ids.cpu(), resp]).unsqueeze(<span class="dv">0</span>).to(device)</span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>                rewards.append(reward_model(full).squeeze().item())</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>        rewards_t <span class="op">=</span> torch.tensor(rewards)</span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a>        advantages <span class="op">=</span> compute_group_advantages(rewards_t)</span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Old log-probs (no grad)</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a>            old_lps <span class="op">=</span> [</span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>                get_response_log_probs(policy, prompt_ids, r, device)</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> r <span class="kw">in</span> response_ids_list</span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>        <span class="co"># GRPO loss</span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">=</span> torch.tensor(<span class="fl">0.0</span>, device<span class="op">=</span>device)</span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a>        kl_sum <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, (resp, adv) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(response_ids_list, advantages)):</span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>            inp <span class="op">=</span> torch.cat([prompt_ids, resp.to(device)]).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>            logits <span class="op">=</span> policy(inp)</span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>            plen <span class="op">=</span> prompt_ids.size(<span class="dv">0</span>)</span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>            log_probs_all <span class="op">=</span> torch.log_softmax(logits[<span class="dv">0</span>], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>            policy_lp <span class="op">=</span> log_probs_all[plen <span class="op">-</span> <span class="dv">1</span>:<span class="op">-</span><span class="dv">1</span>].gather(</span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span><span class="dv">1</span>, resp.unsqueeze(<span class="op">-</span><span class="dv">1</span>).to(device)</span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>            ).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a>            ref_lp <span class="op">=</span> get_response_log_probs(ref_model, prompt_ids, resp, device)</span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a>            loss_i, m <span class="op">=</span> grpo_loss(</span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a>                policy_lp, old_lps[i].to(device), ref_lp, adv.to(device), grpo_cfg</span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a>            total_loss <span class="op">=</span> total_loss <span class="op">+</span> loss_i <span class="op">/</span> grpo_cfg.G</span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a>            kl_sum <span class="op">+=</span> m[<span class="st">"kl"</span>]</span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a>        total_loss.backward()</span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a>        torch.nn.utils.clip_grad_norm_(</span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a>            [p <span class="cf">for</span> p <span class="kw">in</span> policy.parameters() <span class="cf">if</span> p.requires_grad], <span class="fl">1.0</span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> log_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a>            mean_r <span class="op">=</span> rewards_t.mean().item()</span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a>            mean_kl <span class="op">=</span> kl_sum <span class="op">/</span> grpo_cfg.G</span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"step"</span>].append(step)</span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"reward"</span>].append(mean_r)</span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a>            history[<span class="st">"kl"</span>].append(mean_kl)</span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  step </span><span class="sc">{</span>step<span class="sc">:4d}</span><span class="ss"> | reward </span><span class="sc">{</span>mean_r<span class="sc">:.3f}</span><span class="ss"> | kl </span><span class="sc">{</span>mean_kl<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> stopper.step(mean_r, mean_kl, entropy<span class="op">=</span><span class="fl">0.0</span>):</span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"  Early stopping triggered."</span>)</span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a>    torch.save({<span class="st">"model"</span>: policy.state_dict(), <span class="st">"history"</span>: history}, ckpt_path)</span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Saved → </span><span class="sc">{</span>ckpt_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ckpt_path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="stage-5-deployment" class="level2">
+<h2 class="anchored" data-anchor-id="stage-5-deployment">Stage 5: Deployment</h2>
+<p>Stage 5 quantizes the final policy (<a href="../../notebooks/llm/12-quantization.html">NB12</a>) and wraps it in the <code>FastInferenceEngine</code> (<a href="../../notebooks/llm/13-inference.html">NB13</a>) with a KV cache.</p>
+<p><strong>Pico sanity check:</strong> all checkpoints should save and load without error. The most common failure mode on a first run is a shape or key mismatch at checkpoint load time.</p>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_deploy(cfg: PipelineConfig, grpo_ckpt: <span class="bu">str</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Quantize the model and initialize the inference engine.</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">        grpo_ckpt: path to final GRPO checkpoint.</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">        A ready-to-use FastInferenceEngine.</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 5 — DEPLOYMENT"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb01_gpt_architecture <span class="im">import</span> GPT, GPTConfig</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb12_quantization <span class="im">import</span> quantize_model_ptq, model_size_mb</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb13_inference <span class="im">import</span> FastInferenceEngine</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nb02_tokenization <span class="im">import</span> Tokenizer</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.load(<span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/tokenizer.model"</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> GPT(GPTConfig(<span class="op">**</span>asdict(cfg.model))).to(device)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    ckpt <span class="op">=</span> torch.load(grpo_ckpt, map_location<span class="op">=</span>device)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    model.load_state_dict(ckpt[<span class="st">"model"</span>])</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    size_fp <span class="op">=</span> model_size_mb(model)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Size (fp32) : </span><span class="sc">{</span>size_fp<span class="sc">:.1f}</span><span class="ss"> MB"</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg.quantize:</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        quantize_model_ptq(model, n_bits<span class="op">=</span>cfg.quant_bits)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        size_q <span class="op">=</span> model_size_mb(model)</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        reduction <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> size_q <span class="op">/</span> size_fp)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  Size (INT</span><span class="sc">{</span>cfg<span class="sc">.</span>quant_bits<span class="sc">}</span><span class="ss">) : </span><span class="sc">{</span>size_q<span class="sc">:.1f}</span><span class="ss"> MB  (</span><span class="sc">{</span>reduction<span class="sc">:.0f}</span><span class="ss">% reduction)"</span>)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">=</span> FastInferenceEngine(</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>model,</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        tokenizer<span class="op">=</span>tok,</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        device<span class="op">=</span>device,</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        use_speculative<span class="op">=</span>cfg.use_speculative,</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        k<span class="op">=</span>cfg.spec_k,</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  Engine ready."</span>)</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> engine</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="stage-6-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="stage-6-evaluation">Stage 6: Evaluation</h2>
+<p>Three-part evaluation: qualitative samples from the final (GRPO) model, a throughput benchmark, and a before/after comparison across pipeline stages.</p>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stage_evaluate(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    cfg: PipelineConfig,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    engine,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    pretrain_ckpt: <span class="bu">str</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    sft_ckpt: <span class="bu">str</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    grpo_ckpt: <span class="bu">str</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Evaluate the final model with qualitative samples and throughput benchmark.</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">        cfg: PipelineConfig.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">        engine: FastInferenceEngine (GRPO model, quantized).</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">        pretrain_ckpt: path to pretrained checkpoint (for comparison).</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">        sft_ckpt: path to SFT checkpoint (for comparison).</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">        grpo_ckpt: path to GRPO checkpoint (for comparison).</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  STAGE 6 — EVALUATION"</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"═"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    eval_prompts <span class="op">=</span> [</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What should Hamlet do about his father's murder?"</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write a brief speech about the nature of ambition."</span>,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Who is more dangerous: Iago or the witches in Macbeth?"</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Describe the relationship between power and corruption."</span>,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What is the right way to treat a defeated enemy?"</span>,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Qualitative samples</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">  Qualitative samples (GRPO model):"</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  "</span> <span class="op">+</span> <span class="st">"─"</span> <span class="op">*</span> <span class="dv">56</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> prompt <span class="kw">in</span> eval_prompts[:<span class="dv">3</span>]:</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        response, stats <span class="op">=</span> engine.generate(prompt, max_new_tokens<span class="op">=</span><span class="dv">120</span>, temperature<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">  Q: </span><span class="sc">{</span>prompt<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">=</span> textwrap.fill(</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            response.strip(), width<span class="op">=</span><span class="dv">56</span>,</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>            initial_indent<span class="op">=</span><span class="st">"  A: "</span>, subsequent_indent<span class="op">=</span><span class="st">"     "</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(wrapped)</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"     [</span><span class="sc">{</span>stats[<span class="st">'n_tokens'</span>]<span class="sc">}</span><span class="ss"> tokens  </span><span class="sc">{</span>stats[<span class="st">'tokens_per_sec'</span>]<span class="sc">:.0f}</span><span class="ss"> tok/s]"</span>)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Throughput benchmark</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">  Throughput benchmark:"</span>)</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  "</span> <span class="op">+</span> <span class="st">"─"</span> <span class="op">*</span> <span class="dv">56</span>)</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    bm_stats <span class="op">=</span> engine.benchmark(eval_prompts <span class="op">*</span> <span class="dv">4</span>, max_new_tokens<span class="op">=</span><span class="dv">80</span>)</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Mean tokens/sec : </span><span class="sc">{</span>bm_stats[<span class="st">'mean_tps'</span>]<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Min  tokens/sec : </span><span class="sc">{</span>bm_stats[<span class="st">'min_tps'</span>]<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Max  tokens/sec : </span><span class="sc">{</span>bm_stats[<span class="st">'max_tps'</span>]<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Before/after comparison (abbreviated)</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">  Before/after comparison:"</span>)</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  "</span> <span class="op">+</span> <span class="st">"─"</span> <span class="op">*</span> <span class="dv">56</span>)</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [Pretrained]  — raw text continuation (no instruction format)"</span>)</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [SFT]         — addresses prompt directly"</span>)</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [GRPO]        — more structured, reward-optimized responses"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="interpreting-the-output" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-output">Interpreting the Output</h2>
+<p>The <code>stage_evaluate</code> comparison reveals the effect of each stage:</p>
+<ul>
+<li><p>The <strong>pretrained model</strong> produces a text continuation. It has learned the statistical structure of Shakespearean English but has no concept of question-answer format. Given “What should Hamlet do?”, it continues with something plausibly Shakespearean but addressed to no one.</p></li>
+<li><p>The <strong>SFT model</strong> addresses the prompt directly. It has learned the structural form of a response from the instruction data. Quality is limited by the SFT dataset — a few hundred Shakespeare excerpts with synthetic prompts — so do not expect deep philosophical insight.</p></li>
+<li><p>The <strong>GRPO model</strong> has been optimized toward responses the reward model scores more highly. Since the reward model prefers coherent, well-organized text over word-shuffled text, GRPO nudges the policy toward more structured outputs. The improvement at nano scale is real but modest.</p></li>
+</ul>
+<p><u>The same pipeline on a 7B model with high-quality human preference data produces the much larger behavioral change seen in production instruction-following models.</u> The mechanism is identical; the scale is different.</p>
+</section>
+<section id="helper-functions" class="level2">
+<h2 class="anchored" data-anchor-id="helper-functions">Helper Functions</h2>
+<div id="cell-22" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _download_tinyshakespeare(path: Path) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Download TinyShakespeare to the given path."""</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    path.parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> (</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://raw.githubusercontent.com/karpathy/char-rnn/"</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"master/data/tinyshakespeare/input.txt"</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"  Downloading TinyShakespeare..."</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    urllib.request.urlretrieve(url, path)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>path<span class="sc">.</span>stat()<span class="sc">.</span>st_size <span class="op">/</span> <span class="fl">1e6</span><span class="sc">:.1f}</span><span class="ss"> MB downloaded."</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _make_shakespeare_sft(raw: <span class="bu">str</span>, output: <span class="bu">str</span>, n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">800</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create a synthetic SFT dataset from TinyShakespeare.</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">    Pairs random prompts (e.g. 'Write a short dramatic passage.') with</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">    Shakespeare text excerpts as responses.</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    random.seed(<span class="dv">42</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    words <span class="op">=</span> raw.split()</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> [<span class="st">" "</span>.join(words[i:i <span class="op">+</span> <span class="dv">80</span>]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(words) <span class="op">-</span> <span class="dv">80</span>, <span class="dv">80</span>)]</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    prompts <span class="op">=</span> [</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write a short dramatic passage."</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Continue this scene in the style of Shakespeare."</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write a soliloquy about fate."</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write dialogue between two nobles."</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write a verse about jealousy."</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Describe a battle in Shakespearean prose."</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write a monologue about ambition."</span>,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Compose a lament for a fallen king."</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    Path(output).parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(output, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">min</span>(n_samples, <span class="bu">len</span>(chunks))):</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            sample <span class="op">=</span> {</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                <span class="st">"messages"</span>: [</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                    {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a creative writing assistant."</span>},</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>                    {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: random.choice(prompts)},</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>                    {<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: chunks[i]},</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>            f.write(json.dumps(sample) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  SFT dataset: </span><span class="sc">{</span><span class="bu">min</span>(n_samples, <span class="bu">len</span>(chunks))<span class="sc">}</span><span class="ss"> samples → </span><span class="sc">{</span>output<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _make_preference_data(raw: <span class="bu">str</span>, output: <span class="bu">str</span>, n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">400</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create preference pairs: real excerpt (chosen) vs word-shuffled (rejected)."""</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    random.seed(<span class="dv">42</span>)</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    words <span class="op">=</span> raw.split()</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    chunks <span class="op">=</span> [<span class="st">" "</span>.join(words[i:i <span class="op">+</span> <span class="dv">60</span>]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(words) <span class="op">-</span> <span class="dv">60</span>, <span class="dv">60</span>)]</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    Path(output).parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(output, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> chunk <span class="kw">in</span> chunks[:n_samples]:</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>            shuffled_words <span class="op">=</span> <span class="bu">list</span>(chunk.split())</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>            random.shuffle(shuffled_words)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>            f.write(json.dumps({</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>                <span class="st">"chosen"</span>: chunk,</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>                <span class="st">"rejected"</span>: <span class="st">" "</span>.join(shuffled_words),</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>            }) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Preference data: </span><span class="sc">{</span><span class="bu">min</span>(n_samples, <span class="bu">len</span>(chunks))<span class="sc">}</span><span class="ss"> pairs → </span><span class="sc">{</span>output<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _make_grpo_prompts() <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Short Shakespeare-themed prompts for GRPO training."""</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What should Hamlet do about his father?"</span>,</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Speak of honor and duty."</span>,</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What is the nature of ambition?"</span>,</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Describe the folly of pride."</span>,</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>        <span class="st">"How should a king treat his subjects?"</span>,</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What is the price of betrayal?"</span>,</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Write of love and its consequences."</span>,</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>        <span class="st">"What do the stars foretell?"</span>,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-main-entrypoint" class="level2">
+<h2 class="anchored" data-anchor-id="the-main-entrypoint">The Main Entrypoint</h2>
+<div id="cell-24" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_pipeline(config: <span class="bu">str</span> <span class="op">=</span> <span class="st">"pico"</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run the full training pipeline from pretraining to evaluation.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">        config: 'pico' for a quick sanity check, 'nano' for a full run.</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">=</span> pico_config() <span class="cf">if</span> config <span class="op">==</span> <span class="st">"pico"</span> <span class="cf">else</span> nano_config()</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    torch.manual_seed(cfg.seed)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    random.seed(cfg.seed)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    np.random.seed(cfg.seed)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    Path(cfg.run_dir).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    Path(cfg.data_dir).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    cfg.save(<span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/config.json"</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(cfg.device)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">  Device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">  |  Config: </span><span class="sc">{</span>config<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Run directory: </span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    pretrain_ckpt <span class="op">=</span> stage_pretrain(cfg)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    sft_ckpt <span class="op">=</span> stage_sft(cfg, pretrain_ckpt)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    rm_ckpt <span class="op">=</span> stage_reward_model(cfg, sft_ckpt)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    grpo_ckpt <span class="op">=</span> stage_grpo(cfg, sft_ckpt, rm_ckpt)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">=</span> stage_deploy(cfg, grpo_ckpt)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    stage_evaluate(cfg, engine, pretrain_ckpt, sft_ckpt, grpo_ckpt)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">  Pipeline complete."</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with: run_pipeline('pico')  or  run_pipeline('nano')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="running-the-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="running-the-pipeline">Running the Pipeline</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1 — verify everything works on your machine (pico, ~6 min CPU)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>run_pipeline(<span class="st">'pico'</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2 — full run on a GPU (~20–50 min)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>run_pipeline(<span class="st">'nano'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Approximate runtimes:</p>
+<table class="caption-top table">
+<caption>Pipeline runtime estimates.</caption>
+<colgroup>
+<col style="width: 10%">
+<col style="width: 17%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Config</th>
+<th>Hardware</th>
+<th>Pretrain</th>
+<th>SFT</th>
+<th>RM</th>
+<th>GRPO</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pico</td>
+<td>Laptop CPU</td>
+<td>~3 min</td>
+<td>~1 min</td>
+<td>&lt;1 min</td>
+<td>&lt;1 min</td>
+<td>~6 min</td>
+</tr>
+<tr class="even">
+<td>nano</td>
+<td>A100 40GB</td>
+<td>~8 min</td>
+<td>~3 min</td>
+<td>~2 min</td>
+<td>~5 min</td>
+<td>~20 min</td>
+</tr>
+<tr class="odd">
+<td>nano</td>
+<td>RTX 3090</td>
+<td>~25 min</td>
+<td>~8 min</td>
+<td>~5 min</td>
+<td>~12 min</td>
+<td>~50 min</td>
+</tr>
+<tr class="even">
+<td>nano</td>
+<td>M2 MacBook</td>
+<td>~90 min</td>
+<td>~25 min</td>
+<td>~15 min</td>
+<td>~35 min</td>
+<td>~2.7 hr</td>
+</tr>
+</tbody>
+</table>
+<p>Because each stage saves a checkpoint and skips if one exists, <u>progress is preserved if a run is interrupted</u> — simply re-run to pick up where training left off.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pretraining</td>
+<td>Train NanoGPT on TinyShakespeare with cosine schedule, gradient accumulation, and BF16.</td>
+</tr>
+<tr class="even">
+<td>SFT</td>
+<td>Instruction-tune with LoRA on Shakespeare Q&amp;A pairs; masked loss on assistant tokens only.</td>
+</tr>
+<tr class="odd">
+<td>Reward model</td>
+<td>Train a Bradley-Terry reward model on chosen/rejected pairs (real vs.&nbsp;shuffled Shakespeare).</td>
+</tr>
+<tr class="even">
+<td>GRPO</td>
+<td>Policy optimization with group-relative advantages; KL penalty against the SFT checkpoint.</td>
+</tr>
+<tr class="odd">
+<td>Deployment</td>
+<td>INT8 quantization + KV cache inference engine.</td>
+</tr>
+<tr class="even">
+<td>Evaluation</td>
+<td>Generate answers and score with the reward model; verify coherent Shakespearean output.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Pico baseline.</strong> Run <code>run_pipeline('pico')</code> and confirm all six sanity checks: (a) pretraining loss decreases, (b) SFT eval loss beats random, (c) reward model accuracy exceeds 0.5, (d) GRPO reward trends upward, (e) all checkpoints save/load without error, (f) evaluation completes without crash.</p></li>
+<li><p><strong>Before/after comparison.</strong> After running <code>nano</code>, generate 10 responses from each of the three checkpoints (pretrained, SFT, GRPO) for the same 5 prompts. Rate them on coherence (1–5). How many SFT responses are better than pretrained? How many GRPO responses are better than SFT?</p></li>
+<li><p><strong>Quantization quality.</strong> Run <code>stage_deploy</code> with <code>quant_bits=8</code>, <code>quant_bits=4</code>, and <code>quant_bits=32</code> (no quantization). Measure perplexity and tokens/sec for each. At what bit width does perplexity noticeably increase?</p></li>
+<li><p><strong>Reward model quality.</strong> Replace the word-shuffled rejected responses with a different rejection signal — e.g., responses from a different Shakespeare play, or responses from a random text source. How does reward model accuracy change? How does the quality of GRPO-optimized responses change?</p></li>
+<li><p><strong>LoRA rank ablation.</strong> Run <code>stage_sft</code> with <code>lora_rank</code> ∈ {2, 4, 8, 16}. Compare SFT eval loss and the quality of GRPO responses. At what rank does additional capacity stop helping?</p></li>
+<li><p><strong>GRPO group size ablation.</strong> Run <code>stage_grpo</code> with <code>grpo_G</code> ∈ {2, 4, 8, 16}. Plot final reward vs <span class="math inline">G</span>. How does <span class="math inline">G</span> affect the stability of advantage estimates and the variance of the training signal?</p></li>
+</ol>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/llm/14-inference-time-scaling.html" class="pagination-link" aria-label="14. Inference-Time Scaling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">14. Inference-Time Scaling</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/llm/deepseek/index.html" class="pagination-link" aria-label="DeepSeek">
+        <span class="nav-page-text">DeepSeek</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

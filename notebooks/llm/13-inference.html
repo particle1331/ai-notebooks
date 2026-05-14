@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Fast Inference with KV Cache, Flash Attention, and Speculative Decoding – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/llm/14-inference-time-scaling.html" rel="next">
+<link href="../../notebooks/llm/12-quantization.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/13-inference.html">13. KV Cache &amp; Speculative Decoding</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-autoregressive-generation-problem" id="toc-the-autoregressive-generation-problem" class="nav-link active" data-scroll-target="#the-autoregressive-generation-problem">The Autoregressive Generation Problem</a></li>
+  <li><a href="#kv-cache" id="toc-kv-cache" class="nav-link" data-scroll-target="#kv-cache">KV Cache</a>
+  <ul class="collapse">
+  <li><a href="#cache-memory" id="toc-cache-memory" class="nav-link" data-scroll-target="#cache-memory">Cache memory</a></li>
+  <li><a href="#cache-eviction-strategies" id="toc-cache-eviction-strategies" class="nav-link" data-scroll-target="#cache-eviction-strategies">Cache eviction strategies</a></li>
+  </ul></li>
+  <li><a href="#flash-attention" id="toc-flash-attention" class="nav-link" data-scroll-target="#flash-attention">Flash Attention</a>
+  <ul class="collapse">
+  <li><a href="#flash-attention-tiling-to-stay-in-sram" id="toc-flash-attention-tiling-to-stay-in-sram" class="nav-link" data-scroll-target="#flash-attention-tiling-to-stay-in-sram">Flash Attention: tiling to stay in SRAM</a></li>
+  <li><a href="#replacing-standard-attention-with-flash-attention" id="toc-replacing-standard-attention-with-flash-attention" class="nav-link" data-scroll-target="#replacing-standard-attention-with-flash-attention">Replacing standard attention with Flash Attention</a></li>
+  </ul></li>
+  <li><a href="#speculative-decoding" id="toc-speculative-decoding" class="nav-link" data-scroll-target="#speculative-decoding">Speculative Decoding</a>
+  <ul class="collapse">
+  <li><a href="#the-acceptance-criterion" id="toc-the-acceptance-criterion" class="nav-link" data-scroll-target="#the-acceptance-criterion">The acceptance criterion</a></li>
+  <li><a href="#speedup-analysis" id="toc-speedup-analysis" class="nav-link" data-scroll-target="#speedup-analysis">Speedup analysis</a></li>
+  </ul></li>
+  <li><a href="#the-fastinferenceengine" id="toc-the-fastinferenceengine" class="nav-link" data-scroll-target="#the-fastinferenceengine">The <code>FastInferenceEngine</code></a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/13-inference.html">13. KV Cache &amp; Speculative Decoding</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Fast Inference with KV Cache, Flash Attention, and Speculative Decoding</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Training a model is a one-time cost. Inference is paid on every request, forever. A model that generates 10 tokens/sec is not deployable; a model that generates 500 tokens/sec can serve real users. The difference is almost entirely algorithmic — the same weights, the same hardware, orders of magnitude apart in throughput. This notebook covers the three techniques that make the difference: <mark><strong>KV caching</strong></mark>, which eliminates redundant recomputation during autoregressive generation; <strong>Flash Attention</strong>, which eliminates redundant HBM traffic during the attention computation; and <strong>speculative decoding</strong>, which breaks the sequential bottleneck by verifying multiple draft tokens in a single parallel forward pass.</p>
+<section id="the-autoregressive-generation-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-autoregressive-generation-problem">The Autoregressive Generation Problem</h2>
+<p>Language model generation is sequential: to generate token <span class="math inline">t+1</span>, you need token <span class="math inline">t</span>. The naive forward pass for generating token <span class="math inline">t+1</span> runs on the full accumulated sequence <span class="math inline">[x_1, \ldots, x_t]</span> — recomputing all keys and values from scratch. Cost per token: <span class="math inline">O(t)</span> attention operations. Cost to generate <span class="math inline">T</span> tokens: <span class="math inline">O(T^2)</span>. For <span class="math inline">T = 1024</span>, that is one million units of work where one thousand would suffice.</p>
+<p>The fix is to <strong>cache</strong> the computed keys and values. After computing <span class="math inline">K_l</span> and <span class="math inline">V_l</span> for layer <span class="math inline">l</span> at position <span class="math inline">t</span>, store them. At step <span class="math inline">t+1</span>, only compute the new query <span class="math inline">q_{t+1}</span> and the new key/value pair <span class="math inline">(k_{t+1}, v_{t+1})</span>. Attend to the full cached sequence without recomputing anything.</p>
+</section>
+<section id="kv-cache" class="level2">
+<h2 class="anchored" data-anchor-id="kv-cache">KV Cache</h2>
+<p>The KV cache stores key and value projections for all past tokens across all layers. Two phases:</p>
+<ul>
+<li><strong>Prefill:</strong> run the full prompt through the model in one forward pass, populating the cache for all prompt positions.</li>
+<li><strong>Decode:</strong> generate one token at a time, computing only the new key/value pair and attending to the full cache.</li>
+</ul>
+<p>Implementing <code>KVCache</code>:</p>
+<div id="cell-5" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KVCache:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stores key and value tensors for all transformer layers.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">    On each generation step, new K/V pairs are appended along the</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">    sequence dimension. Shape: k_cache[layer] = (B, H, T_cached, d_h).</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">        n_layers: number of transformer layers.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    n_layers: <span class="bu">int</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    k_cache: <span class="bu">list</span>[Optional[torch.Tensor]] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    v_cache: <span class="bu">list</span>[Optional[torch.Tensor]] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    seq_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.k_cache <span class="op">=</span> [<span class="va">None</span>] <span class="op">*</span> <span class="va">self</span>.n_layers</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.v_cache <span class="op">=</span> [<span class="va">None</span>] <span class="op">*</span> <span class="va">self</span>.n_layers</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update(</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        layer_idx: <span class="bu">int</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        new_k: torch.Tensor,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        new_v: torch.Tensor,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[torch.Tensor, torch.Tensor]:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Append new K/V to the cache and return the full cached tensors.</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co">            layer_idx: which layer's cache to update.</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co">            new_k: shape (B, H, T_new, d_h).</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">            new_v: shape (B, H, T_new, d_h).</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co">            (k_full, v_full): full cached K/V tensors including the new tokens.</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.k_cache[layer_idx] <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.k_cache[layer_idx] <span class="op">=</span> new_k</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.v_cache[layer_idx] <span class="op">=</span> new_v</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.k_cache[layer_idx] <span class="op">=</span> torch.cat([<span class="va">self</span>.k_cache[layer_idx], new_k], dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.v_cache[layer_idx] <span class="op">=</span> torch.cat([<span class="va">self</span>.v_cache[layer_idx], new_v], dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> layer_idx <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.seq_len <span class="op">=</span> <span class="va">self</span>.k_cache[<span class="dv">0</span>].size(<span class="dv">2</span>)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.k_cache[layer_idx], <span class="va">self</span>.v_cache[layer_idx]</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> clear(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Reset the cache between independent sequences."""</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.k_cache <span class="op">=</span> [<span class="va">None</span>] <span class="op">*</span> <span class="va">self</span>.n_layers</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.v_cache <span class="op">=</span> [<span class="va">None</span>] <span class="op">*</span> <span class="va">self</span>.n_layers</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.seq_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> memory_bytes(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Current cache memory usage in bytes."""</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>        total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k, v <span class="kw">in</span> <span class="bu">zip</span>(<span class="va">self</span>.k_cache, <span class="va">self</span>.v_cache):</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> k <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>                total <span class="op">+=</span> k.numel() <span class="op">*</span> k.element_size()</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>                total <span class="op">+=</span> v.numel() <span class="op">*</span> v.element_size()</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Cache-aware attention.</strong> The attention module needs a code path that: (1) computes K and V only for the new token(s), (2) reads the full K/V from the cache, and (3) computes attention between the new query and all cached K/V. During decoding the query has shape <code>(B, H, 1, d_h)</code> — a single vector attending over the entire cached sequence.</p>
+<p>Implementing <code>attention_with_cache</code> and the two-phase generation loop:</p>
+<div id="cell-7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> attention_with_cache(</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    q: torch.Tensor,</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    k_new: torch.Tensor,</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    v_new: torch.Tensor,</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>    cache: KVCache,</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>    layer_idx: <span class="bu">int</span>,</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    is_causal: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Attention computation using the KV cache.</span></span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    For generation (T_new=1), this reduces to a single vector-matrix product.</span></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a><span class="co">        q: shape (B, H, T_new, d_h) — query for new token(s).</span></span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a><span class="co">        k_new: shape (B, H, T_new, d_h) — new key(s) to append.</span></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="co">        v_new: shape (B, H, T_new, d_h) — new value(s) to append.</span></span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a><span class="co">        cache: KVCache object holding past K/V.</span></span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a><span class="co">        layer_idx: which layer this call belongs to.</span></span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a><span class="co">        is_causal: apply causal masking (only needed during prefill).</span></span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a><span class="co">        Output tensor of shape (B, H, T_new, d_h).</span></span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-24" class="code-annotation-target"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>    k_full, v_full <span class="op">=</span> cache.update(layer_idx, k_new, v_new)</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>    d_h <span class="op">=</span> q.size(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> d_h <span class="op">**</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> torch.matmul(q, k_full.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span> scale  <span class="co"># (B, H, T_new, T_cached)</span></span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Causal mask only needed during prefill (T_new &gt; 1)</span></span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_causal <span class="kw">and</span> q.size(<span class="dv">2</span>) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a>        T_new <span class="op">=</span> q.size(<span class="dv">2</span>)</span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>        T_cached <span class="op">=</span> k_full.size(<span class="dv">2</span>)</span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> torch.ones(T_new, T_cached, device<span class="op">=</span>q.device, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> torch.triu(mask, diagonal<span class="op">=</span>T_cached <span class="op">-</span> T_new <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> scores.masked_fill(mask.unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>), <span class="op">-</span><span class="fl">1e9</span>)</span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">=</span> F.softmax(scores, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.matmul(weights, v_full)  <span class="co"># (B, H, T_new, d_h)</span></span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_with_cache(</span>
+<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a>    tokenizer,</span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a>    prompt: <span class="bu">str</span>,</span>
+<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>    max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">200</span>,</span>
+<span id="annotated-cell-2-46"><a href="#annotated-cell-2-46" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="annotated-cell-2-47"><a href="#annotated-cell-2-47" aria-hidden="true" tabindex="-1"></a>    top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>,</span>
+<span id="annotated-cell-2-48"><a href="#annotated-cell-2-48" aria-hidden="true" tabindex="-1"></a>    device: torch.device <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="annotated-cell-2-49"><a href="#annotated-cell-2-49" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-2-50"><a href="#annotated-cell-2-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Autoregressive generation with KV cache.</span></span>
+<span id="annotated-cell-2-51"><a href="#annotated-cell-2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-52"><a href="#annotated-cell-2-52" aria-hidden="true" tabindex="-1"></a><span class="co">    Two phases:</span></span>
+<span id="annotated-cell-2-53"><a href="#annotated-cell-2-53" aria-hidden="true" tabindex="-1"></a><span class="co">    1. Prefill: full prompt in one forward pass, populating the cache.</span></span>
+<span id="annotated-cell-2-54"><a href="#annotated-cell-2-54" aria-hidden="true" tabindex="-1"></a><span class="co">    2. Decode: one token at a time using the cache.</span></span>
+<span id="annotated-cell-2-55"><a href="#annotated-cell-2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-56"><a href="#annotated-cell-2-56" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-2-57"><a href="#annotated-cell-2-57" aria-hidden="true" tabindex="-1"></a><span class="co">        model: language model with KV cache support.</span></span>
+<span id="annotated-cell-2-58"><a href="#annotated-cell-2-58" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer with encode/decode methods.</span></span>
+<span id="annotated-cell-2-59"><a href="#annotated-cell-2-59" aria-hidden="true" tabindex="-1"></a><span class="co">        prompt: input prompt string.</span></span>
+<span id="annotated-cell-2-60"><a href="#annotated-cell-2-60" aria-hidden="true" tabindex="-1"></a><span class="co">        max_new_tokens: maximum tokens to generate.</span></span>
+<span id="annotated-cell-2-61"><a href="#annotated-cell-2-61" aria-hidden="true" tabindex="-1"></a><span class="co">        temperature: sampling temperature.</span></span>
+<span id="annotated-cell-2-62"><a href="#annotated-cell-2-62" aria-hidden="true" tabindex="-1"></a><span class="co">        top_k: top-k sampling parameter.</span></span>
+<span id="annotated-cell-2-63"><a href="#annotated-cell-2-63" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="annotated-cell-2-64"><a href="#annotated-cell-2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-65"><a href="#annotated-cell-2-65" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-2-66"><a href="#annotated-cell-2-66" aria-hidden="true" tabindex="-1"></a><span class="co">        Generated text string (excluding prompt).</span></span>
+<span id="annotated-cell-2-67"><a href="#annotated-cell-2-67" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-2-68"><a href="#annotated-cell-2-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> device <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-2-69"><a href="#annotated-cell-2-69" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> <span class="bu">next</span>(model.parameters()).device</span>
+<span id="annotated-cell-2-70"><a href="#annotated-cell-2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-71"><a href="#annotated-cell-2-71" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-2-72"><a href="#annotated-cell-2-72" aria-hidden="true" tabindex="-1"></a>    cache <span class="op">=</span> KVCache(n_layers<span class="op">=</span>model.config.n_layers)</span>
+<span id="annotated-cell-2-73"><a href="#annotated-cell-2-73" aria-hidden="true" tabindex="-1"></a>    prompt_ids <span class="op">=</span> torch.tensor(</span>
+<span id="annotated-cell-2-74"><a href="#annotated-cell-2-74" aria-hidden="true" tabindex="-1"></a>        [tokenizer.encode(prompt)], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device</span>
+<span id="annotated-cell-2-75"><a href="#annotated-cell-2-75" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-2-76"><a href="#annotated-cell-2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-77"><a href="#annotated-cell-2-77" aria-hidden="true" tabindex="-1"></a>    generated <span class="op">=</span> []</span>
+<span id="annotated-cell-2-78"><a href="#annotated-cell-2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-79"><a href="#annotated-cell-2-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-2-80"><a href="#annotated-cell-2-80" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Phase 1: prefill</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-81" class="code-annotation-target"><a href="#annotated-cell-2-81" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(prompt_ids, cache<span class="op">=</span>cache)</span>
+<span id="annotated-cell-2-82"><a href="#annotated-cell-2-82" aria-hidden="true" tabindex="-1"></a>        next_token_logits <span class="op">=</span> logits[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>, :]      <span class="co"># last position</span></span>
+<span id="annotated-cell-2-83"><a href="#annotated-cell-2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-84"><a href="#annotated-cell-2-84" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Phase 2: decode</span></span>
+<span id="annotated-cell-2-85"><a href="#annotated-cell-2-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_new_tokens):</span>
+<span id="annotated-cell-2-86"><a href="#annotated-cell-2-86" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> temperature <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-2-87"><a href="#annotated-cell-2-87" aria-hidden="true" tabindex="-1"></a>                scaled <span class="op">=</span> next_token_logits <span class="op">/</span> temperature</span>
+<span id="annotated-cell-2-88"><a href="#annotated-cell-2-88" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> top_k <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-2-89"><a href="#annotated-cell-2-89" aria-hidden="true" tabindex="-1"></a>                    topk_vals, _ <span class="op">=</span> torch.topk(scaled, top_k)</span>
+<span id="annotated-cell-2-90"><a href="#annotated-cell-2-90" aria-hidden="true" tabindex="-1"></a>                    scaled[scaled <span class="op">&lt;</span> topk_vals[<span class="op">-</span><span class="dv">1</span>]] <span class="op">=</span> <span class="op">-</span><span class="bu">float</span>(<span class="st">"inf"</span>)</span>
+<span id="annotated-cell-2-91"><a href="#annotated-cell-2-91" aria-hidden="true" tabindex="-1"></a>                probs <span class="op">=</span> F.softmax(scaled, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-2-92"><a href="#annotated-cell-2-92" aria-hidden="true" tabindex="-1"></a>                next_id <span class="op">=</span> torch.multinomial(probs, num_samples<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-2-93"><a href="#annotated-cell-2-93" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="annotated-cell-2-94"><a href="#annotated-cell-2-94" aria-hidden="true" tabindex="-1"></a>                next_id <span class="op">=</span> next_token_logits.argmax(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-2-95"><a href="#annotated-cell-2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-96"><a href="#annotated-cell-2-96" aria-hidden="true" tabindex="-1"></a>            generated.append(next_id.item())</span>
+<span id="annotated-cell-2-97"><a href="#annotated-cell-2-97" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> next_id.item() <span class="op">==</span> tokenizer.eos_id:</span>
+<span id="annotated-cell-2-98"><a href="#annotated-cell-2-98" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="annotated-cell-2-99"><a href="#annotated-cell-2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-100"><a href="#annotated-cell-2-100" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Single-token forward pass</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-101" class="code-annotation-target"><a href="#annotated-cell-2-101" aria-hidden="true" tabindex="-1"></a>            logits <span class="op">=</span> model(next_id.unsqueeze(<span class="dv">0</span>), cache<span class="op">=</span>cache)</span>
+<span id="annotated-cell-2-102"><a href="#annotated-cell-2-102" aria-hidden="true" tabindex="-1"></a>            next_token_logits <span class="op">=</span> logits[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>, :]</span>
+<span id="annotated-cell-2-103"><a href="#annotated-cell-2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-104"><a href="#annotated-cell-2-104" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tokenizer.decode(generated)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="24" data-code-annotation="1"><code>cache.update</code> appends the new K/V and returns the full cached tensor — the attention scores are computed between the new query and all past + present keys.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="81" data-code-annotation="2">Prefill: full prompt sequence, populates the cache with K/V for all prompt positions.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="101" data-code-annotation="3">Decode: single new token as input; the model reads the accumulated cache for context.</span>
+</dd>
+</dl>
+</div>
+</div>
+<section id="cache-memory" class="level3">
+<h3 class="anchored" data-anchor-id="cache-memory">Cache memory</h3>
+<p>The KV cache memory scales linearly with sequence length:</p>
+<p><span class="math display">\text{memory} = 2 \times L \times H \times d_h \times T \times \text{bytes per element}</span></p>
+<p>For a 7B model (32 layers, 32 heads, <span class="math inline">d_h = 128</span>) at FP16 with <span class="math inline">T = 4096</span>: <span class="math inline">2 \times 32 \times 32 \times 128 \times 4096 \times 2 \approx 2</span> GB. This is why KV cache quantization (INT8 or INT4 keys/values) is important for long-context serving.</p>
+</section>
+<section id="cache-eviction-strategies" class="level3">
+<h3 class="anchored" data-anchor-id="cache-eviction-strategies">Cache eviction strategies</h3>
+<p>When the generated sequence exceeds the maximum context length, the cache must be truncated. Two common strategies:</p>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SlidingWindowEviction:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Keep only the most recent max_len tokens.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Simple and effective for most chat use cases.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    The model loses context beyond max_len tokens.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, cache: KVCache, max_len: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Evict oldest tokens to bring seq_len down to max_len.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">            cache: KVCache to evict from.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">            max_len: target maximum sequence length.</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> cache.seq_len <span class="op">&lt;=</span> max_len:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(cache.n_layers):</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> cache.k_cache[i] <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                cache.k_cache[i] <span class="op">=</span> cache.k_cache[i][:, :, <span class="op">-</span>max_len:, :]</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                cache.v_cache[i] <span class="op">=</span> cache.v_cache[i][:, :, <span class="op">-</span>max_len:, :]</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        cache.seq_len <span class="op">=</span> max_len</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SinkTokenEviction:</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""StreamingLLM (Xiao et al. 2023) eviction strategy.</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">    Always keep the first n_sink tokens (attention sinks) plus the</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">    most recent (max_len - n_sink) tokens. Preserves the initial context</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">    that anchors the model's attention patterns.</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">        n_sink: number of initial tokens to always preserve.</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, n_sink: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_sink <span class="op">=</span> n_sink</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, cache: KVCache, max_len: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Evict tokens from the middle of the cache.</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">            cache: KVCache to evict from.</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">            max_len: target maximum sequence length.</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> cache.seq_len <span class="op">&lt;=</span> max_len:</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>        n_drop <span class="op">=</span> cache.seq_len <span class="op">-</span> max_len</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        n_keep_recent <span class="op">=</span> max_len <span class="op">-</span> <span class="va">self</span>.n_sink</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(cache.n_layers):</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> cache.k_cache[i] <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>            k, v <span class="op">=</span> cache.k_cache[i], cache.v_cache[i]</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>            sink_k <span class="op">=</span> k[:, :, :<span class="va">self</span>.n_sink, :]</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>            sink_v <span class="op">=</span> v[:, :, :<span class="va">self</span>.n_sink, :]</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>            recent_k <span class="op">=</span> k[:, :, <span class="va">self</span>.n_sink <span class="op">+</span> n_drop:, :]</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>            recent_v <span class="op">=</span> v[:, :, <span class="va">self</span>.n_sink <span class="op">+</span> n_drop:, :]</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>            cache.k_cache[i] <span class="op">=</span> torch.cat([sink_k, recent_k], dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>            cache.v_cache[i] <span class="op">=</span> torch.cat([sink_v, recent_v], dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        cache.seq_len <span class="op">-=</span> n_drop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="flash-attention" class="level2">
+<h2 class="anchored" data-anchor-id="flash-attention">Flash Attention</h2>
+<p>Standard attention is IO-bound, not compute-bound. For a sequence of length <span class="math inline">T</span>, the naive implementation:</p>
+<ol type="1">
+<li>Computes <span class="math inline">S = QK^\top / \sqrt{d_h}</span> — shape <span class="math inline">(T, T)</span>.</li>
+<li>Writes <span class="math inline">S</span> to HBM (GPU main memory).</li>
+<li>Reads <span class="math inline">S</span> from HBM to compute softmax.</li>
+<li>Writes softmax weights <span class="math inline">P</span> to HBM.</li>
+<li>Reads <span class="math inline">P</span> from HBM to compute <span class="math inline">PV</span>.</li>
+</ol>
+<p>Steps 2–4 each read/write an <span class="math inline">O(T^2)</span> matrix. At <span class="math inline">T = 2048</span>: ~8 MB per read/write per layer. HBM bandwidth on an A100 is 2 TB/s; on-chip SRAM bandwidth is ~20 TB/s. <u>The bottleneck is the HBM round-trips, not the FLOPs.</u></p>
+<section id="flash-attention-tiling-to-stay-in-sram" class="level3">
+<h3 class="anchored" data-anchor-id="flash-attention-tiling-to-stay-in-sram">Flash Attention: tiling to stay in SRAM</h3>
+<p>Flash Attention <span class="citation" data-cites="dao2022flashattention">(<a href="#ref-dao2022flashattention" role="doc-biblioref">Dao et al. 2022</a>)</span> rewrites the attention computation so that intermediate matrices never need to be written to HBM. It processes attention in tiles that fit in SRAM, using the <strong>online softmax</strong> trick to accumulate the output without materializing the full <span class="math inline">T \times T</span> matrix.</p>
+<p><strong>Online softmax.</strong> For a vector <span class="math inline">x \in \mathbb{R}^T</span>, standard softmax requires two passes (find maximum, then compute exponentials). The online algorithm processes one element at a time, maintaining a running maximum <span class="math inline">m</span>, normalizer <span class="math inline">l</span>, and output <span class="math inline">o</span>:</p>
+<pre><code>m_0 = -∞,  l_0 = 0,  o_0 = 0
+For i = 1 to T:
+    m_i = max(m_{i-1}, x_i)
+    l_i = l_{i-1} * exp(m_{i-1} - m_i) + exp(x_i - m_i)
+    o_i = o_{i-1} * exp(m_{i-1} - m_i) / l_i * l_{i-1} + exp(x_i - m_i) / l_i * v_i</code></pre>
+<p>After the full pass, <span class="math inline">o_T = \text{softmax}(x) \cdot V</span> — the attention output — without ever storing the <span class="math inline">T</span>-length attention weights.</p>
+<p>A reference implementation in pure PyTorch (for illustration — the real version uses custom CUDA kernels):</p>
+<div id="cell-13" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flash_attention_reference(</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    Q: torch.Tensor,</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>    K: torch.Tensor,</span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a>    V: torch.Tensor,</span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>    block_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">64</span>,</span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>    causal: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Reference implementation of Flash Attention in pure PyTorch.</span></span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a><span class="co">    This is NOT as fast as the real CUDA implementation — it illustrates</span></span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a><span class="co">    the tiling algorithm. For production use, call</span></span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a><span class="co">    F.scaled_dot_product_attention() which uses the optimized kernel.</span></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a><span class="co">        Q: shape (B, H, T, d_h).</span></span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a><span class="co">        K: shape (B, H, T, d_h).</span></span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a><span class="co">        V: shape (B, H, T, d_h).</span></span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a><span class="co">        block_size: tile size for SRAM blocking.</span></span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a><span class="co">        causal: apply causal masking.</span></span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a><span class="co">        Output tensor of shape (B, H, T, d_h).</span></span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>    B, H, T, d_h <span class="op">=</span> Q.shape</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> d_h <span class="op">**</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>    O <span class="op">=</span> torch.zeros_like(Q)</span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> q_start <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, T, block_size):</span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a>        q_end <span class="op">=</span> <span class="bu">min</span>(q_start <span class="op">+</span> block_size, T)</span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>        Q_blk <span class="op">=</span> Q[:, :, q_start:q_end, :]   <span class="co"># (B, H, Bq, d_h)</span></span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>        Bq <span class="op">=</span> q_end <span class="op">-</span> q_start</span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a>        m_i <span class="op">=</span> torch.full((B, H, Bq), <span class="bu">float</span>(<span class="st">"-inf"</span>), device<span class="op">=</span>Q.device)  <span class="co"># running max</span></span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>        l_i <span class="op">=</span> torch.zeros(B, H, Bq, device<span class="op">=</span>Q.device)                  <span class="co"># running sum</span></span>
+<span id="annotated-cell-5-35"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a>        O_i <span class="op">=</span> torch.zeros(B, H, Bq, d_h, device<span class="op">=</span>Q.device)             <span class="co"># running output</span></span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-37"><a href="#annotated-cell-5-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> kv_start <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, T, block_size):</span>
+<span id="annotated-cell-5-38"><a href="#annotated-cell-5-38" aria-hidden="true" tabindex="-1"></a>            kv_end <span class="op">=</span> <span class="bu">min</span>(kv_start <span class="op">+</span> block_size, T)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-39" class="code-annotation-target"><a href="#annotated-cell-5-39" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> causal <span class="kw">and</span> kv_start <span class="op">&gt;=</span> q_end:</span>
+<span id="annotated-cell-5-40"><a href="#annotated-cell-5-40" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="annotated-cell-5-41"><a href="#annotated-cell-5-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-42"><a href="#annotated-cell-5-42" aria-hidden="true" tabindex="-1"></a>            K_blk <span class="op">=</span> K[:, :, kv_start:kv_end, :]</span>
+<span id="annotated-cell-5-43"><a href="#annotated-cell-5-43" aria-hidden="true" tabindex="-1"></a>            V_blk <span class="op">=</span> V[:, :, kv_start:kv_end, :]</span>
+<span id="annotated-cell-5-44"><a href="#annotated-cell-5-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-45"><a href="#annotated-cell-5-45" aria-hidden="true" tabindex="-1"></a>            S_blk <span class="op">=</span> torch.matmul(Q_blk, K_blk.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span> scale  <span class="co"># (B, H, Bq, Bkv)</span></span>
+<span id="annotated-cell-5-46"><a href="#annotated-cell-5-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-47"><a href="#annotated-cell-5-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> causal:</span>
+<span id="annotated-cell-5-48"><a href="#annotated-cell-5-48" aria-hidden="true" tabindex="-1"></a>                q_idx <span class="op">=</span> torch.arange(q_start, q_end, device<span class="op">=</span>Q.device)</span>
+<span id="annotated-cell-5-49"><a href="#annotated-cell-5-49" aria-hidden="true" tabindex="-1"></a>                kv_idx <span class="op">=</span> torch.arange(kv_start, kv_end, device<span class="op">=</span>Q.device)</span>
+<span id="annotated-cell-5-50"><a href="#annotated-cell-5-50" aria-hidden="true" tabindex="-1"></a>                causal_mask <span class="op">=</span> q_idx.unsqueeze(<span class="dv">1</span>) <span class="op">&lt;</span> kv_idx.unsqueeze(<span class="dv">0</span>)   <span class="co"># (Bq, Bkv)</span></span>
+<span id="annotated-cell-5-51"><a href="#annotated-cell-5-51" aria-hidden="true" tabindex="-1"></a>                S_blk <span class="op">=</span> S_blk.masked_fill(causal_mask.unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>), <span class="op">-</span><span class="fl">1e9</span>)</span>
+<span id="annotated-cell-5-52"><a href="#annotated-cell-5-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-53"><a href="#annotated-cell-5-53" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Online softmax update</span></span>
+<span id="annotated-cell-5-54"><a href="#annotated-cell-5-54" aria-hidden="true" tabindex="-1"></a>            m_blk <span class="op">=</span> S_blk.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).values              <span class="co"># (B, H, Bq)</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-55" class="code-annotation-target"><a href="#annotated-cell-5-55" aria-hidden="true" tabindex="-1"></a>            m_new <span class="op">=</span> torch.maximum(m_i, m_blk)</span>
+<span id="annotated-cell-5-56"><a href="#annotated-cell-5-56" aria-hidden="true" tabindex="-1"></a>            exp_S <span class="op">=</span> torch.exp(S_blk <span class="op">-</span> m_new.unsqueeze(<span class="op">-</span><span class="dv">1</span>))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-57" class="code-annotation-target"><a href="#annotated-cell-5-57" aria-hidden="true" tabindex="-1"></a>            exp_correction <span class="op">=</span> torch.exp(m_i <span class="op">-</span> m_new)</span>
+<span id="annotated-cell-5-58"><a href="#annotated-cell-5-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-59"><a href="#annotated-cell-5-59" aria-hidden="true" tabindex="-1"></a>            l_new <span class="op">=</span> l_i <span class="op">*</span> exp_correction <span class="op">+</span> exp_S.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-5-60"><a href="#annotated-cell-5-60" aria-hidden="true" tabindex="-1"></a>            O_i <span class="op">=</span> (O_i <span class="op">*</span> (l_i <span class="op">*</span> exp_correction).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-5-61"><a href="#annotated-cell-5-61" aria-hidden="true" tabindex="-1"></a>                   <span class="op">+</span> torch.matmul(exp_S, V_blk)) <span class="op">/</span> l_new.unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-5-62"><a href="#annotated-cell-5-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-63"><a href="#annotated-cell-5-63" aria-hidden="true" tabindex="-1"></a>            m_i, l_i <span class="op">=</span> m_new, l_new</span>
+<span id="annotated-cell-5-64"><a href="#annotated-cell-5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-65"><a href="#annotated-cell-5-65" aria-hidden="true" tabindex="-1"></a>        O[:, :, q_start:q_end, :] <span class="op">=</span> O_i</span>
+<span id="annotated-cell-5-66"><a href="#annotated-cell-5-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-67"><a href="#annotated-cell-5-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> O</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="39" data-code-annotation="1">Causal masking: entire future KV blocks can be skipped without computation — causal attention only attends to positions <span class="math inline">\leq</span> current position.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="55" data-code-annotation="2">Running maximum update: when a new block with a larger value arrives, all previous exponentials must be rescaled.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="57" data-code-annotation="3">Correction factor: multiply past running sum and output by <span class="math inline">\exp(m_{\text{old}} - m_{\text{new}})</span> to account for the updated normalization.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="replacing-standard-attention-with-flash-attention" class="level3">
+<h3 class="anchored" data-anchor-id="replacing-standard-attention-with-flash-attention">Replacing standard attention with Flash Attention</h3>
+<p>The change to the model is a single line. <code>F.scaled_dot_product_attention</code> (PyTorch ≥ 2.0) calls the optimized Flash Attention kernel automatically:</p>
+<div id="cell-16" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In MultiHeadAttention.forward():</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># BEFORE (standard attention — O(T^2) HBM traffic):</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> torch.matmul(Q, K.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span> scale</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> scores.masked_fill(causal_mask, <span class="op">-</span><span class="fl">1e9</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> F.softmax(scores, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> torch.matmul(weights, V)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># AFTER (Flash Attention — O(T) memory, same result):</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> F.scaled_dot_product_attention(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Q, K, V,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    attn_mask<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    dropout_p<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    is_causal<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)  <span class="co"># One line. Same output. ~3× faster on A100 for long sequences.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Memory complexity comparison:</strong></p>
+<table class="caption-top table">
+<caption>Attention memory comparison.</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 20%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Attention memory</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Standard</td>
+<td><span class="math inline">O(T^2)</span></td>
+<td>Stores full <span class="math inline">T \times T</span> attention matrix to HBM</td>
+</tr>
+<tr class="even">
+<td>Flash Attention</td>
+<td><span class="math inline">O(T)</span></td>
+<td>Never materializes the full matrix</td>
+</tr>
+<tr class="odd">
+<td>With KV cache</td>
+<td><span class="math inline">O(T)</span></td>
+<td>Cached K/V stored per layer</td>
+</tr>
+</tbody>
+</table>
+<p>For <span class="math inline">T = 8192</span>: standard attention stores <span class="math inline">8192^2 \times 6 \times 2 \approx 800</span> MB of attention intermediates per forward pass. <mark>Flash Attention stores essentially nothing.</mark></p>
+</section>
+</section>
+<section id="speculative-decoding" class="level2">
+<h2 class="anchored" data-anchor-id="speculative-decoding">Speculative Decoding</h2>
+<p>KV cache and Flash Attention fix the per-token cost. Speculative decoding addresses a different problem: autoregressive generation is sequential — you cannot generate token <span class="math inline">t+1</span> until you have token <span class="math inline">t</span>. On a GPU with thousands of cores, generating one token at a time wastes nearly all available parallelism.</p>
+<p><strong>The idea:</strong> use a small, fast <strong>draft model</strong> to propose <span class="math inline">k</span> tokens ahead. Then verify all <span class="math inline">k</span> proposals with the large <strong>target model</strong> in a single parallel forward pass. If the target agrees with the draft, all <span class="math inline">k</span> tokens are accepted at once. If it disagrees at position <span class="math inline">j</span>, accept tokens up to <span class="math inline">j-1</span> and resample from the target at position <span class="math inline">j</span>.</p>
+<p><mark>The key insight: verification is cheap because all <span class="math inline">k</span> tokens are verified in a single batched forward pass</mark> — sampling from the large model <span class="math inline">k</span> times would require <span class="math inline">k</span> sequential forward passes.</p>
+<section id="the-acceptance-criterion" class="level3">
+<h3 class="anchored" data-anchor-id="the-acceptance-criterion">The acceptance criterion</h3>
+<p>Naive rejection (accept if the draft matches the target’s greedy choice) changes the distribution. The <strong>correct acceptance criterion</strong> <span class="citation" data-cites="leviathan2023fast">(<a href="#ref-leviathan2023fast" role="doc-biblioref">Leviathan, Kalman, and Matias 2023</a>)</span> preserves the exact target distribution:</p>
+<p>Accept draft token <span class="math inline">\tilde{x}</span> at position <span class="math inline">t</span> with probability:</p>
+<p><span class="math display">\alpha_t = \min\!\left(1,\; \frac{p_{\text{target}}(\tilde{x} \mid x_{&lt;t})}{p_{\text{draft}}(\tilde{x} \mid x_{&lt;t})}\right).</span></p>
+<p>If rejected, sample a correction token from:</p>
+<p><span class="math display">p_{\text{corrected}}(x) \propto \max\!\left(0,\; p_{\text{target}}(x) - p_{\text{draft}}(x)\right).</span></p>
+<p><u>This guarantees the output distribution is exactly <span class="math inline">p_{\text{target}}</span>, regardless of draft model quality.</u> A worse draft model just has lower acceptance rate; it never corrupts the distribution.</p>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> speculative_decode_step(</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>    target_logits: torch.Tensor,</span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>    draft_logits: torch.Tensor,</span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>    draft_tokens: torch.Tensor,</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>    temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>,</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[torch.Tensor, <span class="bu">int</span>]:</span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One step of speculative decoding: verify k draft tokens against the target.</span></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a><span class="co">        target_logits: shape (1, k+1, V) — target model logits on the draft tokens</span></span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a><span class="co">                       plus one extra position for the bonus token.</span></span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a><span class="co">        draft_logits: shape (1, k, V) — draft model logits when sampling.</span></span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a><span class="co">        draft_tokens: shape (1, k) — proposed token IDs from the draft.</span></span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a><span class="co">        temperature: sampling temperature for probability computation.</span></span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a><span class="co">        accepted_tokens: shape (1, n_accepted) — accepted token IDs.</span></span>
+<span id="annotated-cell-7-18"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a><span class="co">        n_accepted: how many draft tokens were accepted (0 &lt;= n_accepted &lt;= k+1).</span></span>
+<span id="annotated-cell-7-19"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-7-20"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> draft_tokens.size(<span class="dv">1</span>)</span>
+<span id="annotated-cell-7-21"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a>    target_probs <span class="op">=</span> F.softmax(target_logits[:, :k, :] <span class="op">/</span> <span class="bu">max</span>(temperature, <span class="fl">1e-6</span>), dim<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># (1, k, V)</span></span>
+<span id="annotated-cell-7-23"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a>    draft_probs <span class="op">=</span> F.softmax(draft_logits <span class="op">/</span> <span class="bu">max</span>(temperature, <span class="fl">1e-6</span>), dim<span class="op">=-</span><span class="dv">1</span>)               <span class="co"># (1, k, V)</span></span>
+<span id="annotated-cell-7-24"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>    accepted <span class="op">=</span> []</span>
+<span id="annotated-cell-7-26"><a href="#annotated-cell-7-26" aria-hidden="true" tabindex="-1"></a>    n_accepted <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-7-27"><a href="#annotated-cell-7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-28"><a href="#annotated-cell-7-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(k):</span>
+<span id="annotated-cell-7-29"><a href="#annotated-cell-7-29" aria-hidden="true" tabindex="-1"></a>        token <span class="op">=</span> draft_tokens[<span class="dv">0</span>, i].item()</span>
+<span id="annotated-cell-7-30"><a href="#annotated-cell-7-30" aria-hidden="true" tabindex="-1"></a>        p_target <span class="op">=</span> target_probs[<span class="dv">0</span>, i, token].item()</span>
+<span id="annotated-cell-7-31"><a href="#annotated-cell-7-31" aria-hidden="true" tabindex="-1"></a>        p_draft <span class="op">=</span> draft_probs[<span class="dv">0</span>, i, token].item()</span>
+<span id="annotated-cell-7-32"><a href="#annotated-cell-7-32" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-33" class="code-annotation-target"><a href="#annotated-cell-7-33" aria-hidden="true" tabindex="-1"></a>        acceptance_prob <span class="op">=</span> <span class="bu">min</span>(<span class="fl">1.0</span>, p_target <span class="op">/</span> (p_draft <span class="op">+</span> <span class="fl">1e-10</span>))</span>
+<span id="annotated-cell-7-34"><a href="#annotated-cell-7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-35"><a href="#annotated-cell-7-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> torch.rand(<span class="dv">1</span>).item() <span class="op">&lt;</span> acceptance_prob:</span>
+<span id="annotated-cell-7-36"><a href="#annotated-cell-7-36" aria-hidden="true" tabindex="-1"></a>            accepted.append(token)</span>
+<span id="annotated-cell-7-37"><a href="#annotated-cell-7-37" aria-hidden="true" tabindex="-1"></a>            n_accepted <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-7-38"><a href="#annotated-cell-7-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="annotated-cell-7-39"><a href="#annotated-cell-7-39" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Sample correction from residual distribution</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-40" class="code-annotation-target"><a href="#annotated-cell-7-40" aria-hidden="true" tabindex="-1"></a>            residual <span class="op">=</span> torch.clamp(target_probs[<span class="dv">0</span>, i] <span class="op">-</span> draft_probs[<span class="dv">0</span>, i], <span class="bu">min</span><span class="op">=</span><span class="dv">0</span>)</span>
+<span id="annotated-cell-7-41"><a href="#annotated-cell-7-41" aria-hidden="true" tabindex="-1"></a>            residual_sum <span class="op">=</span> residual.<span class="bu">sum</span>()</span>
+<span id="annotated-cell-7-42"><a href="#annotated-cell-7-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> residual_sum <span class="op">&gt;</span> <span class="fl">1e-8</span>:</span>
+<span id="annotated-cell-7-43"><a href="#annotated-cell-7-43" aria-hidden="true" tabindex="-1"></a>                residual <span class="op">=</span> residual <span class="op">/</span> residual_sum</span>
+<span id="annotated-cell-7-44"><a href="#annotated-cell-7-44" aria-hidden="true" tabindex="-1"></a>                correction <span class="op">=</span> torch.multinomial(residual, num_samples<span class="op">=</span><span class="dv">1</span>).item()</span>
+<span id="annotated-cell-7-45"><a href="#annotated-cell-7-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="annotated-cell-7-46"><a href="#annotated-cell-7-46" aria-hidden="true" tabindex="-1"></a>                correction <span class="op">=</span> torch.multinomial(target_probs[<span class="dv">0</span>, i], num_samples<span class="op">=</span><span class="dv">1</span>).item()</span>
+<span id="annotated-cell-7-47"><a href="#annotated-cell-7-47" aria-hidden="true" tabindex="-1"></a>            accepted.append(correction)</span>
+<span id="annotated-cell-7-48"><a href="#annotated-cell-7-48" aria-hidden="true" tabindex="-1"></a>            n_accepted <span class="op">+=</span> <span class="dv">1</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-7-49" class="code-annotation-target"><a href="#annotated-cell-7-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span>  <span class="co"># stop after first rejection</span></span>
+<span id="annotated-cell-7-50"><a href="#annotated-cell-7-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-51"><a href="#annotated-cell-7-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Bonus token: sample from target at position after last accepted</span></span>
+<span id="annotated-cell-7-52"><a href="#annotated-cell-7-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_accepted <span class="op">==</span> k:</span>
+<span id="annotated-cell-7-53"><a href="#annotated-cell-7-53" aria-hidden="true" tabindex="-1"></a>        bonus <span class="op">=</span> torch.multinomial(</span>
+<span id="annotated-cell-7-54"><a href="#annotated-cell-7-54" aria-hidden="true" tabindex="-1"></a>            F.softmax(target_logits[<span class="dv">0</span>, k, :] <span class="op">/</span> <span class="bu">max</span>(temperature, <span class="fl">1e-6</span>), dim<span class="op">=-</span><span class="dv">1</span>),</span>
+<span id="annotated-cell-7-55"><a href="#annotated-cell-7-55" aria-hidden="true" tabindex="-1"></a>            num_samples<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="annotated-cell-7-56"><a href="#annotated-cell-7-56" aria-hidden="true" tabindex="-1"></a>        ).item()</span>
+<span id="annotated-cell-7-57"><a href="#annotated-cell-7-57" aria-hidden="true" tabindex="-1"></a>        accepted.append(bonus)</span>
+<span id="annotated-cell-7-58"><a href="#annotated-cell-7-58" aria-hidden="true" tabindex="-1"></a>        n_accepted <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-7-59"><a href="#annotated-cell-7-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-60"><a href="#annotated-cell-7-60" aria-hidden="true" tabindex="-1"></a>    accepted_tensor <span class="op">=</span> torch.tensor(accepted, dtype<span class="op">=</span>torch.<span class="bu">long</span>).unsqueeze(<span class="dv">0</span>)</span>
+<span id="annotated-cell-7-61"><a href="#annotated-cell-7-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> accepted_tensor, n_accepted</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="33" data-code-annotation="1">The acceptance probability <span class="math inline">\min(1, p_T / p_D)</span>: if the target assigns more probability than the draft, always accept; if less, accept proportionally.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="40" data-code-annotation="2">The residual distribution <span class="math inline">\max(0, p_T - p_D)</span> is the correction distribution — sampling from it on rejection ensures the overall distribution is exactly <span class="math inline">p_T</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="49" data-code-annotation="3">Stop after the first rejection: subsequent positions are invalid because they were conditioned on the (incorrect) rejected token.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="speedup-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="speedup-analysis">Speedup analysis</h3>
+<p>The theoretical speedup depends on <span class="math inline">k</span> (draft tokens per step) and <span class="math inline">\alpha</span> (mean acceptance rate). Mean tokens accepted per target forward pass:</p>
+<p><span class="math display">\bar{k} = \sum_{i=1}^{k} \alpha^i + \alpha^k.</span></p>
+<p>For <span class="math inline">\alpha = 0.8</span> and <span class="math inline">k = 4</span>:</p>
+<p><span class="math display">\bar{k} = 0.8 + 0.64 + 0.51 + 0.41 + 0.41 \approx 2.77.</span></p>
+<p>So you get ~2.77 tokens per target forward pass instead of 1. Accounting for the draft model overhead:</p>
+<p><span class="math display">\text{speedup} \approx \frac{\bar{k}}{1 + \text{draft cost fraction} \times k}.</span></p>
+<p>If the draft model costs 10% of the target per token and <span class="math inline">k = 4</span>: speedup <span class="math inline">\approx 2.77 / 1.4 \approx 2×</span>.</p>
+</section>
+</section>
+<section id="the-fastinferenceengine" class="level2">
+<h2 class="anchored" data-anchor-id="the-fastinferenceengine">The <code>FastInferenceEngine</code></h2>
+<p>Combining KV cache, Flash Attention, and speculative decoding into a single coherent interface:</p>
+<div id="cell-23" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FastInferenceEngine:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Combines KV cache, Flash Attention, and speculative decoding.</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Flash Attention is used automatically via F.scaled_dot_product_attention</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">    when the model's attention module is updated to use it. KV cache and</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">    speculative decoding are managed explicitly by this engine.</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">        model: target language model.</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">        tokenizer: tokenizer with encode/decode methods.</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">        device: compute device.</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">        use_speculative: enable speculative decoding.</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">        draft_model: small draft model (required if use_speculative=True).</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">        k: number of draft tokens per step.</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">        max_cache_len: maximum cache sequence length before eviction.</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">        eviction_strategy: callable(cache, max_len) for cache eviction.</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        model,</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        tokenizer,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        device: torch.device,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        use_speculative: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        draft_model<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>,</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        max_cache_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2048</span>,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        eviction_strategy<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tokenizer <span class="op">=</span> tokenizer</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.device <span class="op">=</span> device</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.use_spec <span class="op">=</span> use_speculative <span class="kw">and</span> (draft_model <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>)</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.draft_model <span class="op">=</span> draft_model</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.k <span class="op">=</span> k</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.max_cache <span class="op">=</span> max_cache_len</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eviction <span class="op">=</span> eviction_strategy <span class="kw">or</span> SlidingWindowEviction()</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">hasattr</span>(F, <span class="st">"scaled_dot_product_attention"</span>):</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Flash Attention available via F.scaled_dot_product_attention"</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Flash Attention unavailable — upgrade to PyTorch &gt;= 2.0"</span>)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        prompt: <span class="bu">str</span>,</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">200</span>,</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>        temperature: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>,</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">dict</span>]:</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Generate a response with performance statistics.</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="co">            prompt: input prompt string.</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="co">            max_new_tokens: maximum tokens to generate.</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="co">            temperature: sampling temperature.</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="co">            top_k: top-k sampling parameter.</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="co">            (generated_text, stats) where stats contains 'tokens_per_sec',</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="co">            'n_tokens', 'elapsed_sec'.</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        t0 <span class="op">=</span> time.perf_counter()</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.use_spec:</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>            text, n_tokens <span class="op">=</span> <span class="va">self</span>._speculative_generate(</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>                prompt, max_new_tokens, temperature, top_k</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>            text, n_tokens <span class="op">=</span> <span class="va">self</span>._standard_generate(</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>                prompt, max_new_tokens, temperature, top_k</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>        elapsed <span class="op">=</span> time.perf_counter() <span class="op">-</span> t0</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>        stats <span class="op">=</span> {</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>            <span class="st">"tokens_per_sec"</span>: n_tokens <span class="op">/</span> <span class="bu">max</span>(elapsed, <span class="fl">1e-6</span>),</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>            <span class="st">"n_tokens"</span>: n_tokens,</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>            <span class="st">"elapsed_sec"</span>: elapsed,</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text, stats</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _standard_generate(</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, prompt: <span class="bu">str</span>, max_new_tokens: <span class="bu">int</span>, temperature: <span class="bu">float</span>, top_k: <span class="bu">int</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">int</span>]:</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> generate_with_cache(</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.model, <span class="va">self</span>.tokenizer, prompt,</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>            max_new_tokens<span class="op">=</span>max_new_tokens,</span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>            temperature<span class="op">=</span>temperature,</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>            top_k<span class="op">=</span>top_k,</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>            device<span class="op">=</span><span class="va">self</span>.device,</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text, <span class="bu">len</span>(<span class="va">self</span>.tokenizer.encode(text))</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _speculative_generate(</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, prompt: <span class="bu">str</span>, max_new_tokens: <span class="bu">int</span>, temperature: <span class="bu">float</span>, top_k: <span class="bu">int</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">int</span>]:</span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Simplified: call speculative_decode_step in a loop</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (full implementation would manage draft/target caches together)</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">NotImplementedError</span>(</span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Speculative generation requires model-level KV cache integration."</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> benchmark(</span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>        prompts: <span class="bu">list</span>[<span class="bu">str</span>],</span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>        max_new_tokens: <span class="bu">int</span> <span class="op">=</span> <span class="dv">100</span>,</span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Measure mean tokens/sec over a list of prompts.</span></span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a><span class="co">            prompts: list of prompt strings.</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a><span class="co">            max_new_tokens: tokens to generate per prompt.</span></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="co">            Dict with 'mean_tps', 'min_tps', 'max_tps'.</span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a>        tps_list <span class="op">=</span> []</span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> prompts:</span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a>            _, stats <span class="op">=</span> <span class="va">self</span>.generate(p, max_new_tokens<span class="op">=</span>max_new_tokens)</span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a>            tps_list.append(stats[<span class="st">"tokens_per_sec"</span>])</span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>            <span class="st">"mean_tps"</span>: <span class="bu">sum</span>(tps_list) <span class="op">/</span> <span class="bu">len</span>(tps_list),</span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>            <span class="st">"min_tps"</span>: <span class="bu">min</span>(tps_list),</span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>            <span class="st">"max_tps"</span>: <span class="bu">max</span>(tps_list),</span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>        }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<caption>Inference optimization reference.</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Key detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Without KV cache</td>
+<td><span class="math inline">O(t)</span> work per token → <span class="math inline">O(T^2)</span> total; throughput collapses for long sequences</td>
+</tr>
+<tr class="even">
+<td>KV cache</td>
+<td>Cache <span class="math inline">K_l</span>, <span class="math inline">V_l</span> after computing them; <span class="math inline">O(1)</span> work per new token</td>
+</tr>
+<tr class="odd">
+<td>KV cache memory</td>
+<td><span class="math inline">2LHd_hT \times \text{bytes}</span>; linear in sequence length</td>
+</tr>
+<tr class="even">
+<td>Prefill vs decode</td>
+<td>Prefill: full prompt in one pass. Decode: one token at a time using cache</td>
+</tr>
+<tr class="odd">
+<td>Sliding window</td>
+<td>Keep most recent <span class="math inline">T_{\max}</span> tokens; simple, loses distant context</td>
+</tr>
+<tr class="even">
+<td>Sink token</td>
+<td>Keep first <span class="math inline">n_\text{sink}</span> + most recent; preserves attention anchors</td>
+</tr>
+<tr class="odd">
+<td>Flash Attention bottleneck</td>
+<td>Standard attention: <span class="math inline">O(T^2)</span> HBM reads/writes per layer — IO-bound</td>
+</tr>
+<tr class="even">
+<td>Online softmax</td>
+<td>One-pass accumulation without storing the full attention matrix</td>
+</tr>
+<tr class="odd">
+<td>Flash Attention memory</td>
+<td><span class="math inline">O(T)</span> vs <span class="math inline">O(T^2)</span>; one line: <code>F.scaled_dot_product_attention</code></td>
+</tr>
+<tr class="even">
+<td>Speculative decoding</td>
+<td>Draft <span class="math inline">k</span> tokens with small model; verify in one target forward pass</td>
+</tr>
+<tr class="odd">
+<td>Acceptance criterion</td>
+<td><span class="math inline">\min(1, p_T / p_D)</span>; preserves exact target distribution</td>
+</tr>
+<tr class="even">
+<td>Correction sampling</td>
+<td>Sample from <span class="math inline">\max(0, p_T - p_D)</span> on rejection</td>
+</tr>
+<tr class="odd">
+<td>Speedup</td>
+<td>Mean tokens per pass <span class="math inline">= \sum_{i=1}^k \alpha^i + \alpha^k</span>; ~2.77× for <span class="math inline">\alpha{=}0.8, k{=}4</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Cache memory profiler.</strong> Run generation for sequences of lengths <span class="math inline">\{64, 128, 256, 512, 1024\}</span> and record peak GPU memory at each length with and without the KV cache. Plot memory vs sequence length for both cases. Confirm without cache: quadratic growth; with cache: linear.</p></li>
+<li><p><strong>Distribution preservation.</strong> Verify <code>speculative_decode_step</code> preserves the target distribution. Run 10,000 speculative decoding steps with a known target distribution. Plot the empirical output distribution and confirm it matches the target, not the draft.</p></li>
+<li><p><strong>Online softmax verification.</strong> Run <code>flash_attention_reference</code> and compare its output to standard scaled-dot-product attention on random inputs (B=2, H=4, T=128, d_h=64). Confirm the outputs match to within <span class="math inline">10^{-4}</span> tolerance.</p></li>
+<li><p><strong>Acceptance rate vs speedup.</strong> Simulate speculative decoding with acceptance rates <span class="math inline">\alpha \in \{0.5, 0.7, 0.8, 0.9, 0.95\}</span> and draft lengths <span class="math inline">k \in \{2, 4, 8\}</span>. Plot the theoretical <span class="math inline">\bar{k}</span> (mean accepted tokens) as a function of <span class="math inline">\alpha</span> and <span class="math inline">k</span>. At what <span class="math inline">\alpha</span> does <span class="math inline">k = 8</span> become better than <span class="math inline">k = 4</span>?</p></li>
+<li><p><strong>Sink token eviction.</strong> Implement a benchmark that runs generation on a document longer than <code>max_cache_len</code>. Compare output quality (perplexity on the full document) between <code>SlidingWindowEviction</code> and <code>SinkTokenEviction</code>. When does the sink token strategy help most?</p></li>
+<li><p><strong>Draft model selection.</strong> Run speculative decoding with draft models of different sizes (e.g.&nbsp;a 2-layer vs 4-layer vs 6-layer version of NanoGPT). Measure acceptance rate <span class="math inline">\alpha</span> and actual tokens/sec for each. Find the Pareto-optimal draft model size (best speedup vs quality tradeoff).</p></li>
+</ol>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-dao2022flashattention" class="csl-entry" role="listitem">
+Dao, Tri, Daniel Y. Fu, Stefano Ermon, Atri Rudra, and Christopher Ré. 2022. <span>“<span>FlashAttention</span>: Fast and Memory-Efficient Exact Attention with <span>IO</span>-Awareness.”</span> <a href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a>.
+</div>
+<div id="ref-leviathan2023fast" class="csl-entry" role="listitem">
+Leviathan, Yaniv, Matan Kalman, and Yossi Matias. 2023. <span>“Fast Inference from Transformers via Speculative Decoding.”</span> <a href="https://arxiv.org/abs/2211.17192">https://arxiv.org/abs/2211.17192</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/llm/12-quantization.html" class="pagination-link" aria-label="12. Model Quantization">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">12. Model Quantization</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/llm/14-inference-time-scaling.html" class="pagination-link" aria-label="14. Inference-Time Scaling">
+        <span class="nav-page-text">14. Inference-Time Scaling</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

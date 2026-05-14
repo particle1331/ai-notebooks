@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>The Engram Layer – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/index.html">DeepSeek</a></li><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/03-engram-layer.html">03. The Engram Layer</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#motivation-the-computation-vs-retrieval-gap" id="toc-motivation-the-computation-vs-retrieval-gap" class="nav-link active" data-scroll-target="#motivation-the-computation-vs-retrieval-gap">Motivation: The Computation-vs-Retrieval Gap</a></li>
+  <li><a href="#compressedtokenizer-normalizing-the-hash-space" id="toc-compressedtokenizer-normalizing-the-hash-space" class="nav-link" data-scroll-target="#compressedtokenizer-normalizing-the-hash-space">CompressedTokenizer: Normalizing the Hash Space</a></li>
+  <li><a href="#ngramhashmapping-deterministic-xor-hashing" id="toc-ngramhashmapping-deterministic-xor-hashing" class="nav-link" data-scroll-target="#ngramhashmapping-deterministic-xor-hashing">NgramHashMapping: Deterministic XOR Hashing</a></li>
+  <li><a href="#multiheadembedding-shared-table-with-per-head-offsets" id="toc-multiheadembedding-shared-table-with-per-head-offsets" class="nav-link" data-scroll-target="#multiheadembedding-shared-table-with-per-head-offsets">MultiHeadEmbedding: Shared Table with Per-Head Offsets</a></li>
+  <li><a href="#gating-routing-the-hash-embedding-into-the-residual-stream" id="toc-gating-routing-the-hash-embedding-into-the-residual-stream" class="nav-link" data-scroll-target="#gating-routing-the-hash-embedding-into-the-residual-stream">Gating: Routing the Hash Embedding into the Residual Stream</a></li>
+  <li><a href="#shortconv-causal-local-aggregation" id="toc-shortconv-causal-local-aggregation" class="nav-link" data-scroll-target="#shortconv-causal-local-aggregation">ShortConv: Causal Local Aggregation</a></li>
+  <li><a href="#nanoengram-putting-it-together" id="toc-nanoengram-putting-it-together" class="nav-link" data-scroll-target="#nanoengram-putting-it-together">NanoEngram: Putting It Together</a></li>
+  <li><a href="#integrating-nanoengram-into-nanodeepseek" id="toc-integrating-nanoengram-into-nanodeepseek" class="nav-link" data-scroll-target="#integrating-nanoengram-into-nanodeepseek">Integrating NanoEngram into NanoDeepSeek</a></li>
+  <li><a href="#gate-visualization-what-does-engram-attend-to" id="toc-gate-visualization-what-does-engram-attend-to" class="nav-link" data-scroll-target="#gate-visualization-what-does-engram-attend-to">Gate Visualization: What Does Engram Attend To?</a></li>
+  <li><a href="#sensitivity-analysis-ablating-engram-at-inference" id="toc-sensitivity-analysis-ablating-engram-at-inference" class="nav-link" data-scroll-target="#sensitivity-analysis-ablating-engram-at-inference">Sensitivity Analysis: Ablating Engram at Inference</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/index.html">DeepSeek</a></li><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/03-engram-layer.html">03. The Engram Layer</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">The Engram Layer</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../../../notebooks/llm/deepseek/01-deepseek-architecture.html">Notebook 01</a> catalogued four types of memory a transformer can use: in-weights (dense parameters), in-context (KV cache), external (retrieval DB), and a fourth type introduced by DeepSeek-V3 — hash-addressed <span class="math inline">n</span>-gram memory. MLA reduces the cost of the KV cache. MoE conditions which FFN parameters activate. The Engram layer provides a shortcut that bypasses both: <u>no attention, no routing, just a hash.</u></p>
+<p>The core observation is that transformers waste sequential depth reconstructing facts that could be served by a lookup table. Given the <span class="math inline">n</span>-gram context “capital of France”, a standard transformer reconstructs “Paris” from distributed weight activations on every forward pass. An Engram layer hashes the <span class="math inline">n</span>-gram to a table address, reads the embedding at that address, gates it against the hidden state, and injects the result into the residual stream — <span class="math inline">O(1)</span> deterministic retrieval with no attention compute.</p>
+<p>This notebook builds NanoEngram from scratch, derives the XOR hash mapping and prime-modulus collision strategy, implements the sqrt-sigmoid gate and causal ShortConv aggregation, and integrates the result into <code>NanoDeepSeekWithEngram</code>. We close with a gate visualization and a perplexity ablation measuring the Engram contribution.</p>
+<div id="cell-3" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> unicodedata</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> List, Dict, Tuple, Optional</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="motivation-the-computation-vs-retrieval-gap" class="level2">
+<h2 class="anchored" data-anchor-id="motivation-the-computation-vs-retrieval-gap">Motivation: The Computation-vs-Retrieval Gap</h2>
+<p>Consider a concrete fact: <em>“The capital of France is Paris.”</em> A standard transformer must recover this fact through a chain of attention and FFN operations — the fact has been encoded into weight matrices during training, but there is no direct read path. “Paris” is reconstructed from distributed activations on every forward pass, consuming the same sequential depth and compute regardless of how common the fact is.</p>
+<p>An Engram layer provides a shortcut: 1. Hash the current <span class="math inline">n</span>-gram context (e.g., “capital of France”) to a table address. 2. Read the embedding stored at that address. 3. Gate it against the current hidden state. 4. Add the result to the residual stream <em>before</em> attention.</p>
+<p>This is <em>deterministic retrieval</em> — no learned router, no attention compute, <span class="math inline">O(1)</span> lookup. The embedding at each address is learned during training to carry contextually relevant signal for that surface form.</p>
+<p><strong>Where Engram layers are placed.</strong> In DeepSeek-V3-Engram (27B), the Engram layer is inserted before attention at layers 2 and 15:</p>
+<pre><code>H ← H + Engram(H, input_ids)      # before Attention at layers 2 and 15
+H ← H + Attention(H)
+H ← H + MoE(H)</code></pre>
+<p>At our nano scale (6 layers), we place it at layers 2 and 6 — mirroring the same relative positions.</p>
+</section>
+<section id="compressedtokenizer-normalizing-the-hash-space" class="level2">
+<h2 class="anchored" data-anchor-id="compressedtokenizer-normalizing-the-hash-space">CompressedTokenizer: Normalizing the Hash Space</h2>
+<p>Before hashing, input tokens are normalized so that <em>semantically equivalent</em> surface forms map to the same hash address. For example, <code>"Paris"</code>, <code>"paris"</code>, and <code>"PARIS"</code> should hit the same bucket. Our normalizer applies four steps in order:</p>
+<ol type="1">
+<li><strong>NFKC normalization</strong> — Unicode compatibility decomposition</li>
+<li><strong>Lowercase</strong> — case folding</li>
+<li><strong>NFD + strip accents</strong> — removes combining diacritics (e.g., <code>é</code> → <code>e</code>)</li>
+<li><strong>Whitespace collapse</strong> — multiple spaces → single space</li>
+</ol>
+<p>The compressor builds a lookup table mapping original token IDs to compressed IDs, reducing the vocabulary by ~20% by collapsing case-equivalent and accent-equivalent types.</p>
+<div id="cell-6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> GPT2TokenizerFast</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _normalize(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""NFKC → lowercase → NFD + strip accents → collapse whitespace."""</span></span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> unicodedata.normalize(<span class="st">"NFKC"</span>, text)</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> text.lower()</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> unicodedata.normalize(<span class="st">"NFD"</span>, text)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-9" class="code-annotation-target"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">""</span>.join(c <span class="cf">for</span> c <span class="kw">in</span> text <span class="cf">if</span> <span class="kw">not</span> unicodedata.combining(c))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-10" class="code-annotation-target"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">" "</span>.join(text.split())</span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CompressedTokenizer:</span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Builds a lookup table old_id → compressed_id by grouping tokens whose</span></span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a><span class="co">    decoded text normalizes to the same string.</span></span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a><span class="co">    The original token IDs are still used for embeddings; only the Engram</span></span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a><span class="co">    hashing step uses compressed IDs.</span></span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, tokenizer):</span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tokenizer <span class="op">=</span> tokenizer</span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lookup_table, <span class="va">self</span>.compressed_vocab_size <span class="op">=</span> <span class="va">self</span>._build()</span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>        reduction <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="va">self</span>.compressed_vocab_size <span class="op">/</span> tokenizer.vocab_size</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"CompressedTokenizer: </span><span class="sc">{</span>tokenizer<span class="sc">.</span>vocab_size<span class="sc">}</span><span class="ss"> → "</span></span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a>              <span class="ss">f"</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>compressed_vocab_size<span class="sc">}</span><span class="ss"> tokens (</span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> reduction<span class="sc">:.1f}</span><span class="ss">% reduction)"</span>)</span>
+<span id="annotated-cell-3-28"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _build(<span class="va">self</span>) <span class="op">-&gt;</span> Tuple[np.ndarray, <span class="bu">int</span>]:</span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a>        V <span class="op">=</span> <span class="va">self</span>.tokenizer.vocab_size</span>
+<span id="annotated-cell-3-31"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a>        key2new: Dict[<span class="bu">str</span>, <span class="bu">int</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a>        lookup <span class="op">=</span> np.empty(V, dtype<span class="op">=</span>np.int64)</span>
+<span id="annotated-cell-3-33"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> tid <span class="kw">in</span> <span class="bu">range</span>(V):</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a>            raw <span class="op">=</span> <span class="va">self</span>.tokenizer.decode([tid], skip_special_tokens<span class="op">=</span><span class="va">False</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-3-35" class="code-annotation-target"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a>            key <span class="op">=</span> _normalize(raw) <span class="cf">if</span> <span class="st">"</span><span class="ch">\ufffd</span><span class="st">"</span> <span class="kw">not</span> <span class="kw">in</span> raw <span class="cf">else</span> raw</span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> key <span class="kw">not</span> <span class="kw">in</span> key2new:</span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a>                key2new[key] <span class="op">=</span> <span class="bu">len</span>(key2new)</span>
+<span id="annotated-cell-3-38"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>            lookup[tid] <span class="op">=</span> key2new[key]</span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lookup, <span class="bu">len</span>(key2new)</span>
+<span id="annotated-cell-3-40"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, input_ids: np.ndarray) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-3-42"><a href="#annotated-cell-3-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Map a (B, T) int64 array of token IDs to compressed IDs."""</span></span>
+<span id="annotated-cell-3-43"><a href="#annotated-cell-3-43" aria-hidden="true" tabindex="-1"></a>        flat <span class="op">=</span> np.asarray(input_ids, dtype<span class="op">=</span>np.int64).reshape(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-44"><a href="#annotated-cell-3-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.lookup_table[flat].reshape(input_ids.shape)</span>
+<span id="annotated-cell-3-45"><a href="#annotated-cell-3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-46"><a href="#annotated-cell-3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-47"><a href="#annotated-cell-3-47" aria-hidden="true" tabindex="-1"></a>base_tokenizer <span class="op">=</span> GPT2TokenizerFast.from_pretrained(<span class="st">"gpt2"</span>)</span>
+<span id="annotated-cell-3-48"><a href="#annotated-cell-3-48" aria-hidden="true" tabindex="-1"></a>base_tokenizer.pad_token <span class="op">=</span> base_tokenizer.eos_token</span>
+<span id="annotated-cell-3-49"><a href="#annotated-cell-3-49" aria-hidden="true" tabindex="-1"></a>comp_tokenizer <span class="op">=</span> CompressedTokenizer(base_tokenizer)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="9" data-code-annotation="1">Strip Unicode combining characters (diacritics, accents) — after NFD decomposition each accented character becomes base + combiner, so we drop the combiners.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="10" data-code-annotation="2">Collapse runs of whitespace to a single space so <code>" Paris"</code> and <code>"  Paris"</code> map to the same key.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="35" data-code-annotation="3">Tokens containing the Unicode replacement character <code>\ufffd</code> (malformed bytes) are left un-normalized to avoid collapsing genuinely distinct byte sequences.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="ngramhashmapping-deterministic-xor-hashing" class="level2">
+<h2 class="anchored" data-anchor-id="ngramhashmapping-deterministic-xor-hashing">NgramHashMapping: Deterministic XOR Hashing</h2>
+<p>Given a sequence of compressed token IDs <span class="math inline">[x_0, x_1, \ldots, x_{T-1}]</span>, the <span class="math inline">n</span>-gram hash for position <span class="math inline">t</span> is:</p>
+<p><span class="math display">h_t^{(n)} = \bigoplus_{k=0}^{n-1} (x_{t-k} \cdot m_k) \mod p</span></p>
+<p>where <span class="math inline">m_k</span> are seeded odd-integer multipliers (different per layer to avoid inter-layer collisions), <span class="math inline">\oplus</span> is bitwise XOR, and <span class="math inline">p</span> is a prime slightly larger than the target table size. Left-padding with the pad token handles positions before the sequence start.</p>
+<p>We compute <span class="math inline">n=2</span> (bigram) and <span class="math inline">n=3</span> (trigram) grams, each with <code>n_head</code> independent hash functions using distinct prime moduli. <mark>The prime moduli are chosen to be just above the per-<span class="math inline">n</span>-gram vocabulary size, with all primes across all layers and heads kept globally distinct</mark> — this is the same strategy as the original paper.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Collision probability.</strong> A prime modulus minimizes systematic bias in XOR hash distributions. For bigrams over GPT-2’s vocabulary (<span class="math inline">V \approx 50{,}000</span>, table size <span class="math inline">N = 50{,}000</span>), the birthday-bound collision rate is approximately <span class="math inline">V^2 / (2N) = 25{,}000</span> expected collisions per 1{,}000 unique bigrams. This is probabilistic but bounded, and mitigated by the multi-head design averaging over independent hash functions.</p>
+</div>
+</div>
+<div id="cell-9" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _next_prime(n: <span class="bu">int</span>, seen: <span class="bu">set</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Find the smallest prime &gt; n not already in `seen`."""</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> sympy <span class="im">import</span> isprime</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> n <span class="op">+</span> <span class="dv">1</span></span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">not</span> isprime(c) <span class="kw">or</span> c <span class="kw">in</span> seen:</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>        c <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> c</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoEngramConfig:</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>    engram_vocab_size: List[<span class="bu">int</span>] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="kw">lambda</span>: [<span class="dv">50_000</span>, <span class="dv">50_000</span>])</span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>    max_ngram_size:    <span class="bu">int</span>   <span class="op">=</span> <span class="dv">3</span>        <span class="co"># orders: bigram (n=2) and trigram (n=3)</span></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>    n_embed:           <span class="bu">int</span>   <span class="op">=</span> <span class="dv">64</span>       <span class="co"># embedding dimension per head per n-gram</span></span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>    n_head:            <span class="bu">int</span>   <span class="op">=</span> <span class="dv">4</span>        <span class="co"># independent hash heads per n-gram order</span></span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>    layer_ids:         List[<span class="bu">int</span>] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="kw">lambda</span>: [<span class="dv">2</span>, <span class="dv">6</span>])</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>    pad_id:            <span class="bu">int</span>   <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>    seed:              <span class="bu">int</span>   <span class="op">=</span> <span class="dv">42</span></span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NgramHashMapping:</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""For each Engram layer and each position (B, T), returns a</span></span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a><span class="co">    (B, T, n_heads_total) integer tensor of hash indices.</span></span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a><span class="co">    n_heads_total = (max_ngram_size - 1) * n_head</span></span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a><span class="co">                  = 2 (bigram + trigram) * n_head</span></span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, cfg: NanoEngramConfig, comp_tok: CompressedTokenizer):</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cfg  <span class="op">=</span> cfg</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.comp <span class="op">=</span> comp_tok</span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Seeded odd-integer multipliers per layer</span></span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer_multipliers: Dict[<span class="bu">int</span>, np.ndarray] <span class="op">=</span> {}</span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>        MAX_LONG   <span class="op">=</span> np.iinfo(np.int64).<span class="bu">max</span></span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>        HALF_BOUND <span class="op">=</span> MAX_LONG <span class="op">//</span> <span class="dv">2</span></span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> lid <span class="kw">in</span> cfg.layer_ids:</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>            rng <span class="op">=</span> np.random.default_rng(<span class="bu">int</span>(cfg.seed <span class="op">+</span> <span class="dv">10007</span> <span class="op">*</span> lid))</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a>            raw <span class="op">=</span> rng.integers(<span class="dv">0</span>, HALF_BOUND, size<span class="op">=</span>(cfg.max_ngram_size,), dtype<span class="op">=</span>np.int64)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-40" class="code-annotation-target"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.layer_multipliers[lid] <span class="op">=</span> raw <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>   <span class="co"># ensure odd</span></span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Per-layer, per-n-gram-order, per-head prime moduli — all globally distinct</span></span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a>        seen_primes: <span class="bu">set</span> <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.primes: Dict[<span class="bu">int</span>, List[List[<span class="bu">int</span>]]] <span class="op">=</span> {}</span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> lid <span class="kw">in</span> cfg.layer_ids:</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a>            layer_primes <span class="op">=</span> []</span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> ni <span class="kw">in</span> <span class="bu">range</span>(cfg.max_ngram_size <span class="op">-</span> <span class="dv">1</span>):   <span class="co"># 0 → bigram, 1 → trigram</span></span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>                head_primes <span class="op">=</span> []</span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>                start <span class="op">=</span> cfg.engram_vocab_size[ni] <span class="op">-</span> <span class="dv">1</span></span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(cfg.n_head):</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>                    p <span class="op">=</span> _next_prime(start, seen_primes)</span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a>                    seen_primes.add(p)</span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>                    head_primes.append(p)</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>                    start <span class="op">=</span> p</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a>                layer_primes.append(head_primes)</span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.primes[lid] <span class="op">=</span> layer_primes</span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="bu">hash</span>(<span class="va">self</span>, input_ids: np.ndarray, layer_id: <span class="bu">int</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns: (B, T, n_heads_total) int64</span></span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>        x    <span class="op">=</span> <span class="va">self</span>.comp(input_ids)                  <span class="co"># (B, T) compressed</span></span>
+<span id="annotated-cell-4-63"><a href="#annotated-cell-4-63" aria-hidden="true" tabindex="-1"></a>        B, T <span class="op">=</span> x.shape</span>
+<span id="annotated-cell-4-64"><a href="#annotated-cell-4-64" aria-hidden="true" tabindex="-1"></a>        muls <span class="op">=</span> <span class="va">self</span>.layer_multipliers[layer_id]</span>
+<span id="annotated-cell-4-65"><a href="#annotated-cell-4-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-66"><a href="#annotated-cell-4-66" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> shift_k(k: <span class="bu">int</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="annotated-cell-4-67"><a href="#annotated-cell-4-67" aria-hidden="true" tabindex="-1"></a>            <span class="co">"""Shift x left by k positions, padding with pad_id on the left."""</span></span>
+<span id="annotated-cell-4-68"><a href="#annotated-cell-4-68" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-4-69"><a href="#annotated-cell-4-69" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> x</span>
+<span id="annotated-cell-4-70"><a href="#annotated-cell-4-70" aria-hidden="true" tabindex="-1"></a>            padded <span class="op">=</span> np.pad(x, ((<span class="dv">0</span>, <span class="dv">0</span>), (k, <span class="dv">0</span>)), mode<span class="op">=</span><span class="st">"constant"</span>,</span>
+<span id="annotated-cell-4-71"><a href="#annotated-cell-4-71" aria-hidden="true" tabindex="-1"></a>                            constant_values<span class="op">=</span><span class="va">self</span>.cfg.pad_id)</span>
+<span id="annotated-cell-4-72"><a href="#annotated-cell-4-72" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> padded[:, :T]</span>
+<span id="annotated-cell-4-73"><a href="#annotated-cell-4-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-74"><a href="#annotated-cell-4-74" aria-hidden="true" tabindex="-1"></a>        shifts <span class="op">=</span> [shift_k(k) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.cfg.max_ngram_size)]</span>
+<span id="annotated-cell-4-75"><a href="#annotated-cell-4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-76"><a href="#annotated-cell-4-76" aria-hidden="true" tabindex="-1"></a>        all_hashes <span class="op">=</span> []</span>
+<span id="annotated-cell-4-77"><a href="#annotated-cell-4-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ni <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.cfg.max_ngram_size <span class="op">-</span> <span class="dv">1</span>):  <span class="co"># 0 → bigram, 1 → trigram</span></span>
+<span id="annotated-cell-4-78"><a href="#annotated-cell-4-78" aria-hidden="true" tabindex="-1"></a>            n <span class="op">=</span> ni <span class="op">+</span> <span class="dv">2</span></span>
+<span id="annotated-cell-4-79"><a href="#annotated-cell-4-79" aria-hidden="true" tabindex="-1"></a>            mix <span class="op">=</span> shifts[<span class="dv">0</span>] <span class="op">*</span> muls[<span class="dv">0</span>]</span>
+<span id="annotated-cell-4-80"><a href="#annotated-cell-4-80" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-81" class="code-annotation-target"><a href="#annotated-cell-4-81" aria-hidden="true" tabindex="-1"></a>                mix <span class="op">=</span> np.bitwise_xor(mix, shifts[k] <span class="op">*</span> muls[k])</span>
+<span id="annotated-cell-4-82"><a href="#annotated-cell-4-82" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> prime <span class="kw">in</span> <span class="va">self</span>.primes[layer_id][ni]:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-83" class="code-annotation-target"><a href="#annotated-cell-4-83" aria-hidden="true" tabindex="-1"></a>                all_hashes.append((mix <span class="op">%</span> prime).astype(np.int64))</span>
+<span id="annotated-cell-4-84"><a href="#annotated-cell-4-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-85"><a href="#annotated-cell-4-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.stack(all_hashes, axis<span class="op">=</span><span class="dv">2</span>)  <span class="co"># (B, T, n_heads_total)</span></span>
+<span id="annotated-cell-4-86"><a href="#annotated-cell-4-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-87"><a href="#annotated-cell-4-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-88"><a href="#annotated-cell-4-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Smoke test</span></span>
+<span id="annotated-cell-4-89"><a href="#annotated-cell-4-89" aria-hidden="true" tabindex="-1"></a>eng_cfg <span class="op">=</span> NanoEngramConfig()</span>
+<span id="annotated-cell-4-90"><a href="#annotated-cell-4-90" aria-hidden="true" tabindex="-1"></a>hasher  <span class="op">=</span> NgramHashMapping(eng_cfg, comp_tokenizer)</span>
+<span id="annotated-cell-4-91"><a href="#annotated-cell-4-91" aria-hidden="true" tabindex="-1"></a>test_ids <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">25</span>, <span class="dv">1337</span>, <span class="dv">50</span>, <span class="dv">8</span>, <span class="dv">300</span>]], dtype<span class="op">=</span>np.int64)</span>
+<span id="annotated-cell-4-92"><a href="#annotated-cell-4-92" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> hasher.<span class="bu">hash</span>(test_ids, layer_id<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-4-93"><a href="#annotated-cell-4-93" aria-hidden="true" tabindex="-1"></a>n_heads_total <span class="op">=</span> (eng_cfg.max_ngram_size <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> eng_cfg.n_head</span>
+<span id="annotated-cell-4-94"><a href="#annotated-cell-4-94" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Hash output shape: </span><span class="sc">{</span>h<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">   expected: (1, 6, </span><span class="sc">{</span>n_heads_total<span class="sc">}</span><span class="ss">)"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="40" data-code-annotation="1">Multipliers are forced to be odd to prevent the zero-collapse issue: if a multiplier is even and <span class="math inline">x_{t-k}</span> is even, the contribution to the XOR hash is zero.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="81" data-code-annotation="2">Each context token contributes its own multiplied value to the XOR mix, so the hash changes when any token in the <span class="math inline">n</span>-gram window changes.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="83" data-code-annotation="3">Prime modular reduction maps the full 64-bit XOR output to the table address space <code>[0, prime)</code>. Using distinct primes per head ensures independent hash functions.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="multiheadembedding-shared-table-with-per-head-offsets" class="level2">
+<h2 class="anchored" data-anchor-id="multiheadembedding-shared-table-with-per-head-offsets">MultiHeadEmbedding: Shared Table with Per-Head Offsets</h2>
+<p>Rather than <span class="math inline">H</span> separate embedding tables (one per hash head), we use a single large table of size <span class="math inline">\sum_i p_i</span> and address head <span class="math inline">i</span> by adding its cumulative offset:</p>
+<p><span class="math display">\text{offset}_i = \sum_{j &lt; i} p_j</span></p>
+<p>This is equivalent to separate tables but more memory-efficient: a single <code>nn.Embedding</code> call allows PyTorch to fuse the lookup into one kernel, and the buffer lives contiguously in memory.</p>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultiHeadEmbedding(nn.Module):</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single embedding table of size sum(vocab_sizes) with per-head offsets.</span></span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Input:  (B, T, n_heads) int64</span></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Output: (B, T, n_heads, d_embed)</span></span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_sizes: List[<span class="bu">int</span>], d_embed: <span class="bu">int</span>):</span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_heads <span class="op">=</span> <span class="bu">len</span>(vocab_sizes)</span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_embed <span class="op">=</span> d_embed</span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a>        offsets <span class="op">=</span> [<span class="dv">0</span>]</span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> v <span class="kw">in</span> vocab_sizes[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a>            offsets.append(offsets[<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> v)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-15" class="code-annotation-target"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"offsets"</span>, torch.tensor(offsets, dtype<span class="op">=</span>torch.<span class="bu">long</span>))</span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embedding <span class="op">=</span> nn.Embedding(<span class="bu">sum</span>(vocab_sizes), d_embed)</span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, idx: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""idx: (B, T, n_heads) → (B, T, n_heads, d_embed)"""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-20" class="code-annotation-target"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>        shifted <span class="op">=</span> idx <span class="op">+</span> <span class="va">self</span>.offsets  <span class="co"># (B, T, n_heads) — broadcast over batch and time</span></span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.embedding(shifted)</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Build vocab_sizes from the hasher primes for layer 2</span></span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a>vocab_sizes_l2 <span class="op">=</span> [</span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>    p</span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ni <span class="kw">in</span> <span class="bu">range</span>(eng_cfg.max_ngram_size <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> hasher.primes[<span class="dv">2</span>][ni]</span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>mhe <span class="op">=</span> MultiHeadEmbedding(vocab_sizes_l2, d_embed<span class="op">=</span>eng_cfg.n_embed)</span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>test_idx <span class="op">=</span> torch.from_numpy(h)   <span class="co"># (1, 6, 8)</span></span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a>emb_out  <span class="op">=</span> mhe(test_idx)</span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MultiHeadEmbedding output shape: </span><span class="sc">{</span><span class="bu">tuple</span>(emb_out.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total embedding parameters: </span><span class="sc">{</span><span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> mhe.parameters()) <span class="op">/</span> <span class="fl">1e3</span><span class="sc">:.1f}</span><span class="ss">K"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="15" data-code-annotation="1"><code>offsets</code> is registered as a non-trainable buffer so it moves with the model to the correct device automatically.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="20" data-code-annotation="2">Broadcasting <code>self.offsets</code> of shape <code>(n_heads,)</code> over <code>idx</code> of shape <code>(B, T, n_heads)</code> correctly shifts each head’s indices into its own table region.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="gating-routing-the-hash-embedding-into-the-residual-stream" class="level2">
+<h2 class="anchored" data-anchor-id="gating-routing-the-hash-embedding-into-the-residual-stream">Gating: Routing the Hash Embedding into the Residual Stream</h2>
+<p><mark>The Engram output is not added unconditionally.</mark> A gate decides how much of the hash embedding is relevant given the current hidden state <span class="math inline">h_t</span>. The gate is a dot-product of the RMSNorm-normalized query <span class="math inline">h_t</span> and key <span class="math inline">k_t</span> (projected from the hash embedding), followed by a <strong>sqrt-sigmoid</strong> activation:</p>
+<p><span class="math display">\alpha_t = \sigma\!\left(\sqrt{|s_t|} \cdot \operatorname{sign}(s_t)\right), \qquad s_t = \frac{\hat{h}_t \cdot \hat{k}_t}{\sqrt{d}}</span></p>
+<p>where <span class="math inline">\hat{\cdot}</span> denotes RMSNorm normalization. The sqrt-sigmoid is more conservative near zero and sharper near <span class="math inline">\pm 1</span> than plain sigmoid — it suppresses weakly relevant Engram hits more aggressively. The final gated output is:</p>
+<p><span class="math display">\text{out}_t = \alpha_t \cdot W_V \, e_t</span></p>
+<p>where <span class="math inline">e_t</span> is the flattened hash embedding for position <span class="math inline">t</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Multi-Head Hyper-Connection (mHC) — the part we simplify
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the production DeepSeek-Engram implementation (27B scale), the residual stream is a 4D tensor <code>(B, L, M, D)</code> where <code>M = hc_mult = 4</code> is the number of <em>hyper-connection</em> heads. Each head maintains an independent residual copy mixed at each block via learned gates. In the Engram layer, this means <span class="math inline">M</span> independent key projections <span class="math inline">W_K^{(m)}</span> and <span class="math inline">M</span> corresponding gates <span class="math inline">\alpha_t^{(m)}</span>.</p>
+<p>We skip this in NanoEngram for three reasons: (1) the orthogonality constraint between hyper-connection heads requires Riemannian SGD, not standard AdamW; (2) at nano scale, maintaining <span class="math inline">M=4</span> residual streams would roughly quadruple residual memory and likely collapse; (3) the 4D tensor requires non-trivial shape bookkeeping throughout every block.</p>
+<p><strong>What we do instead:</strong> we collapse <span class="math inline">M=1</span> and expand the hidden state to <span class="math inline">4 \cdot d_{\text{model}}</span> before the key projection — <code>W_K: (engram_dim, 4d)</code>, same FLOPs as <span class="math inline">M</span> independent projections, all in 3D tensors. This captures the routing logic while keeping every tensor 3D.</p>
+</div>
+</div>
+</section>
+<section id="shortconv-causal-local-aggregation" class="level2">
+<h2 class="anchored" data-anchor-id="shortconv-causal-local-aggregation">ShortConv: Causal Local Aggregation</h2>
+<p>After gating, a short depthwise causal convolution smoothes the gated values across a local window:</p>
+<p><span class="math display">Y = \operatorname{SiLU}(\operatorname{CausalConv1D}_{\text{dw}}(\operatorname{RMSNorm}(V))) + V</span></p>
+<ul>
+<li><strong>Kernel size 4, dilation = <code>max_ngram_size</code> = 3</strong>: effective receptive field = <span class="math inline">(4-1) \times 3 + 1 = 10</span> positions</li>
+<li><strong>Depthwise</strong> (<code>groups=d</code>): no cross-channel mixing in the conv; cross-channel mixing happens via <span class="math inline">W_V</span></li>
+<li><strong>Causal</strong>: left-pad only, trim right to length <span class="math inline">T</span></li>
+</ul>
+<p>This allows the model to aggregate information from recent <span class="math inline">n</span>-gram hits before injecting into the residual stream.</p>
+<div id="cell-16" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ShortConv(nn.Module):</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Causal depthwise Conv1D + SiLU residual, operating on (B, T, d)."""</span></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d: <span class="bu">int</span>, kernel_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>, dilation: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>):</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm    <span class="op">=</span> nn.RMSNorm(d)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-7" class="code-annotation-target"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        padding      <span class="op">=</span> (kernel_size <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> dilation</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv    <span class="op">=</span> nn.Conv1d(</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>            in_channels<span class="op">=</span>d,</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>            out_channels<span class="op">=</span>d,</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>            kernel_size<span class="op">=</span>kernel_size,</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>            groups<span class="op">=</span>d,</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>            dilation<span class="op">=</span>dilation,</span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>            padding<span class="op">=</span>padding,</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>            bias<span class="op">=</span><span class="va">False</span>,</span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.act <span class="op">=</span> nn.SiLU()</span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, v: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""v: (B, T, d)"""</span></span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>        B, T, d <span class="op">=</span> v.shape</span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a>        normed   <span class="op">=</span> <span class="va">self</span>.norm(v)                     <span class="co"># (B, T, d)</span></span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a>        x_bct    <span class="op">=</span> normed.transpose(<span class="dv">1</span>, <span class="dv">2</span>)           <span class="co"># (B, d, T) — Conv1d expects channels first</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-24" class="code-annotation-target"><a href="#annotated-cell-6-24" aria-hidden="true" tabindex="-1"></a>        y_bct    <span class="op">=</span> <span class="va">self</span>.conv(x_bct)[..., :T]        <span class="co"># trim right padding → (B, d, T)</span></span>
+<span id="annotated-cell-6-25"><a href="#annotated-cell-6-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.act(y_bct.transpose(<span class="dv">1</span>, <span class="dv">2</span>)) <span class="op">+</span> v  <span class="co"># (B, T, d)</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="7" data-code-annotation="1">Left-padding of <code>(kernel_size - 1) * dilation</code> ensures the convolution is strictly causal — position <span class="math inline">t</span> only sees positions <span class="math inline">\leq t</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="24" data-code-annotation="2">Trimming <code>[..., :T]</code> removes the right-side padding that PyTorch adds symmetrically when <code>padding &gt; 0</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="nanoengram-putting-it-together" class="level2">
+<h2 class="anchored" data-anchor-id="nanoengram-putting-it-together">NanoEngram: Putting It Together</h2>
+<p>The full NanoEngram layer combines hash lookup, value and key projections, sqrt-sigmoid gating, and ShortConv aggregation:</p>
+<pre><code>e  = MultiHeadEmbedding(hash(input_ids))   # (B, T, n_heads, n_embed)
+ef = e.flatten(-2)                          # (B, T, n_heads * n_embed)
+V  = W_V(ef)                                # (B, T, d)
+K  = W_K(ef)                                # (B, T, hc_mult * d)
+s  = RMSNorm(h) · RMSNorm(K_pool) / sqrt(d)
+α  = sigmoid(sqrt(|s|) * sign(s))
+out = ShortConv(α * V)</code></pre>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoEngram(nn.Module):</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single Engram layer for one specific Transformer layer position."""</span></span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-8-6"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>        layer_id: <span class="bu">int</span>,</span>
+<span id="annotated-cell-8-7"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a>        cfg: NanoEngramConfig,</span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a>        d_model: <span class="bu">int</span>,</span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a>        hasher: NgramHashMapping,</span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a>        hc_mult: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>,</span>
+<span id="annotated-cell-8-11"><a href="#annotated-cell-8-11" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="annotated-cell-8-12"><a href="#annotated-cell-8-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-8-13"><a href="#annotated-cell-8-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer_id <span class="op">=</span> layer_id</span>
+<span id="annotated-cell-8-14"><a href="#annotated-cell-8-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hasher   <span class="op">=</span> hasher</span>
+<span id="annotated-cell-8-15"><a href="#annotated-cell-8-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hc_mult  <span class="op">=</span> hc_mult</span>
+<span id="annotated-cell-8-16"><a href="#annotated-cell-8-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d        <span class="op">=</span> d_model</span>
+<span id="annotated-cell-8-17"><a href="#annotated-cell-8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-18"><a href="#annotated-cell-8-18" aria-hidden="true" tabindex="-1"></a>        vocab_sizes <span class="op">=</span> [</span>
+<span id="annotated-cell-8-19"><a href="#annotated-cell-8-19" aria-hidden="true" tabindex="-1"></a>            p</span>
+<span id="annotated-cell-8-20"><a href="#annotated-cell-8-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> ni <span class="kw">in</span> <span class="bu">range</span>(cfg.max_ngram_size <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="annotated-cell-8-21"><a href="#annotated-cell-8-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> hasher.primes[layer_id][ni]</span>
+<span id="annotated-cell-8-22"><a href="#annotated-cell-8-22" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-8-23"><a href="#annotated-cell-8-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_heads  <span class="op">=</span> <span class="bu">len</span>(vocab_sizes)</span>
+<span id="annotated-cell-8-24"><a href="#annotated-cell-8-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_embed  <span class="op">=</span> cfg.n_embed</span>
+<span id="annotated-cell-8-25"><a href="#annotated-cell-8-25" aria-hidden="true" tabindex="-1"></a>        engram_dim    <span class="op">=</span> <span class="va">self</span>.n_heads <span class="op">*</span> cfg.n_embed</span>
+<span id="annotated-cell-8-26"><a href="#annotated-cell-8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-27"><a href="#annotated-cell-8-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mhe        <span class="op">=</span> MultiHeadEmbedding(vocab_sizes, cfg.n_embed)</span>
+<span id="annotated-cell-8-28"><a href="#annotated-cell-8-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_V        <span class="op">=</span> nn.Linear(engram_dim, d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-8-29"><a href="#annotated-cell-8-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_K        <span class="op">=</span> nn.Linear(engram_dim, hc_mult <span class="op">*</span> d_model, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># mHC collapsed</span></span>
+<span id="annotated-cell-8-30"><a href="#annotated-cell-8-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_k     <span class="op">=</span> nn.RMSNorm(hc_mult <span class="op">*</span> d_model)</span>
+<span id="annotated-cell-8-31"><a href="#annotated-cell-8-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_q     <span class="op">=</span> nn.RMSNorm(d_model)</span>
+<span id="annotated-cell-8-32"><a href="#annotated-cell-8-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.short_conv <span class="op">=</span> ShortConv(d_model, kernel_size<span class="op">=</span><span class="dv">4</span>, dilation<span class="op">=</span>cfg.max_ngram_size)</span>
+<span id="annotated-cell-8-33"><a href="#annotated-cell-8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-34"><a href="#annotated-cell-8-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, h: torch.Tensor, input_ids: np.ndarray) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-8-35"><a href="#annotated-cell-8-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="annotated-cell-8-36"><a href="#annotated-cell-8-36" aria-hidden="true" tabindex="-1"></a><span class="co">        h:         (B, T, d_model) hidden state</span></span>
+<span id="annotated-cell-8-37"><a href="#annotated-cell-8-37" aria-hidden="true" tabindex="-1"></a><span class="co">        input_ids: (B, T) int64 numpy array of ORIGINAL token IDs</span></span>
+<span id="annotated-cell-8-38"><a href="#annotated-cell-8-38" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:   (B, T, d_model) Engram contribution (add to h outside)</span></span>
+<span id="annotated-cell-8-39"><a href="#annotated-cell-8-39" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-8-40"><a href="#annotated-cell-8-40" aria-hidden="true" tabindex="-1"></a>        B, T, d <span class="op">=</span> h.shape</span>
+<span id="annotated-cell-8-41"><a href="#annotated-cell-8-41" aria-hidden="true" tabindex="-1"></a>        dev <span class="op">=</span> h.device</span>
+<span id="annotated-cell-8-42"><a href="#annotated-cell-8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-43"><a href="#annotated-cell-8-43" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Hash → multi-head embeddings</span></span>
+<span id="annotated-cell-8-44"><a href="#annotated-cell-8-44" aria-hidden="true" tabindex="-1"></a>        ids_np   <span class="op">=</span> input_ids.cpu().numpy() <span class="cf">if</span> <span class="bu">isinstance</span>(input_ids, torch.Tensor) <span class="cf">else</span> input_ids</span>
+<span id="annotated-cell-8-45"><a href="#annotated-cell-8-45" aria-hidden="true" tabindex="-1"></a>        hash_idx <span class="op">=</span> <span class="va">self</span>.hasher.<span class="bu">hash</span>(ids_np, <span class="va">self</span>.layer_id)              <span class="co"># (B, T, n_heads) np.int64</span></span>
+<span id="annotated-cell-8-46"><a href="#annotated-cell-8-46" aria-hidden="true" tabindex="-1"></a>        hash_t   <span class="op">=</span> torch.from_numpy(hash_idx).to(dev)</span>
+<span id="annotated-cell-8-47"><a href="#annotated-cell-8-47" aria-hidden="true" tabindex="-1"></a>        emb      <span class="op">=</span> <span class="va">self</span>.mhe(hash_t)                                      <span class="co"># (B, T, n_heads, n_embed)</span></span>
+<span id="annotated-cell-8-48"><a href="#annotated-cell-8-48" aria-hidden="true" tabindex="-1"></a>        ef       <span class="op">=</span> emb.flatten(start_dim<span class="op">=-</span><span class="dv">2</span>)                             <span class="co"># (B, T, n_heads*n_embed)</span></span>
+<span id="annotated-cell-8-49"><a href="#annotated-cell-8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-50"><a href="#annotated-cell-8-50" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Project to value and key</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-51" class="code-annotation-target"><a href="#annotated-cell-8-51" aria-hidden="true" tabindex="-1"></a>        V <span class="op">=</span> <span class="va">self</span>.W_V(ef)                                                 <span class="co"># (B, T, d)</span></span>
+<span id="annotated-cell-8-52"><a href="#annotated-cell-8-52" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.W_K(ef)                                                 <span class="co"># (B, T, hc_mult*d)</span></span>
+<span id="annotated-cell-8-53"><a href="#annotated-cell-8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-54"><a href="#annotated-cell-8-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. sqrt-sigmoid gate</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-8-55" class="code-annotation-target"><a href="#annotated-cell-8-55" aria-hidden="true" tabindex="-1"></a>        K_normed <span class="op">=</span> <span class="va">self</span>.norm_k(K).view(B, T, <span class="va">self</span>.hc_mult, d).mean(dim<span class="op">=</span><span class="dv">2</span>)   <span class="co"># (B, T, d)</span></span>
+<span id="annotated-cell-8-56"><a href="#annotated-cell-8-56" aria-hidden="true" tabindex="-1"></a>        nq <span class="op">=</span> <span class="va">self</span>.norm_q(h)</span>
+<span id="annotated-cell-8-57"><a href="#annotated-cell-8-57" aria-hidden="true" tabindex="-1"></a>        s  <span class="op">=</span> (nq <span class="op">*</span> K_normed).<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>) <span class="op">/</span> math.sqrt(d)       <span class="co"># (B, T, 1)</span></span>
+<span id="annotated-cell-8-58"><a href="#annotated-cell-8-58" aria-hidden="true" tabindex="-1"></a>        a  <span class="op">=</span> s.<span class="bu">abs</span>().clamp(<span class="fl">1e-9</span>).sqrt() <span class="op">*</span> s.sign()                           <span class="co"># sqrt-sigmoid input</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-8-59" class="code-annotation-target"><a href="#annotated-cell-8-59" aria-hidden="true" tabindex="-1"></a>        gate <span class="op">=</span> a.sigmoid()                                                    <span class="co"># (B, T, 1)</span></span>
+<span id="annotated-cell-8-60"><a href="#annotated-cell-8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-61"><a href="#annotated-cell-8-61" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4. Gated value → ShortConv</span></span>
+<span id="annotated-cell-8-62"><a href="#annotated-cell-8-62" aria-hidden="true" tabindex="-1"></a>        gated <span class="op">=</span> gate <span class="op">*</span> V</span>
+<span id="annotated-cell-8-63"><a href="#annotated-cell-8-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.short_conv(gated)                                         <span class="co"># (B, T, d)</span></span>
+<span id="annotated-cell-8-64"><a href="#annotated-cell-8-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-65"><a href="#annotated-cell-8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-66"><a href="#annotated-cell-8-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify shapes</span></span>
+<span id="annotated-cell-8-67"><a href="#annotated-cell-8-67" aria-hidden="true" tabindex="-1"></a>eng_cfg2 <span class="op">=</span> NanoEngramConfig()</span>
+<span id="annotated-cell-8-68"><a href="#annotated-cell-8-68" aria-hidden="true" tabindex="-1"></a>hasher2  <span class="op">=</span> NgramHashMapping(eng_cfg2, comp_tokenizer)</span>
+<span id="annotated-cell-8-69"><a href="#annotated-cell-8-69" aria-hidden="true" tabindex="-1"></a>engram2  <span class="op">=</span> NanoEngram(layer_id<span class="op">=</span><span class="dv">2</span>, cfg<span class="op">=</span>eng_cfg2, d_model<span class="op">=</span><span class="dv">384</span>, hasher<span class="op">=</span>hasher2)</span>
+<span id="annotated-cell-8-70"><a href="#annotated-cell-8-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-71"><a href="#annotated-cell-8-71" aria-hidden="true" tabindex="-1"></a>dummy_h   <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">16</span>, <span class="dv">384</span>)</span>
+<span id="annotated-cell-8-72"><a href="#annotated-cell-8-72" aria-hidden="true" tabindex="-1"></a>dummy_ids <span class="op">=</span> np.random.randint(<span class="dv">0</span>, <span class="dv">50257</span>, size<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">16</span>), dtype<span class="op">=</span>np.int64)</span>
+<span id="annotated-cell-8-73"><a href="#annotated-cell-8-73" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> engram2(dummy_h, dummy_ids)</span>
+<span id="annotated-cell-8-74"><a href="#annotated-cell-8-74" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NanoEngram output shape: </span><span class="sc">{</span><span class="bu">tuple</span>(out.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-8-75"><a href="#annotated-cell-8-75" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Engram layer params: </span><span class="sc">{</span><span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> engram2.parameters()) <span class="op">/</span> <span class="fl">1e3</span><span class="sc">:.1f}</span><span class="ss">K"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="51" data-code-annotation="1"><code>W_V</code> projects the flattened hash embeddings to the model’s hidden dimension, producing the <em>content</em> to inject.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="55" data-code-annotation="2">The <span class="math inline">M</span> hyper-connection key vectors are mean-pooled to a single <code>(B, T, d)</code> key — a simplification of the full mHC gating that avoids 4D tensors.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="59" data-code-annotation="3">The sqrt-sigmoid <span class="math inline">\sigma(\sqrt{|s|} \cdot \operatorname{sign}(s))</span> is more conservative near zero than plain sigmoid, suppressing weakly-matched <span class="math inline">n</span>-gram entries more aggressively.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="integrating-nanoengram-into-nanodeepseek" class="level2">
+<h2 class="anchored" data-anchor-id="integrating-nanoengram-into-nanodeepseek">Integrating NanoEngram into NanoDeepSeek</h2>
+<p>We add an optional <code>NanoEngram</code> module to each <code>DeepSeekBlock</code>. Blocks at <code>layer_ids</code> prepend the Engram update before the standard MLA + MoE residual path:</p>
+<pre><code>if layer_id in engram_layer_ids:
+    x = x + NanoEngram(x, input_ids)
+x = x + NanoMLA(RMSNorm(x))
+x = x + NanoMoE(RMSNorm(x))</code></pre>
+<div id="cell-22" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Paste NanoDeepSeek components (self-contained) ─────────────────────────────</span></span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RMSNorm(nn.Module):</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d: <span class="bu">int</span>, eps: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-6</span>):</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> eps<span class="op">;</span> <span class="va">self</span>.gamma <span class="op">=</span> nn.Parameter(torch.ones(d))</span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">/</span> x.<span class="bu">pow</span>(<span class="dv">2</span>).mean(<span class="op">-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>).add(<span class="va">self</span>.eps).sqrt() <span class="op">*</span> <span class="va">self</span>.gamma</span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_rope_cache(max_seq_len, d_head, device):</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (<span class="dv">10000</span> <span class="op">**</span> (torch.arange(<span class="dv">0</span>, d_head, <span class="dv">2</span>, device<span class="op">=</span>device).<span class="bu">float</span>() <span class="op">/</span> d_head))</span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a>    pos   <span class="op">=</span> torch.arange(max_seq_len, device<span class="op">=</span>device).<span class="bu">float</span>()</span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>    freqs <span class="op">=</span> torch.cat([torch.outer(pos, theta)] <span class="op">*</span> <span class="dv">2</span>, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-10-14"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> freqs.cos()[<span class="va">None</span>, <span class="va">None</span>], freqs.sin()[<span class="va">None</span>, <span class="va">None</span>]</span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_rope(x, cos, sin):</span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17" aria-hidden="true" tabindex="-1"></a>    x1, x2 <span class="op">=</span> x[..., ::<span class="dv">2</span>], x[..., <span class="dv">1</span>::<span class="dv">2</span>]</span>
+<span id="annotated-cell-10-18"><a href="#annotated-cell-10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">*</span> cos <span class="op">+</span> torch.stack([<span class="op">-</span>x2, x1], dim<span class="op">=-</span><span class="dv">1</span>).flatten(<span class="op">-</span><span class="dv">2</span>) <span class="op">*</span> sin</span>
+<span id="annotated-cell-10-19"><a href="#annotated-cell-10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-20"><a href="#annotated-cell-10-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> causal_mask(T, device):</span>
+<span id="annotated-cell-10-21"><a href="#annotated-cell-10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.triu(torch.ones(T, T, dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device), <span class="dv">1</span>)[<span class="va">None</span>, <span class="va">None</span>]</span>
+<span id="annotated-cell-10-22"><a href="#annotated-cell-10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-23"><a href="#annotated-cell-10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-24"><a href="#annotated-cell-10-24" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-10-25"><a href="#annotated-cell-10-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoDeepSeekConfig:</span>
+<span id="annotated-cell-10-26"><a href="#annotated-cell-10-26" aria-hidden="true" tabindex="-1"></a>    vocab_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50257</span><span class="op">;</span> d_model: <span class="bu">int</span> <span class="op">=</span> <span class="dv">384</span><span class="op">;</span> n_layers: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span></span>
+<span id="annotated-cell-10-27"><a href="#annotated-cell-10-27" aria-hidden="true" tabindex="-1"></a>    n_heads: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span><span class="op">;</span> d_compressed: <span class="bu">int</span> <span class="op">=</span> <span class="dv">96</span><span class="op">;</span> d_ffn: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1024</span></span>
+<span id="annotated-cell-10-28"><a href="#annotated-cell-10-28" aria-hidden="true" tabindex="-1"></a>    n_shared: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> n_routed: <span class="bu">int</span> <span class="op">=</span> <span class="dv">8</span><span class="op">;</span> top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span></span>
+<span id="annotated-cell-10-29"><a href="#annotated-cell-10-29" aria-hidden="true" tabindex="-1"></a>    max_seq_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">256</span><span class="op">;</span> aux_loss_coeff: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-2</span></span>
+<span id="annotated-cell-10-30"><a href="#annotated-cell-10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-31"><a href="#annotated-cell-10-31" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SwiGLU(nn.Module):</span>
+<span id="annotated-cell-10-32"><a href="#annotated-cell-10-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d, d_ff):</span>
+<span id="annotated-cell-10-33"><a href="#annotated-cell-10-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-34"><a href="#annotated-cell-10-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">=</span> nn.Linear(d, d_ff, bias<span class="op">=</span><span class="va">False</span>)<span class="op">;</span> <span class="va">self</span>.W3 <span class="op">=</span> nn.Linear(d, d_ff, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-35"><a href="#annotated-cell-10-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">=</span> nn.Linear(d_ff, d, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-36"><a href="#annotated-cell-10-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x): <span class="cf">return</span> <span class="va">self</span>.W2(F.silu(<span class="va">self</span>.W1(x)) <span class="op">*</span> <span class="va">self</span>.W3(x))</span>
+<span id="annotated-cell-10-37"><a href="#annotated-cell-10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-38"><a href="#annotated-cell-10-38" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoMLA(nn.Module):</span>
+<span id="annotated-cell-10-39"><a href="#annotated-cell-10-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, cfg):</span>
+<span id="annotated-cell-10-40"><a href="#annotated-cell-10-40" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-41"><a href="#annotated-cell-10-41" aria-hidden="true" tabindex="-1"></a>        d, nh, dc <span class="op">=</span> cfg.d_model, cfg.n_heads, cfg.d_compressed</span>
+<span id="annotated-cell-10-42"><a href="#annotated-cell-10-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.nh <span class="op">=</span> nh<span class="op">;</span> <span class="va">self</span>.dh <span class="op">=</span> d <span class="op">//</span> nh<span class="op">;</span> <span class="va">self</span>.d <span class="op">=</span> d</span>
+<span id="annotated-cell-10-43"><a href="#annotated-cell-10-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_c <span class="op">=</span> nn.Linear(d, dc, bias<span class="op">=</span><span class="va">False</span>)<span class="op">;</span> <span class="va">self</span>.W_K <span class="op">=</span> nn.Linear(dc, d, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-44"><a href="#annotated-cell-10-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_V <span class="op">=</span> nn.Linear(dc, d, bias<span class="op">=</span><span class="va">False</span>)<span class="op">;</span> <span class="va">self</span>.W_Q <span class="op">=</span> nn.Linear(d, d, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-45"><a href="#annotated-cell-10-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_O <span class="op">=</span> nn.Linear(d, d, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-46"><a href="#annotated-cell-10-46" aria-hidden="true" tabindex="-1"></a>        cos, sin <span class="op">=</span> make_rope_cache(cfg.max_seq_len, <span class="va">self</span>.dh, <span class="st">"cpu"</span>)</span>
+<span id="annotated-cell-10-47"><a href="#annotated-cell-10-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"cos"</span>, cos)<span class="op">;</span> <span class="va">self</span>.register_buffer(<span class="st">"sin"</span>, sin)</span>
+<span id="annotated-cell-10-48"><a href="#annotated-cell-10-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x, mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="annotated-cell-10-49"><a href="#annotated-cell-10-49" aria-hidden="true" tabindex="-1"></a>        B, T, _ <span class="op">=</span> x.shape</span>
+<span id="annotated-cell-10-50"><a href="#annotated-cell-10-50" aria-hidden="true" tabindex="-1"></a>        c_kv <span class="op">=</span> <span class="va">self</span>.W_c(x)<span class="op">;</span> K, V <span class="op">=</span> <span class="va">self</span>.W_K(c_kv), <span class="va">self</span>.W_V(c_kv)<span class="op">;</span> Q <span class="op">=</span> <span class="va">self</span>.W_Q(x)</span>
+<span id="annotated-cell-10-51"><a href="#annotated-cell-10-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> mh(t): <span class="cf">return</span> t.view(B, T, <span class="va">self</span>.nh, <span class="va">self</span>.dh).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="annotated-cell-10-52"><a href="#annotated-cell-10-52" aria-hidden="true" tabindex="-1"></a>        Q, K, V <span class="op">=</span> mh(Q), mh(K), mh(V)</span>
+<span id="annotated-cell-10-53"><a href="#annotated-cell-10-53" aria-hidden="true" tabindex="-1"></a>        cos <span class="op">=</span> <span class="va">self</span>.cos[:, :, :T, :].to(x.device)<span class="op">;</span> sin <span class="op">=</span> <span class="va">self</span>.sin[:, :, :T, :].to(x.device)</span>
+<span id="annotated-cell-10-54"><a href="#annotated-cell-10-54" aria-hidden="true" tabindex="-1"></a>        Q, K <span class="op">=</span> apply_rope(Q, cos, sin), apply_rope(K, cos, sin)</span>
+<span id="annotated-cell-10-55"><a href="#annotated-cell-10-55" aria-hidden="true" tabindex="-1"></a>        sc <span class="op">=</span> Q <span class="op">@</span> K.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>) <span class="op">/</span> math.sqrt(<span class="va">self</span>.dh)</span>
+<span id="annotated-cell-10-56"><a href="#annotated-cell-10-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: sc <span class="op">=</span> sc.masked_fill(mask, <span class="bu">float</span>(<span class="st">"-inf"</span>))</span>
+<span id="annotated-cell-10-57"><a href="#annotated-cell-10-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.W_O((F.softmax(sc, dim<span class="op">=-</span><span class="dv">1</span>) <span class="op">@</span> V).transpose(<span class="dv">1</span>, <span class="dv">2</span>).reshape(B, T, <span class="va">self</span>.d))</span>
+<span id="annotated-cell-10-58"><a href="#annotated-cell-10-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-59"><a href="#annotated-cell-10-59" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoMoE(nn.Module):</span>
+<span id="annotated-cell-10-60"><a href="#annotated-cell-10-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, cfg):</span>
+<span id="annotated-cell-10-61"><a href="#annotated-cell-10-61" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-62"><a href="#annotated-cell-10-62" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_shared <span class="op">=</span> cfg.n_shared<span class="op">;</span> <span class="va">self</span>.n_routed <span class="op">=</span> cfg.n_routed</span>
+<span id="annotated-cell-10-63"><a href="#annotated-cell-10-63" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.top_k <span class="op">=</span> cfg.top_k<span class="op">;</span> <span class="va">self</span>.alpha <span class="op">=</span> cfg.aux_loss_coeff</span>
+<span id="annotated-cell-10-64"><a href="#annotated-cell-10-64" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.shared  <span class="op">=</span> nn.ModuleList([SwiGLU(cfg.d_model, cfg.d_ffn) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(cfg.n_shared)])</span>
+<span id="annotated-cell-10-65"><a href="#annotated-cell-10-65" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.experts <span class="op">=</span> nn.ModuleList([SwiGLU(cfg.d_model, cfg.d_ffn) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(cfg.n_routed)])</span>
+<span id="annotated-cell-10-66"><a href="#annotated-cell-10-66" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.router  <span class="op">=</span> nn.Linear(cfg.d_model, cfg.n_routed, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-67"><a href="#annotated-cell-10-67" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="annotated-cell-10-68"><a href="#annotated-cell-10-68" aria-hidden="true" tabindex="-1"></a>        B, T, d <span class="op">=</span> x.shape<span class="op">;</span> xf <span class="op">=</span> x.view(B <span class="op">*</span> T, d)</span>
+<span id="annotated-cell-10-69"><a href="#annotated-cell-10-69" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="bu">sum</span>(e(xf) <span class="cf">for</span> e <span class="kw">in</span> <span class="va">self</span>.shared)</span>
+<span id="annotated-cell-10-70"><a href="#annotated-cell-10-70" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> F.softmax(<span class="va">self</span>.router(xf), dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-10-71"><a href="#annotated-cell-10-71" aria-hidden="true" tabindex="-1"></a>        topk_vals, topk_idx <span class="op">=</span> torch.topk(probs, <span class="va">self</span>.top_k, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-10-72"><a href="#annotated-cell-10-72" aria-hidden="true" tabindex="-1"></a>        gates <span class="op">=</span> topk_vals <span class="op">/</span> (topk_vals.<span class="bu">sum</span>(<span class="op">-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-10-73"><a href="#annotated-cell-10-73" aria-hidden="true" tabindex="-1"></a>        routed <span class="op">=</span> torch.zeros_like(xf)</span>
+<span id="annotated-cell-10-74"><a href="#annotated-cell-10-74" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ki <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.top_k):</span>
+<span id="annotated-cell-10-75"><a href="#annotated-cell-10-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> ei <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.n_routed):</span>
+<span id="annotated-cell-10-76"><a href="#annotated-cell-10-76" aria-hidden="true" tabindex="-1"></a>                m <span class="op">=</span> topk_idx[:, ki] <span class="op">==</span> ei</span>
+<span id="annotated-cell-10-77"><a href="#annotated-cell-10-77" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> m.<span class="bu">any</span>(): routed[m] <span class="op">+=</span> gates[:, ki:ki<span class="op">+</span><span class="dv">1</span>][m] <span class="op">*</span> <span class="va">self</span>.experts[ei](xf[m])</span>
+<span id="annotated-cell-10-78"><a href="#annotated-cell-10-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-10-79"><a href="#annotated-cell-10-79" aria-hidden="true" tabindex="-1"></a>            f <span class="op">=</span> F.one_hot(topk_idx[:, <span class="dv">0</span>], <span class="va">self</span>.n_routed).<span class="bu">float</span>().mean(<span class="dv">0</span>)</span>
+<span id="annotated-cell-10-80"><a href="#annotated-cell-10-80" aria-hidden="true" tabindex="-1"></a>        aux <span class="op">=</span> <span class="va">self</span>.alpha <span class="op">*</span> <span class="va">self</span>.n_routed <span class="op">*</span> (f <span class="op">*</span> probs.mean(<span class="dv">0</span>)).<span class="bu">sum</span>()</span>
+<span id="annotated-cell-10-81"><a href="#annotated-cell-10-81" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (out <span class="op">+</span> routed).view(B, T, d), aux, probs.detach()</span>
+<span id="annotated-cell-10-82"><a href="#annotated-cell-10-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-83"><a href="#annotated-cell-10-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-84"><a href="#annotated-cell-10-84" aria-hidden="true" tabindex="-1"></a><span class="co"># ── DeepSeekBlock with optional Engram ─────────────────────────────────────────</span></span>
+<span id="annotated-cell-10-85"><a href="#annotated-cell-10-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-86"><a href="#annotated-cell-10-86" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DSBlockWithEngram(nn.Module):</span>
+<span id="annotated-cell-10-87"><a href="#annotated-cell-10-87" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, layer_id: <span class="bu">int</span>, ds_cfg: NanoDeepSeekConfig,</span>
+<span id="annotated-cell-10-88"><a href="#annotated-cell-10-88" aria-hidden="true" tabindex="-1"></a>                 engram: Optional[NanoEngram] <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="annotated-cell-10-89"><a href="#annotated-cell-10-89" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-90"><a href="#annotated-cell-10-90" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer_id <span class="op">=</span> layer_id</span>
+<span id="annotated-cell-10-91"><a href="#annotated-cell-10-91" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.engram   <span class="op">=</span> engram</span>
+<span id="annotated-cell-10-92"><a href="#annotated-cell-10-92" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n1       <span class="op">=</span> RMSNorm(ds_cfg.d_model)</span>
+<span id="annotated-cell-10-93"><a href="#annotated-cell-10-93" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn     <span class="op">=</span> NanoMLA(ds_cfg)</span>
+<span id="annotated-cell-10-94"><a href="#annotated-cell-10-94" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n2       <span class="op">=</span> RMSNorm(ds_cfg.d_model)</span>
+<span id="annotated-cell-10-95"><a href="#annotated-cell-10-95" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.moe      <span class="op">=</span> NanoMoE(ds_cfg)</span>
+<span id="annotated-cell-10-96"><a href="#annotated-cell-10-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-97"><a href="#annotated-cell-10-97" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor, input_ids: Optional[np.ndarray], mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="annotated-cell-10-98"><a href="#annotated-cell-10-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.engram <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> input_ids <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-99" class="code-annotation-target"><a href="#annotated-cell-10-99" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.engram(x, input_ids)          <span class="co"># Engram pre-attention update</span></span>
+<span id="annotated-cell-10-100"><a href="#annotated-cell-10-100" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.attn(<span class="va">self</span>.n1(x), mask)</span>
+<span id="annotated-cell-10-101"><a href="#annotated-cell-10-101" aria-hidden="true" tabindex="-1"></a>        moe_out, aux, probs <span class="op">=</span> <span class="va">self</span>.moe(<span class="va">self</span>.n2(x))</span>
+<span id="annotated-cell-10-102"><a href="#annotated-cell-10-102" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> moe_out</span>
+<span id="annotated-cell-10-103"><a href="#annotated-cell-10-103" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x, aux, probs</span>
+<span id="annotated-cell-10-104"><a href="#annotated-cell-10-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-105"><a href="#annotated-cell-10-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-106"><a href="#annotated-cell-10-106" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoDeepSeekWithEngram(nn.Module):</span>
+<span id="annotated-cell-10-107"><a href="#annotated-cell-10-107" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, ds_cfg: NanoDeepSeekConfig, engram_cfg: NanoEngramConfig,</span>
+<span id="annotated-cell-10-108"><a href="#annotated-cell-10-108" aria-hidden="true" tabindex="-1"></a>                 comp_tok: CompressedTokenizer):</span>
+<span id="annotated-cell-10-109"><a href="#annotated-cell-10-109" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-10-110"><a href="#annotated-cell-10-110" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ds_cfg <span class="op">=</span> ds_cfg</span>
+<span id="annotated-cell-10-111"><a href="#annotated-cell-10-111" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hasher <span class="op">=</span> NgramHashMapping(engram_cfg, comp_tok)  <span class="co"># shared across all Engram layers</span></span>
+<span id="annotated-cell-10-112"><a href="#annotated-cell-10-112" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.emb    <span class="op">=</span> nn.Embedding(ds_cfg.vocab_size, ds_cfg.d_model)</span>
+<span id="annotated-cell-10-113"><a href="#annotated-cell-10-113" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.blocks <span class="op">=</span> nn.ModuleList()</span>
+<span id="annotated-cell-10-114"><a href="#annotated-cell-10-114" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> lid <span class="kw">in</span> <span class="bu">range</span>(ds_cfg.n_layers):</span>
+<span id="annotated-cell-10-115"><a href="#annotated-cell-10-115" aria-hidden="true" tabindex="-1"></a>            engram <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-10-116"><a href="#annotated-cell-10-116" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> lid <span class="kw">in</span> engram_cfg.layer_ids:</span>
+<span id="annotated-cell-10-117"><a href="#annotated-cell-10-117" aria-hidden="true" tabindex="-1"></a>                engram <span class="op">=</span> NanoEngram(</span>
+<span id="annotated-cell-10-118"><a href="#annotated-cell-10-118" aria-hidden="true" tabindex="-1"></a>                    layer_id<span class="op">=</span>lid, cfg<span class="op">=</span>engram_cfg, d_model<span class="op">=</span>ds_cfg.d_model, hasher<span class="op">=</span><span class="va">self</span>.hasher</span>
+<span id="annotated-cell-10-119"><a href="#annotated-cell-10-119" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-10-120"><a href="#annotated-cell-10-120" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.blocks.append(DSBlockWithEngram(lid, ds_cfg, engram))</span>
+<span id="annotated-cell-10-121"><a href="#annotated-cell-10-121" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> RMSNorm(ds_cfg.d_model)</span>
+<span id="annotated-cell-10-122"><a href="#annotated-cell-10-122" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head <span class="op">=</span> nn.Linear(ds_cfg.d_model, ds_cfg.vocab_size, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-10-123"><a href="#annotated-cell-10-123" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head.weight <span class="op">=</span> <span class="va">self</span>.emb.weight</span>
+<span id="annotated-cell-10-124"><a href="#annotated-cell-10-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-125"><a href="#annotated-cell-10-125" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, idx: torch.Tensor, targets<span class="op">=</span><span class="va">None</span>):</span>
+<span id="annotated-cell-10-126"><a href="#annotated-cell-10-126" aria-hidden="true" tabindex="-1"></a>        B, T <span class="op">=</span> idx.shape</span>
+<span id="annotated-cell-10-127"><a href="#annotated-cell-10-127" aria-hidden="true" tabindex="-1"></a>        x         <span class="op">=</span> <span class="va">self</span>.emb(idx)</span>
+<span id="annotated-cell-10-128"><a href="#annotated-cell-10-128" aria-hidden="true" tabindex="-1"></a>        mask      <span class="op">=</span> causal_mask(T, idx.device)</span>
+<span id="annotated-cell-10-129"><a href="#annotated-cell-10-129" aria-hidden="true" tabindex="-1"></a>        ids_np    <span class="op">=</span> idx.cpu().numpy()</span>
+<span id="annotated-cell-10-130"><a href="#annotated-cell-10-130" aria-hidden="true" tabindex="-1"></a>        total_aux <span class="op">=</span> torch.tensor(<span class="fl">0.0</span>, device<span class="op">=</span>idx.device)</span>
+<span id="annotated-cell-10-131"><a href="#annotated-cell-10-131" aria-hidden="true" tabindex="-1"></a>        all_probs <span class="op">=</span> []</span>
+<span id="annotated-cell-10-132"><a href="#annotated-cell-10-132" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> blk <span class="kw">in</span> <span class="va">self</span>.blocks:</span>
+<span id="annotated-cell-10-133"><a href="#annotated-cell-10-133" aria-hidden="true" tabindex="-1"></a>            x, aux, probs <span class="op">=</span> blk(x, ids_np, mask)</span>
+<span id="annotated-cell-10-134"><a href="#annotated-cell-10-134" aria-hidden="true" tabindex="-1"></a>            total_aux <span class="op">+=</span> aux</span>
+<span id="annotated-cell-10-135"><a href="#annotated-cell-10-135" aria-hidden="true" tabindex="-1"></a>            all_probs.append(probs)</span>
+<span id="annotated-cell-10-136"><a href="#annotated-cell-10-136" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.head(<span class="va">self</span>.norm(x))</span>
+<span id="annotated-cell-10-137"><a href="#annotated-cell-10-137" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-10-138"><a href="#annotated-cell-10-138" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> targets <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-10-139"><a href="#annotated-cell-10-139" aria-hidden="true" tabindex="-1"></a>            lm   <span class="op">=</span> F.cross_entropy(logits.view(<span class="op">-</span><span class="dv">1</span>, logits.size(<span class="op">-</span><span class="dv">1</span>)), targets.view(<span class="op">-</span><span class="dv">1</span>))</span>
+<span id="annotated-cell-10-140"><a href="#annotated-cell-10-140" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> lm <span class="op">+</span> total_aux</span>
+<span id="annotated-cell-10-141"><a href="#annotated-cell-10-141" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits, loss, all_probs</span>
+<span id="annotated-cell-10-142"><a href="#annotated-cell-10-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-143"><a href="#annotated-cell-10-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-144"><a href="#annotated-cell-10-144" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and verify</span></span>
+<span id="annotated-cell-10-145"><a href="#annotated-cell-10-145" aria-hidden="true" tabindex="-1"></a>ds_cfg  <span class="op">=</span> NanoDeepSeekConfig()</span>
+<span id="annotated-cell-10-146"><a href="#annotated-cell-10-146" aria-hidden="true" tabindex="-1"></a>eg_cfg  <span class="op">=</span> NanoEngramConfig()</span>
+<span id="annotated-cell-10-147"><a href="#annotated-cell-10-147" aria-hidden="true" tabindex="-1"></a>model_eg <span class="op">=</span> NanoDeepSeekWithEngram(ds_cfg, eg_cfg, comp_tokenizer).to(device)</span>
+<span id="annotated-cell-10-148"><a href="#annotated-cell-10-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-149"><a href="#annotated-cell-10-149" aria-hidden="true" tabindex="-1"></a>total_p  <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model_eg.parameters())</span>
+<span id="annotated-cell-10-150"><a href="#annotated-cell-10-150" aria-hidden="true" tabindex="-1"></a>engram_p <span class="op">=</span> <span class="bu">sum</span>(</span>
+<span id="annotated-cell-10-151"><a href="#annotated-cell-10-151" aria-hidden="true" tabindex="-1"></a>    p.numel() <span class="cf">for</span> blk <span class="kw">in</span> model_eg.blocks <span class="cf">if</span> blk.engram <span class="cf">for</span> p <span class="kw">in</span> blk.engram.parameters()</span>
+<span id="annotated-cell-10-152"><a href="#annotated-cell-10-152" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-10-153"><a href="#annotated-cell-10-153" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NanoDeepSeekWithEngram — total params: </span><span class="sc">{</span>total_p<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.2f}</span><span class="ss">M  (Engram: </span><span class="sc">{</span>engram_p<span class="op">/</span><span class="fl">1e3</span><span class="sc">:.1f}</span><span class="ss">K)"</span>)</span>
+<span id="annotated-cell-10-154"><a href="#annotated-cell-10-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-155"><a href="#annotated-cell-10-155" aria-hidden="true" tabindex="-1"></a>dummy <span class="op">=</span> torch.randint(<span class="dv">0</span>, <span class="dv">50257</span>, (<span class="dv">2</span>, <span class="dv">32</span>)).to(device)</span>
+<span id="annotated-cell-10-156"><a href="#annotated-cell-10-156" aria-hidden="true" tabindex="-1"></a>tgt   <span class="op">=</span> torch.randint(<span class="dv">0</span>, <span class="dv">50257</span>, (<span class="dv">2</span>, <span class="dv">32</span>)).to(device)</span>
+<span id="annotated-cell-10-157"><a href="#annotated-cell-10-157" aria-hidden="true" tabindex="-1"></a>logits, loss, probs <span class="op">=</span> model_eg(dummy, tgt)</span>
+<span id="annotated-cell-10-158"><a href="#annotated-cell-10-158" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Forward pass OK — logits: </span><span class="sc">{</span><span class="bu">tuple</span>(logits.shape)<span class="sc">}</span><span class="ss">, loss: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="99" data-code-annotation="1">The Engram update runs before the pre-norm MLA step. This gives the attention mechanism access to the hash-retrieved signal when computing queries and keys.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="gate-visualization-what-does-engram-attend-to" class="level2">
+<h2 class="anchored" data-anchor-id="gate-visualization-what-does-engram-attend-to">Gate Visualization: What Does Engram Attend To?</h2>
+<p>We visualize the gate values <span class="math inline">\alpha_t</span> for each token position in a sentence, at each Engram layer. <mark>High gate values indicate that the hash embedding for that <span class="math inline">n</span>-gram context carried a strong signal</mark> — typically proper nouns, technical terms, or rare multi-word expressions.</p>
+<p>At initialization (random embeddings), gates will be near 0.5 uniformly. This visualization becomes meaningful after training, where gates for rare surface forms will sharpen.</p>
+<div id="cell-25" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_gate_values(model: NanoDeepSeekWithEngram, text: <span class="bu">str</span>) <span class="op">-&gt;</span> Dict[<span class="bu">int</span>, np.ndarray]:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return gate values (T,) for each Engram layer given a text prompt."""</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> base_tokenizer.encode(text)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    idx    <span class="op">=</span> torch.tensor(tokens, dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    B, T   <span class="op">=</span> idx.shape</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    x      <span class="op">=</span> model.emb(idx)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    ids_np <span class="op">=</span> idx.cpu().numpy()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    mask   <span class="op">=</span> causal_mask(T, device)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    gates_by_layer: Dict[<span class="bu">int</span>, np.ndarray] <span class="op">=</span> {}</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> blk <span class="kw">in</span> model.blocks:</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> blk.engram <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            eg  <span class="op">=</span> blk.engram</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            lid <span class="op">=</span> blk.layer_id</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            hash_idx <span class="op">=</span> eg.hasher.<span class="bu">hash</span>(ids_np, lid)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>            hash_t   <span class="op">=</span> torch.from_numpy(hash_idx).to(device)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            emb      <span class="op">=</span> eg.mhe(hash_t).flatten(start_dim<span class="op">=-</span><span class="dv">2</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            K        <span class="op">=</span> eg.W_K(emb)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            K_normed <span class="op">=</span> eg.norm_k(K).view(B, T, eg.hc_mult, eg.d).mean(dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            nq       <span class="op">=</span> eg.norm_q(x)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            s        <span class="op">=</span> (nq <span class="op">*</span> K_normed).<span class="bu">sum</span>(<span class="op">-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>) <span class="op">/</span> math.sqrt(eg.d)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            a        <span class="op">=</span> s.<span class="bu">abs</span>().clamp(<span class="fl">1e-9</span>).sqrt() <span class="op">*</span> s.sign()</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            gate     <span class="op">=</span> a.sigmoid().squeeze(<span class="op">-</span><span class="dv">1</span>).squeeze(<span class="dv">0</span>)   <span class="co"># (T,)</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            gates_by_layer[lid] <span class="op">=</span> gate.cpu().numpy()</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        x, _, _ <span class="op">=</span> blk(x, ids_np, mask)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gates_by_layer</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>sentence  <span class="op">=</span> <span class="st">"Only Alexander the Great could tame the horse Bucephalus."</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>tokens    <span class="op">=</span> base_tokenizer.encode(sentence)</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>tok_strs  <span class="op">=</span> [base_tokenizer.decode([t]) <span class="cf">for</span> t <span class="kw">in</span> tokens]</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>gate_vals <span class="op">=</span> get_gate_values(model_eg, sentence)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="bu">len</span>(gate_vals), <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="fl">2.5</span> <span class="op">*</span> <span class="bu">len</span>(gate_vals)))</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(gate_vals) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> [axes]</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (lid, gates) <span class="kw">in</span> <span class="bu">zip</span>(axes, <span class="bu">sorted</span>(gate_vals.items())):</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    im <span class="op">=</span> ax.imshow(gates[<span class="va">None</span>, :], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span><span class="st">"YlOrRd"</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    ax.set_xticks(<span class="bu">range</span>(<span class="bu">len</span>(tok_strs)))</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    ax.set_xticklabels(tok_strs, rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    ax.set_yticks([])</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Engram gate α — Layer </span><span class="sc">{</span>lid<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    plt.colorbar(im, ax<span class="op">=</span>ax)</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="ss">f'"</span><span class="sc">{</span>sentence<span class="sc">}</span><span class="ss">"'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"03_engram_gates.png"</span>, dpi<span class="op">=</span><span class="dv">150</span>)</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>After training: proper nouns (<em>Alexander</em>, <em>Bucephalus</em>), rare multi-word spans, and end-of-sentence positions typically show higher gate values. At random initialization the gates are uninformative — run this cell again after training on FineWeb-Edu to see learned specialization.</p>
+</section>
+<section id="sensitivity-analysis-ablating-engram-at-inference" class="level2">
+<h2 class="anchored" data-anchor-id="sensitivity-analysis-ablating-engram-at-inference">Sensitivity Analysis: Ablating Engram at Inference</h2>
+<p>We zero out the Engram contribution — setting all gates to 0 — and measure the perplexity increase on a held-out sample. This quantifies how much the model relies on hash retrieval versus pure attention.</p>
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eval_perplexity(</span>
+<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a>    model: NanoDeepSeekWithEngram,</span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a>    n_batches: <span class="bu">int</span> <span class="op">=</span> <span class="dv">20</span>,</span>
+<span id="annotated-cell-12-8"><a href="#annotated-cell-12-8" aria-hidden="true" tabindex="-1"></a>    seq_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">64</span>,</span>
+<span id="annotated-cell-12-9"><a href="#annotated-cell-12-9" aria-hidden="true" tabindex="-1"></a>    ablate_engram: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="annotated-cell-12-10"><a href="#annotated-cell-12-10" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-12-11"><a href="#annotated-cell-12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate perplexity on a few FineWeb-Edu batches."""</span></span>
+<span id="annotated-cell-12-12"><a href="#annotated-cell-12-12" aria-hidden="true" tabindex="-1"></a>    original_forwards <span class="op">=</span> {}</span>
+<span id="annotated-cell-12-13"><a href="#annotated-cell-12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ablate_engram:</span>
+<span id="annotated-cell-12-14"><a href="#annotated-cell-12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> blk <span class="kw">in</span> model.blocks:</span>
+<span id="annotated-cell-12-15"><a href="#annotated-cell-12-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> blk.engram <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-12-16"><a href="#annotated-cell-12-16" aria-hidden="true" tabindex="-1"></a>                eg <span class="op">=</span> blk.engram</span>
+<span id="annotated-cell-12-17"><a href="#annotated-cell-12-17" aria-hidden="true" tabindex="-1"></a>                original_forwards[<span class="bu">id</span>(eg)] <span class="op">=</span> eg.forward</span>
+<span id="annotated-cell-12-18"><a href="#annotated-cell-12-18" aria-hidden="true" tabindex="-1"></a>                <span class="kw">def</span> zero_forward(h, input_ids, _eg<span class="op">=</span>eg):</span>
+<span id="annotated-cell-12-19"><a href="#annotated-cell-12-19" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> torch.zeros_like(h)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-20" class="code-annotation-target"><a href="#annotated-cell-12-20" aria-hidden="true" tabindex="-1"></a>                eg.forward <span class="op">=</span> zero_forward</span>
+<span id="annotated-cell-12-21"><a href="#annotated-cell-12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-22"><a href="#annotated-cell-12-22" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-12-23"><a href="#annotated-cell-12-23" aria-hidden="true" tabindex="-1"></a>    total_loss, n_done <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span></span>
+<span id="annotated-cell-12-24"><a href="#annotated-cell-12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="annotated-cell-12-25"><a href="#annotated-cell-12-25" aria-hidden="true" tabindex="-1"></a>        ds <span class="op">=</span> load_dataset(<span class="st">"HuggingFaceFW/fineweb-edu"</span>, name<span class="op">=</span><span class="st">"sample-10BT"</span>,</span>
+<span id="annotated-cell-12-26"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a>                          split<span class="op">=</span><span class="st">"train"</span>, streaming<span class="op">=</span><span class="va">True</span>, trust_remote_code<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-12-27"><a href="#annotated-cell-12-27" aria-hidden="true" tabindex="-1"></a>        buf <span class="op">=</span> []</span>
+<span id="annotated-cell-12-28"><a href="#annotated-cell-12-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> doc <span class="kw">in</span> ds:</span>
+<span id="annotated-cell-12-29"><a href="#annotated-cell-12-29" aria-hidden="true" tabindex="-1"></a>            ids <span class="op">=</span> base_tokenizer.encode(doc[<span class="st">"text"</span>], add_special_tokens<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-12-30"><a href="#annotated-cell-12-30" aria-hidden="true" tabindex="-1"></a>            buf.extend(ids)</span>
+<span id="annotated-cell-12-31"><a href="#annotated-cell-12-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="bu">len</span>(buf) <span class="op">&gt;=</span> seq_len <span class="op">+</span> <span class="dv">1</span> <span class="kw">and</span> n_done <span class="op">&lt;</span> n_batches:</span>
+<span id="annotated-cell-12-32"><a href="#annotated-cell-12-32" aria-hidden="true" tabindex="-1"></a>                chunk <span class="op">=</span> buf[:seq_len <span class="op">+</span> <span class="dv">1</span>]<span class="op">;</span> buf <span class="op">=</span> buf[seq_len <span class="op">+</span> <span class="dv">1</span>:]</span>
+<span id="annotated-cell-12-33"><a href="#annotated-cell-12-33" aria-hidden="true" tabindex="-1"></a>                inp <span class="op">=</span> torch.tensor(chunk[:<span class="op">-</span><span class="dv">1</span>], dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device).unsqueeze(<span class="dv">0</span>)</span>
+<span id="annotated-cell-12-34"><a href="#annotated-cell-12-34" aria-hidden="true" tabindex="-1"></a>                tgt <span class="op">=</span> torch.tensor(chunk[<span class="dv">1</span>:],  dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device).unsqueeze(<span class="dv">0</span>)</span>
+<span id="annotated-cell-12-35"><a href="#annotated-cell-12-35" aria-hidden="true" tabindex="-1"></a>                _, loss, _ <span class="op">=</span> model(inp, tgt)</span>
+<span id="annotated-cell-12-36"><a href="#annotated-cell-12-36" aria-hidden="true" tabindex="-1"></a>                total_loss <span class="op">+=</span> loss.item()<span class="op">;</span> n_done <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-12-37"><a href="#annotated-cell-12-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> n_done <span class="op">&gt;=</span> n_batches:</span>
+<span id="annotated-cell-12-38"><a href="#annotated-cell-12-38" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="annotated-cell-12-39"><a href="#annotated-cell-12-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">finally</span>:</span>
+<span id="annotated-cell-12-40"><a href="#annotated-cell-12-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ablate_engram:</span>
+<span id="annotated-cell-12-41"><a href="#annotated-cell-12-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> blk <span class="kw">in</span> model.blocks:</span>
+<span id="annotated-cell-12-42"><a href="#annotated-cell-12-42" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> blk.engram <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-12-43"><a href="#annotated-cell-12-43" aria-hidden="true" tabindex="-1"></a>                    eg <span class="op">=</span> blk.engram</span>
+<span id="annotated-cell-12-44"><a href="#annotated-cell-12-44" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="bu">id</span>(eg) <span class="kw">in</span> original_forwards:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-12-45" class="code-annotation-target"><a href="#annotated-cell-12-45" aria-hidden="true" tabindex="-1"></a>                        eg.forward <span class="op">=</span> original_forwards[<span class="bu">id</span>(eg)]</span>
+<span id="annotated-cell-12-46"><a href="#annotated-cell-12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-47"><a href="#annotated-cell-12-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.exp(total_loss <span class="op">/</span> <span class="bu">max</span>(n_done, <span class="dv">1</span>))</span>
+<span id="annotated-cell-12-48"><a href="#annotated-cell-12-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-49"><a href="#annotated-cell-12-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-50"><a href="#annotated-cell-12-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Evaluating (model is untrained — values are random-init baseline)"</span>)</span>
+<span id="annotated-cell-12-51"><a href="#annotated-cell-12-51" aria-hidden="true" tabindex="-1"></a>ppl_with    <span class="op">=</span> eval_perplexity(model_eg, ablate_engram<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-12-52"><a href="#annotated-cell-12-52" aria-hidden="true" tabindex="-1"></a>ppl_without <span class="op">=</span> eval_perplexity(model_eg, ablate_engram<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-12-53"><a href="#annotated-cell-12-53" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Perplexity WITH    Engram: </span><span class="sc">{</span>ppl_with<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-12-54"><a href="#annotated-cell-12-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Perplexity WITHOUT Engram: </span><span class="sc">{</span>ppl_without<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-12-55"><a href="#annotated-cell-12-55" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"ΔPP: </span><span class="sc">{</span>ppl_without <span class="op">-</span> ppl_with<span class="sc">:+.2f}</span><span class="ss"> (</span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>(ppl_without<span class="op">/</span>ppl_with <span class="op">-</span> <span class="dv">1</span>)<span class="sc">:+.1f}</span><span class="ss">%)"</span>)</span>
+<span id="annotated-cell-12-56"><a href="#annotated-cell-12-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Note: For a trained model, expect 2–8% perplexity increase when ablating."</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="20" data-code-annotation="1">Monkey-patching <code>eg.forward</code> to return zeros cleanly ablates the Engram contribution without modifying model weights.</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="45" data-code-annotation="2">The <code>finally</code> block restores the original forward methods even if evaluation raises an exception, preventing permanent model corruption.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 30%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Purpose</th>
+<th>Key design</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CompressedTokenizer</code></td>
+<td>Normalize hash space</td>
+<td>NFKC + lowercase + accent strip</td>
+</tr>
+<tr class="even">
+<td><code>NgramHashMapping</code></td>
+<td>Map <span class="math inline">n</span>-grams → table addresses</td>
+<td>Seeded XOR + globally distinct prime moduli</td>
+</tr>
+<tr class="odd">
+<td><code>MultiHeadEmbedding</code></td>
+<td>Read hash addresses</td>
+<td>Single table + per-head offsets</td>
+</tr>
+<tr class="even">
+<td>Gate</td>
+<td>Route embedding into residual</td>
+<td>sqrt-sigmoid of normalized dot-product</td>
+</tr>
+<tr class="odd">
+<td><code>ShortConv</code></td>
+<td>Local aggregation</td>
+<td>kernel=4, dilation=3, depthwise, causal</td>
+</tr>
+<tr class="even">
+<td><code>NanoEngram</code></td>
+<td>Full layer</td>
+<td>hash → embed → gate → ShortConv → residual</td>
+</tr>
+<tr class="odd">
+<td>mHC (simplified)</td>
+<td>Key diversity</td>
+<td>Collapsed to single <span class="math inline">4d</span> projection; full mHC requires Riemannian optimizer</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Collision rate measurement.</strong> Estimate the theoretical collision rate for bigrams with table size <span class="math inline">N = 50{,}000</span> and GPT-2’s vocabulary (<span class="math inline">V = 50{,}257</span>). Then measure empirically: generate 10,000 random bigrams from the <code>NgramHashMapping</code> and count how many distinct bigrams share the same hash address.</p></li>
+<li><p><strong>Normalization ablation.</strong> Replace <code>_normalize</code> with a stricter version that also strips punctuation. Does this reduce the compressed vocabulary further? Plot the gate entropy before and after a short training run with each normalization to assess impact on routing signal quality.</p></li>
+<li><p><strong>ShortConv ablation.</strong> Remove the <code>ShortConv</code> from <code>NanoEngram</code> (return <code>gate * V</code> directly) and measure perplexity change on a trained checkpoint. Is local aggregation important, or does gating alone capture most of the benefit?</p></li>
+<li><p><strong>sqrt-sigmoid vs sigmoid.</strong> Plot both <span class="math inline">\sigma(x)</span> and <span class="math inline">\sigma(\sqrt{|x|} \cdot \operatorname{sign}(x))</span> over <span class="math inline">x \in [-3, 3]</span>. How do they differ in the near-zero region? Implement a version of <code>NanoEngram</code> using plain sigmoid and compare gate entropy histograms after training.</p></li>
+<li><p><strong>Multi-head diversity.</strong> After training, compute the pairwise cosine similarity between the <code>n_head</code> hash head embeddings for the most common 1,000 bigrams. Are the heads learning diverse representations, or are they collapsing to similar embeddings?</p></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+References
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>DeepSeek-AI (2025). <em>DeepSeek-V3-Engram: Hash-Addressed n-gram Memory for Language Models.</em> Technical Report.</li>
+<li>DeepSeek-AI (2024). <em>DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model.</em> arXiv:2405.04434.</li>
+<li>Zhang &amp; Sennrich (2019). <em>Root Mean Square Layer Normalization.</em> NeurIPS.</li>
+</ul>
+</div>
+</div>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="pagination-link" aria-label="02. Training NanoDeepSeek">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">02. Training NanoDeepSeek</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

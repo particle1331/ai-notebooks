@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Byte Pair Encoding and Vocabulary Design – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/llm/03-data-pipelines.html" rel="next">
+<link href="../../notebooks/llm/01-gpt-architecture.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/02-tokenization.html">02. Byte Pair Encoding &amp; Tokenization</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-problem-with-naive-approaches" id="toc-the-problem-with-naive-approaches" class="nav-link active" data-scroll-target="#the-problem-with-naive-approaches">The Problem with Naive Approaches</a></li>
+  <li><a href="#byte-pair-encoding-from-scratch" id="toc-byte-pair-encoding-from-scratch" class="nav-link" data-scroll-target="#byte-pair-encoding-from-scratch">Byte Pair Encoding from Scratch</a>
+  <ul class="collapse">
+  <li><a href="#step-1-the-initial-vocabulary" id="toc-step-1-the-initial-vocabulary" class="nav-link" data-scroll-target="#step-1-the-initial-vocabulary">Step 1: The initial vocabulary</a></li>
+  <li><a href="#step-2-pre-tokenization" id="toc-step-2-pre-tokenization" class="nav-link" data-scroll-target="#step-2-pre-tokenization">Step 2: Pre-tokenization</a></li>
+  <li><a href="#step-3-build-the-frequency-table" id="toc-step-3-build-the-frequency-table" class="nav-link" data-scroll-target="#step-3-build-the-frequency-table">Step 3: Build the frequency table</a></li>
+  <li><a href="#step-4-count-pair-frequencies" id="toc-step-4-count-pair-frequencies" class="nav-link" data-scroll-target="#step-4-count-pair-frequencies">Step 4: Count pair frequencies</a></li>
+  <li><a href="#step-5-merge-the-most-frequent-pair" id="toc-step-5-merge-the-most-frequent-pair" class="nav-link" data-scroll-target="#step-5-merge-the-most-frequent-pair">Step 5: Merge the most frequent pair</a></li>
+  <li><a href="#step-6-the-full-training-loop" id="toc-step-6-the-full-training-loop" class="nav-link" data-scroll-target="#step-6-the-full-training-loop">Step 6: The full training loop</a></li>
+  </ul></li>
+  <li><a href="#encoding-and-decoding" id="toc-encoding-and-decoding" class="nav-link" data-scroll-target="#encoding-and-decoding">Encoding and Decoding</a></li>
+  <li><a href="#vocabulary-size-the-real-tradeoffs" id="toc-vocabulary-size-the-real-tradeoffs" class="nav-link" data-scroll-target="#vocabulary-size-the-real-tradeoffs">Vocabulary Size: The Real Tradeoffs</a>
+  <ul class="collapse">
+  <li><a href="#sequence-length" id="toc-sequence-length" class="nav-link" data-scroll-target="#sequence-length">Sequence length</a></li>
+  <li><a href="#embedding-table-size" id="toc-embedding-table-size" class="nav-link" data-scroll-target="#embedding-table-size">Embedding table size</a></li>
+  <li><a href="#softmax-cost" id="toc-softmax-cost" class="nav-link" data-scroll-target="#softmax-cost">Softmax cost</a></li>
+  <li><a href="#fertility-and-domain-coverage" id="toc-fertility-and-domain-coverage" class="nav-link" data-scroll-target="#fertility-and-domain-coverage">Fertility and domain coverage</a></li>
+  </ul></li>
+  <li><a href="#special-tokens" id="toc-special-tokens" class="nav-link" data-scroll-target="#special-tokens">Special Tokens</a>
+  <ul class="collapse">
+  <li><a href="#the-standard-set" id="toc-the-standard-set" class="nav-link" data-scroll-target="#the-standard-set">The standard set</a></li>
+  <li><a href="#training-vs-inference-behavior" id="toc-training-vs-inference-behavior" class="nav-link" data-scroll-target="#training-vs-inference-behavior">Training vs inference behavior</a></li>
+  <li><a href="#the-padding-bug" id="toc-the-padding-bug" class="nav-link" data-scroll-target="#the-padding-bug">The padding bug</a></li>
+  </ul></li>
+  <li><a href="#the-tokenizer-class" id="toc-the-tokenizer-class" class="nav-link" data-scroll-target="#the-tokenizer-class">The <code>Tokenizer</code> Class</a></li>
+  <li><a href="#training-the-tokenizer-on-real-text" id="toc-training-the-tokenizer-on-real-text" class="nav-link" data-scroll-target="#training-the-tokenizer-on-real-text">Training the Tokenizer on Real Text</a></li>
+  <li><a href="#how-tiktoken-differs" id="toc-how-tiktoken-differs" class="nav-link" data-scroll-target="#how-tiktoken-differs">How tiktoken Differs</a></li>
+  <li><a href="#the-nano-model-tokenizer-decision" id="toc-the-nano-model-tokenizer-decision" class="nav-link" data-scroll-target="#the-nano-model-tokenizer-decision">The Nano Model Tokenizer Decision</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/02-tokenization.html">02. Byte Pair Encoding &amp; Tokenization</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Byte Pair Encoding and Vocabulary Design</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Before a single weight is updated, text has to become numbers. <strong>Tokenization</strong> is the bridge — and <mark>the choices made here propagate through every downstream decision</mark>: vocabulary size affects embedding table memory, sequence length, and softmax cost; the tokenizer’s coverage of rare words affects how well the model handles domain-specific text; the special token conventions affect how SFT and alignment data must be formatted.</p>
+<p>Most treatments of tokenization use it as a black box — call <code>tokenizer.encode()</code>, move on. This notebook <u>opens the box</u>:</p>
+<ul>
+<li><strong>Byte Pair Encoding (BPE)</strong> — what it actually computes: the merge loop, the frequency table, the vocabulary, step by step</li>
+<li><strong>Encoding and decoding</strong> — how they work with a learned merge table</li>
+<li><strong>Vocabulary size</strong> — a real hyperparameter with real tradeoffs: sequence length vs embedding cost vs coverage</li>
+<li><strong>The fertility problem</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> — why some languages and domains tokenize badly, and what that costs at training time</li>
+<li><strong>Special tokens</strong> — <code>&lt;bos&gt;</code>, <code>&lt;eos&gt;</code>, <code>&lt;pad&gt;</code>, <code>&lt;unk&gt;</code> — their roles in training vs inference and the bugs that happen when you confuse them</li>
+<li>Building a <code>Tokenizer</code> class that trains on a corpus, saves its vocabulary, and reloads it</li>
+<li><strong>How tiktoken differs</strong> — and why it’s faster</li>
+</ul>
+<p>By the end you will have a working BPE tokenizer trained on real text, and a precise understanding of what GPT-2’s tokenizer is doing when you call it.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+References
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The BPE implementation here follows the approach in <a href="https://github.com/rasbt/LLMs-from-scratch">LLMs-from-scratch</a> — specifically <a href="https://github.com/rasbt/LLMs-from-scratch/tree/main/ch02/05_bpe-from-scratch"><code>ch02/05_bpe-from-scratch/</code></a>. For the GPT-2 pre-tokenization pattern and byte-level vocabulary, see also the OpenAI GPT-2 <a href="https://github.com/openai/gpt-2/blob/master/src/encoder.py">encoder.py</a>.</p>
+</div>
+</div>
+<section id="the-problem-with-naive-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem-with-naive-approaches">The Problem with Naive Approaches</h2>
+<p>Before BPE, consider the alternatives and why they fail.</p>
+<p><strong>Character-level tokenization.</strong> Split text into individual characters. Vocabulary is tiny (~100 for ASCII, ~1000 for Unicode BMP). But sequences get very long — “tokenization” becomes 13 tokens — and the model has to learn to compose characters into words and words into meaning from scratch. Long sequences mean more attention computation (<span class="math inline">O(n^2)</span> in sequence length) and more gradient steps to learn the same concept.</p>
+<p><strong>Word-level tokenization.</strong> Split on whitespace and punctuation. Sequences are short. But the vocabulary explodes: English has hundreds of thousands of word forms, and any word not seen during training is mapped to <code>&lt;unk&gt;</code>. A model that maps “tokenizing”, “tokenizer”, and “tokenized” to three different vocabulary entries — or to <code>&lt;unk&gt;</code> — cannot generalize across morphological variants.</p>
+<p><strong>Subword tokenization.</strong> The middle ground. Frequent words get their own token; rare words are split into frequent subword pieces. “tokenization” → [“token”, “ization”]. “unimaginably” → [“un”, “imagine”, “ably”]. Unknown words are always representable as sequences of known subwords — at worst, individual bytes. This is what BPE implements.</p>
+</section>
+<section id="byte-pair-encoding-from-scratch" class="level2">
+<h2 class="anchored" data-anchor-id="byte-pair-encoding-from-scratch">Byte Pair Encoding from Scratch</h2>
+<p>BPE was originally a data compression algorithm (1994, Gage). The idea: find the most frequent pair of adjacent symbols in a corpus and replace every occurrence with a new merged symbol. Repeat. Sennrich et al.&nbsp;(2016) applied this to NLP subword tokenization — the “symbols” are characters, and each merge creates a new subword unit.</p>
+<section id="step-1-the-initial-vocabulary" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-the-initial-vocabulary">Step 1: The initial vocabulary</h3>
+<p>Start with the set of all unique bytes (0–255) as the base vocabulary. This guarantees that any text is always representable — no <code>&lt;unk&gt;</code>. GPT-2 uses this byte-level approach; we will too.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Base vocabulary: all 256 byte values as single-byte strings</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We represent each byte as a string for readability</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>base_vocab <span class="op">=</span> {i: <span class="bu">bytes</span>([i]).decode(<span class="st">'latin-1'</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-2-pre-tokenization" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-pre-tokenization">Step 2: Pre-tokenization</h3>
+<p>Before running BPE, split the raw text into “words” — chunks that BPE should not merge across. The standard approach (used by GPT-2) is a regex that splits on whitespace boundaries while keeping the whitespace attached to the following word:</p>
+<div id="31278202" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> regex <span class="im">as</span> re   <span class="co"># pip install regex — supports Unicode categories</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># GPT-2's pre-tokenization pattern</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>GPT2_SPLIT_PATTERN <span class="op">=</span> <span class="vs">r"""'</span>(?:<span class="pp">[sdmt]</span><span class="cf">|</span><span class="vs">ll</span><span class="cf">|</span><span class="vs">ve</span><span class="cf">|</span><span class="vs">re</span>)<span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="dv">\w</span><span class="op">+</span><span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="dv">\d</span><span class="op">+</span><span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="pp">[^</span><span class="dv">\s\w\d</span><span class="pp">]</span><span class="op">+</span><span class="cf">|</span><span class="dv">\s</span><span class="op">+</span><span class="ex">(</span><span class="fu">?!</span><span class="dv">\S</span><span class="ex">)</span><span class="cf">|</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"""</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pre_tokenize(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> re.findall(GPT2_SPLIT_PATTERN, text)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Hello, world! I'm learning tokenization."</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pre_tokenize(text))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ['Hello', ',', ' world', '!', " I'm", ' learning', ' tokenization', '.']</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that <code>" world"</code> has a leading space — <mark>this is intentional</mark>. The token <code>" world"</code> (with space) is distinct from <code>"world"</code> (without space), which handles the difference between the word at the start of a sentence vs mid-sentence. This is why GPT-2’s vocabulary contains both <code>"world"</code> and <code>"Ġworld"</code> (the <code>Ġ</code> symbol is how tiktoken renders the leading space).</p>
+</section>
+<section id="step-3-build-the-frequency-table" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-build-the-frequency-table">Step 3: Build the frequency table</h3>
+<p>Convert each pre-tokenized word into a tuple of characters, and count how often each character sequence appears:</p>
+<div id="7f04b1b4" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, defaultdict</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_vocab_from_corpus(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">tuple</span>, <span class="bu">int</span>]:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns {char_sequence: frequency} for each pre-tokenized word."""</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    words <span class="op">=</span> pre_tokenize(text)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    vocab <span class="op">=</span> Counter()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word <span class="kw">in</span> words:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convert word to tuple of individual characters (initial "tokens")</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        char_seq <span class="op">=</span> <span class="bu">tuple</span>(word)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        vocab[char_seq] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">dict</span>(vocab)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"low lower lowest low lower"</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>word_freqs <span class="op">=</span> build_vocab_from_corpus(text)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(word_freqs)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># {('l','o','w'): 2, ('l','o','w','e','r'): 2, ('l','o','w','e','s','t'): 1}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-4-count-pair-frequencies" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-count-pair-frequencies">Step 4: Count pair frequencies</h3>
+<p>For the current tokenization of each word, count how often each <em>adjacent pair</em> appears (weighted by word frequency):</p>
+<div id="4a5c7170" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_pair_frequencies(word_freqs: <span class="bu">dict</span>) <span class="op">-&gt;</span> Counter:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    pair_counts <span class="op">=</span> Counter()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char_seq, freq <span class="kw">in</span> word_freqs.items():</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(char_seq) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            pair <span class="op">=</span> (char_seq[i], char_seq[i<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            pair_counts[pair] <span class="op">+=</span> freq</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pair_counts</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>pair_freqs <span class="op">=</span> get_pair_frequencies(word_freqs)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pair_freqs.most_common(<span class="dv">5</span>))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># [(('l', 'o'), 5), (('o', 'w'), 5), (('w', 'e'), 3), (('e', 'r'), 2), ...]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-5-merge-the-most-frequent-pair" class="level3">
+<h3 class="anchored" data-anchor-id="step-5-merge-the-most-frequent-pair">Step 5: Merge the most frequent pair</h3>
+<p>Find the most frequent pair and merge every occurrence in every word:</p>
+<div id="4dc2a18a" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge_pair(word_freqs: <span class="bu">dict</span>, pair: <span class="bu">tuple</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Replace all occurrences of `pair` in every word with a merged token."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    new_word_freqs <span class="op">=</span> {}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    merged <span class="op">=</span> pair[<span class="dv">0</span>] <span class="op">+</span> pair[<span class="dv">1</span>]   <span class="co"># e.g. ('l', 'o') → 'lo'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char_seq, freq <span class="kw">in</span> word_freqs.items():</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        new_seq <span class="op">=</span> []</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> i <span class="op">&lt;</span> <span class="bu">len</span>(char_seq):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(char_seq) <span class="op">-</span> <span class="dv">1</span> <span class="kw">and</span> (char_seq[i], char_seq[i<span class="op">+</span><span class="dv">1</span>]) <span class="op">==</span> pair:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                new_seq.append(merged)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                i <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                new_seq.append(char_seq[i])</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        new_word_freqs[<span class="bu">tuple</span>(new_seq)] <span class="op">=</span> freq</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_word_freqs</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Before merge: ('l', 'o', 'w') appears 2 times</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge ('l', 'o') → 'lo'</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>word_freqs <span class="op">=</span> merge_pair(word_freqs, (<span class="st">'l'</span>, <span class="st">'o'</span>))</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(word_freqs)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># {('lo', 'w'): 2, ('lo', 'w', 'e', 'r'): 2, ('lo', 'w', 'e', 's', 't'): 1}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-6-the-full-training-loop" class="level3">
+<h3 class="anchored" data-anchor-id="step-6-the-full-training-loop">Step 6: The full training loop</h3>
+<p>Repeat steps 4–5 for a fixed number of merges (the <code>num_merges</code> hyperparameter, which <mark>determines vocabulary size</mark>):</p>
+<div id="78fd2952" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_bpe(text: <span class="bu">str</span>, num_merges: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">dict</span>, <span class="bu">list</span>]:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">        vocab:  {token_string: token_id}  — the final vocabulary</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">        merges: [(pair, merged_token), ...] — ordered list of merges</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">                 (needed for encoding new text)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    word_freqs <span class="op">=</span> build_vocab_from_corpus(text)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    merges <span class="op">=</span> []</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Base vocabulary: all unique characters seen in the corpus</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    all_chars <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word <span class="kw">in</span> word_freqs:</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        all_chars.update(word)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    vocab <span class="op">=</span> {ch: i <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">sorted</span>(all_chars))}</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> merge_idx <span class="kw">in</span> <span class="bu">range</span>(num_merges):</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        pair_freqs <span class="op">=</span> get_pair_frequencies(word_freqs)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> pair_freqs:</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span>   <span class="co"># corpus fully merged — stop early</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Most frequent pair</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        best_pair <span class="op">=</span> pair_freqs.most_common(<span class="dv">1</span>)[<span class="dv">0</span>][<span class="dv">0</span>]</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        merged    <span class="op">=</span> best_pair[<span class="dv">0</span>] <span class="op">+</span> best_pair[<span class="dv">1</span>]</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add to vocabulary</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        vocab[merged] <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        merges.append((best_pair, merged))</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Apply merge to corpus</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        word_freqs <span class="op">=</span> merge_pair(word_freqs, best_pair)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> merge_idx <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"merge </span><span class="sc">{</span>merge_idx<span class="sc">:4d}</span><span class="ss">: </span><span class="sc">{</span>best_pair<span class="sc">}</span><span class="ss"> → '</span><span class="sc">{</span>merged<span class="sc">}</span><span class="ss">'  "</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>                  <span class="ss">f"(freq=</span><span class="sc">{</span>pair_freqs[best_pair]<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vocab, merges</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running this on a small corpus, the first few merges on English text typically look like:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>corpus <span class="op">=</span> <span class="bu">open</span>(<span class="st">'some_text.txt'</span>).read()   <span class="co"># any text file</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>vocab, merges <span class="op">=</span> train_bpe(corpus, num_merges<span class="op">=</span><span class="dv">500</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># merge    0: ('e', 's') → 'es'     (very frequent: "the", "es", ...)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># merge    1: ('i', 'n') → 'in'     (frequent: "in", "ing", "tion")</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># merge    2: ('t', 'h') → 'th'     ("the", "this", "that")</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># merge    3: ('t', 'he') → 'the'   ("the" — most common English word)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># merge    4: ('in', 'g') → 'ing'   (progressive "-ing" suffix)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><mark>The early merges are always the most frequent bigrams</mark> — <code>"th"</code>, <code>"he"</code>, <code>"in"</code>, <code>"er"</code>. As merges continue, they start capturing <strong>longer subword units</strong> — <code>"ing"</code>, <code>"tion"</code>, <code>"the"</code>, and eventually common full words<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+</section>
+</section>
+<section id="encoding-and-decoding" class="level2">
+<h2 class="anchored" data-anchor-id="encoding-and-decoding">Encoding and Decoding</h2>
+<p>Once trained, the tokenizer needs to encode new text. The key insight: <u><strong>apply the merges in the same order they were learned</strong></u>. A pair learned on merge step 42 can only be applied after all merges from steps 0–41 have been applied first.</p>
+<div id="a7448f35" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BPETokenizer:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">int</span>], merges: <span class="bu">list</span>[<span class="bu">tuple</span>]):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab   <span class="op">=</span> vocab                          <span class="co"># str → id</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.id2tok  <span class="op">=</span> {v: k <span class="cf">for</span> k, v <span class="kw">in</span> vocab.items()}  <span class="co"># id → str</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.merges  <span class="op">=</span> merges                         <span class="co"># ordered merge list</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Build a merge lookup: {pair: merged_token} for O(1) lookup</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.merge_lookup <span class="op">=</span> {pair: merged <span class="cf">for</span> pair, merged <span class="kw">in</span> merges}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> pre_tokenize(text)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        token_ids <span class="op">=</span> []</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> word <span class="kw">in</span> words:</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Start with individual characters</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            tokens <span class="op">=</span> <span class="bu">list</span>(word)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Apply merges in learned order</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            changed <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> changed <span class="kw">and</span> <span class="bu">len</span>(tokens) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>                changed <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                new_tokens <span class="op">=</span> []</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">while</span> i <span class="op">&lt;</span> <span class="bu">len</span>(tokens):</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(tokens) <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                        pair <span class="op">=</span> (tokens[i], tokens[i<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> pair <span class="kw">in</span> <span class="va">self</span>.merge_lookup:</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>                            new_tokens.append(<span class="va">self</span>.merge_lookup[pair])</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                            i <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                            changed <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">continue</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                    new_tokens.append(tokens[i])</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>                    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>                tokens <span class="op">=</span> new_tokens</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Convert token strings to IDs</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> tok <span class="kw">in</span> tokens:</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> tok <span class="kw">in</span> <span class="va">self</span>.vocab:</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>                    token_ids.append(<span class="va">self</span>.vocab[tok])</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Fallback: encode as individual bytes</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span> byte <span class="kw">in</span> tok.encode(<span class="st">'utf-8'</span>):</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>                        token_ids.append(<span class="va">self</span>.vocab.get(<span class="bu">chr</span>(byte), <span class="dv">0</span>))</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> token_ids</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decode(<span class="va">self</span>, token_ids: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> [<span class="va">self</span>.id2tok[i] <span class="cf">for</span> i <span class="kw">in</span> token_ids]</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">''</span>.join(tokens)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, path: <span class="bu">str</span>):</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        <span class="im">import</span> json</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> {</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>            <span class="st">'vocab'</span>:  <span class="va">self</span>.vocab,</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>            <span class="st">'merges'</span>: [[<span class="bu">list</span>(pair), merged] <span class="cf">for</span> pair, merged <span class="kw">in</span> <span class="va">self</span>.merges]</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">'w'</span>) <span class="im">as</span> f:</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>            json.dump(data, f)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load(cls, path: <span class="bu">str</span>):</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>        <span class="im">import</span> json</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(path) <span class="im">as</span> f:</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> json.load(f)</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>        vocab  <span class="op">=</span> data[<span class="st">'vocab'</span>]</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>        merges <span class="op">=</span> [(<span class="bu">tuple</span>(pair), merged) <span class="cf">for</span> pair, merged <span class="kw">in</span> data[<span class="st">'merges'</span>]]</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(vocab, merges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A quick end-to-end test:</p>
+<div id="c57238f7" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>corpus <span class="op">=</span> <span class="st">"low lower lowest new newer newest"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>vocab, merges <span class="op">=</span> train_bpe(corpus, num_merges<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>tok <span class="op">=</span> BPETokenizer(vocab, merges)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"low newer"</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>ids  <span class="op">=</span> tok.encode(text)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>back <span class="op">=</span> tok.decode(ids)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"'</span><span class="sc">{</span>text<span class="sc">}</span><span class="ss">' → </span><span class="sc">{</span>ids<span class="sc">}</span><span class="ss"> → '</span><span class="sc">{</span>back<span class="sc">}</span><span class="ss">'"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 'low newer' → [12, 8, 15, 7] → 'low newer'</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> back <span class="op">==</span> text, <span class="st">"round-trip failed"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="vocabulary-size-the-real-tradeoffs" class="level2">
+<h2 class="anchored" data-anchor-id="vocabulary-size-the-real-tradeoffs">Vocabulary Size: The Real Tradeoffs</h2>
+<p><code>num_merges</code> directly controls vocabulary size (base chars + num_merges). <u>This is not a free parameter</u> — it affects four things simultaneously:</p>
+<section id="sequence-length" class="level3">
+<h3 class="anchored" data-anchor-id="sequence-length">Sequence length</h3>
+<p>More vocabulary → longer subwords → shorter sequences for the same text. <mark>This matters because attention is <span class="math inline">O(T^2)</span></mark> in sequence length <span class="math inline">T</span>. Doubling vocabulary can halve sequence length, quartering attention cost.</p>
+<div id="a786b47e" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rough relationship for English text:</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># vocab_size=1000:   ~6 characters per token</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># vocab_size=10000:  ~4 characters per token</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># vocab_size=50000:  ~3-4 characters per token (GPT-2: 50257)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># vocab_size=100000: ~3 characters per token (LLaMA: 32000-128000)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> estimate_compression(tokenizer, text):</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    n_chars  <span class="op">=</span> <span class="bu">len</span>(text)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    n_tokens <span class="op">=</span> <span class="bu">len</span>(tokenizer.encode(text))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"chars=</span><span class="sc">{</span>n_chars<span class="sc">}</span><span class="ss">, tokens=</span><span class="sc">{</span>n_tokens<span class="sc">}</span><span class="ss">, chars/token=</span><span class="sc">{</span>n_chars<span class="op">/</span>n_tokens<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="embedding-table-size" class="level3">
+<h3 class="anchored" data-anchor-id="embedding-table-size">Embedding table size</h3>
+<p>The <strong>embedding table</strong> is <code>vocab_size × d_model</code>. For GPT-2 (50257 × 768): <u><strong>38.6M parameters</strong></u> — 31% of the entire model. For a 125M model this is significant; for a 1B model it becomes less dominant.</p>
+<div id="bece8cb1" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Memory cost of the embedding table</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> embedding_memory_mb(vocab_size, d_model, dtype_bytes<span class="op">=</span><span class="dv">2</span>):  <span class="co"># BF16</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> vocab_size <span class="op">*</span> d_model</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> params <span class="op">*</span> dtype_bytes <span class="op">/</span> <span class="fl">1e6</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(embedding_memory_mb(<span class="dv">50257</span>, <span class="dv">768</span>))   <span class="co"># 77.2 MB</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(embedding_memory_mb(<span class="dv">128000</span>, <span class="dv">4096</span>)) <span class="co"># 1048.6 MB — LLaMA-3's embedding</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="softmax-cost" class="level3">
+<h3 class="anchored" data-anchor-id="softmax-cost">Softmax cost</h3>
+<p>The LM head projects from <code>d_model</code> to <code>vocab_size</code> at every position. For a sequence of length <span class="math inline">T</span> and batch size <span class="math inline">B</span>, this is a <span class="math inline">(B \cdot T) \times d_{\text{model}}</span> matrix multiplied by <span class="math inline">d_{\text{model}} \times V</span>. Vocabulary size directly multiplies the cost of this operation, which dominates at long sequences.</p>
+</section>
+<section id="fertility-and-domain-coverage" class="level3">
+<h3 class="anchored" data-anchor-id="fertility-and-domain-coverage">Fertility and domain coverage</h3>
+<p><strong>Fertility</strong> is the average number of tokens per word. A tokenizer trained on English Wikipedia will have <em>high fertility</em> on code, Arabic, or mathematical notation — these texts will tokenize into many short fragments because the BPE merges were learned from different statistics. <mark>A model that sees a code file as 3× as many tokens</mark> as a model with a code-aware tokenizer will have a harder time learning long-range dependencies in that code.</p>
+<div id="65c78d70" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fertility(tokenizer, text):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    words  <span class="op">=</span> pre_tokenize(text)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> tokenizer.encode(text)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(tokens) <span class="op">/</span> <span class="bu">len</span>(words)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># GPT-2 tokenizer on Python code:</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># fertility ≈ 3.1  (each "word" becomes ~3 tokens on average)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Code-specialized tokenizer:</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># fertility ≈ 1.4  (much more efficient)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>High fertility wastes sequence length budget and <mark>makes it harder for the model to learn</mark>. If you are training on a specialized domain (code, math, biomedical text), consider either training a domain-specific tokenizer or using a larger vocabulary.</p>
+</section>
+</section>
+<section id="special-tokens" class="level2">
+<h2 class="anchored" data-anchor-id="special-tokens">Special Tokens</h2>
+<p><strong>Special tokens</strong> are not learned by BPE — they are <u>added manually with reserved IDs</u>. Their meaning is entirely a convention baked into how you format training data.</p>
+<section id="the-standard-set" class="level3">
+<h3 class="anchored" data-anchor-id="the-standard-set">The standard set</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th>Symbol</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Begin of sequence</td>
+<td><code>&lt;bos&gt;</code> or <code>&lt;s&gt;</code></td>
+<td>Prepended to every sequence at training and inference</td>
+</tr>
+<tr class="even">
+<td>End of sequence</td>
+<td><code>&lt;eos&gt;</code> or <code>&lt;/s&gt;</code></td>
+<td><mark>Appended at document boundaries during training; generation stops when sampled</mark></td>
+</tr>
+<tr class="odd">
+<td>Padding</td>
+<td><code>&lt;pad&gt;</code></td>
+<td>Fills shorter sequences to a fixed length in a batch; loss is masked on pad tokens</td>
+</tr>
+<tr class="even">
+<td>Unknown</td>
+<td><code>&lt;unk&gt;</code></td>
+<td>Fallback for characters not in vocabulary; rare with byte-level BPE</td>
+</tr>
+</tbody>
+</table>
+<p>GPT-2 uses a single special token: <code>&lt;|endoftext|&gt;</code> (ID 50256), which serves as both <code>&lt;bos&gt;</code> and <code>&lt;eos&gt;</code>. LLaMA-3 uses <code>&lt;|begin_of_text|&gt;</code>, <code>&lt;|end_of_text|&gt;</code>, and a set of instruction-tuning tokens.</p>
+</section>
+<section id="training-vs-inference-behavior" class="level3">
+<h3 class="anchored" data-anchor-id="training-vs-inference-behavior">Training vs inference behavior</h3>
+<p><strong>During pretraining.</strong> Documents are concatenated with <code>&lt;eos&gt;</code> between them and packed into chunks of <code>max_seq_len</code>. <u>There is no <code>&lt;bos&gt;</code></u> — the model learns to treat the start of a chunk as the start of a document. The <code>&lt;eos&gt;</code> token teaches the model that a document has ended and a new context begins.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pretraining packing: multiple documents per sequence</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>doc1_ids <span class="op">=</span> tokenizer.encode(doc1) <span class="op">+</span> [EOS_ID]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>doc2_ids <span class="op">=</span> tokenizer.encode(doc2) <span class="op">+</span> [EOS_ID]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>packed   <span class="op">=</span> (doc1_ids <span class="op">+</span> doc2_ids)[:max_seq_len]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>During SFT</strong> (see <a href="../../notebooks/llm/08-sft-lora.html">Notebook 08</a>). A chat template wraps each turn:</p>
+<pre><code>&lt;bos&gt;&lt;|user|&gt;\nWhat is 2+2?\n&lt;|assistant|&gt;\n4&lt;eos&gt;</code></pre>
+<p><mark>Loss is computed only on the assistant tokens</mark> — the user turn and special tokens are masked. Confusing the loss mask here is one of the most common SFT bugs<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p><strong>During inference.</strong> Start with <code>&lt;bos&gt;</code> (or <code>&lt;|begin_of_text|&gt;</code>), sample tokens until <code>&lt;eos&gt;</code> is produced or <code>max_new_tokens</code> is reached.</p>
+<div id="6c5190d1" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_special_tokens(vocab: <span class="bu">dict</span>, merges: <span class="bu">list</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">dict</span>, <span class="bu">list</span>, <span class="bu">dict</span>]:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Add special tokens to a trained BPE vocabulary."""</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    special <span class="op">=</span> [<span class="st">'&lt;unk&gt;'</span>, <span class="st">'&lt;bos&gt;'</span>, <span class="st">'&lt;eos&gt;'</span>, <span class="st">'&lt;pad&gt;'</span>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Insert at the end — IDs are vocab_size, vocab_size+1, ...</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    special_ids <span class="op">=</span> {}</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tok <span class="kw">in</span> special:</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        vocab[tok] <span class="op">=</span> idx</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        special_ids[tok] <span class="op">=</span> idx</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vocab, merges, special_ids</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-padding-bug" class="level3">
+<h3 class="anchored" data-anchor-id="the-padding-bug">The padding bug</h3>
+<p><u>A very common bug:</u> using <code>&lt;pad&gt;</code> token ID 0 and forgetting to mask it in the loss. The model then learns to predict pad tokens — the loss goes down but nothing useful is learned, and the model generates <code>&lt;pad&gt;</code> tokens during inference[^padloss].</p>
+<div id="5682f88e" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG: loss computed on pad tokens</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> F.cross_entropy(logits.view(<span class="op">-</span><span class="dv">1</span>, V), targets.view(<span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT: ignore pad tokens in loss</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>PAD_ID <span class="op">=</span> special_ids[<span class="st">'&lt;pad&gt;'</span>]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> F.cross_entropy(</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    logits.view(<span class="op">-</span><span class="dv">1</span>, V),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    targets.view(<span class="op">-</span><span class="dv">1</span>),</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    ignore_index<span class="op">=</span>PAD_ID   <span class="co"># pad positions contribute 0 to the loss</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="the-tokenizer-class" class="level2">
+<h2 class="anchored" data-anchor-id="the-tokenizer-class">The <code>Tokenizer</code> Class</h2>
+<p>Here is the complete version combining everything above — the class we will use throughout the rest of the series:[^endtoend]</p>
+<div id="fa3e504b" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> regex <span class="im">as</span> re</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>GPT2_SPLIT_PATTERN <span class="op">=</span> <span class="vs">r"""'</span>(?:<span class="pp">[sdmt]</span><span class="cf">|</span><span class="vs">ll</span><span class="cf">|</span><span class="vs">ve</span><span class="cf">|</span><span class="vs">re</span>)<span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="dv">\w</span><span class="op">+</span><span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="dv">\d</span><span class="op">+</span><span class="cf">|</span><span class="vs"> </span><span class="op">?</span><span class="pp">[^</span><span class="dv">\s\w\d</span><span class="pp">]</span><span class="op">+</span><span class="cf">|</span><span class="dv">\s</span><span class="op">+</span><span class="ex">(</span><span class="fu">?!</span><span class="dv">\S</span><span class="ex">)</span><span class="cf">|</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"""</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Tokenizer:</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Byte-level BPE tokenizer.</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Usage:</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">        tok = Tokenizer.train(corpus_text, vocab_size=1000)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">        tok.save('my_tokenizer.json')</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">        tok = Tokenizer.load('my_tokenizer.json')</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co">        ids = tok.encode("Hello, world!")</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co">        txt = tok.decode(ids)</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    SPECIAL_TOKENS <span class="op">=</span> [<span class="st">'&lt;unk&gt;'</span>, <span class="st">'&lt;pad&gt;'</span>, <span class="st">'&lt;bos&gt;'</span>, <span class="st">'&lt;eos&gt;'</span>]</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">int</span>], merges: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">tuple</span>, <span class="bu">str</span>]]):</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab        <span class="op">=</span> vocab</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.id2tok       <span class="op">=</span> {v: k <span class="cf">for</span> k, v <span class="kw">in</span> vocab.items()}</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.merges       <span class="op">=</span> merges</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.merge_lookup <span class="op">=</span> {pair: merged <span class="cf">for</span> pair, merged <span class="kw">in</span> merges}</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Resolve special token IDs</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.unk_id <span class="op">=</span> vocab.get(<span class="st">'&lt;unk&gt;'</span>, <span class="dv">0</span>)</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pad_id <span class="op">=</span> vocab.get(<span class="st">'&lt;pad&gt;'</span>, <span class="dv">0</span>)</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bos_id <span class="op">=</span> vocab.get(<span class="st">'&lt;bos&gt;'</span>, <span class="dv">0</span>)</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eos_id <span class="op">=</span> vocab.get(<span class="st">'&lt;eos&gt;'</span>, <span class="dv">0</span>)</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> vocab_size(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.vocab)</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">#  Training                                                            #</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> train(cls, text: <span class="bu">str</span>, vocab_size: <span class="bu">int</span>, verbose: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>):</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Train a BPE tokenizer on `text` to a target `vocab_size`."""</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Initial vocab: all unique bytes in the corpus</span></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> re.findall(GPT2_SPLIT_PATTERN, text)</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>        word_freqs <span class="op">=</span> Counter(<span class="bu">tuple</span>(w) <span class="cf">for</span> w <span class="kw">in</span> words)</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Base vocabulary</span></span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>        all_chars <span class="op">=</span> <span class="bu">set</span>(ch <span class="cf">for</span> word <span class="kw">in</span> word_freqs <span class="cf">for</span> ch <span class="kw">in</span> word)</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>        vocab <span class="op">=</span> {ch: i <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">sorted</span>(all_chars))}</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reserve space for special tokens</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>        n_special    <span class="op">=</span> <span class="bu">len</span>(cls.SPECIAL_TOKENS)</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>        target_merges <span class="op">=</span> vocab_size <span class="op">-</span> <span class="bu">len</span>(vocab) <span class="op">-</span> n_special</span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> target_merges <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(</span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"vocab_size=</span><span class="sc">{</span>vocab_size<span class="sc">}</span><span class="ss"> is too small for the corpus "</span></span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"(base vocab has </span><span class="sc">{</span><span class="bu">len</span>(vocab)<span class="sc">}</span><span class="ss"> chars + </span><span class="sc">{</span>n_special<span class="sc">}</span><span class="ss"> special tokens)"</span></span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>        merges <span class="op">=</span> []</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(target_merges):</span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>            pair_counts <span class="op">=</span> Counter()</span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> word, freq <span class="kw">in</span> word_freqs.items():</span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(word) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>                    pair_counts[(word[j], word[j<span class="op">+</span><span class="dv">1</span>])] <span class="op">+=</span> freq</span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> pair_counts:</span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> pair_counts.most_common(<span class="dv">1</span>)[<span class="dv">0</span>][<span class="dv">0</span>]</span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a>            merged <span class="op">=</span> best[<span class="dv">0</span>] <span class="op">+</span> best[<span class="dv">1</span>]</span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a>            vocab[merged] <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a>            merges.append((best, merged))</span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Apply merge</span></span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a>            new_freqs <span class="op">=</span> {}</span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> word, freq <span class="kw">in</span> word_freqs.items():</span>
+<span id="cb17-82"><a href="#cb17-82" aria-hidden="true" tabindex="-1"></a>                new_word, j <span class="op">=</span> [], <span class="dv">0</span></span>
+<span id="cb17-83"><a href="#cb17-83" aria-hidden="true" tabindex="-1"></a>                <span class="cf">while</span> j <span class="op">&lt;</span> <span class="bu">len</span>(word):</span>
+<span id="cb17-84"><a href="#cb17-84" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> j <span class="op">&lt;</span> <span class="bu">len</span>(word)<span class="op">-</span><span class="dv">1</span> <span class="kw">and</span> (word[j], word[j<span class="op">+</span><span class="dv">1</span>]) <span class="op">==</span> best:</span>
+<span id="cb17-85"><a href="#cb17-85" aria-hidden="true" tabindex="-1"></a>                        new_word.append(merged)</span>
+<span id="cb17-86"><a href="#cb17-86" aria-hidden="true" tabindex="-1"></a>                        j <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb17-87"><a href="#cb17-87" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">else</span>:</span>
+<span id="cb17-88"><a href="#cb17-88" aria-hidden="true" tabindex="-1"></a>                        new_word.append(word[j])</span>
+<span id="cb17-89"><a href="#cb17-89" aria-hidden="true" tabindex="-1"></a>                        j <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb17-90"><a href="#cb17-90" aria-hidden="true" tabindex="-1"></a>                new_freqs[<span class="bu">tuple</span>(new_word)] <span class="op">=</span> freq</span>
+<span id="cb17-91"><a href="#cb17-91" aria-hidden="true" tabindex="-1"></a>            word_freqs <span class="op">=</span> new_freqs</span>
+<span id="cb17-92"><a href="#cb17-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-93"><a href="#cb17-93" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> verbose <span class="kw">and</span> i <span class="op">%</span> <span class="dv">500</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  merge </span><span class="sc">{</span>i<span class="sc">:5d}</span><span class="ss">/</span><span class="sc">{</span>target_merges<span class="sc">}</span><span class="ss">: '</span><span class="sc">{</span>best[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">'+'</span><span class="sc">{</span>best[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">' "</span></span>
+<span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a>                      <span class="ss">f"→ '</span><span class="sc">{</span>merged<span class="sc">}</span><span class="ss">'"</span>)</span>
+<span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-97"><a href="#cb17-97" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add special tokens at the end</span></span>
+<span id="cb17-98"><a href="#cb17-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> tok <span class="kw">in</span> cls.SPECIAL_TOKENS:</span>
+<span id="cb17-99"><a href="#cb17-99" aria-hidden="true" tabindex="-1"></a>            vocab[tok] <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb17-100"><a href="#cb17-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-101"><a href="#cb17-101" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> verbose:</span>
+<span id="cb17-102"><a href="#cb17-102" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Training complete. vocab_size=</span><span class="sc">{</span><span class="bu">len</span>(vocab)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-103"><a href="#cb17-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-104"><a href="#cb17-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(vocab, merges)</span>
+<span id="cb17-105"><a href="#cb17-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-106"><a href="#cb17-106" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-107"><a href="#cb17-107" aria-hidden="true" tabindex="-1"></a>    <span class="co">#  Encoding                                                            #</span></span>
+<span id="cb17-108"><a href="#cb17-108" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-109"><a href="#cb17-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-110"><a href="#cb17-110" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, text: <span class="bu">str</span>, add_bos: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>, add_eos: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb17-111"><a href="#cb17-111" aria-hidden="true" tabindex="-1"></a>        words  <span class="op">=</span> re.findall(GPT2_SPLIT_PATTERN, text)</span>
+<span id="cb17-112"><a href="#cb17-112" aria-hidden="true" tabindex="-1"></a>        ids    <span class="op">=</span> []</span>
+<span id="cb17-113"><a href="#cb17-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-114"><a href="#cb17-114" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> add_bos:</span>
+<span id="cb17-115"><a href="#cb17-115" aria-hidden="true" tabindex="-1"></a>            ids.append(<span class="va">self</span>.bos_id)</span>
+<span id="cb17-116"><a href="#cb17-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-117"><a href="#cb17-117" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> word <span class="kw">in</span> words:</span>
+<span id="cb17-118"><a href="#cb17-118" aria-hidden="true" tabindex="-1"></a>            tokens <span class="op">=</span> <span class="bu">list</span>(word)</span>
+<span id="cb17-119"><a href="#cb17-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-120"><a href="#cb17-120" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Apply merges in learned order</span></span>
+<span id="cb17-121"><a href="#cb17-121" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="bu">len</span>(tokens) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb17-122"><a href="#cb17-122" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Find the highest-priority (earliest-learned) merge</span></span>
+<span id="cb17-123"><a href="#cb17-123" aria-hidden="true" tabindex="-1"></a>                best_idx, best_pair <span class="op">=</span> <span class="va">None</span>, <span class="va">None</span></span>
+<span id="cb17-124"><a href="#cb17-124" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(tokens) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb17-125"><a href="#cb17-125" aria-hidden="true" tabindex="-1"></a>                    pair <span class="op">=</span> (tokens[j], tokens[j<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb17-126"><a href="#cb17-126" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> pair <span class="kw">in</span> <span class="va">self</span>.merge_lookup:</span>
+<span id="cb17-127"><a href="#cb17-127" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># Merges are stored in order — find earliest applicable</span></span>
+<span id="cb17-128"><a href="#cb17-128" aria-hidden="true" tabindex="-1"></a>                        merge_rank <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb17-129"><a href="#cb17-129" aria-hidden="true" tabindex="-1"></a>                            (k <span class="cf">for</span> k, (p, _) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="va">self</span>.merges) <span class="cf">if</span> p <span class="op">==</span> pair),</span>
+<span id="cb17-130"><a href="#cb17-130" aria-hidden="true" tabindex="-1"></a>                            <span class="bu">float</span>(<span class="st">'inf'</span>)</span>
+<span id="cb17-131"><a href="#cb17-131" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb17-132"><a href="#cb17-132" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> best_idx <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> merge_rank <span class="op">&lt;</span> best_idx:</span>
+<span id="cb17-133"><a href="#cb17-133" aria-hidden="true" tabindex="-1"></a>                            best_idx, best_pair <span class="op">=</span> merge_rank, (j, pair)</span>
+<span id="cb17-134"><a href="#cb17-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-135"><a href="#cb17-135" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> best_pair <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb17-136"><a href="#cb17-136" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span>   <span class="co"># no more merges applicable</span></span>
+<span id="cb17-137"><a href="#cb17-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-138"><a href="#cb17-138" aria-hidden="true" tabindex="-1"></a>                j, pair <span class="op">=</span> best_pair</span>
+<span id="cb17-139"><a href="#cb17-139" aria-hidden="true" tabindex="-1"></a>                merged  <span class="op">=</span> <span class="va">self</span>.merge_lookup[pair]</span>
+<span id="cb17-140"><a href="#cb17-140" aria-hidden="true" tabindex="-1"></a>                tokens  <span class="op">=</span> tokens[:j] <span class="op">+</span> [merged] <span class="op">+</span> tokens[j<span class="op">+</span><span class="dv">2</span>:]</span>
+<span id="cb17-141"><a href="#cb17-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-142"><a href="#cb17-142" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> tok <span class="kw">in</span> tokens:</span>
+<span id="cb17-143"><a href="#cb17-143" aria-hidden="true" tabindex="-1"></a>                ids.append(<span class="va">self</span>.vocab.get(tok, <span class="va">self</span>.unk_id))</span>
+<span id="cb17-144"><a href="#cb17-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-145"><a href="#cb17-145" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> add_eos:</span>
+<span id="cb17-146"><a href="#cb17-146" aria-hidden="true" tabindex="-1"></a>            ids.append(<span class="va">self</span>.eos_id)</span>
+<span id="cb17-147"><a href="#cb17-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-148"><a href="#cb17-148" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ids</span>
+<span id="cb17-149"><a href="#cb17-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-150"><a href="#cb17-150" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decode(<span class="va">self</span>, ids: <span class="bu">list</span>[<span class="bu">int</span>], skip_special: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb17-151"><a href="#cb17-151" aria-hidden="true" tabindex="-1"></a>        special <span class="op">=</span> <span class="bu">set</span>(<span class="va">self</span>.SPECIAL_TOKENS)</span>
+<span id="cb17-152"><a href="#cb17-152" aria-hidden="true" tabindex="-1"></a>        tokens  <span class="op">=</span> []</span>
+<span id="cb17-153"><a href="#cb17-153" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> ids:</span>
+<span id="cb17-154"><a href="#cb17-154" aria-hidden="true" tabindex="-1"></a>            tok <span class="op">=</span> <span class="va">self</span>.id2tok.get(i, <span class="st">'&lt;unk&gt;'</span>)</span>
+<span id="cb17-155"><a href="#cb17-155" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> skip_special <span class="kw">and</span> tok <span class="kw">in</span> special:</span>
+<span id="cb17-156"><a href="#cb17-156" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb17-157"><a href="#cb17-157" aria-hidden="true" tabindex="-1"></a>            tokens.append(tok)</span>
+<span id="cb17-158"><a href="#cb17-158" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">''</span>.join(tokens)</span>
+<span id="cb17-159"><a href="#cb17-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-160"><a href="#cb17-160" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-161"><a href="#cb17-161" aria-hidden="true" tabindex="-1"></a>    <span class="co">#  Persistence                                                         #</span></span>
+<span id="cb17-162"><a href="#cb17-162" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-163"><a href="#cb17-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-164"><a href="#cb17-164" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, path: <span class="bu">str</span>):</span>
+<span id="cb17-165"><a href="#cb17-165" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> {</span>
+<span id="cb17-166"><a href="#cb17-166" aria-hidden="true" tabindex="-1"></a>            <span class="st">'vocab'</span>:  <span class="va">self</span>.vocab,</span>
+<span id="cb17-167"><a href="#cb17-167" aria-hidden="true" tabindex="-1"></a>            <span class="st">'merges'</span>: [[<span class="bu">list</span>(pair), merged] <span class="cf">for</span> pair, merged <span class="kw">in</span> <span class="va">self</span>.merges]</span>
+<span id="cb17-168"><a href="#cb17-168" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb17-169"><a href="#cb17-169" aria-hidden="true" tabindex="-1"></a>        Path(path).write_text(json.dumps(data, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>))</span>
+<span id="cb17-170"><a href="#cb17-170" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Tokenizer saved to </span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">  (vocab_size=</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>vocab_size<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb17-171"><a href="#cb17-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-172"><a href="#cb17-172" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb17-173"><a href="#cb17-173" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load(cls, path: <span class="bu">str</span>):</span>
+<span id="cb17-174"><a href="#cb17-174" aria-hidden="true" tabindex="-1"></a>        data   <span class="op">=</span> json.loads(Path(path).read_text())</span>
+<span id="cb17-175"><a href="#cb17-175" aria-hidden="true" tabindex="-1"></a>        vocab  <span class="op">=</span> data[<span class="st">'vocab'</span>]</span>
+<span id="cb17-176"><a href="#cb17-176" aria-hidden="true" tabindex="-1"></a>        merges <span class="op">=</span> [(<span class="bu">tuple</span>(pair), merged) <span class="cf">for</span> pair, merged <span class="kw">in</span> data[<span class="st">'merges'</span>]]</span>
+<span id="cb17-177"><a href="#cb17-177" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(vocab, merges)</span>
+<span id="cb17-178"><a href="#cb17-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-179"><a href="#cb17-179" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-180"><a href="#cb17-180" aria-hidden="true" tabindex="-1"></a>    <span class="co">#  Diagnostics                                                         #</span></span>
+<span id="cb17-181"><a href="#cb17-181" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ------------------------------------------------------------------ #</span></span>
+<span id="cb17-182"><a href="#cb17-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-183"><a href="#cb17-183" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fertility(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb17-184"><a href="#cb17-184" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Average tokens per pre-tokenized word."""</span></span>
+<span id="cb17-185"><a href="#cb17-185" aria-hidden="true" tabindex="-1"></a>        words  <span class="op">=</span> re.findall(GPT2_SPLIT_PATTERN, text)</span>
+<span id="cb17-186"><a href="#cb17-186" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> <span class="va">self</span>.encode(text)</span>
+<span id="cb17-187"><a href="#cb17-187" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(tokens) <span class="op">/</span> <span class="bu">max</span>(<span class="bu">len</span>(words), <span class="dv">1</span>)</span>
+<span id="cb17-188"><a href="#cb17-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-189"><a href="#cb17-189" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> token_length_distribution(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb17-190"><a href="#cb17-190" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Distribution of token string lengths — useful for vocab analysis."""</span></span>
+<span id="cb17-191"><a href="#cb17-191" aria-hidden="true" tabindex="-1"></a>        ids    <span class="op">=</span> <span class="va">self</span>.encode(text)</span>
+<span id="cb17-192"><a href="#cb17-192" aria-hidden="true" tabindex="-1"></a>        lengths <span class="op">=</span> Counter(<span class="bu">len</span>(<span class="va">self</span>.id2tok[i]) <span class="cf">for</span> i <span class="kw">in</span> ids)</span>
+<span id="cb17-193"><a href="#cb17-193" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(<span class="bu">sorted</span>(lengths.items()))</span>
+<span id="cb17-194"><a href="#cb17-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-195"><a href="#cb17-195" aria-hidden="true" tabindex="-1"></a>[<span class="op">^</span>endtoend]: This <span class="kw">is</span> a simplified but fully working version. Production implementations add streaming decoding, byte<span class="op">-</span>fallback handling, <span class="kw">and</span> <span class="dv">100</span>× performance optimizations.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="training-the-tokenizer-on-real-text" class="level2">
+<h2 class="anchored" data-anchor-id="training-the-tokenizer-on-real-text">Training the Tokenizer on Real Text</h2>
+<p>Let’s train on a small corpus and <u>inspect what we get</u>:</p>
+<div id="8974b9ec" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download a small corpus — Project Gutenberg is public domain</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>url  <span class="op">=</span> <span class="st">"https://www.gutenberg.org/files/1342/1342-0.txt"</span>   <span class="co"># Pride and Prejudice</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> <span class="st">"pride_and_prejudice.txt"</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>urllib.request.urlretrieve(url, path)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="bu">open</span>(path, encoding<span class="op">=</span><span class="st">'utf-8'</span>).read()</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Corpus: </span><span class="sc">{</span><span class="bu">len</span>(text)<span class="sc">:,}</span><span class="ss"> characters"</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Train with vocab_size=1000 — small enough to see what's happening</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>tok <span class="op">=</span> Tokenizer.train(text, vocab_size<span class="op">=</span><span class="dv">1000</span>, verbose<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>tok.save(<span class="st">"tok_1000.json"</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect some encodings</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> [</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"It is a truth universally acknowledged"</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tokenization"</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unimaginably"</span>,</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"1234567890"</span>,</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> samples:</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> tok.encode(s)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    decoded_tokens <span class="op">=</span> [tok.id2tok[i] <span class="cf">for</span> i <span class="kw">in</span> ids]</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"'</span><span class="sc">{</span>s<span class="sc">}</span><span class="ss">' → </span><span class="sc">{</span>decoded_tokens<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span><span class="bu">len</span>(ids)<span class="sc">}</span><span class="ss"> tokens)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<pre><code># Example output (vocab_size=1000):
+'It is a truth universally acknowledged'
+  → ['It', ' is', ' a', ' truth', ' un', 'iver', 'sally', ' ac', 'know', 'ledg', 'ed']
+  (11 tokens)
+
+'tokenization'
+  → ['to', 'ken', 'ization']
+  (3 tokens)
+
+'unimaginably'
+  → ['un', 'im', 'agin', 'ably']
+  (4 tokens)</code></pre>
+<p>Now compare <strong>fertility across domains</strong>:</p>
+<div id="384c7af1" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load some Python code</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>code <span class="op">=</span> <span class="st">'''</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="st">def scaled_dot_product_attention(Q, K, V, mask=None):</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="st">    d_k = Q.size(-1)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="st">    scores = Q @ K.transpose(-2, -1) / math.sqrt(d_k)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="st">    if mask is not None:</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="st">        scores = scores.masked_fill(mask, float('-inf'))</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="st">    return F.softmax(scores, dim=-1) @ V</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prose fertility:  </span><span class="sc">{</span>tok<span class="sc">.</span>fertility(text[:<span class="dv">5000</span>])<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Code fertility:   </span><span class="sc">{</span>tok<span class="sc">.</span>fertility(code)<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Prose fertility: 1.4   (tokenizer is well-adapted to English prose)</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Code fertility:  3.1   (tokenizer is poorly adapted to code)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This is the <strong>fertility problem</strong> in action. A tokenizer trained on English prose will <mark>fragment code into many small pieces</mark> because the merge statistics reflect English character n-grams, not code character n-grams. The nano model we build in this series will be trained on English text, so this is fine — but it’s the first thing to address if you adapt this to a code model<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+</section>
+<section id="how-tiktoken-differs" class="level2">
+<h2 class="anchored" data-anchor-id="how-tiktoken-differs">How tiktoken Differs</h2>
+<p>GPT-2 and GPT-4 use <strong>tiktoken</strong>, OpenAI’s tokenizer library. Under the hood it uses the same BPE algorithm — <u>the difference is implementation</u>:</p>
+<p><strong>Rust core.</strong> tiktoken’s BPE is implemented in Rust via a Python extension. The merge application loop — the bottleneck for encoding — runs at native speed. Our Python implementation encodes ~10K tokens/second; tiktoken does ~10M tokens/second.</p>
+<p><strong>Regex-based pre-tokenization.</strong> Same GPT-2 split pattern, but compiled to a Rust regex engine.</p>
+<p><strong>Byte-level.</strong> tiktoken’s base vocabulary is all 256 bytes — it never produces <code>&lt;unk&gt;</code>. Our implementation is also byte-level but uses character strings rather than raw bytes.</p>
+<p><strong>No training API.</strong> tiktoken ships pre-trained vocabularies (<code>cl100k_base</code> for GPT-4, <code>o200k_base</code> for GPT-4o). <mark>You cannot train a new tokenizer with tiktoken</mark> — you use <code>tokenizers</code> (HuggingFace) or our implementation above.</p>
+<div id="a91aa313" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tiktoken usage for reference</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tiktoken</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>enc <span class="op">=</span> tiktoken.get_encoding(<span class="st">"cl100k_base"</span>)   <span class="co"># GPT-4 tokenizer</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>ids <span class="op">=</span> enc.encode(<span class="st">"Hello, world!"</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ids)         <span class="co"># [9906, 11, 1917, 0]</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(enc.decode(ids))  <span class="co"># "Hello, world!"</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Fertility comparison</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"It is a truth universally acknowledged"</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"cl100k fertility: </span><span class="sc">{</span><span class="bu">len</span>(enc.encode(text)) <span class="op">/</span> <span class="bu">len</span>(text.split())<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co"># cl100k fertility: 1.2  (GPT-4's tokenizer is highly optimized for English)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For this series we use our own tokenizer — <strong>built and understood from scratch</strong>. In practice, when you fine-tune or align an existing model, you will <mark>always use that model’s original tokenizer</mark>. Changing the tokenizer changes the embedding table indices, which means the pretrained weights are meaningless for the new vocabulary<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+</section>
+<section id="the-nano-model-tokenizer-decision" class="level2">
+<h2 class="anchored" data-anchor-id="the-nano-model-tokenizer-decision">The Nano Model Tokenizer Decision</h2>
+<p>For the nano model used throughout this series, we face a practical choice:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 15%">
+<col style="width: 30%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Option</th>
+<th>Vocab size</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Train from scratch</td>
+<td>1,000–5,000</td>
+<td>Fully understood, minimal embedding table</td>
+<td>High fertility, poor coverage</td>
+</tr>
+<tr class="even">
+<td>GPT-2 tokenizer</td>
+<td>50,257</td>
+<td>Production quality, low fertility</td>
+<td>38M parameter embedding table for our small model</td>
+</tr>
+<tr class="odd">
+<td>Tiny custom BPE</td>
+<td>8,000–16,000</td>
+<td><mark>Good balance for English text</mark></td>
+<td>Requires a decent corpus to train</td>
+</tr>
+</tbody>
+</table>
+<p>For this series we train a custom tokenizer with <code>vocab_size=4096</code> on TinyShakespeare. This keeps the embedding table at <span class="math inline">4096 \times 384 = 1.57\text{M}</span> parameters — a reasonable fraction of the nano model’s ~29.9M total. All subsequent notebooks assume this tokenizer.</p>
+<div id="a5fd7ee1" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The tokenizer we use for the rest of the series</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># TinyShakespeare — small, public domain, good English coverage</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>url  <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> urllib.request.urlopen(url).read().decode(<span class="st">'utf-8'</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>tok <span class="op">=</span> Tokenizer.train(text, vocab_size<span class="op">=</span><span class="dv">4096</span>, verbose<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>tok.save(<span class="st">"nano_tokenizer.json"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Nano tokenizer stats:"</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  vocab_size: </span><span class="sc">{</span>tok<span class="sc">.</span>vocab_size<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  fertility on sample: </span><span class="sc">{</span>tok<span class="sc">.</span>fertility(text[:<span class="dv">10000</span>])<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  embedding table params: </span><span class="sc">{</span>tok<span class="sc">.</span>vocab_size <span class="op">*</span> <span class="dv">384</span><span class="sc">:,}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Key detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>BPE core idea</strong></td>
+<td>Iteratively merge the most frequent adjacent pair; each merge creates a new vocabulary token</td>
+</tr>
+<tr class="even">
+<td><strong>Pre-tokenization</strong></td>
+<td>Regex splits text into “words” before BPE runs — BPE never merges across word boundaries</td>
+</tr>
+<tr class="odd">
+<td><strong>Merge ordering</strong></td>
+<td><mark>Encoding must apply merges in the same order they were learned</mark> — this is what the merge list stores</td>
+</tr>
+<tr class="even">
+<td><strong><code>num_merges</code></strong></td>
+<td>Controls vocabulary size: <code>vocab_size = len(base_chars) + num_merges + len(special_tokens)</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Sequence length</strong></td>
+<td>Higher vocab → longer subwords → shorter sequences → <span class="math inline">O(T^2)</span> attention savings</td>
+</tr>
+<tr class="even">
+<td><strong>Embedding cost</strong></td>
+<td><code>vocab_size × d_model</code> parameters — can dominate small models</td>
+</tr>
+<tr class="odd">
+<td><strong>Fertility</strong></td>
+<td>Tokens per word — high fertility signals tokenizer-domain mismatch</td>
+</tr>
+<tr class="even">
+<td><strong><code>&lt;eos&gt;</code> at pretraining</strong></td>
+<td>Separates concatenated documents; model learns document boundaries</td>
+</tr>
+<tr class="odd">
+<td><strong><code>&lt;pad&gt;</code> and loss masking</strong></td>
+<td>Must set <code>ignore_index=pad_id</code> in <code>F.cross_entropy</code> — <u>forgetting this is a silent bug</u></td>
+</tr>
+<tr class="even">
+<td><strong>SFT loss masking</strong></td>
+<td>Loss computed only on assistant tokens — user turn uses <code>ignore_index=-100</code></td>
+</tr>
+<tr class="odd">
+<td><strong>tiktoken</strong></td>
+<td>Same BPE algorithm, Rust implementation, ~1000× faster encoding, no training API</td>
+</tr>
+<tr class="even">
+<td><strong>Tokenizer portability</strong></td>
+<td><mark>Always use the original model’s tokenizer when fine-tuning</mark> — changing it invalidates pretrained weights</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<p><strong>1.</strong> Run <code>train_bpe</code> on the TinyShakespeare corpus with <code>num_merges</code> of 100, 500, and 2000. For each, measure fertility on a held-out paragraph. Plot fertility vs vocabulary size and observe the diminishing returns — the fertility curve flattens above a certain vocabulary size.</p>
+<p><strong>2.</strong> Implement a <code>count_pair_frequencies</code> that handles the edge case where a word has only one token (no pairs). Verify that the training loop handles single-character words correctly.</p>
+<p><strong>3.</strong> The encoding function above has <span class="math inline">O(V)</span> complexity per token because it scans the merge list to find merge rank. Redesign it using a precomputed <code>{pair: rank}</code> dictionary for <span class="math inline">O(1)</span> lookup. Measure the speedup on encoding a 10,000-character document.</p>
+<p><strong>4.</strong> Train two tokenizers on the same corpus: one using the GPT-2 split pattern and one that splits purely on whitespace (no regex). Compare the vocabularies they learn. Explain why the leading-space convention (<code>world</code> vs <code>world</code>) matters for a language model.</p>
+<p><strong>5.</strong> Add an <code>encode_batch(texts: list[str]) -&gt; list[list[int]]</code> method that tokenizes a list of texts and pads all sequences to the same length with <code>&lt;pad&gt;</code>. Return both the token IDs and an attention mask (1 where real tokens, 0 where padding). Verify that the attention mask correctly identifies pad positions.</p>
+<p><strong>6.</strong> Modify <code>GPT.forward()</code> from <a href="../../notebooks/llm/01-gpt-architecture.html">Notebook 01</a> to accept the attention mask from Exercise 5 and mask pad tokens in the causal attention matrix. Verify that pad positions produce zero attention weights.</p>
+<p>■</p>
+
+
+</section>
+
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Fertility = average tokens per word. Higher fertility means the tokenizer is a poor fit for the text domain.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is why the merge list is ordered — it’s not just a set of pairs, it’s a sequence that must be applied in a specific order.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>This is why different pretraining data orders produce different models — consecutive documents should be semantically separated, but they are concatenated directly in the sequence.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>The symptom: the model learns to output the assistant response but with weird preamble tokens or poor coherence — a sign that loss was accumulated on non-assistant tokens.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Specialized tokenizers handle this by training on mixed corpora (general + domain) to balance coverage.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This is a critical constraint for model development — you can change almost everything, but the tokenizer is locked to the pretrained model.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/llm/01-gpt-architecture.html" class="pagination-link" aria-label="01. GPT from Scratch">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">01. GPT from Scratch</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/llm/03-data-pipelines.html" class="pagination-link" aria-label="03. Data Pipelines for Pretraining">
+        <span class="nav-page-text">03. Data Pipelines for Pretraining</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

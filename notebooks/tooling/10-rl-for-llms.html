@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>RL for Language Models: From PPO to GRPO – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/tooling/11-text-to-lora.html" rel="next">
+<link href="../../notebooks/tooling/09-rl-ppo.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/10-rl-for-llms.html">RL4: RL for Language Models</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/tooling/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Special Topics &amp; Tooling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/01-runpod.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Runpod Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/02-weak-supervision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Weak Supervision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/03-prompt-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/04-svd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Singular Value Decomposition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/05-mcp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MCP Servers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/06-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Security Tooling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/07-rl-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL1: Foundations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/08-rl-policy-gradients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL2: Policy Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/09-rl-ppo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL3: Proximal Policy Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/10-rl-for-llms.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">RL4: RL for Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/11-text-to-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text-to-LoRA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#language-generation-as-an-mdp" id="toc-language-generation-as-an-mdp" class="nav-link active" data-scroll-target="#language-generation-as-an-mdp">1. Language Generation as an MDP</a></li>
+  <li><a href="#the-rlhf-objective" id="toc-the-rlhf-objective" class="nav-link" data-scroll-target="#the-rlhf-objective">2. The RLHF Objective</a></li>
+  <li><a href="#dpo-as-implicit-rl" id="toc-dpo-as-implicit-rl" class="nav-link" data-scroll-target="#dpo-as-implicit-rl">3. DPO as Implicit RL</a></li>
+  <li><a href="#ppo-for-language-models" id="toc-ppo-for-language-models" class="nav-link" data-scroll-target="#ppo-for-language-models">4. PPO for Language Models</a></li>
+  <li><a href="#grpo-ppo-without-the-value-network" id="toc-grpo-ppo-without-the-value-network" class="nav-link" data-scroll-target="#grpo-ppo-without-the-value-network">5. GRPO — PPO Without the Value Network</a></li>
+  <li><a href="#reward-hacking-and-the-kl-constraint" id="toc-reward-hacking-and-the-kl-constraint" class="nav-link" data-scroll-target="#reward-hacking-and-the-kl-constraint">6. Reward Hacking and the KL Constraint</a></li>
+  <li><a href="#the-alignment-landscape" id="toc-the-alignment-landscape" class="nav-link" data-scroll-target="#the-alignment-landscape">7. The Alignment Landscape</a></li>
+  <li><a href="#sec-appendix-dpo-bellman" id="toc-sec-appendix-dpo-bellman" class="nav-link" data-scroll-target="#sec-appendix-dpo-bellman">Appendix: DPO from the Soft Bellman Equation</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/10-rl-for-llms.html">RL4: RL for Language Models</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">RL for Language Models: From PPO to GRPO</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The previous three notebooks built the RL toolkit from first principles. <a href="../../notebooks/tooling/07-rl-foundations.html">NB1</a> established the MDP formalism, Bellman equations, and Q-learning. <a href="../../notebooks/tooling/08-rl-policy-gradients.html">NB2</a> developed REINFORCE, baselines, and the actor-critic framework. <a href="../../notebooks/tooling/09-rl-ppo.html">NB3</a> introduced GAE, trust regions, and a full PPO implementation. This notebook applies that entire toolkit to the domain where it matters most today: aligning language models.</p>
+<p>LLM alignment is an RL problem. We have a <strong>policy</strong> (the language model), a <strong>reward</strong> (human preferences, answer correctness, safety constraints), and a training loop that must improve the policy without destabilizing it. The connection is not metaphorical — the same equations that govern CartPole govern instruction-following in a 70B parameter model.</p>
+<p>We proceed as follows: we cast language generation as an MDP, derive the KL-regularized RLHF objective and its closed-form optimal policy, show how DPO exploits this closed form to eliminate the RL loop entirely, walk through the anatomy of PPO-for-LLMs, and derive GRPO as a principled simplification that drops the value network. We close with a toy reward overoptimization simulation and a unified view of the alignment landscape.</p>
+<p><strong>NOTE:</strong> Implementations of DPO and GRPO live in <a href="../../notebooks/llm/tutorial_12_dpo.html"><code>tutorial_12_dpo</code></a> and <a href="../../notebooks/llm/tutorial_14_grpo.html"><code>tutorial_14_grpo</code></a>. The goal here is the RL-theoretic “why” that makes those implementations deeper.</p>
+<section id="language-generation-as-an-mdp" class="level2">
+<h2 class="anchored" data-anchor-id="language-generation-as-an-mdp">1. Language Generation as an MDP</h2>
+<p>To apply RL to language models, we must first specify the MDP. There are two natural levels of abstraction: the <strong>token-level MDP</strong>, which models each generation step as a separate decision, and the <strong>bandit (sequence-level) formulation</strong>, which treats the entire response as a single composite action.</p>
+<p><strong>Token-level MDP.</strong> At each step <span class="math inline">t</span>, the agent observes the current state, chooses an action, and transitions deterministically:</p>
+<ul>
+<li><strong>State</strong>: <span class="math inline">s_t = (x, y_{&lt;t})</span> — the prompt <span class="math inline">x</span> concatenated with all tokens generated so far <span class="math inline">y_{&lt;t}</span>.</li>
+<li><strong>Action</strong>: <span class="math inline">a_t = y_t \in \mathcal{V}</span> — the next token drawn from vocabulary <span class="math inline">\mathcal{V}</span>.</li>
+<li><strong>Transition</strong>: deterministic — appending <span class="math inline">y_t</span> to <span class="math inline">(x, y_{&lt;t})</span> gives <span class="math inline">s_{t+1} = (x, y_{\leq t}).</span></li>
+<li><strong>Reward</strong>: <span class="math inline">r_t = 0</span> at all intermediate steps; <span class="math inline">r_T = r(x, y)</span> at the final token, provided by a reward model or human annotator.</li>
+<li><strong>Policy</strong>: <span class="math inline">\pi_\theta(a_t \mid s_t) = p_\theta(y_t \mid x, y_{&lt;t})</span> — exactly the language model’s next-token distribution.</li>
+<li><strong>Discount</strong>: <span class="math inline">\gamma = 1</span>, since we care equally about all tokens in a response.</li>
+</ul>
+<p><strong>Bandit (sequence-level) formulation.</strong> When the reward is purely outcome-based — as in math problem solving or preference learning — it is natural to treat generation as a one-step decision:</p>
+<ul>
+<li><strong>State</strong>: <span class="math inline">s = x</span> (just the prompt).</li>
+<li><strong>Action</strong>: <span class="math inline">a = y</span> (the full response, treated as one composite action).</li>
+<li><strong>Reward</strong>: <span class="math inline">r(x, y)</span> at the end.</li>
+</ul>
+<p>This is a <strong>contextual bandit</strong> — there is no sequential state transition, only a context-dependent reward for each response. GRPO operates at this level. PPO-for-LLMs operates at the token level.</p>
+<p><br></p>
+<p>The correspondence with standard RL is exact:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>RL Concept</th>
+<th>LLM Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>State <span class="math inline">s_t</span></td>
+<td>Prompt + generated tokens so far <span class="math inline">(x, y_{&lt;t})</span></td>
+</tr>
+<tr class="even">
+<td>Action <span class="math inline">a_t</span></td>
+<td>Next token <span class="math inline">y_t \in \mathcal{V}</span></td>
+</tr>
+<tr class="odd">
+<td>Policy <span class="math inline">\pi_\theta(a \mid s)</span></td>
+<td>Language model <span class="math inline">p_\theta(y_t \mid x, y_{&lt;t})</span></td>
+</tr>
+<tr class="even">
+<td>Trajectory <span class="math inline">\tau</span></td>
+<td>(prompt, response) pair <span class="math inline">(x, y)</span></td>
+</tr>
+<tr class="odd">
+<td>Return <span class="math inline">G_0</span></td>
+<td>Reward <span class="math inline">r(x, y)</span></td>
+</tr>
+<tr class="even">
+<td>Episode length <span class="math inline">T</span></td>
+<td>Response length <span class="math inline">|y|</span></td>
+</tr>
+<tr class="odd">
+<td>Environment</td>
+<td>Human preferences / reward model</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The “action space” in LLM RL is the vocabulary — typically 32K–128K tokens. For comparison, CartPole has 2 actions and Atari games have 18. This scale makes value-based methods (Q-learning from NB1) completely intractable and motivates policy gradient approaches.</p>
+</div>
+</div>
+</section>
+<section id="the-rlhf-objective" class="level2">
+<h2 class="anchored" data-anchor-id="the-rlhf-objective">2. The RLHF Objective</h2>
+<p>We want to train a policy that maximizes reward while staying close to the reference model <span class="math inline">\pi_\text{ref}</span> (typically the SFT-finetuned model). The unconstrained reward maximization objective is degenerate — the policy would collapse to a degenerate distribution over the single highest-reward response, sacrificing all diversity and exploiting reward model imperfections. The standard fix is a <strong>KL-regularized objective</strong>:</p>
+<p><span class="math display">\max_{\pi_\theta} \; \mathbb{E}_{x \sim \mathcal{D},\; y \sim \pi_\theta(\cdot \mid x)}\left[r(x, y)\right] - \beta \, D_\text{KL}\!\left(\pi_\theta(\cdot \mid x) \,\|\, \pi_\text{ref}(\cdot \mid x)\right)</span></p>
+<p>The parameter <span class="math inline">\beta &gt; 0</span> controls the tradeoff: large <span class="math inline">\beta</span> keeps <span class="math inline">\pi_\theta</span> close to <span class="math inline">\pi_\text{ref}</span>; small <span class="math inline">\beta</span> allows the policy to pursue reward aggressively.</p>
+<p><strong>Connection to NB3.</strong> The KL constraint here is exactly the trust region from TRPO. Instead of the hard KL constraint <span class="math inline">D_\text{KL} \leq \delta</span>, RLHF uses a soft KL penalty. The intuition is identical: prevent the policy from drifting too far from the known-good starting point.</p>
+<p><br></p>
+<p><strong>Deriving the optimal policy.</strong> This is the key theoretical result. We derive the closed-form solution to the RLHF objective step by step.</p>
+<p>Expanding the KL divergence, the objective can be written as:</p>
+<p><span class="math display">J(\pi_\theta) = \mathbb{E}_{x, y}\left[r(x,y) - \beta \log \frac{\pi_\theta(y \mid x)}{\pi_\text{ref}(y \mid x)}\right]</span></p>
+<p>For a fixed prompt <span class="math inline">x</span>, we maximize over the distribution <span class="math inline">\pi_\theta(\cdot \mid x)</span>:</p>
+<p><span class="math display">\sum_y \pi_\theta(y \mid x)\left[r(x,y) - \beta \log \frac{\pi_\theta(y \mid x)}{\pi_\text{ref}(y \mid x)}\right]</span></p>
+<p>subject to <span class="math inline">\sum_y \pi_\theta(y \mid x) = 1.</span> Taking the functional derivative with respect to <span class="math inline">\pi_\theta(y \mid x)</span> and setting it to zero (with a Lagrange multiplier for the normalization constraint), we obtain:</p>
+<p><span class="math display">\boxed{\pi^*(y \mid x) = \frac{1}{Z(x)}\, \pi_\text{ref}(y \mid x)\, \exp\!\left(\frac{r(x,y)}{\beta}\right)}</span></p>
+<p>where the <strong>partition function</strong> <span class="math inline">Z(x) = \sum_{y'} \pi_\text{ref}(y' \mid x) \exp(r(x,y')/\beta)</span> normalizes the distribution.</p>
+<p>The optimal policy <span class="math inline">\pi^*</span> upweights responses with high reward by a factor <span class="math inline">\exp(r/\beta)</span> relative to the reference, then renormalizes. This is a <strong>Boltzmann distribution</strong> over responses — the same soft-max structure that appears in the softmax Bellman equation from NB1. Responses far from the reference require strong reward signal to be preferred; responses near the reference are favored by default.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The partition function <span class="math inline">Z(x)</span> is intractable — summing over all possible responses is exponential in the response length. This is why we cannot directly compute <span class="math inline">\pi^*</span>; we need approximate optimization methods (PPO, GRPO) or a clever reparameterization (DPO).</p>
+</div>
+</div>
+</section>
+<section id="dpo-as-implicit-rl" class="level2">
+<h2 class="anchored" data-anchor-id="dpo-as-implicit-rl">3. DPO as Implicit RL</h2>
+<p>DPO’s key insight is that the intractable partition function <span class="math inline">Z(x)</span> can be made to vanish. Starting from the optimal policy equation and solving for the reward:</p>
+<p><span class="math display">r(x,y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_\text{ref}(y \mid x)} + \beta \log Z(x)</span></p>
+<p>The <strong>Bradley-Terry preference model</strong> gives the probability that response <span class="math inline">y_w</span> is preferred over <span class="math inline">y_l</span>:</p>
+<p><span class="math display">p(y_w \succ y_l \mid x) = \sigma\!\left(r(x,y_w) - r(x,y_l)\right)</span></p>
+<p>Crucially, <span class="math inline">\beta \log Z(x)</span> cancels in the difference <span class="math inline">r(x,y_w) - r(x,y_l)</span>. Substituting the parameterization <span class="math inline">r(x,y) \approx \beta \log \frac{\pi_\theta(y \mid x)}{\pi_\text{ref}(y \mid x)}</span> and maximizing the log-likelihood over a preference dataset of <span class="math inline">(x, y_w, y_l)</span> triples:</p>
+<p><span class="math display">\mathcal{L}_\text{DPO}(\theta) = -\mathbb{E}_{(x, y_w, y_l)}\!\left[\log \sigma\!\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_\text{ref}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_\text{ref}(y_l \mid x)}\right)\right]</span></p>
+<p><strong>The RL interpretation.</strong> DPO trains <span class="math inline">\pi_\theta</span> to be the optimal policy <span class="math inline">\pi^*</span> of the RLHF objective, without ever running an RL loop. The log-ratio <span class="math inline">\beta \log \pi_\theta / \pi_\text{ref}</span> is the <strong>implicit reward</strong> — DPO simultaneously acts as a reward model and a policy optimizer.</p>
+<p><br></p>
+<p><strong>Tradeoffs.</strong> The two families of alignment methods have complementary strengths:</p>
+<ul>
+<li><strong>DPO</strong>: stable, no reward model needed, no RL loop — but offline; it cannot improve beyond what the fixed preference dataset implies.</li>
+<li><strong>PPO / GRPO</strong>: online — the policy generates its own rollouts and can discover new high-reward behaviors — but requires an explicit reward model and a more complex optimization loop.</li>
+</ul>
+<p>For the full DPO derivation and implementation, see <a href="../../notebooks/llm/tutorial_12_dpo.html"><code>tutorial_12_dpo</code></a>.</p>
+</section>
+<section id="ppo-for-language-models" class="level2">
+<h2 class="anchored" data-anchor-id="ppo-for-language-models">4. PPO for Language Models</h2>
+<p>PPO-for-LLMs is the same algorithm from NB3, adapted for the token-level LLM MDP. The clipped surrogate objective <span class="math inline">L^\text{CLIP}</span>, importance ratios <span class="math inline">\rho = \pi_\theta / \pi_{\theta_\text{old}}</span>, GAE for advantage estimation, and multiple epochs of minibatch updates are all unchanged. What changes is the environment and the reward structure.</p>
+<p><strong>What changes for LLMs:</strong></p>
+<ol type="1">
+<li><strong>Four models in memory</strong>: policy <span class="math inline">\pi_\theta</span>, reference <span class="math inline">\pi_\text{ref}</span>, value model <span class="math inline">V_\phi</span>, reward model <span class="math inline">r_\psi</span>. The reference model must be kept frozen and queried every rollout.</li>
+<li><strong>KL penalty added to reward</strong>: the per-token shaped reward subtracts a KL term at every step, and adds the outcome reward only at the final token: <span class="math display">\tilde{r}_t = -\beta \left(\log \pi_\theta(y_t \mid s_t) - \log \pi_\text{ref}(y_t \mid s_t)\right) + r(x,y) \cdot \mathbf{1}[t = T]</span></li>
+<li><strong>Value network on the LM backbone</strong>: the value head must share or duplicate the LM’s weights, roughly doubling memory.</li>
+<li><strong>Sparse reward</strong>: the outcome reward arrives only at the final token, so GAE is essential for propagating credit back through the token sequence.</li>
+</ol>
+<p><br></p>
+<p><strong>Annotated pseudocode.</strong> The following summarizes the PPO-for-LLMs training loop:</p>
+<p><strong>PPO-for-LLMs pseudocode</strong> — illustrating the four-model setup and KL-shaped reward:</p>
+<div id="b4a5c6d7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PPO-for-LLMs pseudocode (not executable — illustrative)</span></span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 4 models: policy, reference, value_model, reward_model</span></span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> dataloader:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-5" class="code-annotation-target"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>    prompts <span class="op">=</span> batch[<span class="st">"prompts"</span>]</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># == ROLLOUT PHASE ==</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-8" class="code-annotation-target"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>    responses <span class="op">=</span> policy.generate(prompts)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-1-9" class="code-annotation-target"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>    rewards <span class="op">=</span> reward_model.score(prompts, responses)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-1-10" class="code-annotation-target"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>    ref_logprobs <span class="op">=</span> reference.logprobs(prompts, responses)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-1-11" class="code-annotation-target"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a>    old_logprobs <span class="op">=</span> policy.logprobs(prompts, responses)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-1-12" class="code-annotation-target"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> value_model(prompts, responses)</span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># KL-shaped reward (per token)</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-1-15" class="code-annotation-target"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>    kl <span class="op">=</span> old_logprobs <span class="op">-</span> ref_logprobs</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="8" onclick="event.preventDefault();">8</a><span id="annotated-cell-1-16" class="code-annotation-target"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>    shaped_rewards <span class="op">=</span> <span class="op">-</span>beta <span class="op">*</span> kl</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="9" onclick="event.preventDefault();">9</a><span id="annotated-cell-1-17" class="code-annotation-target"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a>    shaped_rewards[:, <span class="op">-</span><span class="dv">1</span>] <span class="op">+=</span> rewards</span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GAE advantages (same as NB3!)</span></span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>    advantages, returns <span class="op">=</span> compute_gae(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="10" onclick="event.preventDefault();">10</a><span id="annotated-cell-1-21" class="code-annotation-target"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>        shaped_rewards, values, gamma<span class="op">=</span><span class="fl">1.0</span>, lam<span class="op">=</span><span class="fl">0.95</span></span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># == OPTIMIZATION PHASE (K epochs) ==</span></span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> mb <span class="kw">in</span> minibatches(prompts, responses, ...):</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>            new_logprobs <span class="op">=</span> policy.logprobs(mb.prompts, mb.responses)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="11" onclick="event.preventDefault();">11</a><span id="annotated-cell-1-28" class="code-annotation-target"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a>            ratio <span class="op">=</span> (new_logprobs <span class="op">-</span> mb.old_logprobs).exp()</span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>            surr <span class="op">=</span> torch.<span class="bu">min</span>(</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>                ratio <span class="op">*</span> mb.advantages,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="12" onclick="event.preventDefault();">12</a><span id="annotated-cell-1-32" class="code-annotation-target"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>                ratio.clamp(<span class="dv">1</span><span class="op">-</span>eps, <span class="dv">1</span><span class="op">+</span>eps) <span class="op">*</span> mb.advantages</span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>            policy_loss <span class="op">=</span> <span class="op">-</span>surr.mean()</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>            value_loss <span class="op">=</span> mse(value_model(...), mb.returns)</span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> policy_loss <span class="op">+</span> c1 <span class="op">*</span> value_loss</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>            loss.backward()<span class="op">;</span> optimizer.step()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="5" data-code-annotation="1">Each batch contains a set of prompts drawn from the training distribution <span class="math inline">\mathcal{D}.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="8" data-code-annotation="2">The policy generates responses autoregressively — this is the online sampling step that PPO requires.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="9" data-code-annotation="3">The reward model scores each (prompt, response) pair, returning a scalar outcome reward.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="10" data-code-annotation="4">The frozen reference model computes log-probabilities of the generated responses — needed for the per-token KL.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="11" data-code-annotation="5">The current policy’s log-probabilities are recorded before optimization; these become <span class="math inline">\pi_{\theta_\text{old}}</span> for the importance ratio.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="12" data-code-annotation="6">The value model predicts <span class="math inline">V(s_t)</span> at each token position, providing the baseline for GAE.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="15" data-code-annotation="7">Per-token KL divergence: <span class="math inline">\log \pi_{\theta_\text{old}}(y_t \mid s_t) - \log \pi_\text{ref}(y_t \mid s_t).</span> Positive when the policy has moved away from the reference.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="8">8</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="16" data-code-annotation="8">The shaped per-token reward is <span class="math inline">-\beta \cdot \text{KL}_t</span> — a continuous penalty that discourages drift from the reference at every step.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="9">9</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="17" data-code-annotation="9">The outcome reward is added only at the final token position, matching the sparse reward structure of the MDP.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="10">10</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="21" data-code-annotation="10">GAE propagates the sparse terminal reward backward through the sequence, producing per-token advantages. <span class="math inline">\gamma = 1</span> treats all tokens equally; <span class="math inline">\lambda = 0.95</span> trades bias for variance.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="11">11</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="28" data-code-annotation="11">Importance ratio <span class="math inline">\rho_t = \pi_\theta(y_t \mid s_t) / \pi_{\theta_\text{old}}(y_t \mid s_t)</span>, computed in log space for numerical stability.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="12">12</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="32" data-code-annotation="12">The PPO clip (from NB3) prevents large policy updates: if <span class="math inline">\rho_t</span> moves outside <span class="math inline">[1-\epsilon, 1+\epsilon]</span>, the gradient is zeroed.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Memory cost.</strong> For a 7B model in <code>bfloat16</code>, each model requires approximately 14 GB. Four models — policy, reference, value, and reward — amount to roughly 56 GB just for weights, before activations or optimizer states. In practice the value model shares the LM backbone with the policy (adding only a small head), but the reference and reward models are fully separate. This cost motivates GRPO, which eliminates the value network entirely.</p>
+</section>
+<section id="grpo-ppo-without-the-value-network" class="level2">
+<h2 class="anchored" data-anchor-id="grpo-ppo-without-the-value-network">5. GRPO — PPO Without the Value Network</h2>
+<p>GRPO (Group Relative Policy Optimization) was introduced in DeepSeekMath <span class="citation" data-cites="shao2024deepseekmath">(<a href="#ref-shao2024deepseekmath" role="doc-biblioref">Shao et al. 2024</a>)</span>. It eliminates the value network by replacing the learned <span class="math inline">V_\phi</span> baseline with a Monte Carlo estimate computed from a group of sampled responses.</p>
+<p><strong>The key idea.</strong> For each prompt <span class="math inline">x</span>, we sample a group of <span class="math inline">G</span> responses <span class="math inline">y_1, \ldots, y_G \sim \pi_\theta(\cdot \mid x)</span> and score each with the reward model. The group mean reward is:</p>
+<p><span class="math display">\hat{V}^\pi(x) \approx \bar{r} = \frac{1}{G}\sum_{i=1}^G r(x, y_i)</span></p>
+<p>The normalized group-relative advantage for response <span class="math inline">i</span> is then:</p>
+<p><span class="math display">\hat{A}_i = \frac{r_i - \bar{r}}{\sigma_r}, \quad \sigma_r = \text{std}(r_1, \ldots, r_G)</span></p>
+<p><strong>Why is this a valid baseline?</strong> From NB2: any baseline <span class="math inline">b(s)</span> that depends only on the state and not the action yields an unbiased policy gradient estimator. The group mean <span class="math inline">\bar{r}</span> depends on the prompt <span class="math inline">x</span> (the “state”) and is marginalized over responses — it is a Monte Carlo estimate of <span class="math inline">V^\pi(x).</span> Technically, <span class="math inline">\bar{r}</span> includes response <span class="math inline">y_i</span> itself, introducing a small bias; but with <span class="math inline">G &gt; 1</span> this is the REINFORCE-leave-one-out estimator, which is consistent.</p>
+<p><br></p>
+<p><strong>Component comparison.</strong> GRPO and PPO-for-LLMs solve the same problem with different approximations:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>PPO-for-LLMs</th>
+<th>GRPO</th>
+<th>Why GRPO works</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Advantage</td>
+<td>GAE via value network</td>
+<td><span class="math inline">(r_i - \bar{r}) / \sigma_r</span></td>
+<td>Group mean <span class="math inline">\approx V^\pi(x)</span></td>
+</tr>
+<tr class="even">
+<td>Baseline</td>
+<td><span class="math inline">V_\phi(s_t)</span> per token</td>
+<td><span class="math inline">\bar{r}</span> per sequence</td>
+<td>MC baseline (NB2)</td>
+</tr>
+<tr class="odd">
+<td>Importance ratio</td>
+<td>Per-token</td>
+<td>Per-token</td>
+<td>Both use PPO clipping</td>
+</tr>
+<tr class="even">
+<td>Models</td>
+<td>4 (policy, ref, value, reward)</td>
+<td>3 (policy, ref, reward)</td>
+<td>No value network</td>
+</tr>
+<tr class="odd">
+<td>Memory</td>
+<td><span class="math inline">\sim 4\times</span> LM</td>
+<td><span class="math inline">\sim 3\times</span> LM</td>
+<td>25% reduction</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>The GRPO loss.</strong> For a group of <span class="math inline">G</span> responses to prompt <span class="math inline">x</span>, the GRPO objective is:</p>
+<p><span class="math display">L^{\text{GRPO}}(\theta) = -\frac{1}{G}\sum_{i=1}^G \frac{1}{|y_i|}\sum_{t=1}^{|y_i|} \left[\min\!\left(\rho_{i,t}\hat{A}_i,\; \text{clip}(\rho_{i,t}, 1-\epsilon, 1+\epsilon)\hat{A}_i\right) - \beta\, D_\text{KL}(\pi_\theta \| \pi_\text{ref})\right]</span></p>
+<p>where <span class="math inline">\rho_{i,t} = \pi_\theta(y_{i,t} \mid x, y_{i,&lt;t}) / \pi_{\theta_\text{old}}(y_{i,t} \mid x, y_{i,&lt;t})</span> is the per-token importance ratio. The clipping and KL penalty are inherited directly from PPO-for-LLMs. What GRPO replaces is only the source of the advantage estimate.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For the full GRPO implementation — sampling groups of responses, scoring, computing the loss, training loop, and monitoring reward hacking — see <a href="../../notebooks/llm/tutorial_14_grpo.html"><code>tutorial_14_grpo</code></a>. The end-to-end pipeline (SFT → reward model → GRPO) is in <a href="../../notebooks/llm/tutorial_17_capstone.html"><code>tutorial_17_capstone</code></a>.</p>
+</div>
+</div>
+</section>
+<section id="reward-hacking-and-the-kl-constraint" class="level2">
+<h2 class="anchored" data-anchor-id="reward-hacking-and-the-kl-constraint">6. Reward Hacking and the KL Constraint</h2>
+<p><strong>Reward hacking</strong> (Goodhart’s Law applied to RL) is the phenomenon where a policy over-optimizes a proxy reward at the expense of true performance. It is a fundamental failure mode of any learned reward signal, and it becomes acute in LLM alignment because reward models are trained on finite human preference data and are therefore imperfect.</p>
+<p>The mechanism is straightforward:</p>
+<ol type="1">
+<li>The reward model is trained on a finite preference dataset and fits the training distribution well.</li>
+<li>As the policy moves far from that distribution, the reward model’s predictions become unreliable — it extrapolates badly.</li>
+<li>The policy discovers “exploits” — high-proxy-reward, low-true-reward responses — by gradient descent.</li>
+</ol>
+<p>The KL penalty <span class="math inline">\beta \, D_\text{KL}(\pi_\theta \| \pi_\text{ref})</span> is a trust region that limits how far the policy can drift from the reference. From NB3, this is exactly TRPO’s KL constraint applied as a continuous soft penalty. The <span class="math inline">\beta</span> parameter governs the tradeoff between reward optimization and fidelity to the reference.</p>
+<p>We demonstrate this with a minimal simulation. The “true reward” is a Gaussian bump peaked at <span class="math inline">x = 0</span>; the “proxy reward” is a polynomial approximation that matches near the origin but diverges for large <span class="math inline">|x|.</span> The policy is a Gaussian with mean <span class="math inline">\mu</span> — training moves <span class="math inline">\mu</span> toward higher proxy reward. We compare outcomes with <span class="math inline">\beta \in \{0, 0.1, 0.5\}.</span></p>
+<p><strong>Setup.</strong> We import NumPy and configure SVG output:</p>
+<div id="e3d4f5a6" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib_inline <span class="im">import</span> backend_inline</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>backend_inline.set_matplotlib_formats(<span class="st">"svg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Reward overoptimization simulation.</strong> We define the true and proxy rewards, then simulate policy gradient ascent on the proxy under varying KL penalties:</p>
+<div id="a5f6b7c8" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> true_reward(x):</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""True reward: Gaussian bump centered at 0."""</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.exp(<span class="op">-</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proxy_reward(x):</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Proxy reward: polynomial that matches true reward near 0 but diverges for large |x|."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-7" class="code-annotation-target"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="fl">0.05</span> <span class="op">*</span> np.<span class="bu">abs</span>(x)<span class="op">**</span><span class="dv">3</span></span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simulate_overoptimization(n_steps<span class="op">=</span><span class="dv">300</span>, lr<span class="op">=</span><span class="fl">0.03</span>, beta<span class="op">=</span><span class="fl">0.0</span>, sigma<span class="op">=</span><span class="fl">0.5</span>):</span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Gradient ascent on proxy reward with optional KL penalty."""</span></span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>    mu <span class="op">=</span> <span class="fl">0.0</span>      <span class="co"># policy mean starts at reference</span></span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    mu_ref <span class="op">=</span> <span class="fl">0.0</span>  <span class="co"># reference policy mean</span></span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> {<span class="st">"step"</span>: [], <span class="st">"mu"</span>: [], <span class="st">"proxy"</span>: [], <span class="st">"true"</span>: [], <span class="st">"kl"</span>: []}</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(n_steps):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-16" class="code-annotation-target"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>        kl <span class="op">=</span> (mu <span class="op">-</span> mu_ref)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-3-17" class="code-annotation-target"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>        grad_proxy <span class="op">=</span> <span class="op">-</span>mu</span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a>        grad_kl <span class="op">=</span> (mu <span class="op">-</span> mu_ref) <span class="op">/</span> sigma<span class="op">**</span><span class="dv">2</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-3-19" class="code-annotation-target"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a>        mu <span class="op">+=</span> lr <span class="op">*</span> (grad_proxy <span class="op">-</span> beta <span class="op">*</span> grad_kl)</span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>        history[<span class="st">"step"</span>].append(step)</span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>        history[<span class="st">"mu"</span>].append(mu)</span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>        history[<span class="st">"proxy"</span>].append(proxy_reward(mu))</span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>        history[<span class="st">"true"</span>].append(true_reward(mu))</span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>        history[<span class="st">"kl"</span>].append(kl)</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> history</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="7" data-code-annotation="1">The proxy reward is a degree-3 polynomial. Near <span class="math inline">x = 0</span> it closely approximates the true Gaussian reward, but for <span class="math inline">|x| \gtrsim 2</span> the cubic term dominates and the proxy diverges — a simple model of reward misspecification.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="16" data-code-annotation="2">For two Gaussians with equal variance <span class="math inline">\sigma^2</span>, the KL divergence reduces to <span class="math inline">(\mu - \mu_\text{ref})^2 / (2\sigma^2).</span> This is zero when the policy matches the reference and grows quadratically with drift.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="17" data-code-annotation="3">The gradient of the proxy reward evaluated at the policy mean — the policy gradient pushes <span class="math inline">\mu</span> toward the proxy maximum.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="19" data-code-annotation="4">The update adds the proxy gradient and subtracts a term proportional to the KL gradient, acting as a quadratic regularizer centered on <span class="math inline">\mu_\text{ref}.</span></span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Visualization.</strong> We run the simulation for three values of <span class="math inline">\beta</span> and plot the reward trajectories together with the reward landscape:</p>
+<div id="d8c9e0f1" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>betas <span class="op">=</span> [<span class="fl">0.0</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#e74c3c"</span>, <span class="st">"#2ecc71"</span>, <span class="st">"#3498db"</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="vs">r"</span><span class="dv">$\b</span><span class="vs">eta = 0</span><span class="dv">$</span><span class="vs"> </span><span class="kw">(</span><span class="vs">no KL</span><span class="kw">)</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\b</span><span class="vs">eta = 0</span><span class="dv">.</span><span class="vs">1</span><span class="dv">$</span><span class="vs">"</span>, <span class="vs">r"</span><span class="dv">$\b</span><span class="vs">eta = 0</span><span class="dv">.</span><span class="vs">5</span><span class="dv">$</span><span class="vs">"</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>histories <span class="op">=</span> [simulate_overoptimization(beta<span class="op">=</span>b) <span class="cf">for</span> b <span class="kw">in</span> betas]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Left panel: reward curves over training steps ---</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> h, c, lab <span class="kw">in</span> <span class="bu">zip</span>(histories, colors, labels):</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ax.plot(h[<span class="st">"step"</span>], h[<span class="st">"true"</span>], color<span class="op">=</span>c, linewidth<span class="op">=</span><span class="fl">1.8</span>, label<span class="op">=</span>lab)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="fl">1.0</span>, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>, linewidth<span class="op">=</span><span class="fl">1.0</span>, alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"true optimum"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"training step"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"true reward"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"True reward during training"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="dv">0</span>, <span class="dv">300</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Right panel: reward landscape with final policy positions ---</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">500</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, true_reward(xs), <span class="st">"k-"</span>,  linewidth<span class="op">=</span><span class="fl">2.0</span>, label<span class="op">=</span><span class="st">"true reward"</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>ax.plot(xs, proxy_reward(xs), <span class="st">"k--"</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="st">"proxy reward"</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xs, true_reward(xs), proxy_reward(xs),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                where<span class="op">=</span>(proxy_reward(xs) <span class="op">&gt;</span> true_reward(xs)),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                alpha<span class="op">=</span><span class="fl">0.08</span>, color<span class="op">=</span><span class="st">"red"</span>, label<span class="op">=</span><span class="st">"overoptimization region"</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> h, c, lab <span class="kw">in</span> <span class="bu">zip</span>(histories, colors, labels):</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    final_mu <span class="op">=</span> h[<span class="st">"mu"</span>][<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    ax.axvline(final_mu, color<span class="op">=</span>c, linewidth<span class="op">=</span><span class="fl">1.5</span>, alpha<span class="op">=</span><span class="fl">0.8</span>, linestyle<span class="op">=</span><span class="st">"-"</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    ax.scatter([final_mu], [true_reward(final_mu)], color<span class="op">=</span>c, s<span class="op">=</span><span class="dv">60</span>, zorder<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="vs">r"policy mean </span><span class="dv">$\m</span><span class="vs">u</span><span class="dv">$</span><span class="vs">"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"reward"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Reward landscape and final policy positions"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">1.4</span>)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> (<strong>Left</strong>) True reward achieved during training for each <span class="math inline">\beta.</span> Without KL regularization (<span class="math inline">\beta = 0</span>, red), the policy overshoots the true reward peak and settles at a suboptimal region where the proxy is high but the true reward is low. (<strong>Right</strong>) The reward landscape showing the divergence between true and proxy rewards for <span class="math inline">|x| &gt; 2,</span> together with the final policy mean <span class="math inline">\mu</span> for each <span class="math inline">\beta.</span> The <span class="math inline">\beta = 0</span> policy overshoots into the overoptimization region; <span class="math inline">\beta = 0.1</span> lands near the true optimum; <span class="math inline">\beta = 0.5</span> barely moves from the reference.</p>
+<p>The <span class="math inline">\beta</span> parameter in DPO, GRPO, and PPO-for-LLMs controls exactly this tradeoff in the actual alignment setting. Practitioners typically sweep <span class="math inline">\beta</span> or schedule it to allow aggressive early optimization while tightening the constraint later.</p>
+</section>
+<section id="the-alignment-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="the-alignment-landscape">7. The Alignment Landscape</h2>
+<p>We can now place all major alignment methods on two axes: (1) whether training is <strong>online</strong> — the policy generates its own data during training — or <strong>offline</strong> — the dataset is fixed; and (2) whether an <strong>explicit reward model</strong> is required.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 14%">
+<col style="width: 20%">
+<col style="width: 28%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Online?</th>
+<th>Explicit RM?</th>
+<th>RL Algorithm</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SFT</td>
+<td>Offline</td>
+<td>No</td>
+<td>Behavioral cloning</td>
+<td><a href="../../notebooks/llm/tutorial_11_sft_lora.html"><code>tutorial_11_sft_lora</code></a></td>
+</tr>
+<tr class="even">
+<td>DPO</td>
+<td>Offline</td>
+<td>No (implicit)</td>
+<td>Implicit RL (closed-form)</td>
+<td><a href="../../notebooks/llm/tutorial_12_dpo.html"><code>tutorial_12_dpo</code></a></td>
+</tr>
+<tr class="odd">
+<td>GRPO</td>
+<td>Online</td>
+<td>Yes</td>
+<td>REINFORCE + clipping</td>
+<td><a href="../../notebooks/llm/tutorial_14_grpo.html"><code>tutorial_14_grpo</code></a></td>
+</tr>
+<tr class="even">
+<td>PPO-for-LLMs</td>
+<td>Online</td>
+<td>Yes</td>
+<td>PPO (full)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>The GPI connection.</strong> The full alignment pipeline — SFT → reward model training → GRPO/PPO — is <strong>generalized policy iteration</strong> in disguise. Recall from NB1 that GPI alternates between policy evaluation (estimating <span class="math inline">V^\pi</span>) and policy improvement (acting greedily w.r.t. <span class="math inline">V^\pi</span>) until convergence. The alignment pipeline instantiates this at the scale of human preferences:</p>
+<ul>
+<li><strong>Policy evaluation</strong> step: train the reward model on human-labeled preference data to estimate the “value” of responses.</li>
+<li><strong>Policy improvement</strong> step: run GRPO or PPO to improve the policy using the current reward model.</li>
+<li>The cycle: a better policy generates higher-quality outputs → better preference data can be collected → a better reward model is trained → the policy improves further.</li>
+</ul>
+<p><br></p>
+<p><strong>Open directions.</strong> Several active research threads push beyond the methods covered here:</p>
+<ul>
+<li><strong>Online DPO / Iterative DPO</strong>: generate new preference pairs online from the current policy, then apply DPO on the fresh data. This combines DPO’s stability with GRPO’s ability to explore beyond the initial dataset.</li>
+<li><strong>Process Reward Models (PRM)</strong>: instead of a sparse outcome reward at the final token, PRMs provide a dense reward at each reasoning step. This directly addresses the credit assignment problem and is essential for long-horizon chain-of-thought tasks.</li>
+<li><strong>Test-time compute scaling</strong>: using RL methods at inference time — best-of-<span class="math inline">N</span> sampling, MCTS with a value function as a search heuristic. The trained value network becomes a search guide rather than just a baseline.</li>
+<li><strong>Constitutional AI / RLAIF</strong>: the reward model is itself a language model, eliminating the need for human labels at scale. Feedback is generated by asking a “constitution”-following LM to rate responses, enabling self-improving alignment loops.</li>
+</ul>
+<hr>
+</section>
+<section id="sec-appendix-dpo-bellman" class="level2">
+<h2 class="anchored" data-anchor-id="sec-appendix-dpo-bellman">Appendix: DPO from the Soft Bellman Equation</h2>
+<p>This appendix is for readers who want the deepest unification. We show that the DPO implicit reward <span class="math inline">r(x,y) = \beta \log \frac{\pi_\theta(y \mid x)}{\pi_\text{ref}(y \mid x)}</span> is precisely the <strong>advantage function</strong> of the KL-constrained MDP, and that DPO is therefore training a policy to match the soft Bellman optimum.</p>
+<p><strong>MaxEnt RL and the soft Bellman equation.</strong> The KL-regularized RLHF objective belongs to the family of <strong>maximum entropy RL</strong> (MaxEnt RL), also studied in the Soft Actor-Critic (SAC) algorithm. In the bandit formulation, the Q-function is simply the reward: <span class="math inline">Q^*(x,y) = r(x,y).</span> The <strong>soft-optimal policy</strong> satisfies:</p>
+<p><span class="math display">\pi^*(y \mid x) \propto \pi_\text{ref}(y \mid x) \exp\!\left(\frac{Q^*(x,y)}{\beta}\right)</span></p>
+<p>which is exactly the optimal policy we derived in §2. The corresponding <strong>soft value function</strong> is:</p>
+<p><span class="math display">V^*(x) = \beta \log \sum_y \pi_\text{ref}(y \mid x) \exp\!\left(\frac{r(x,y)}{\beta}\right) = \beta \log Z(x)</span></p>
+<p>The <strong>advantage function</strong> measures how much better a particular response <span class="math inline">y</span> is compared to the average:</p>
+<p><span class="math display">\begin{aligned}
+A^*(x,y) &amp;= Q^*(x,y) - V^*(x) \\[0.5em]
+&amp;= r(x,y) - \beta \log Z(x) \\[0.5em]
+&amp;= \beta \log \frac{\pi^*(y \mid x)}{\pi_\text{ref}(y \mid x)}
+\end{aligned}</span></p>
+<p>The last equality follows directly from the optimal policy formula: <span class="math inline">\pi^*(y \mid x) = \frac{1}{Z(x)} \pi_\text{ref}(y \mid x) \exp(r/\beta).</span> The partition function <span class="math inline">Z(x)</span> cancels when computing <span class="math inline">A^*.</span></p>
+<p><strong>DPO as advantage matching.</strong> DPO parameterizes <span class="math inline">A^*(x,y) \approx \beta \log \frac{\pi_\theta(y \mid x)}{\pi_\text{ref}(y \mid x)}</span> and trains <span class="math inline">\pi_\theta</span> to reproduce the <strong>rankings</strong> induced by <span class="math inline">A^*</span> — which is precisely the Bradley-Terry preference model. The preference probability becomes:</p>
+<p><span class="math display">p(y_w \succ y_l \mid x) = \sigma\!\left(A^*(x,y_w) - A^*(x,y_l)\right) = \sigma\!\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_\text{ref}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_\text{ref}(y_l \mid x)}\right)</span></p>
+<p>Maximizing the log-likelihood of observed preferences over <span class="math inline">\theta</span> is exactly <span class="math inline">-\mathcal{L}_\text{DPO}(\theta).</span></p>
+<p><br></p>
+<p><strong>The unified picture.</strong> DPO, GRPO, and PPO-for-LLMs are all optimizing the same soft Bellman equation for the KL-constrained MDP, with different approximations:</p>
+<ul>
+<li><strong>DPO</strong>: closed-form, offline. The advantage is computed exactly from the policy ratio; no sampling required. The price: fixed to the offline preference dataset.</li>
+<li><strong>GRPO</strong>: online, sequence-level. The advantage <span class="math inline">\hat{A}_i = (r_i - \bar{r})/\sigma_r</span> is a Monte Carlo estimate of <span class="math inline">A^\pi(x, y_i)</span> using the group mean as <span class="math inline">V^\pi(x).</span> No value network needed.</li>
+<li><strong>PPO-for-LLMs</strong>: online, token-level. The advantage is computed via GAE using a learned value network <span class="math inline">V_\phi \approx V^\pi.</span> Higher variance reduction, higher memory cost.</li>
+</ul>
+<p>All three share the same objective; they differ in how they estimate the gradient of that objective.</p>
+<hr>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-shao2024deepseekmath" class="csl-entry" role="listitem">
+Shao, Zhihong, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Mingchuan Zhang, Y. K. Li, Y. Wu, and Daya Guo. 2024. <span>“<span>DeepSeekMath</span>: Pushing the Limits of Mathematical Reasoning in Open Language Models.”</span> <a href="https://arxiv.org/abs/2402.03300">https://arxiv.org/abs/2402.03300</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/tooling/09-rl-ppo.html" class="pagination-link" aria-label="RL3: Proximal Policy Optimization">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">RL3: Proximal Policy Optimization</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/tooling/11-text-to-lora.html" class="pagination-link" aria-label="Text-to-LoRA">
+        <span class="nav-page-text">Text-to-LoRA</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

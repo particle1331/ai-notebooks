@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Image Captioning – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/deep/advanced/16-segmentation.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/index.html">Advanced Topics</a></li><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/17-captioning.html">17. Image Captioning</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/01-softmax-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Softmax Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/02-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/03-autodiff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Automatic Differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/04-optimizers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizers: SGD to AdamW</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/05-activations-and-gradients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Activations and Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/06-cnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/07-language-modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Language Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/08-rnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/09-attention-transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Attention &amp; Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/11-appendix-expressivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Activation Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/12-appendix-resnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. ResNet from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/18-appendix-double-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">18. Double Descent</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/advanced/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/13-translation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Machine Translation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/14-generative-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/15-diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Diffusion Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/16-segmentation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">16. Semantic Segmentation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/17-captioning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">17. Image Captioning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dataset" id="toc-dataset" class="nav-link active" data-scroll-target="#dataset">Dataset</a></li>
+  <li><a href="#patch-embedding" id="toc-patch-embedding" class="nav-link" data-scroll-target="#patch-embedding">Patch embedding</a></li>
+  <li><a href="#vit-encoder" id="toc-vit-encoder" class="nav-link" data-scroll-target="#vit-encoder">ViT encoder</a></li>
+  <li><a href="#caption-decoder" id="toc-caption-decoder" class="nav-link" data-scroll-target="#caption-decoder">Caption decoder</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training">Training</a></li>
+  <li><a href="#greedy-decoding" id="toc-greedy-decoding" class="nav-link" data-scroll-target="#greedy-decoding">Greedy decoding</a></li>
+  <li><a href="#bleu-score" id="toc-bleu-score" class="nav-link" data-scroll-target="#bleu-score">BLEU score</a></li>
+  <li><a href="#cross-attention-visualization" id="toc-cross-attention-visualization" class="nav-link" data-scroll-target="#cross-attention-visualization">Cross-attention visualization</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/index.html">Advanced Topics</a></li><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/17-captioning.html">17. Image Captioning</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Image Captioning</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Image captioning is a <strong>cross-modal generation</strong> task: given an image, produce a natural language sentence that describes its content. This requires a model to simultaneously understand visual structure and generate fluent text — bridging computer vision and natural language processing in a single architecture. Early neural approaches used a CNN encoder to extract a fixed-length image feature vector, which was then decoded by an RNN. A key improvement was <strong>soft attention</strong> <span class="citation" data-cites="showattendtell">(<a href="#ref-showattendtell" role="doc-biblioref">Xu et al. 2016</a>)</span>, which lets the decoder selectively focus on different regions of the image at each generation step rather than relying on a single global summary.We adopt the modern Transformer-based formulation. The <strong>encoder</strong> is a Vision Transformer (ViT) <span class="citation" data-cites="vit">(<a href="#ref-vit" role="doc-biblioref">Dosovitskiy et al. 2020</a>)</span> that divides the image into a grid of non-overlapping patches, linearly projects each patch to an embedding vector, and processes the resulting sequence with multi-head self-attention blocks to produce <span class="math inline">N</span> contextualized patch representations. The <strong>decoder</strong> is a stack of Transformer decoder blocks — identical to those developed in the <a href="../../../notebooks/deep/advanced/13-translation.html">machine translation notebook</a> — each of which applies causal self-attention over the caption prefix, followed by cross-attention over the <span class="math inline">N</span> patch tokens. This cross-attention is the mechanism through which the decoder grounds each generated word in specific image regions. The encoder’s self-attention and positional encoding are reviewed in <a href="../../../notebooks/deep/09-attention-transformers.html">NB09</a>; the decoder block and cross-attention are developed in detail in <a href="../../../notebooks/deep/advanced/13-translation.html">NB13</a>.In this notebook we build a complete image captioning pipeline from scratch. We train a ViT patch encoder (no pretrained weights) together with a Transformer decoder on the Flickr8k dataset <span class="citation" data-cites="flickr8k">(<a href="#ref-flickr8k" role="doc-biblioref">Hodosh, Young, and Hockenmaier 2013</a>)</span> using teacher-forcing. After training we evaluate with greedy decoding, measure translation quality via corpus BLEU-4 <span class="citation" data-cites="bleu">(<a href="#ref-bleu" role="doc-biblioref">Papineni et al. 2002</a>)</span>, and visualize the cross-attention maps to see which patches the decoder attends to when generating each word.</p>
+<p><br></p>
+<div id="d4e5f6a7" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math, re, json, random, warnings</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> transforms</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib_inline <span class="im">import</span> backend_inline</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>DATASET_DIR <span class="op">=</span> Path(<span class="st">"./data"</span>).resolve()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>DATASET_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>MATPLOTLIB_FORMAT <span class="op">=</span> <span class="st">"png"</span> <span class="cf">if</span> DEBUG <span class="cf">else</span> <span class="st">"svg"</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>np.random.seed(RANDOM_SEED)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>random.seed(RANDOM_SEED)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>backend_inline.set_matplotlib_formats(MATPLOTLIB_FORMAT)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>DEVICE <span class="op">=</span> (</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    torch.device(<span class="st">"cuda"</span>) <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> torch.device(<span class="st">"mps"</span>) <span class="cf">if</span> torch.backends.mps.is_available()</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> torch.device(<span class="st">"cpu"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"device:"</span>, DEVICE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="dataset" class="level2">
+<h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
+<p><strong>Data.</strong> Flickr8k <span class="citation" data-cites="flickr8k">(<a href="#ref-flickr8k" role="doc-biblioref">Hodosh, Young, and Hockenmaier 2013</a>)</span> contains 8,000 images each paired with five human-written captions, giving 40,000 (image, caption) pairs in total. We download it via the Hugging Face <code>datasets</code> library. Each example has an <code>"image"</code> field (PIL image) and a <code>"caption"</code> field (string). We split the 40,000 pairs 80/10/10 into train, validation, and test sets.</p>
+<div id="a7b8c9d0" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>raw <span class="op">=</span> load_dataset(<span class="st">"jxie/flickr8k"</span>)</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>all_examples <span class="op">=</span> <span class="bu">list</span>(raw[<span class="st">"train"</span>])</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>random.seed(RANDOM_SEED)</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>random.shuffle(all_examples)</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(all_examples)</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="bu">int</span>(<span class="fl">0.8</span> <span class="op">*</span> N)</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>n_val   <span class="op">=</span> <span class="bu">int</span>(<span class="fl">0.1</span> <span class="op">*</span> N)</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>train_examples <span class="op">=</span> all_examples[:n_train]</span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>val_examples   <span class="op">=</span> all_examples[n_train:n_train <span class="op">+</span> n_val]</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a>test_examples  <span class="op">=</span> all_examples[n_train <span class="op">+</span> n_val:]</span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total: </span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> | Train: </span><span class="sc">{</span><span class="bu">len</span>(train_examples)<span class="sc">}</span><span class="ss"> | Val: </span><span class="sc">{</span><span class="bu">len</span>(val_examples)<span class="sc">}</span><span class="ss"> | Test: </span><span class="sc">{</span><span class="bu">len</span>(test_examples)<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">The <code>jxie/flickr8k</code> dataset on Hugging Face contains all 40,000 (image, caption) pairs under a single <code>train</code> split.2. We convert to a list so we can shuffle and slice in-place.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Vocabulary.</strong> We build a word-level vocabulary from the training captions. Tokenization lowercases each caption, strips punctuation, and splits on whitespace. Words appearing fewer than 5 times are mapped to <code>&lt;unk&gt;</code>. Four special tokens are reserved: <code>&lt;pad&gt;</code> at index 0, <code>&lt;bos&gt;</code> at index 1, <code>&lt;eos&gt;</code> at index 2, and <code>&lt;unk&gt;</code> at index 3.</p>
+<div id="d0e1f2a3" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>PAD_IDX, BOS_IDX, EOS_IDX, UNK_IDX <span class="op">=</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>MIN_FREQ   <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>MAX_CAP_LEN <span class="op">=</span> <span class="dv">40</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tokenize(caption: <span class="bu">str</span>):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    caption <span class="op">=</span> caption.lower()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    caption <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="pp">[^</span><span class="dv">\w\s</span><span class="pp">]</span><span class="vs">"</span>, <span class="st">""</span>, caption)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> caption.split()</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># count word frequencies on training set</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>counter <span class="op">=</span> Counter()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ex <span class="kw">in</span> train_examples:</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    counter.update(tokenize(ex[<span class="st">"caption"</span>]))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># build vocabulary: special tokens first, then words by frequency</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>special_tokens <span class="op">=</span> [<span class="st">"&lt;pad&gt;"</span>, <span class="st">"&lt;bos&gt;"</span>, <span class="st">"&lt;eos&gt;"</span>, <span class="st">"&lt;unk&gt;"</span>]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>vocab_words <span class="op">=</span> [w <span class="cf">for</span> w, c <span class="kw">in</span> counter.most_common() <span class="cf">if</span> c <span class="op">&gt;=</span> MIN_FREQ]</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>itos <span class="op">=</span> special_tokens <span class="op">+</span> vocab_words</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>stoi <span class="op">=</span> {w: i <span class="cf">for</span> i, w <span class="kw">in</span> <span class="bu">enumerate</span>(itos)}</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>VOCAB_SIZE <span class="op">=</span> <span class="bu">len</span>(itos)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Vocabulary size: </span><span class="sc">{</span>VOCAB_SIZE<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train captions: </span><span class="sc">{</span><span class="bu">len</span>(train_examples)<span class="sc">}</span><span class="ss"> | Val: </span><span class="sc">{</span><span class="bu">len</span>(val_examples)<span class="sc">}</span><span class="ss"> | Test: </span><span class="sc">{</span><span class="bu">len</span>(test_examples)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>CaptionDataset.</strong> Each <code>__getitem__</code> returns an image tensor and a caption tensor that includes the <code>&lt;bos&gt;</code> and <code>&lt;eos&gt;</code> tokens. We define a <code>collate_fn</code> that pads captions to the maximum length in each batch.</p>
+<div id="f2a3b4c5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a>IMG_SIZE   <span class="op">=</span> <span class="dv">224</span></span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>BATCH_SIZE <span class="op">=</span> <span class="dv">64</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>train_transform <span class="op">=</span> transforms.Compose([</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>    transforms.Resize(<span class="dv">256</span>),</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>    transforms.RandomCrop(IMG_SIZE),</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>    transforms.RandomHorizontalFlip(),</span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize(mean<span class="op">=</span>[<span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span>],  <span class="co"># ImageNet stats</span></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>                         std <span class="op">=</span>[<span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span>]),</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a>eval_transform <span class="op">=</span> transforms.Compose([</span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>    transforms.Resize(<span class="dv">256</span>),</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>    transforms.CenterCrop(IMG_SIZE),</span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize(mean<span class="op">=</span>[<span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span>],</span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>                         std <span class="op">=</span>[<span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span>]),</span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CaptionDataset(Dataset):</span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, examples, img_transform, max_len<span class="op">=</span>MAX_CAP_LEN):</span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.examples <span class="op">=</span> examples</span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.transform <span class="op">=</span> img_transform</span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.max_len <span class="op">=</span> max_len</span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.examples)</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-32" class="code-annotation-target"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>        ex <span class="op">=</span> <span class="va">self</span>.examples[idx]</span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> ex[<span class="st">"image"</span>].convert(<span class="st">"RGB"</span>)</span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>        img_tensor <span class="op">=</span> <span class="va">self</span>.transform(img)</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> tokenize(ex[<span class="st">"caption"</span>])[:<span class="va">self</span>.max_len]</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a>        ids <span class="op">=</span> [BOS_IDX] <span class="op">+</span> [stoi.get(t, UNK_IDX) <span class="cf">for</span> t <span class="kw">in</span> tokens] <span class="op">+</span> [EOS_IDX]</span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a>        cap_tensor <span class="op">=</span> torch.tensor(ids, dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img_tensor, cap_tensor</span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>    imgs, caps <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>batch)</span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>    imgs <span class="op">=</span> torch.stack(imgs)</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a>    max_len <span class="op">=</span> <span class="bu">max</span>(c.size(<span class="dv">0</span>) <span class="cf">for</span> c <span class="kw">in</span> caps)</span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>    padded <span class="op">=</span> torch.full((<span class="bu">len</span>(caps), max_len), PAD_IDX, dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="annotated-cell-4-48"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(caps):</span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a>        padded[i, :c.size(<span class="dv">0</span>)] <span class="op">=</span> c</span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> imgs, padded</span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> CaptionDataset(train_examples, train_transform)</span>
+<span id="annotated-cell-4-54"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>val_dataset   <span class="op">=</span> CaptionDataset(val_examples,   eval_transform)</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a>test_dataset  <span class="op">=</span> CaptionDataset(test_examples,  eval_transform)</span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>                          collate_fn<span class="op">=</span>collate_fn, num_workers<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>val_loader   <span class="op">=</span> DataLoader(val_dataset,   batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>,</span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a>                          collate_fn<span class="op">=</span>collate_fn, num_workers<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a>test_loader  <span class="op">=</span> DataLoader(test_dataset,  batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>,</span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>                          collate_fn<span class="op">=</span>collate_fn, num_workers<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="annotated-cell-4-63"><a href="#annotated-cell-4-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-64"><a href="#annotated-cell-4-64" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train batches: </span><span class="sc">{</span><span class="bu">len</span>(train_loader)<span class="sc">}</span><span class="ss"> | Val: </span><span class="sc">{</span><span class="bu">len</span>(val_loader)<span class="sc">}</span><span class="ss"> | Test: </span><span class="sc">{</span><span class="bu">len</span>(test_loader)<span class="sc">}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="32" data-code-annotation="1">Each item returns a normalized image tensor of shape <span class="math inline">(3, 224, 224)</span> and a caption tensor of shape <span class="math inline">(T+2,)</span> — the <span class="math inline">T</span> caption tokens sandwiched between <code>&lt;bos&gt;</code> and <code>&lt;eos&gt;</code>, truncated to <code>MAX_CAP_LEN</code> content tokens.2. <code>collate_fn</code> pads each batch’s captions to the length of the longest caption in that batch, minimizing unnecessary padding.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Displaying four sample images from the training set with their captions:</p>
+<div id="fig-samples" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">3</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ex <span class="op">=</span> train_examples[i]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    ax.imshow(ex[<span class="st">"image"</span>])</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    caption <span class="op">=</span> ex[<span class="st">"caption"</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    words <span class="op">=</span> caption.split()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># wrap at ~8 words per line</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">=</span> []</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">min</span>(<span class="bu">len</span>(words), <span class="dv">16</span>), <span class="dv">8</span>):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        lines.append(<span class="st">" "</span>.join(words[j:j<span class="op">+</span><span class="dv">8</span>]))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(lines), fontsize<span class="op">=</span><span class="dv">7</span>, wrap<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> Sample images from the Flickr8k training set. Each image has five human-written captions; we show one. The captions range from simple object descriptions to action-oriented sentences, capturing the diversity the model must learn to generate.</p>
+</section>
+<section id="patch-embedding" class="level2">
+<h2 class="anchored" data-anchor-id="patch-embedding">Patch embedding</h2>
+<p><strong>Patch embedding.</strong> A ViT <span class="citation" data-cites="vit">(<a href="#ref-vit" role="doc-biblioref">Dosovitskiy et al. 2020</a>)</span> treats the image as a sequence of non-overlapping patches. For a <span class="math inline">H \times W</span> image divided into <span class="math inline">P \times P</span> patches, there are <span class="math inline">N = (H/P)^2</span> patches (assuming <span class="math inline">H = W</span>). Each patch is a vector of size <span class="math inline">P^2 \cdot C</span> and is projected to <span class="math inline">d_\text{model}</span> via a linear layer. Concretely, for patch <span class="math inline">p_i \in \mathbb{R}^{P^2 C}</span>, the embedding is<span class="math display">\mathbf{e}_i = p_i \mathbf{W}_E + \mathbf{b}_E, \quad \mathbf{W}_E \in \mathbb{R}^{P^2 C \times d_\text{model}}.</span>A learnable <code>[CLS]</code> token is prepended, and learnable position embeddings are added to all <span class="math inline">N + 1</span> positions to indicate spatial location. The result is a sequence of <span class="math inline">N + 1</span> tokens: <code>[CLS, patch_1, ..., patch_N]</code>.The projection can be implemented efficiently with a single <code>Conv2d</code> whose kernel and stride both equal <span class="math inline">P</span>, tiling the image with non-overlapping patches and projecting each one in a single pass.</p>
+<p>Defining the <code>PatchEmbedding</code> module:</p>
+<div id="b0c1d2e3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PatchEmbedding(nn.Module):</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, in_channels<span class="op">=</span><span class="dv">3</span>, d_model<span class="op">=</span><span class="dv">256</span>):</span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.patch_size <span class="op">=</span> patch_size</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-6" class="code-annotation-target"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_patches <span class="op">=</span> (img_size <span class="op">//</span> patch_size) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.proj <span class="op">=</span> nn.Conv2d(in_channels, d_model,</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>                              kernel_size<span class="op">=</span>patch_size, stride<span class="op">=</span>patch_size)</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cls_token  <span class="op">=</span> nn.Parameter(torch.zeros(<span class="dv">1</span>, <span class="dv">1</span>, d_model))</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pos_embed  <span class="op">=</span> nn.Parameter(torch.zeros(<span class="dv">1</span>, <span class="va">self</span>.n_patches <span class="op">+</span> <span class="dv">1</span>, d_model))</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>        nn.init.trunc_normal_(<span class="va">self</span>.pos_embed, std<span class="op">=</span><span class="fl">0.02</span>)</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>        nn.init.trunc_normal_(<span class="va">self</span>.cls_token, std<span class="op">=</span><span class="fl">0.02</span>)</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>        B <span class="op">=</span> x.shape[<span class="dv">0</span>]</span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.proj(x)                                  <span class="co"># (B, d_model, H/P, W/P)</span></span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.flatten(<span class="dv">2</span>).transpose(<span class="dv">1</span>, <span class="dv">2</span>)                  <span class="co"># (B, N, d_model)</span></span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>        cls <span class="op">=</span> <span class="va">self</span>.cls_token.expand(B, <span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)            <span class="co"># (B, 1, d_model)</span></span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat([cls, x], dim<span class="op">=</span><span class="dv">1</span>)                    <span class="co"># (B, N+1, d_model)</span></span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.pos_embed</span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="6" data-code-annotation="1">For <code>img_size=224, patch_size=16</code>: <span class="math inline">N = (224/16)^2 = 196</span> patches.2. A <code>Conv2d</code> with <code>kernel_size=patch_size, stride=patch_size</code> tiles the image with non-overlapping patches and projects each to <code>d_model</code> in one step — equivalent to flattening each <span class="math inline">P \times P</span> patch and applying a shared linear projection.3. Learnable <code>[CLS]</code> token, initialized near zero. After the encoder its representation aggregates global image information.4. Learnable position embeddings for all <span class="math inline">N + 1</span> positions (including <code>[CLS]</code>), initialized with truncated normal (<span class="math inline">\sigma = 0.02</span>).5. Output shape: <code>(B, d_model, H/P, W/P)</code> — one channel slice per patch position.6. Flatten spatial dims and transpose: <code>(B, d_model, N) → (B, N, d_model)</code>.7. Prepend <code>[CLS]</code> token; sequence length becomes <span class="math inline">N + 1 = 197</span>.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="vit-encoder" class="level2">
+<h2 class="anchored" data-anchor-id="vit-encoder">ViT encoder</h2>
+<p><strong>ViT encoder.</strong> The patch embeddings are passed through <span class="math inline">L</span> encoder blocks — identical to the Pre-LN encoder blocks from <a href="../../../notebooks/deep/09-attention-transformers.html">NB09</a> <span class="citation" data-cites="preln-transformer">(<a href="#ref-preln-transformer" role="doc-biblioref">Xiong et al. 2020</a>)</span>. Each block applies multi-head self-attention followed by a position-wise FFN, both with Pre-LN residual connections <span class="citation" data-cites="transformers">(<a href="#ref-transformers" role="doc-biblioref">Vaswani et al. 2017</a>)</span>. The output is a sequence of <span class="math inline">N + 1</span> contextualized patch representations.For caption generation, we use <strong>all <span class="math inline">N</span> patch tokens</strong> (excluding <code>[CLS]</code>) as the memory sequence that the caption decoder will cross-attend to, giving it spatial coverage of the entire image. The <code>[CLS]</code> token aggregates global information and is useful for classification tasks, but here we want the decoder to attend to individual patch locations.</p>
+<p>Re-implementing <code>MultiHeadAttention</code> and <code>EncoderBlock</code> for self-containedness (adapted from NB09/NB13):</p>
+<div id="a5b6c7d8" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from NB09/NB13</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultiHeadAttention(nn.Module):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, num_heads: <span class="bu">int</span>, dropout: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.0</span>):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> d_model <span class="op">%</span> num_heads <span class="op">==</span> <span class="dv">0</span>, <span class="st">"num_heads must divide d_model"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model   <span class="op">=</span> d_model</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_heads   <span class="op">=</span> num_heads</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_head    <span class="op">=</span> d_model <span class="op">//</span> num_heads</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout_p <span class="op">=</span> dropout</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w_q <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w_k <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w_v <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w_o <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, query, key, value, mask<span class="op">=</span><span class="va">None</span>, return_attn<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""query: (B, Tq, d), key/value: (B, Tk, d), mask: broadcastable bool."""</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        B, Tq <span class="op">=</span> query.shape[:<span class="dv">2</span>]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        Tk    <span class="op">=</span> key.shape[<span class="dv">1</span>]</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> <span class="va">self</span>.w_q(query).view(B, Tq, <span class="va">self</span>.n_heads, <span class="va">self</span>.d_head).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        k <span class="op">=</span> <span class="va">self</span>.w_k(key  ).view(B, Tk, <span class="va">self</span>.n_heads, <span class="va">self</span>.d_head).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> <span class="va">self</span>.w_v(value).view(B, Tk, <span class="va">self</span>.n_heads, <span class="va">self</span>.d_head).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> mask.ndim <span class="op">==</span> <span class="dv">2</span>:</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> mask.unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> mask.ndim <span class="op">==</span> <span class="dv">3</span>:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> mask.unsqueeze(<span class="dv">1</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        dropout_p <span class="op">=</span> <span class="va">self</span>.dropout_p <span class="cf">if</span> <span class="va">self</span>.training <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        head <span class="op">=</span> F.scaled_dot_product_attention(q, k, v, mask, dropout_p<span class="op">=</span>dropout_p)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        out  <span class="op">=</span> head.permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>).reshape(B, Tq, <span class="va">self</span>.d_model)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        out  <span class="op">=</span> <span class="va">self</span>.w_o(out)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_attn:</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            scale  <span class="op">=</span> math.sqrt(<span class="va">self</span>.d_head)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> (q <span class="op">@</span> k.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">/</span> scale</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>                scores <span class="op">=</span> scores.masked_fill(mask <span class="op">==</span> <span class="dv">0</span>, <span class="bu">float</span>(<span class="st">"-inf"</span>))</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>            attn_w <span class="op">=</span> F.softmax(scores, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> out, attn_w</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from NB09/NB13</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EncoderBlock(nn.Module):</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, num_heads: <span class="bu">int</span>, d_ff: <span class="bu">int</span>, dropout: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>):</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1     <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2     <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.self_attn <span class="op">=</span> MultiHeadAttention(d_model, num_heads, dropout)</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ffn <span class="op">=</span> nn.Sequential(</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>            nn.Linear(d_model, d_ff), nn.ReLU(),</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(dropout),</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>            nn.Linear(d_ff, d_model), nn.Dropout(dropout)</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x, src_mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.dropout(<span class="va">self</span>.self_attn(<span class="va">self</span>.norm1(x), <span class="va">self</span>.norm1(x), <span class="va">self</span>.norm1(x), mask<span class="op">=</span>src_mask))</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.ffn(<span class="va">self</span>.norm2(x))</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Defining the full <code>ViTEncoder</code>:</p>
+<div id="c7d8e9f0" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ViTEncoder(nn.Module):</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, in_channels<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>                 d_model<span class="op">=</span><span class="dv">256</span>, num_heads<span class="op">=</span><span class="dv">8</span>, num_layers<span class="op">=</span><span class="dv">6</span>, d_ff<span class="op">=</span><span class="dv">512</span>, dropout<span class="op">=</span><span class="fl">0.1</span>):</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-8-6"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.patch_embed <span class="op">=</span> PatchEmbedding(img_size, patch_size, in_channels, d_model)</span>
+<span id="annotated-cell-8-7"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout     <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers      <span class="op">=</span> nn.ModuleList(</span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a>            [EncoderBlock(d_model, num_heads, d_ff, dropout) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_layers)]</span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-8-11"><a href="#annotated-cell-8-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="annotated-cell-8-12"><a href="#annotated-cell-8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-13"><a href="#annotated-cell-8-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-14" class="code-annotation-target"><a href="#annotated-cell-8-14" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.dropout(<span class="va">self</span>.patch_embed(x))  <span class="co"># (B, N+1, d_model)</span></span>
+<span id="annotated-cell-8-15"><a href="#annotated-cell-8-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> block <span class="kw">in</span> <span class="va">self</span>.layers:</span>
+<span id="annotated-cell-8-16"><a href="#annotated-cell-8-16" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> block(x)</span>
+<span id="annotated-cell-8-17"><a href="#annotated-cell-8-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm(x)</span>
+<span id="annotated-cell-8-18"><a href="#annotated-cell-8-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[:, <span class="dv">1</span>:, :]                     <span class="co"># (B, N, d_model)</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="14" data-code-annotation="1">Dropout applied to the patch embedding (standard ViT regularization).2. We return all patch tokens (index 1 onwards), excluding <code>[CLS]</code>. These <span class="math inline">N = 196</span> tokens serve as the cross-attention memory for the decoder.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="caption-decoder" class="level2">
+<h2 class="anchored" data-anchor-id="caption-decoder">Caption decoder</h2>
+<p><strong>Caption decoder.</strong> The caption decoder is a stack of <span class="math inline">M</span> decoder blocks, each identical to the <code>DecoderBlock</code> from <a href="../../../notebooks/deep/advanced/13-translation.html">NB13</a>. Each block applies (1) causal self-attention over the caption prefix, (2) cross-attention over the <span class="math inline">N = 196</span> patch tokens produced by the ViT encoder, and (3) a position-wise FFN, all with Pre-LN residuals. At training time, <strong>teacher forcing</strong> is used: the full ground-truth caption (shifted right, prefixed with <code>&lt;bos&gt;</code>) is fed to the decoder in parallel. At inference, the caption is generated autoregressively token by token.</p>
+<p>Re-implementing <code>DecoderBlock</code> for self-containedness (adapted from NB13):</p>
+<div id="b2c3d4e6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from NB13</span></span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DecoderBlock(nn.Module):</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, num_heads: <span class="bu">int</span>, d_ff: <span class="bu">int</span>, dropout: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>):</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm3 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-9" class="code-annotation-target"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.self_attn  <span class="op">=</span> MultiHeadAttention(d_model, num_heads, dropout)</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cross_attn <span class="op">=</span> MultiHeadAttention(d_model, num_heads, dropout)</span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ffn <span class="op">=</span> nn.Sequential(</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>            nn.Linear(d_model, d_ff), nn.ReLU(),</span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(dropout),</span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>            nn.Linear(d_ff, d_model), nn.Dropout(dropout)</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tgt, memory, tgt_mask<span class="op">=</span><span class="va">None</span>, return_attn<span class="op">=</span><span class="va">False</span>):</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># sub-layer 1: causal self-attention over target tokens</span></span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> tgt <span class="op">+</span> <span class="va">self</span>.dropout(<span class="va">self</span>.self_attn(<span class="va">self</span>.norm1(tgt), <span class="va">self</span>.norm1(tgt),</span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>                                              <span class="va">self</span>.norm1(tgt), mask<span class="op">=</span>tgt_mask))</span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># sub-layer 2: cross-attention — queries from decoder, keys/values from encoder</span></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> <span class="va">self</span>.norm2(x)</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_attn:</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>            ca_out, attn_w <span class="op">=</span> <span class="va">self</span>.cross_attn(x2, memory, memory, return_attn<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>            ca_out <span class="op">=</span> <span class="va">self</span>.cross_attn(x2, memory, memory)</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>            attn_w <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.dropout(ca_out)</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># sub-layer 3: position-wise FFN</span></span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.ffn(<span class="va">self</span>.norm3(x))</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_attn:</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> x, attn_w</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="9" data-code-annotation="1">Causal self-attention — the same <code>MultiHeadAttention</code> module, but receives a causal mask during the forward pass so each target position can only attend to earlier positions.2. Cross-attention — <code>query</code> comes from the decoder stream, <code>key</code> and <code>value</code> come from the encoder’s <span class="math inline">N</span> patch tokens. This is the mechanism that conditions caption generation on image content.3. Pre-LN residual: normalize, apply self-attention, add back. The mask <code>tgt_mask</code> is a lower-triangular boolean matrix of shape <span class="math inline">(T, T)</span>.4. The encoder memory (patch tokens) is broadcast across all decoder layers — computed once and used at every decoding step.5. The FFN processes each token embedding independently, adding non-linear capacity after cross-attention.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Defining the full <code>CaptioningModel</code> with positional encoding and mask helpers:</p>
+<div id="e5f6a7b9" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_causal_mask(sz: <span class="bu">int</span>, device) <span class="op">-&gt;</span> torch.BoolTensor:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Lower-triangular boolean mask of shape (sz, sz)."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.tril(torch.ones(sz, sz, dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from NB09/NB13</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PositionalEncoding(nn.Module):</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, dropout: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>, max_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5000</span>):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        pe  <span class="op">=</span> torch.zeros(max_len, d_model)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        t   <span class="op">=</span> torch.arange(<span class="dv">0</span>, max_len, dtype<span class="op">=</span>torch.<span class="bu">float</span>).unsqueeze(<span class="dv">1</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        w   <span class="op">=</span> torch.exp(<span class="op">-</span>(torch.arange(<span class="dv">0</span>, d_model, <span class="dv">2</span>).<span class="bu">float</span>() <span class="op">/</span> d_model <span class="op">*</span> math.log(<span class="dv">10000</span>)))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        pe[:, <span class="dv">0</span>::<span class="dv">2</span>] <span class="op">=</span> torch.sin(t <span class="op">*</span> w)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        pe[:, <span class="dv">1</span>::<span class="dv">2</span>] <span class="op">=</span> torch.cos(t <span class="op">*</span> w)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"pe"</span>, pe.unsqueeze(<span class="dv">0</span>))  <span class="co"># (1, max_len, d_model)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.dropout(x <span class="op">+</span> <span class="va">self</span>.pe[:, :x.size(<span class="dv">1</span>), :])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CaptioningModel(nn.Module):</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_size, d_model<span class="op">=</span><span class="dv">256</span>, num_heads<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                 num_enc_layers<span class="op">=</span><span class="dv">6</span>, num_dec_layers<span class="op">=</span><span class="dv">6</span>, d_ff<span class="op">=</span><span class="dv">512</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>                 dropout<span class="op">=</span><span class="fl">0.1</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, max_len<span class="op">=</span><span class="dv">64</span>):</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model <span class="op">=</span> d_model</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.encoder <span class="op">=</span> ViTEncoder(img_size, patch_size, <span class="dv">3</span>, d_model, num_heads,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                                  num_enc_layers, d_ff, dropout)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tgt_embed <span class="op">=</span> nn.Embedding(vocab_size, d_model, padding_idx<span class="op">=</span>PAD_IDX)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pos_enc   <span class="op">=</span> PositionalEncoding(d_model, dropout, max_len)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder   <span class="op">=</span> nn.ModuleList(</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            [DecoderBlock(d_model, num_heads, d_ff, dropout) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_dec_layers)]</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_dec <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc_out   <span class="op">=</span> nn.Linear(d_model, vocab_size)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._init_weights()</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _init_weights(<span class="va">self</span>):</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.parameters():</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> p.dim() <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>                nn.init.xavier_uniform_(p)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, imgs):</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.encoder(imgs)  <span class="co"># (B, N, d_model)</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decode(<span class="va">self</span>, tgt, memory, tgt_mask, return_attn<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.pos_enc(<span class="va">self</span>.tgt_embed(tgt) <span class="op">*</span> math.sqrt(<span class="va">self</span>.d_model))</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>        last_attn <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, block <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="va">self</span>.decoder):</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>            is_last <span class="op">=</span> (i <span class="op">==</span> <span class="bu">len</span>(<span class="va">self</span>.decoder) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> return_attn <span class="kw">and</span> is_last:</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>                x, last_attn <span class="op">=</span> block(x, memory, tgt_mask<span class="op">=</span>tgt_mask, return_attn<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>                x <span class="op">=</span> block(x, memory, tgt_mask<span class="op">=</span>tgt_mask)</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm_dec(x)</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_attn:</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> x, last_attn</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, imgs, tgt, return_attn<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>        memory  <span class="op">=</span> <span class="va">self</span>.encode(imgs)          <span class="co"># (B, N, d_model)</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>        T       <span class="op">=</span> tgt.size(<span class="dv">1</span>)</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        tgt_mask <span class="op">=</span> make_causal_mask(T, imgs.device)</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_attn:</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>            dec_out, attn <span class="op">=</span> <span class="va">self</span>.decode(tgt, memory, tgt_mask, return_attn<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>.fc_out(dec_out), attn</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>        dec_out <span class="op">=</span> <span class="va">self</span>.decode(tgt, memory, tgt_mask)</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.fc_out(dec_out)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Printing the parameter count and verifying output shapes:</p>
+<div id="a7b8c9db" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>_test_model <span class="op">=</span> CaptioningModel(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    vocab_size<span class="op">=</span>VOCAB_SIZE, d_model<span class="op">=</span><span class="dv">256</span>, num_heads<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    num_enc_layers<span class="op">=</span><span class="dv">4</span>, num_dec_layers<span class="op">=</span><span class="dv">4</span>, d_ff<span class="op">=</span><span class="dv">512</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    dropout<span class="op">=</span><span class="fl">0.1</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, max_len<span class="op">=</span><span class="dv">64</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>).to(DEVICE)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>n_params <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> _test_model.parameters() <span class="cf">if</span> p.requires_grad)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Parameters: </span><span class="sc">{</span>n_params<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># shape check</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>_dummy_img <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">224</span>, <span class="dv">224</span>, device<span class="op">=</span>DEVICE)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>_dummy_cap <span class="op">=</span> torch.randint(<span class="dv">0</span>, VOCAB_SIZE, (<span class="dv">2</span>, <span class="dv">15</span>), device<span class="op">=</span>DEVICE)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>_logits <span class="op">=</span> _test_model(_dummy_img, _dummy_cap)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Logits shape: </span><span class="sc">{</span>_logits<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">  (expected: 2, 15, </span><span class="sc">{</span>VOCAB_SIZE<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>_memory <span class="op">=</span> _test_model.encode(_dummy_img)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Memory shape: </span><span class="sc">{</span>_memory<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">  (expected: 2, 196, 256)"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="kw">del</span> _test_model, _dummy_img, _dummy_cap, _logits, _memory</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="training" class="level2">
+<h2 class="anchored" data-anchor-id="training">Training</h2>
+<p><strong>Training setup.</strong> We train with <strong>teacher forcing</strong>: at each step the decoder receives the ground-truth caption shifted right (prefixed with <code>&lt;bos&gt;</code>) and is trained to predict the next token. The loss is cross-entropy over the vocabulary, with padding positions excluded via <code>ignore_index=PAD_IDX</code>. The optimizer is AdamW with learning rate <span class="math inline">3 \times 10^{-4}</span> and cosine annealing over 20 epochs. Gradient clipping at 1.0 prevents exploding gradients early in training. The ViT encoder is trained from scratch — no pretrained weights — since the full pipeline is small enough to converge on Flickr8k within a reasonable time.</p>
+<div id="d0e1f2a4" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>NUM_EPOCHS     <span class="op">=</span> <span class="dv">20</span></span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a>LR             <span class="op">=</span> <span class="fl">3e-4</span></span>
+<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>D_MODEL        <span class="op">=</span> <span class="dv">256</span></span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a>NUM_HEADS      <span class="op">=</span> <span class="dv">8</span></span>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a>NUM_ENC_LAYERS <span class="op">=</span> <span class="dv">4</span></span>
+<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a>NUM_DEC_LAYERS <span class="op">=</span> <span class="dv">4</span></span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a>D_FF           <span class="op">=</span> <span class="dv">512</span></span>
+<span id="annotated-cell-12-8"><a href="#annotated-cell-12-8" aria-hidden="true" tabindex="-1"></a>DROPOUT        <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="annotated-cell-12-9"><a href="#annotated-cell-12-9" aria-hidden="true" tabindex="-1"></a>PATCH_SIZE     <span class="op">=</span> <span class="dv">16</span></span>
+<span id="annotated-cell-12-10"><a href="#annotated-cell-12-10" aria-hidden="true" tabindex="-1"></a>MAX_LEN        <span class="op">=</span> <span class="dv">64</span></span>
+<span id="annotated-cell-12-11"><a href="#annotated-cell-12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-12"><a href="#annotated-cell-12-12" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="annotated-cell-12-13"><a href="#annotated-cell-12-13" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> CaptioningModel(</span>
+<span id="annotated-cell-12-14"><a href="#annotated-cell-12-14" aria-hidden="true" tabindex="-1"></a>    vocab_size<span class="op">=</span>VOCAB_SIZE,</span>
+<span id="annotated-cell-12-15"><a href="#annotated-cell-12-15" aria-hidden="true" tabindex="-1"></a>    d_model<span class="op">=</span>D_MODEL, num_heads<span class="op">=</span>NUM_HEADS,</span>
+<span id="annotated-cell-12-16"><a href="#annotated-cell-12-16" aria-hidden="true" tabindex="-1"></a>    num_enc_layers<span class="op">=</span>NUM_ENC_LAYERS, num_dec_layers<span class="op">=</span>NUM_DEC_LAYERS,</span>
+<span id="annotated-cell-12-17"><a href="#annotated-cell-12-17" aria-hidden="true" tabindex="-1"></a>    d_ff<span class="op">=</span>D_FF, dropout<span class="op">=</span>DROPOUT, img_size<span class="op">=</span>IMG_SIZE,</span>
+<span id="annotated-cell-12-18"><a href="#annotated-cell-12-18" aria-hidden="true" tabindex="-1"></a>    patch_size<span class="op">=</span>PATCH_SIZE, max_len<span class="op">=</span>MAX_LEN,</span>
+<span id="annotated-cell-12-19"><a href="#annotated-cell-12-19" aria-hidden="true" tabindex="-1"></a>).to(DEVICE)</span>
+<span id="annotated-cell-12-20"><a href="#annotated-cell-12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-21"><a href="#annotated-cell-12-21" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.CrossEntropyLoss(ignore_index<span class="op">=</span>PAD_IDX)</span>
+<span id="annotated-cell-12-22"><a href="#annotated-cell-12-22" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.AdamW(model.parameters(), lr<span class="op">=</span>LR, weight_decay<span class="op">=</span><span class="fl">1e-4</span>)</span>
+<span id="annotated-cell-12-23"><a href="#annotated-cell-12-23" aria-hidden="true" tabindex="-1"></a>scheduler <span class="op">=</span> torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max<span class="op">=</span>NUM_EPOCHS)</span>
+<span id="annotated-cell-12-24"><a href="#annotated-cell-12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-25"><a href="#annotated-cell-12-25" aria-hidden="true" tabindex="-1"></a>n_params <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters() <span class="cf">if</span> p.requires_grad)</span>
+<span id="annotated-cell-12-26"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Parameters: </span><span class="sc">{</span>n_params<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-12-27"><a href="#annotated-cell-12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-28"><a href="#annotated-cell-12-28" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> {<span class="st">"train_loss"</span>: [], <span class="st">"val_loss"</span>: []}</span>
+<span id="annotated-cell-12-29"><a href="#annotated-cell-12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-30"><a href="#annotated-cell-12-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-31"><a href="#annotated-cell-12-31" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_epoch(model, loader, optimizer, criterion, device, train<span class="op">=</span><span class="va">True</span>):</span>
+<span id="annotated-cell-12-32"><a href="#annotated-cell-12-32" aria-hidden="true" tabindex="-1"></a>    model.train() <span class="cf">if</span> train <span class="cf">else</span> model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-12-33"><a href="#annotated-cell-12-33" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-12-34"><a href="#annotated-cell-12-34" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">=</span> torch.enable_grad() <span class="cf">if</span> train <span class="cf">else</span> torch.inference_mode()</span>
+<span id="annotated-cell-12-35"><a href="#annotated-cell-12-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> ctx:</span>
+<span id="annotated-cell-12-36"><a href="#annotated-cell-12-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> imgs, captions <span class="kw">in</span> loader:</span>
+<span id="annotated-cell-12-37"><a href="#annotated-cell-12-37" aria-hidden="true" tabindex="-1"></a>            imgs, captions <span class="op">=</span> imgs.to(device), captions.to(device)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-38" class="code-annotation-target"><a href="#annotated-cell-12-38" aria-hidden="true" tabindex="-1"></a>            tgt_in  <span class="op">=</span> captions[:, :<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="annotated-cell-12-39"><a href="#annotated-cell-12-39" aria-hidden="true" tabindex="-1"></a>            tgt_out <span class="op">=</span> captions[:, <span class="dv">1</span>:]</span>
+<span id="annotated-cell-12-40"><a href="#annotated-cell-12-40" aria-hidden="true" tabindex="-1"></a>            logits  <span class="op">=</span> model(imgs, tgt_in)                 <span class="co"># (B, T-1, V)</span></span>
+<span id="annotated-cell-12-41"><a href="#annotated-cell-12-41" aria-hidden="true" tabindex="-1"></a>            loss    <span class="op">=</span> criterion(</span>
+<span id="annotated-cell-12-42"><a href="#annotated-cell-12-42" aria-hidden="true" tabindex="-1"></a>                logits.reshape(<span class="op">-</span><span class="dv">1</span>, logits.size(<span class="op">-</span><span class="dv">1</span>)), tgt_out.reshape(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-12-43"><a href="#annotated-cell-12-43" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-12-44"><a href="#annotated-cell-12-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> train:</span>
+<span id="annotated-cell-12-45"><a href="#annotated-cell-12-45" aria-hidden="true" tabindex="-1"></a>                optimizer.zero_grad()</span>
+<span id="annotated-cell-12-46"><a href="#annotated-cell-12-46" aria-hidden="true" tabindex="-1"></a>                loss.backward()</span>
+<span id="annotated-cell-12-47"><a href="#annotated-cell-12-47" aria-hidden="true" tabindex="-1"></a>                nn.utils.clip_grad_norm_(model.parameters(), <span class="fl">1.0</span>)</span>
+<span id="annotated-cell-12-48"><a href="#annotated-cell-12-48" aria-hidden="true" tabindex="-1"></a>                optimizer.step()</span>
+<span id="annotated-cell-12-49"><a href="#annotated-cell-12-49" aria-hidden="true" tabindex="-1"></a>            total_loss <span class="op">+=</span> loss.item()</span>
+<span id="annotated-cell-12-50"><a href="#annotated-cell-12-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_loss <span class="op">/</span> <span class="bu">len</span>(loader)</span>
+<span id="annotated-cell-12-51"><a href="#annotated-cell-12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-52"><a href="#annotated-cell-12-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-12-53"><a href="#annotated-cell-12-53" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, NUM_EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="annotated-cell-12-54"><a href="#annotated-cell-12-54" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> run_epoch(model, train_loader, optimizer, criterion, DEVICE, train<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-12-55"><a href="#annotated-cell-12-55" aria-hidden="true" tabindex="-1"></a>    va <span class="op">=</span> run_epoch(model, val_loader,   <span class="va">None</span>,      criterion, DEVICE, train<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-12-56"><a href="#annotated-cell-12-56" aria-hidden="true" tabindex="-1"></a>    scheduler.step()</span>
+<span id="annotated-cell-12-57"><a href="#annotated-cell-12-57" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"train_loss"</span>].append(tr)</span>
+<span id="annotated-cell-12-58"><a href="#annotated-cell-12-58" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"val_loss"</span>].append(va)</span>
+<span id="annotated-cell-12-59"><a href="#annotated-cell-12-59" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">:02d}</span><span class="ss"> | train </span><span class="sc">{</span>tr<span class="sc">:.4f}</span><span class="ss"> | val </span><span class="sc">{</span>va<span class="sc">:.4f}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="38" data-code-annotation="1"><code>tgt_in</code> is the caption without its last token — fed to the decoder as input (teacher-forced).2. <code>tgt_out</code> is the caption without its first (<code>&lt;bos&gt;</code>) token — the targets the decoder must predict.3. The model returns logits of shape <span class="math inline">(B, T-1, V)</span> where <span class="math inline">V</span> is the vocabulary size.4. Reshape to <span class="math inline">(B(T-1), V)</span> and <span class="math inline">(B(T-1),)</span> for <code>CrossEntropyLoss</code>.5. Clip the global gradient norm to 1.0 to prevent early-training instability.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Plotting the training and validation loss curves:</p>
+<div id="fig-loss" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, NUM_EPOCHS <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ax.plot(epochs, history[<span class="st">"train_loss"</span>], color<span class="op">=</span><span class="st">"C0"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"train"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>ax.plot(epochs, history[<span class="st">"val_loss"</span>],   color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"val"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Cross-entropy loss"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> Training and validation cross-entropy loss over 20 epochs. Both curves decrease steadily and track closely, indicating that the model is learning without severe overfitting at this scale. The gap between train and validation loss widens slightly in later epochs — expected given that the encoder is trained from random initialization on a small dataset.</p>
+</section>
+<section id="greedy-decoding" class="level2">
+<h2 class="anchored" data-anchor-id="greedy-decoding">Greedy decoding</h2>
+<p><strong>Greedy decoding.</strong> At inference we encode the image once to obtain the <span class="math inline">N = 196</span> patch memory tokens, then generate the caption autoregressively. Starting from <code>&lt;bos&gt;</code>, at each step we append the argmax-predicted token, stopping at <code>&lt;eos&gt;</code> or <code>MAX_CAP_LEN</code> tokens. This is the simplest decoding strategy; beam search would improve quality at the cost of additional computation.</p>
+<div id="e7f8a9b1" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.inference_mode</span>()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_caption(model, img_tensor, max_len<span class="op">=</span>MAX_CAP_LEN):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    img       <span class="op">=</span> img_tensor.unsqueeze(<span class="dv">0</span>).to(DEVICE)         <span class="co"># (1, 3, H, W)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    memory    <span class="op">=</span> model.encode(img)                          <span class="co"># (1, N, d_model)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    dec_input <span class="op">=</span> torch.tensor([[BOS_IDX]], device<span class="op">=</span>DEVICE)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_len):</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        T      <span class="op">=</span> dec_input.size(<span class="dv">1</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        causal <span class="op">=</span> make_causal_mask(T, DEVICE)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        dec_out <span class="op">=</span> model.decode(dec_input, memory, causal)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        logits  <span class="op">=</span> model.fc_out(dec_out[:, <span class="op">-</span><span class="dv">1</span>, :])          <span class="co"># (1, V)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        next_id <span class="op">=</span> logits.argmax(<span class="op">-</span><span class="dv">1</span>).item()</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        dec_input <span class="op">=</span> torch.cat(</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            [dec_input, torch.tensor([[next_id]], device<span class="op">=</span>DEVICE)], dim<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> next_id <span class="op">==</span> EOS_IDX:</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> dec_input[<span class="dv">0</span>, <span class="dv">1</span>:].tolist()</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">" "</span>.join(itos[i] <span class="cf">for</span> i <span class="kw">in</span> ids <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> (BOS_IDX, EOS_IDX, PAD_IDX))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Showing four test images with their generated captions:</p>
+<div id="fig-captions" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-captions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ex   <span class="op">=</span> test_examples[i]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> generate_caption(model, eval_transform(ex[<span class="st">"image"</span>].convert(<span class="st">"RGB"</span>)))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    gt   <span class="op">=</span> ex[<span class="st">"caption"</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    ax.imshow(ex[<span class="st">"image"</span>])</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># wrap prediction</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    pred_words <span class="op">=</span> pred.split()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    pred_lines <span class="op">=</span> []</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(pred_words), <span class="dv">7</span>):</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        pred_lines.append(<span class="st">" "</span>.join(pred_words[j:j<span class="op">+</span><span class="dv">7</span>]))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    pred_str <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(pred_lines)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    gt_words <span class="op">=</span> gt.split()</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    gt_lines <span class="op">=</span> []</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">min</span>(<span class="bu">len</span>(gt_words), <span class="dv">14</span>), <span class="dv">7</span>):</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        gt_lines.append(<span class="st">" "</span>.join(gt_words[j:j<span class="op">+</span><span class="dv">7</span>]))</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    gt_str <span class="op">=</span> <span class="st">"gt: "</span> <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">    "</span>.join(gt_lines)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    ax.set_title(pred_str <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> gt_str, fontsize<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-captions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> Test images with greedy-decoded captions (top line) and the corresponding ground-truth caption (gray, prefixed “gt:”). The model correctly identifies dominant subjects and actions in many cases. Errors typically involve hallucinated attributes or swapped object types — expected behavior from a small model trained from scratch on a few thousand images.</p>
+</section>
+<section id="bleu-score" class="level2">
+<h2 class="anchored" data-anchor-id="bleu-score">BLEU score</h2>
+<p><strong>BLEU.</strong> The BLEU-4 metric <span class="citation" data-cites="bleu">(<a href="#ref-bleu" role="doc-biblioref">Papineni et al. 2002</a>)</span> measures the geometric mean of 1- through 4-gram precision between a hypothesis and a reference, multiplied by a brevity penalty for short outputs. A corpus BLEU score averages over all test examples. We adapt the <code>ngram_counts</code>, <code>bleu4</code>, and <code>corpus_bleu</code> functions from <a href="../../../notebooks/deep/advanced/13-translation.html">NB13</a>.</p>
+<div id="e3f4a5b7" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from NB13</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ngram_counts(tokens, n):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Counter(<span class="bu">tuple</span>(tokens[i:i<span class="op">+</span>n]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(tokens) <span class="op">-</span> n <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bleu4(hypotheses, references):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Corpus BLEU-4 (uniform weights, brevity penalty)."""</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    clip_counts  <span class="op">=</span> [<span class="dv">0</span>] <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    total_counts <span class="op">=</span> [<span class="dv">0</span>] <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    hyp_len <span class="op">=</span> ref_len <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> hyp, ref <span class="kw">in</span> <span class="bu">zip</span>(hypotheses, references):</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        hyp_toks <span class="op">=</span> hyp.split()</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        ref_toks <span class="op">=</span> ref.split()</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        hyp_len <span class="op">+=</span> <span class="bu">len</span>(hyp_toks)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        ref_len <span class="op">+=</span> <span class="bu">len</span>(ref_toks)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">5</span>):</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            hyp_ng <span class="op">=</span> ngram_counts(hyp_toks, n)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            ref_ng <span class="op">=</span> ngram_counts(ref_toks, n)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> gram, cnt <span class="kw">in</span> hyp_ng.items():</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>                clip_counts[n<span class="op">-</span><span class="dv">1</span>]  <span class="op">+=</span> <span class="bu">min</span>(cnt, ref_ng.get(gram, <span class="dv">0</span>))</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>                total_counts[n<span class="op">-</span><span class="dv">1</span>] <span class="op">+=</span> cnt</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    p_n <span class="op">=</span> [clip_counts[n] <span class="op">/</span> <span class="bu">max</span>(total_counts[n], <span class="dv">1</span>) <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>)]</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">any</span>(p <span class="op">==</span> <span class="dv">0</span> <span class="cf">for</span> p <span class="kw">in</span> p_n):</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.0</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    log_avg <span class="op">=</span> <span class="bu">sum</span>(math.log(p) <span class="cf">for</span> p <span class="kw">in</span> p_n) <span class="op">/</span> <span class="dv">4</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    bp <span class="op">=</span> <span class="bu">min</span>(<span class="fl">1.0</span>, math.exp(<span class="dv">1</span> <span class="op">-</span> ref_len <span class="op">/</span> <span class="bu">max</span>(hyp_len, <span class="dv">1</span>)))</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bp <span class="op">*</span> math.exp(log_avg) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.inference_mode</span>()</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> corpus_bleu(model, examples):</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    hypotheses <span class="op">=</span> [generate_caption(model, eval_transform(ex[<span class="st">"image"</span>].convert(<span class="st">"RGB"</span>)))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> ex <span class="kw">in</span> examples]</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    references <span class="op">=</span> [ex[<span class="st">"caption"</span>] <span class="cf">for</span> ex <span class="kw">in</span> examples]</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bleu4(hypotheses, references)</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> corpus_bleu(model, test_examples)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"BLEU-4 on test set: </span><span class="sc">{</span>score<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>BLEU compares against a single reference caption per image, while Flickr8k has five. Evaluating against all five references (multi-reference BLEU) would yield a notably higher score and is the standard evaluation protocol. The single-reference score here underestimates true caption quality.</p>
+</div>
+</div>
+</section>
+<section id="cross-attention-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="cross-attention-visualization">Cross-attention visualization</h2>
+<p><strong>Cross-attention.</strong> We visualize which image patches the decoder attends to when generating each caption word. For a given test image we run the model with <code>return_attn=True</code> to extract the cross-attention weights from the last decoder layer. The weights have shape <span class="math inline">(1, H_\text{heads}, T_\text{cap}, N_\text{patches})</span>. Averaging over heads and reshaping to <span class="math inline">\sqrt{N} \times \sqrt{N} = 14 \times 14</span> gives a spatial attention map over the image for each generated word. We upsample this map to the image size and overlay it as a semi-transparent heatmap.</p>
+<p>Extracting per-step cross-attention weights during greedy decoding:</p>
+<div id="d8e9f0a2" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.inference_mode</span>()</span>
+<span id="annotated-cell-17-2"><a href="#annotated-cell-17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_with_attention(model, img_tensor, max_len<span class="op">=</span>MAX_CAP_LEN):</span>
+<span id="annotated-cell-17-3"><a href="#annotated-cell-17-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Greedy decode and collect per-step cross-attention from last decoder layer."""</span></span>
+<span id="annotated-cell-17-4"><a href="#annotated-cell-17-4" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-17-5"><a href="#annotated-cell-17-5" aria-hidden="true" tabindex="-1"></a>    img       <span class="op">=</span> img_tensor.unsqueeze(<span class="dv">0</span>).to(DEVICE)</span>
+<span id="annotated-cell-17-6"><a href="#annotated-cell-17-6" aria-hidden="true" tabindex="-1"></a>    memory    <span class="op">=</span> model.encode(img)                          <span class="co"># (1, N, d_model)</span></span>
+<span id="annotated-cell-17-7"><a href="#annotated-cell-17-7" aria-hidden="true" tabindex="-1"></a>    dec_input <span class="op">=</span> torch.tensor([[BOS_IDX]], device<span class="op">=</span>DEVICE)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-17" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-17-8" class="code-annotation-target"><a href="#annotated-cell-17-8" aria-hidden="true" tabindex="-1"></a>    all_attn  <span class="op">=</span> []</span>
+<span id="annotated-cell-17-9"><a href="#annotated-cell-17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-17-10"><a href="#annotated-cell-17-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_len):</span>
+<span id="annotated-cell-17-11"><a href="#annotated-cell-17-11" aria-hidden="true" tabindex="-1"></a>        T      <span class="op">=</span> dec_input.size(<span class="dv">1</span>)</span>
+<span id="annotated-cell-17-12"><a href="#annotated-cell-17-12" aria-hidden="true" tabindex="-1"></a>        causal <span class="op">=</span> make_causal_mask(T, DEVICE)</span>
+<span id="annotated-cell-17-13"><a href="#annotated-cell-17-13" aria-hidden="true" tabindex="-1"></a>        dec_out, attn_w <span class="op">=</span> model.decode(</span>
+<span id="annotated-cell-17-14"><a href="#annotated-cell-17-14" aria-hidden="true" tabindex="-1"></a>            dec_input, memory, causal, return_attn<span class="op">=</span><span class="va">True</span></span>
+<span id="annotated-cell-17-15"><a href="#annotated-cell-17-15" aria-hidden="true" tabindex="-1"></a>        )                                                  <span class="co"># attn_w: (1, H, T, N)</span></span>
+<span id="annotated-cell-17-16"><a href="#annotated-cell-17-16" aria-hidden="true" tabindex="-1"></a>        step_attn <span class="op">=</span> attn_w[<span class="dv">0</span>, :, <span class="op">-</span><span class="dv">1</span>, :].mean(<span class="dv">0</span>).cpu()     <span class="co"># (N,)</span></span>
+<span id="annotated-cell-17-17"><a href="#annotated-cell-17-17" aria-hidden="true" tabindex="-1"></a>        all_attn.append(step_attn)</span>
+<span id="annotated-cell-17-18"><a href="#annotated-cell-17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-17-19"><a href="#annotated-cell-17-19" aria-hidden="true" tabindex="-1"></a>        logits  <span class="op">=</span> model.fc_out(dec_out[:, <span class="op">-</span><span class="dv">1</span>, :])</span>
+<span id="annotated-cell-17-20"><a href="#annotated-cell-17-20" aria-hidden="true" tabindex="-1"></a>        next_id <span class="op">=</span> logits.argmax(<span class="op">-</span><span class="dv">1</span>).item()</span>
+<span id="annotated-cell-17-21"><a href="#annotated-cell-17-21" aria-hidden="true" tabindex="-1"></a>        dec_input <span class="op">=</span> torch.cat(</span>
+<span id="annotated-cell-17-22"><a href="#annotated-cell-17-22" aria-hidden="true" tabindex="-1"></a>            [dec_input, torch.tensor([[next_id]], device<span class="op">=</span>DEVICE)], dim<span class="op">=</span><span class="dv">1</span></span>
+<span id="annotated-cell-17-23"><a href="#annotated-cell-17-23" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-17-24"><a href="#annotated-cell-17-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> next_id <span class="op">==</span> EOS_IDX:</span>
+<span id="annotated-cell-17-25"><a href="#annotated-cell-17-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="annotated-cell-17-26"><a href="#annotated-cell-17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-17-27"><a href="#annotated-cell-17-27" aria-hidden="true" tabindex="-1"></a>    ids   <span class="op">=</span> dec_input[<span class="dv">0</span>, <span class="dv">1</span>:].tolist()</span>
+<span id="annotated-cell-17-28"><a href="#annotated-cell-17-28" aria-hidden="true" tabindex="-1"></a>    words <span class="op">=</span> [itos[i] <span class="cf">for</span> i <span class="kw">in</span> ids <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> (BOS_IDX, EOS_IDX, PAD_IDX)]</span>
+<span id="annotated-cell-17-29"><a href="#annotated-cell-17-29" aria-hidden="true" tabindex="-1"></a>    attn_mat <span class="op">=</span> torch.stack(all_attn[:<span class="op">-</span><span class="dv">1</span>]).numpy()          <span class="co"># (T_cap, N)</span></span>
+<span id="annotated-cell-17-30"><a href="#annotated-cell-17-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> words, attn_mat</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-17" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-17" data-code-lines="8" data-code-annotation="1"><code>all_attn</code> collects the cross-attention distribution over the <span class="math inline">N = 196</span> patch tokens at every decoding step.2. <code>attn_w</code> has shape <span class="math inline">(1, H_\text{heads}, T, N)</span> where <span class="math inline">T</span> grows at each step; we only need the last position.3. Taking the last position’s attention and averaging over heads gives a <span class="math inline">(N,)</span> vector — the spatial attention weights for this generation step.4. We drop the attention collected for the <code>&lt;eos&gt;</code> step and stack the remaining steps into a <span class="math inline">(T_\text{cap}, N)</span> matrix.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Visualizing the attention maps for selected words overlaid on the image:</p>
+<div id="fig-attn-viz" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-attn-viz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ex       <span class="op">=</span> test_examples[<span class="dv">0</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>img_pil  <span class="op">=</span> ex[<span class="st">"image"</span>].convert(<span class="st">"RGB"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>img_t    <span class="op">=</span> eval_transform(img_pil)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>words, attn_mat <span class="op">=</span> generate_with_attention(model, img_t)  <span class="co"># (T_cap, 196)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># pick up to 6 content words to visualize</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>stop <span class="op">=</span> {<span class="st">"a"</span>, <span class="st">"an"</span>, <span class="st">"the"</span>, <span class="st">"is"</span>, <span class="st">"in"</span>, <span class="st">"on"</span>, <span class="st">"of"</span>, <span class="st">"with"</span>, <span class="st">"and"</span>, <span class="st">"are"</span>, <span class="st">"to"</span>, <span class="st">"at"</span>}</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>vis_indices <span class="op">=</span> [i <span class="cf">for</span> i, w <span class="kw">in</span> <span class="bu">enumerate</span>(words) <span class="cf">if</span> w <span class="kw">not</span> <span class="kw">in</span> stop][:<span class="dv">6</span>]</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>n_show <span class="op">=</span> <span class="bu">len</span>(vis_indices)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>patch_grid <span class="op">=</span> <span class="bu">int</span>(math.sqrt(attn_mat.shape[<span class="dv">1</span>]))  <span class="co"># 14</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>img_np     <span class="op">=</span> np.array(img_pil.resize((IMG_SIZE, IMG_SIZE)))</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, n_show, figsize<span class="op">=</span>(<span class="fl">2.4</span> <span class="op">*</span> n_show, <span class="fl">2.8</span>))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> n_show <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> [axes]</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, idx <span class="kw">in</span> <span class="bu">zip</span>(axes, vis_indices):</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">=</span> attn_mat[idx]                              <span class="co"># (196,)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    heat    <span class="op">=</span> weights.reshape(patch_grid, patch_grid)    <span class="co"># (14, 14)</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    heat    <span class="op">=</span> (heat <span class="op">-</span> heat.<span class="bu">min</span>()) <span class="op">/</span> (heat.<span class="bu">max</span>() <span class="op">-</span> heat.<span class="bu">min</span>() <span class="op">+</span> <span class="fl">1e-8</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># upsample to image size</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    heat_up <span class="op">=</span> np.array(</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        Image.fromarray((heat <span class="op">*</span> <span class="dv">255</span>).astype(np.uint8)).resize(</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>            (IMG_SIZE, IMG_SIZE), resample<span class="op">=</span>Image.BILINEAR</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    ax.imshow(img_np)</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    ax.imshow(heat_up, cmap<span class="op">=</span><span class="st">"viridis"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f'"</span><span class="sc">{</span>words[idx]<span class="sc">}</span><span class="ss">"'</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Generated:"</span>, <span class="st">" "</span>.join(words))</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Reference:"</span>, ex[<span class="st">"caption"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-attn-viz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+<p><strong>Figure.</strong> Cross-attention maps for selected content words, overlaid on the input image. Each panel shows which <span class="math inline">14 \times 14</span> patch grid regions the last decoder layer attends to when generating that word. Attention is averaged over heads and bilinearly upsampled to the image resolution. Ideally, words like “dog” or “ball” would light up the corresponding objects in the image.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Attention maps from a ViT trained from scratch on a small dataset are coarser than those from large pretrained models like CLIP. Pretrained features would reveal sharper localization of objects and attributes, since the encoder would have already learned semantically meaningful patch representations.</p>
+</div>
+</div>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-vit" class="csl-entry" role="listitem">
+Dosovitskiy, Alexey, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, et al. 2020. <span>“An Image Is Worth 16x16 Words: Transformers for Image Recognition at Scale.”</span> <a href="https://arxiv.org/abs/2010.11929">https://arxiv.org/abs/2010.11929</a>.
+</div>
+<div id="ref-flickr8k" class="csl-entry" role="listitem">
+Hodosh, Micah, Peter Young, and Julia Hockenmaier. 2013. <span>“Framing Image Description as a Ranking Task: Data, Models and Evaluation Metrics.”</span> <em>Journal of Artificial Intelligence Research</em>. <a href="https://jair.org/index.php/jair/article/view/10831">https://jair.org/index.php/jair/article/view/10831</a>.
+</div>
+<div id="ref-bleu" class="csl-entry" role="listitem">
+Papineni, Kishore, Salim Roukos, Todd Ward, and Wei-Jing Zhu. 2002. <span>“BLEU: A Method for Automatic Evaluation of Machine Translation.”</span> In <em>Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics</em>, 311–18. <a href="https://aclanthology.org/P02-1040">https://aclanthology.org/P02-1040</a>.
+</div>
+<div id="ref-transformers" class="csl-entry" role="listitem">
+Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017. <span>“Attention Is All You Need.”</span> <em>CoRR</em> abs/1706.03762. <a href="http://arxiv.org/abs/1706.03762">http://arxiv.org/abs/1706.03762</a>.
+</div>
+<div id="ref-preln-transformer" class="csl-entry" role="listitem">
+Xiong, Ruibin, Yunchang Yang, Di He, Kai Zheng, Shuxin Zheng, Chen Xing, Huishuai Zhang, Yanyan Lan, Liwei Wang, and Tie-Yan Liu. 2020. <span>“On Layer Normalization in the Transformer Architecture.”</span> <em>CoRR</em> abs/2002.04745. <a href="https://arxiv.org/abs/2002.04745">https://arxiv.org/abs/2002.04745</a>.
+</div>
+<div id="ref-showattendtell" class="csl-entry" role="listitem">
+Xu, Kelvin, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron Courville, Ruslan Salakhutdinov, Richard Zemel, and Yoshua Bengio. 2016. <span>“Show, Attend and Tell: Neural Image Caption Generation with Visual Attention.”</span> <a href="https://arxiv.org/abs/1502.03044">https://arxiv.org/abs/1502.03044</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/deep/advanced/16-segmentation.html" class="pagination-link" aria-label="16. Semantic Segmentation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">16. Semantic Segmentation</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Resilience Patterns – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/prep/deep-dives/05-mlops.html" rel="next">
+<link href="../../../notebooks/prep/deep-dives/03-agent-memory.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/04-resilience.html">04. Resilience Patterns</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#failure-taxonomy" id="toc-failure-taxonomy" class="nav-link active" data-scroll-target="#failure-taxonomy">Failure Taxonomy</a></li>
+  <li><a href="#exponential-backoff-with-jitter" id="toc-exponential-backoff-with-jitter" class="nav-link" data-scroll-target="#exponential-backoff-with-jitter">Exponential Backoff with Jitter</a></li>
+  <li><a href="#circuit-breaker" id="toc-circuit-breaker" class="nav-link" data-scroll-target="#circuit-breaker">Circuit Breaker</a></li>
+  <li><a href="#fallback-chains" id="toc-fallback-chains" class="nav-link" data-scroll-target="#fallback-chains">Fallback Chains</a></li>
+  <li><a href="#bulkheads" id="toc-bulkheads" class="nav-link" data-scroll-target="#bulkheads">Bulkheads</a></li>
+  <li><a href="#graceful-degradation" id="toc-graceful-degradation" class="nav-link" data-scroll-target="#graceful-degradation">Graceful Degradation</a></li>
+  <li><a href="#context-overflow-handling" id="toc-context-overflow-handling" class="nav-link" data-scroll-target="#context-overflow-handling">Context Overflow Handling</a></li>
+  <li><a href="#full-demo-resilientcomplianceservice" id="toc-full-demo-resilientcomplianceservice" class="nav-link" data-scroll-target="#full-demo-resilientcomplianceservice">Full Demo: ResilientComplianceService</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/04-resilience.html">04. Resilience Patterns</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Resilience Patterns</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This deep dive extends <a href="../../../notebooks/prep/10-model-serving.html">notebook 10</a> and <a href="../../../notebooks/prep/12-ai-infra.html">notebook 12</a>, which establish the serving and infrastructure foundations. Production AI services have failure modes that pure software does not. A microservice downstream from a database can assume that a valid SQL query always returns a valid result in bounded time; an LLM service cannot. Models time out under load, rate limits impose hard ceilings on throughput, context windows overflow on long documents, and — most insidiously — a model can return syntactically valid JSON that is semantically wrong. This notebook builds the full resilience toolkit for a financial AI service: exponential backoff with jitter, circuit breakers, fallback chains, bulkheads, graceful degradation, and context-overflow handling. We assemble all patterns into a <code>ResilientComplianceService</code> and run a simulation with probabilistic fault injection to demonstrate the system continuing to serve safe, degraded responses under stress.</p>
+<p>Setup:</p>
+<section id="failure-taxonomy" class="level2">
+<h2 class="anchored" data-anchor-id="failure-taxonomy">Failure Taxonomy</h2>
+<p>Not all LLM failures are alike. The resilience pattern we apply depends entirely on which category an error falls into:</p>
+<p><br></p>
+<p><strong>Transient errors.</strong> Errors that are likely to resolve on their own: HTTP 429 rate-limit responses, HTTP 503 service unavailability, and network timeouts. The defining property is that the exact same request, retried after a short delay, has a reasonable chance of succeeding. The appropriate response is <mark>retry with backoff</mark>.</p>
+<p><br></p>
+<p><strong>Permanent errors.</strong> Errors for which retrying the identical request will always fail: a prompt that exceeds the model’s context window, a malformed API request, or invalid credentials. Retrying wastes quota and time. The appropriate response is <mark>fail fast and route to an alternative</mark>.</p>
+<p><br></p>
+<p><strong>Quality degradation.</strong> The request succeeds — the model returns a 200 with well-formed JSON — but the answer is wrong, incomplete, or hallucinated. This is the hardest failure mode to detect because there is no exception to catch. Detection requires application-layer checks: schema validation, confidence scores, or a lightweight judge. The appropriate response is <mark>escalate to a stronger model or flag for human review</mark>.</p>
+<p><br></p>
+<p>For a financial AI service, we define the following SLO targets:</p>
+<table class="caption-top table">
+<caption>SLO targets for the compliance review service.</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 15%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: center;">Target</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">p99 latency</td>
+<td style="text-align: center;"><span class="math inline">&lt; 2\,\text{s}</span></td>
+<td style="text-align: left;">End-to-end, including retrieval</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Error rate</td>
+<td style="text-align: center;"><span class="math inline">&lt; 0.1\%</span></td>
+<td style="text-align: left;">Unhandled exceptions reaching the caller</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Faithfulness</td>
+<td style="text-align: center;"><span class="math inline">&gt; 0.85</span></td>
+<td style="text-align: left;">RAGAS faithfulness on a held-out eval set</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Degraded-safe rate</td>
+<td style="text-align: center;"><span class="math inline">100\%</span></td>
+<td style="text-align: left;">Every failure returns a human-reviewable result</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exponential-backoff-with-jitter" class="level2">
+<h2 class="anchored" data-anchor-id="exponential-backoff-with-jitter">Exponential Backoff with Jitter</h2>
+<p>When multiple clients hit a rate limit simultaneously and all retry on the same schedule, they produce a <strong>thundering herd</strong>: the retries arrive at the server at the same time and immediately trigger another 429. The solution is to add randomness — <strong>jitter</strong> — to the retry delay. With full jitter, the wait time after attempt <span class="math inline">n</span> is drawn from:</p>
+<p><span class="math display">t_n = \text{base} \cdot 2^n \cdot U(0, 1)</span></p>
+<p>where <span class="math inline">U(0, 1)</span> is a uniform random variable. This spreads retries across the interval <span class="math inline">[0,\, \text{base} \cdot 2^n]</span>, reducing the probability that many clients retry at exactly the same moment. We cap <span class="math inline">t_n</span> at a maximum delay to prevent indefinite backoff under sustained overload:</p>
+<p><span class="math display">t_n = \min\!\left(\text{cap},\; \text{base} \cdot 2^n \cdot U(0, 1)\right).</span></p>
+<p>We implement <code>RetryClient</code> using <code>tenacity</code>, which provides declarative retry semantics and handles the retry loop, exception filtering, and wait strategy for us.</p>
+<p>Defining the retry wrapper:</p>
+<div id="d0fca9bd" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tenacity <span class="im">import</span> (</span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>    retry,</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>    stop_after_attempt,</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>    wait_random_exponential,</span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>    retry_if_exception_type,</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>    before_sleep_log,</span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>logging.basicConfig(level<span class="op">=</span>logging.INFO, <span class="bu">format</span><span class="op">=</span><span class="st">"</span><span class="sc">%(levelname)s</span><span class="st"> </span><span class="sc">%(message)s</span><span class="st">"</span>)</span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RateLimitError(<span class="pp">Exception</span>):</span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simulated transient rate-limit error."""</span></span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RetryClient:</span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""LLMClient wrapper with exponential backoff + full jitter."""</span></span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, inner: LLMClient, max_attempts: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>,</span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>                 base: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>, cap: <span class="bu">float</span> <span class="op">=</span> <span class="fl">10.0</span>):</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._inner <span class="op">=</span> inner</span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._max_attempts <span class="op">=</span> max_attempts</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._base <span class="op">=</span> base</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._cap <span class="op">=</span> cap</span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._attempt_log: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, messages, <span class="op">**</span>kwargs):</span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">@retry</span>(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-33" class="code-annotation-target"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>            stop<span class="op">=</span>stop_after_attempt(<span class="va">self</span>._max_attempts),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-34" class="code-annotation-target"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>            wait<span class="op">=</span>wait_random_exponential(</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>                multiplier<span class="op">=</span><span class="va">self</span>._base, <span class="bu">max</span><span class="op">=</span><span class="va">self</span>._cap</span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-1-37" class="code-annotation-target"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a>            retry<span class="op">=</span>retry_if_exception_type(RateLimitError),</span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>            before_sleep<span class="op">=</span>before_sleep_log(logger, logging.WARNING),</span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>            reraise<span class="op">=</span><span class="va">True</span>,</span>
+<span id="annotated-cell-1-40"><a href="#annotated-cell-1-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-1-41"><a href="#annotated-cell-1-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> _call():</span>
+<span id="annotated-cell-1-42"><a href="#annotated-cell-1-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>._inner.complete(messages, <span class="op">**</span>kwargs)</span>
+<span id="annotated-cell-1-43"><a href="#annotated-cell-1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-1-44"><a href="#annotated-cell-1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> _call()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="33" data-code-annotation="1">Stop retrying after <code>max_attempts</code> total calls (including the first).</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="34" data-code-annotation="2"><code>wait_random_exponential</code> implements full-jitter: the wait before attempt <span class="math inline">n</span> is sampled from <span class="math inline">U(0, \text{base} \cdot 2^n)</span>, capped at <code>max</code> seconds.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="37" data-code-annotation="3">We only retry <code>RateLimitError</code> (transient). Permanent errors like <code>ContextOverflowError</code> will propagate immediately.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>To demonstrate recovery, we build a mock LLM that fails with a rate-limit error on its first two calls:</p>
+<div id="a3cfd2e0" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FlakeyLLM:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stub LLM: raises RateLimitError for the first `fail_count` calls."""</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, fail_count: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, response: <span class="bu">str</span> <span class="op">=</span> <span class="st">"COMPLIANT"</span>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fail_count <span class="op">=</span> fail_count</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._calls <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._response <span class="op">=</span> response</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> <span class="st">"mock"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, messages, <span class="op">**</span>kwargs):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._calls <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._calls <span class="op">&lt;=</span> <span class="va">self</span>._fail_count:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  [FlakeyLLM] call </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_calls<span class="sc">}</span><span class="ss">: raising RateLimitError"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> RateLimitError(<span class="st">"429 Too Many Requests"</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  [FlakeyLLM] call </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_calls<span class="sc">}</span><span class="ss">: success"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._response</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>flakey <span class="op">=</span> FlakeyLLM(fail_count<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> RetryClient(flakey, max_attempts<span class="op">=</span><span class="dv">4</span>, base<span class="op">=</span><span class="fl">0.01</span>, cap<span class="op">=</span><span class="fl">0.1</span>)  <span class="co"># short delays for demo</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Sending compliance review request..."</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> client.complete([{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Review trade order #TRD-8821."</span>}])</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Result: </span><span class="sc">{</span>result<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="circuit-breaker" class="level2">
+<h2 class="anchored" data-anchor-id="circuit-breaker">Circuit Breaker</h2>
+<p>Retrying a service that is completely down is wasteful: each attempt occupies a thread, consumes timeout budget, and returns an error anyway. The <strong>circuit breaker</strong> pattern short-circuits calls to a failing dependency rather than letting them accumulate. It models the dependency as a state machine with three states:</p>
+<ul>
+<li><strong>CLOSED</strong> — normal operation; all requests flow through.</li>
+<li><strong>OPEN</strong> — the dependency is considered down; requests fail immediately without being forwarded.</li>
+<li><strong>HALF_OPEN</strong> — a cooldown period has elapsed; a single probe request is forwarded to test recovery.</li>
+</ul>
+<p>Transitions are governed by a sliding-window failure rate and a cooldown timer:</p>
+<p><span class="math display">\text{CLOSED} \xrightarrow{\;\text{failure rate} &gt; \theta\;} \text{OPEN} \xrightarrow{\;t &gt; t_{\text{cool}}\;} \text{HALF\_OPEN} \xrightarrow{\;\text{probe success}\;} \text{CLOSED}</span></p>
+<p>If the probe in HALF_OPEN fails, the breaker returns immediately to OPEN and resets the cooldown clock.</p>
+<p>Implementing the state machine:</p>
+<div id="e7a3b6c4" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> enum <span class="im">import</span> Enum, auto</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CBState(Enum):</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    CLOSED    <span class="op">=</span> auto()</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>    OPEN      <span class="op">=</span> auto()</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>    HALF_OPEN <span class="op">=</span> auto()</span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CircuitBreakerOpen(<span class="pp">Exception</span>):</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Raised when the circuit is OPEN and a request is rejected."""</span></span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CircuitBreaker:</span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sliding-window circuit breaker wrapping any object with a .complete() method."""</span></span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, inner, window: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a>                 failure_threshold: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a>                 cooldown: <span class="bu">float</span> <span class="op">=</span> <span class="fl">5.0</span>):</span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._inner <span class="op">=</span> inner</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-22" class="code-annotation-target"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._window <span class="op">=</span> window</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-23" class="code-annotation-target"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._threshold <span class="op">=</span> failure_threshold</span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._cooldown <span class="op">=</span> cooldown</span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._state <span class="op">=</span> CBState.CLOSED</span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._results: deque[<span class="bu">bool</span>] <span class="op">=</span> deque(maxlen<span class="op">=</span>window)  <span class="co"># True=success</span></span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._opened_at: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-3-28"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> state(<span class="va">self</span>) <span class="op">-&gt;</span> CBState:</span>
+<span id="annotated-cell-3-31"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._state</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-33"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _failure_rate(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="va">self</span>._results:</span>
+<span id="annotated-cell-3-35"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">1.0</span> <span class="op">-</span> (<span class="bu">sum</span>(<span class="va">self</span>._results) <span class="op">/</span> <span class="bu">len</span>(<span class="va">self</span>._results))</span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-38"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _try_reset(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Check whether cooldown has elapsed and transition to HALF_OPEN."""</span></span>
+<span id="annotated-cell-3-40"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._state <span class="op">==</span> CBState.OPEN:</span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a>            elapsed <span class="op">=</span> time.time() <span class="op">-</span> <span class="va">self</span>._opened_at</span>
+<span id="annotated-cell-3-42"><a href="#annotated-cell-3-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> elapsed <span class="op">&gt;=</span> <span class="va">self</span>._cooldown:</span>
+<span id="annotated-cell-3-43"><a href="#annotated-cell-3-43" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._state <span class="op">=</span> CBState.HALF_OPEN</span>
+<span id="annotated-cell-3-44"><a href="#annotated-cell-3-44" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [CB] → HALF_OPEN after </span><span class="sc">{</span>elapsed<span class="sc">:.1f}</span><span class="ss">s cooldown"</span>)</span>
+<span id="annotated-cell-3-45"><a href="#annotated-cell-3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-46"><a href="#annotated-cell-3-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, messages, <span class="op">**</span>kwargs):</span>
+<span id="annotated-cell-3-47"><a href="#annotated-cell-3-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._try_reset()</span>
+<span id="annotated-cell-3-48"><a href="#annotated-cell-3-48" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-3-49" class="code-annotation-target"><a href="#annotated-cell-3-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._state <span class="op">==</span> CBState.OPEN:</span>
+<span id="annotated-cell-3-50"><a href="#annotated-cell-3-50" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> CircuitBreakerOpen(<span class="st">"Circuit is OPEN — request rejected"</span>)</span>
+<span id="annotated-cell-3-51"><a href="#annotated-cell-3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-52"><a href="#annotated-cell-3-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="annotated-cell-3-53"><a href="#annotated-cell-3-53" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> <span class="va">self</span>._inner.complete(messages, <span class="op">**</span>kwargs)</span>
+<span id="annotated-cell-3-54"><a href="#annotated-cell-3-54" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._results.append(<span class="va">True</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-3-55" class="code-annotation-target"><a href="#annotated-cell-3-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>._state <span class="op">==</span> CBState.HALF_OPEN:</span>
+<span id="annotated-cell-3-56"><a href="#annotated-cell-3-56" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._state <span class="op">=</span> CBState.CLOSED</span>
+<span id="annotated-cell-3-57"><a href="#annotated-cell-3-57" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._results.clear()</span>
+<span id="annotated-cell-3-58"><a href="#annotated-cell-3-58" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [CB] → CLOSED on probe success"</span>)</span>
+<span id="annotated-cell-3-59"><a href="#annotated-cell-3-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> result</span>
+<span id="annotated-cell-3-60"><a href="#annotated-cell-3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-61"><a href="#annotated-cell-3-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> exc:</span>
+<span id="annotated-cell-3-62"><a href="#annotated-cell-3-62" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._results.append(<span class="va">False</span>)</span>
+<span id="annotated-cell-3-63"><a href="#annotated-cell-3-63" aria-hidden="true" tabindex="-1"></a>            rate <span class="op">=</span> <span class="va">self</span>._failure_rate()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-3-64" class="code-annotation-target"><a href="#annotated-cell-3-64" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>._state <span class="op">==</span> CBState.HALF_OPEN:</span>
+<span id="annotated-cell-3-65"><a href="#annotated-cell-3-65" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._state <span class="op">=</span> CBState.OPEN</span>
+<span id="annotated-cell-3-66"><a href="#annotated-cell-3-66" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._opened_at <span class="op">=</span> time.time()</span>
+<span id="annotated-cell-3-67"><a href="#annotated-cell-3-67" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [CB] → OPEN (probe failed)"</span>)</span>
+<span id="annotated-cell-3-68"><a href="#annotated-cell-3-68" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> rate <span class="op">&gt;=</span> <span class="va">self</span>._threshold <span class="kw">and</span> <span class="bu">len</span>(<span class="va">self</span>._results) <span class="op">==</span> <span class="va">self</span>._window:</span>
+<span id="annotated-cell-3-69"><a href="#annotated-cell-3-69" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._state <span class="op">=</span> CBState.OPEN</span>
+<span id="annotated-cell-3-70"><a href="#annotated-cell-3-70" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._opened_at <span class="op">=</span> time.time()</span>
+<span id="annotated-cell-3-71"><a href="#annotated-cell-3-71" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [CB] → OPEN (failure rate=</span><span class="sc">{</span>rate<span class="sc">:.0%}</span><span class="ss">)"</span>)</span>
+<span id="annotated-cell-3-72"><a href="#annotated-cell-3-72" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> exc</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="22" data-code-annotation="1">We track the last <code>window</code> outcomes; older results fall off automatically thanks to <code>deque(maxlen=window)</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="23" data-code-annotation="2">If the failure rate over the window exceeds <code>failure_threshold</code>, the breaker opens.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="49" data-code-annotation="3">In OPEN state, all calls fail immediately — no forwarding occurs.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="55" data-code-annotation="4">A successful probe in HALF_OPEN closes the breaker and clears the results window so stale failures don’t immediately reopen it.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="64" data-code-annotation="5">A failed probe in HALF_OPEN reopens the breaker and resets the cooldown clock.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Simulating a burst of failures followed by recovery:</p>
+<div id="b0d6e9f7" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CountingLLM:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stub LLM: fails for call indices in `fail_on`."""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, fail_on: <span class="bu">set</span>[<span class="bu">int</span>]):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fail_on <span class="op">=</span> fail_on</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._calls <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> <span class="st">"mock"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, messages, <span class="op">**</span>kwargs):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._calls <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._calls <span class="kw">in</span> <span class="va">self</span>._fail_on:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="ss">f"Simulated failure on call </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_calls<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"COMPLIANT"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Calls 1-4 fail → window of 5 filled with 4 failures → OPEN</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>mock_llm <span class="op">=</span> CountingLLM(fail_on<span class="op">=</span>{<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>})</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>cb <span class="op">=</span> CircuitBreaker(mock_llm, window<span class="op">=</span><span class="dv">5</span>, failure_threshold<span class="op">=</span><span class="fl">0.6</span>, cooldown<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        resp <span class="op">=</span> cb.complete([{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Review order #</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>}])</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  call </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">: OK → state=</span><span class="sc">{</span>cb<span class="sc">.</span>state<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> CircuitBreakerOpen:</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  call </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">: REJECTED (circuit open) → state=</span><span class="sc">{</span>cb<span class="sc">.</span>state<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">RuntimeError</span> <span class="im">as</span> e:</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  call </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">: ERROR (</span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">) → state=</span><span class="sc">{</span>cb<span class="sc">.</span>state<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">==</span> <span class="dv">5</span>:                        <span class="co"># pause to let cooldown elapse</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="fl">0.15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The circuit breaker transitions to OPEN only after the window is fully populated. Early in the service’s lifetime — when the results deque has fewer than <code>window</code> entries — no threshold check fires even if every call fails. Set <code>window</code> small (3–5) for fast-failure services, and ensure the service is pre-warmed or that startup errors are excluded from the window.</p>
+</div>
+</div>
+</section>
+<section id="fallback-chains" class="level2">
+<h2 class="anchored" data-anchor-id="fallback-chains">Fallback Chains</h2>
+<p>When a primary model is unavailable — circuit open, quota exhausted, or context overflow — we want to serve a degraded but useful answer rather than an error. A <strong>fallback chain</strong> tries each option in descending order of capability:</p>
+<ol type="1">
+<li><code>gpt-4o</code> — highest quality, highest cost, primary path.</li>
+<li><code>gpt-4o-mini</code> — lower cost, slightly lower quality, acceptable for most queries.</li>
+<li>Rule-based extractor — a regex scan of the input for compliance keywords; no LLM call, zero cost, zero latency, but no reasoning.</li>
+</ol>
+<p>The cost–quality tradeoff is explicit: as we descend the chain, we trade answer quality for availability. The invariant we preserve is that the service always returns <em>something</em> actionable rather than an exception.</p>
+<p>Implementing the rule-based fallback and the chain:</p>
+<div id="a5c1d4ec" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a>COMPLIANCE_KEYWORDS <span class="op">=</span> [</span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r"</span><span class="dv">\b</span><span class="vs">sanction"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">watchlist"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">AML"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">KYC"</span>,</span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r"</span><span class="dv">\b</span><span class="vs">fraud"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">unauthorized"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">restricted"</span>,</span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r"</span><span class="dv">\b</span><span class="vs">embargo"</span>, <span class="vs">r"</span><span class="dv">\b</span><span class="vs">money</span><span class="dv">.</span><span class="vs">laundering"</span>,</span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a>_PATTERN <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">"|"</span>.join(COMPLIANCE_KEYWORDS), re.IGNORECASE)</span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ReviewResult:</span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>    verdict: <span class="bu">str</span>          <span class="co"># "COMPLIANT" | "NON_COMPLIANT" | "REVIEW_REQUIRED"</span></span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>    explanation: <span class="bu">str</span></span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a>    source: <span class="bu">str</span>           <span class="co"># which chain link produced the result</span></span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a>    cost_usd: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-21"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rule_based_review(text: <span class="bu">str</span>) <span class="op">-&gt;</span> ReviewResult:</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Regex compliance keyword extractor — zero-cost fallback."""</span></span>
+<span id="annotated-cell-5-23"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>    hits <span class="op">=</span> _PATTERN.findall(text)</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hits:</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ReviewResult(</span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>            verdict<span class="op">=</span><span class="st">"REVIEW_REQUIRED"</span>,</span>
+<span id="annotated-cell-5-27"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a>            explanation<span class="op">=</span><span class="ss">f"Keyword matches: </span><span class="sc">{</span><span class="bu">list</span>(<span class="bu">set</span>(h.upper() <span class="cf">for</span> h <span class="kw">in</span> hits))<span class="sc">}</span><span class="ss">. Human review required."</span>,</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a>            source<span class="op">=</span><span class="st">"rule-based"</span>,</span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ReviewResult(</span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>        verdict<span class="op">=</span><span class="st">"COMPLIANT"</span>,</span>
+<span id="annotated-cell-5-32"><a href="#annotated-cell-5-32" aria-hidden="true" tabindex="-1"></a>        explanation<span class="op">=</span><span class="st">"No compliance keywords detected by rule-based scan."</span>,</span>
+<span id="annotated-cell-5-33"><a href="#annotated-cell-5-33" aria-hidden="true" tabindex="-1"></a>        source<span class="op">=</span><span class="st">"rule-based"</span>,</span>
+<span id="annotated-cell-5-34"><a href="#annotated-cell-5-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-5-35"><a href="#annotated-cell-5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-36"><a href="#annotated-cell-5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-37"><a href="#annotated-cell-5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FallbackChain:</span>
+<span id="annotated-cell-5-38"><a href="#annotated-cell-5-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Tries each link in order; returns the first successful result."""</span></span>
+<span id="annotated-cell-5-39"><a href="#annotated-cell-5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-40"><a href="#annotated-cell-5-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, links: <span class="bu">list</span>):</span>
+<span id="annotated-cell-5-41"><a href="#annotated-cell-5-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._links <span class="op">=</span> links   <span class="co"># list of (name, callable) tuples</span></span>
+<span id="annotated-cell-5-42"><a href="#annotated-cell-5-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-43"><a href="#annotated-cell-5-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> review(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> ReviewResult:</span>
+<span id="annotated-cell-5-44"><a href="#annotated-cell-5-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, fn <span class="kw">in</span> <span class="va">self</span>._links:</span>
+<span id="annotated-cell-5-45"><a href="#annotated-cell-5-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-46" class="code-annotation-target"><a href="#annotated-cell-5-46" aria-hidden="true" tabindex="-1"></a>                result <span class="op">=</span> fn(text)</span>
+<span id="annotated-cell-5-47"><a href="#annotated-cell-5-47" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [FallbackChain] succeeded with '</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">'"</span>)</span>
+<span id="annotated-cell-5-48"><a href="#annotated-cell-5-48" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> result</span>
+<span id="annotated-cell-5-49"><a href="#annotated-cell-5-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="annotated-cell-5-50"><a href="#annotated-cell-5-50" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [FallbackChain] '</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">' failed: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-5-51"><a href="#annotated-cell-5-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The rule-based link never raises, so this is unreachable in practice</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-52" class="code-annotation-target"><a href="#annotated-cell-5-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"All fallback links exhausted"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="46" data-code-annotation="1">Each link is a callable <code>fn(text) -&gt; ReviewResult</code>. The chain is link-agnostic: LLM clients and rule-based functions share the same protocol.</span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="52" data-code-annotation="2">This should never execute if the final link is rule-based (which always succeeds). It exists as a defensive assertion.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Wiring up the chain with a broken primary and a working mini model:</p>
+<div id="d8f4a7bf" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>SYSTEM_PROMPT <span class="op">=</span> (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You are a compliance officer. Review the trade description and respond with "</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"exactly one word: COMPLIANT or NON_COMPLIANT."</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> llm_review(client: LLMClient, text: <span class="bu">str</span>) <span class="op">-&gt;</span> ReviewResult:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    msgs <span class="op">=</span> [</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: SYSTEM_PROMPT},</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: text},</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    verdict <span class="op">=</span> client.complete(msgs).strip().upper()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ReviewResult(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        verdict<span class="op">=</span>verdict,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        explanation<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>client<span class="sc">.</span>model<span class="sc">}</span><span class="ss"> classification."</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        source<span class="op">=</span>client.model,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        cost_usd<span class="op">=</span>client.total_cost,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Primary: always raises (simulates outage)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BrokenLLM:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> <span class="st">"gpt-4o"</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, <span class="op">*</span>a, <span class="op">**</span>kw):</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> CircuitBreakerOpen(<span class="st">"Circuit OPEN for gpt-4o"</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>broken_4o  <span class="op">=</span> BrokenLLM()</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>mini_client <span class="op">=</span> LLMClient(model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>chain <span class="op">=</span> FallbackChain([</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"gpt-4o"</span>,      <span class="kw">lambda</span> t: llm_review(broken_4o,   t)),</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"gpt-4o-mini"</span>, <span class="kw">lambda</span> t: llm_review(mini_client, t)),</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"rule-based"</span>,  <span class="kw">lambda</span> t: rule_based_review(t)),</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>trade_desc <span class="op">=</span> (</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sell 5000 shares of XYZ Corp for client account #8821. "</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Client is on internal watchlist for AML review."</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> chain.review(trade_desc)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Verdict : </span><span class="sc">{</span>result<span class="sc">.</span>verdict<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Source  : </span><span class="sc">{</span>result<span class="sc">.</span>source<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Explanation: </span><span class="sc">{</span>result<span class="sc">.</span>explanation<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cost    : $</span><span class="sc">{</span>result<span class="sc">.</span>cost_usd<span class="sc">:.6f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="bulkheads" class="level2">
+<h2 class="anchored" data-anchor-id="bulkheads">Bulkheads</h2>
+<p>A <strong>bulkhead</strong> partitions capacity so that one consumer cannot starve another. In ship design, bulkheads are watertight compartments that prevent a single breach from flooding the whole hull. In an AI service, the analogous failure is a burst of requests from tenant A filling all available concurrency slots, blocking tenant B’s time-sensitive margin-call processor.</p>
+<p>We implement per-tenant concurrency limits using <code>asyncio.Semaphore</code>. Each tenant gets a semaphore capped at <code>max_concurrent</code> slots. Requests that would exceed the limit raise <code>BulkheadFull</code> immediately rather than queuing indefinitely — a pattern called <strong>fail fast</strong> that preserves predictable latency.</p>
+<p>Implementing the bulkhead executor:</p>
+<div id="b2d8e1f3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> asyncio</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BulkheadFull(<span class="pp">Exception</span>):</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Raised when no concurrency slots are available for a tenant."""</span></span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BulkheadExecutor:</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Per-tenant async concurrency limiter."""</span></span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, max_concurrent: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>):</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._max <span class="op">=</span> max_concurrent</span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._semaphores: <span class="bu">dict</span>[<span class="bu">str</span>, asyncio.Semaphore] <span class="op">=</span> {}</span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._active: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">int</span>] <span class="op">=</span> {}</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_sem(<span class="va">self</span>, tenant: <span class="bu">str</span>) <span class="op">-&gt;</span> asyncio.Semaphore:</span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tenant <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>._semaphores:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-18" class="code-annotation-target"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._semaphores[tenant] <span class="op">=</span> asyncio.Semaphore(<span class="va">self</span>._max)</span>
+<span id="annotated-cell-7-19"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._active[tenant] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-7-20"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._semaphores[tenant]</span>
+<span id="annotated-cell-7-21"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="kw">def</span> execute(<span class="va">self</span>, tenant: <span class="bu">str</span>, coro):</span>
+<span id="annotated-cell-7-23"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a>        sem <span class="op">=</span> <span class="va">self</span>._get_sem(tenant)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-24" class="code-annotation-target"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> sem._value <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> BulkheadFull(<span class="ss">f"Tenant '</span><span class="sc">{</span>tenant<span class="sc">}</span><span class="ss">' bulkhead full (</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_max<span class="sc">}</span><span class="ss"> slots used)"</span>)</span>
+<span id="annotated-cell-7-26"><a href="#annotated-cell-7-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">async</span> <span class="cf">with</span> sem:</span>
+<span id="annotated-cell-7-27"><a href="#annotated-cell-7-27" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._active[tenant] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-7-28"><a href="#annotated-cell-7-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="annotated-cell-7-29"><a href="#annotated-cell-7-29" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="cf">await</span> coro</span>
+<span id="annotated-cell-7-30"><a href="#annotated-cell-7-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">finally</span>:</span>
+<span id="annotated-cell-7-31"><a href="#annotated-cell-7-31" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._active[tenant] <span class="op">-=</span> <span class="dv">1</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="18" data-code-annotation="1">Each tenant gets an independent semaphore. Tenant A’s semaphore exhaustion has no effect on tenant B’s semaphore.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="24" data-code-annotation="2">We check whether the semaphore is saturated <em>before</em> acquiring it. This gives fail-fast semantics: rather than queuing behind the semaphore, we immediately raise <code>BulkheadFull</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Demonstrating tenant isolation under a burst from tenant A:</p>
+<div id="e5a1b4c6" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> mock_llm_call(tenant: <span class="bu">str</span>, req_id: <span class="bu">int</span>, latency: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.05</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simulate a slow LLM request."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> asyncio.sleep(latency)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>tenant<span class="sc">}</span><span class="ss">:</span><span class="sc">{</span>req_id<span class="sc">}</span><span class="ss">:COMPLIANT"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_bulkhead_demo():</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    bh <span class="op">=</span> BulkheadExecutor(max_concurrent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> []</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="kw">def</span> send(tenant: <span class="bu">str</span>, req_id: <span class="bu">int</span>):</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            resp <span class="op">=</span> <span class="cf">await</span> bh.execute(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                tenant,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                mock_llm_call(tenant, req_id, latency<span class="op">=</span><span class="fl">0.1</span>),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            results.append((tenant, req_id, <span class="st">"OK"</span>, resp))</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> BulkheadFull <span class="im">as</span> e:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            results.append((tenant, req_id, <span class="st">"REJECTED"</span>, <span class="bu">str</span>(e)))</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Tenant A floods with 5 concurrent requests; tenant B sends 2</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">=</span> [</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        send(<span class="st">"tenant-A"</span>, i) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">+</span> [</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        send(<span class="st">"tenant-B"</span>, i) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Tenant'</span><span class="sc">:&lt;12}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Req'</span><span class="sc">:&gt;4}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Status'</span><span class="sc">:&gt;10}</span><span class="ss">  Detail"</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">60</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tenant, req_id, status, detail <span class="kw">in</span> <span class="bu">sorted</span>(results):</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        detail_short <span class="op">=</span> detail[:<span class="dv">50</span>] <span class="cf">if</span> <span class="bu">len</span>(detail) <span class="op">&gt;</span> <span class="dv">50</span> <span class="cf">else</span> detail</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tenant<span class="sc">:&lt;12}</span><span class="ss"> </span><span class="sc">{</span>req_id<span class="sc">:&gt;4}</span><span class="ss"> </span><span class="sc">{</span>status<span class="sc">:&gt;10}</span><span class="ss">  </span><span class="sc">{</span>detail_short<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> run_bulkhead_demo()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Tenant A’s burst fills its two slots and the remaining three are rejected immediately, while both of tenant B’s requests succeed unaffected. Isolation is complete: tenant A’s failure budget does not touch tenant B.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In a real service the bulkhead limit per tenant would be configurable by tier — premium clients receive more concurrency slots than standard clients. A <code>TenantConfig</code> registry mapping tenant IDs to their contracted SLA tier is a natural extension.</p>
+</div>
+</div>
+</section>
+<section id="graceful-degradation" class="level2">
+<h2 class="anchored" data-anchor-id="graceful-degradation">Graceful Degradation</h2>
+<p>Graceful degradation is the commitment that a service will never return an unhandled exception to the caller. Instead, it returns the best answer it can given the current failure state, clearly annotated with its degradation level. We define a <code>DegradationLevel</code> enum with three values that correspond to increasingly conservative behavior:</p>
+<ul>
+<li><strong>FULL</strong> — complete LLM analysis with structured reasoning and cited evidence.</li>
+<li><strong>PARTIAL</strong> — classification verdict only; the reasoning step was skipped (e.g., due to a timeout).</li>
+<li><strong>SAFE_DEFAULT</strong> — the service cannot classify at all; the request is flagged for mandatory human review.</li>
+</ul>
+<p>The invariant is that <code>SAFE_DEFAULT</code> always has <code>verdict="REVIEW_REQUIRED"</code>. Downstream consumers can check <code>level</code> to decide whether to auto-approve (FULL, COMPLIANT) or route to a human queue (anything else).</p>
+<p>Implementing the graceful reviewer:</p>
+<div id="d0f6a9b1" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass <span class="im">as</span> dc</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DegradationLevel(Enum):</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>    FULL         <span class="op">=</span> <span class="st">"full"</span>          <span class="co"># complete LLM analysis</span></span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    PARTIAL      <span class="op">=</span> <span class="st">"partial"</span>       <span class="co"># classification only, no explanation</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>    SAFE_DEFAULT <span class="op">=</span> <span class="st">"safe_default"</span>  <span class="co"># flagged for human review</span></span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DegradedResult:</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>    verdict: <span class="bu">str</span></span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>    explanation: <span class="bu">str</span></span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>    level: DegradationLevel</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>    error: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>SAFE_DEFAULT_RESULT <span class="op">=</span> DegradedResult(</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>    verdict<span class="op">=</span><span class="st">"REVIEW_REQUIRED"</span>,</span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>    explanation<span class="op">=</span><span class="st">"Service unavailable. Routed to human review queue."</span>,</span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>    level<span class="op">=</span>DegradationLevel.SAFE_DEFAULT,</span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GracefulComplianceReviewer:</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Three-tier graceful degradation for compliance review."""</span></span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, full_client, partial_client):</span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._full    <span class="op">=</span> full_client</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._partial <span class="op">=</span> partial_client</span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _full_review(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> DegradedResult:</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>        msgs <span class="op">=</span> [</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">"You are a compliance officer. Reply with JSON: "</span></span>
+<span id="annotated-cell-9-36"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a>                <span class="st">'{"verdict": "COMPLIANT|NON_COMPLIANT", "reason": "&lt;one sentence&gt;"}'</span></span>
+<span id="annotated-cell-9-37"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a>            )},</span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: text},</span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a>        raw <span class="op">=</span> <span class="va">self</span>._full.complete(msgs)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-41" class="code-annotation-target"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> json.loads(raw)</span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DegradedResult(</span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a>            verdict<span class="op">=</span>data[<span class="st">"verdict"</span>],</span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>            explanation<span class="op">=</span>data[<span class="st">"reason"</span>],</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>            level<span class="op">=</span>DegradationLevel.FULL,</span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-9-47"><a href="#annotated-cell-9-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-48"><a href="#annotated-cell-9-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _partial_review(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> DegradedResult:</span>
+<span id="annotated-cell-9-49"><a href="#annotated-cell-9-49" aria-hidden="true" tabindex="-1"></a>        msgs <span class="op">=</span> [</span>
+<span id="annotated-cell-9-50"><a href="#annotated-cell-9-50" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: SYSTEM_PROMPT},</span>
+<span id="annotated-cell-9-51"><a href="#annotated-cell-9-51" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: text},</span>
+<span id="annotated-cell-9-52"><a href="#annotated-cell-9-52" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-9-53"><a href="#annotated-cell-9-53" aria-hidden="true" tabindex="-1"></a>        verdict <span class="op">=</span> <span class="va">self</span>._partial.complete(msgs).strip().upper()</span>
+<span id="annotated-cell-9-54"><a href="#annotated-cell-9-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DegradedResult(</span>
+<span id="annotated-cell-9-55"><a href="#annotated-cell-9-55" aria-hidden="true" tabindex="-1"></a>            verdict<span class="op">=</span>verdict,</span>
+<span id="annotated-cell-9-56"><a href="#annotated-cell-9-56" aria-hidden="true" tabindex="-1"></a>            explanation<span class="op">=</span><span class="st">"Partial review: classification only (explanation unavailable)."</span>,</span>
+<span id="annotated-cell-9-57"><a href="#annotated-cell-9-57" aria-hidden="true" tabindex="-1"></a>            level<span class="op">=</span>DegradationLevel.PARTIAL,</span>
+<span id="annotated-cell-9-58"><a href="#annotated-cell-9-58" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-9-59"><a href="#annotated-cell-9-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-60"><a href="#annotated-cell-9-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> review(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> DegradedResult:</span>
+<span id="annotated-cell-9-61"><a href="#annotated-cell-9-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-62" class="code-annotation-target"><a href="#annotated-cell-9-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>._full_review(text)</span>
+<span id="annotated-cell-9-63"><a href="#annotated-cell-9-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e1:</span>
+<span id="annotated-cell-9-64"><a href="#annotated-cell-9-64" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"  [Graceful] full review failed: </span><span class="sc">{</span>e1<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-65"><a href="#annotated-cell-9-65" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-66" class="code-annotation-target"><a href="#annotated-cell-9-66" aria-hidden="true" tabindex="-1"></a>                result <span class="op">=</span> <span class="va">self</span>._partial_review(text)</span>
+<span id="annotated-cell-9-67"><a href="#annotated-cell-9-67" aria-hidden="true" tabindex="-1"></a>                result.error <span class="op">=</span> <span class="bu">str</span>(e1)</span>
+<span id="annotated-cell-9-68"><a href="#annotated-cell-9-68" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> result</span>
+<span id="annotated-cell-9-69"><a href="#annotated-cell-9-69" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e2:</span>
+<span id="annotated-cell-9-70"><a href="#annotated-cell-9-70" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  [Graceful] partial review failed: </span><span class="sc">{</span>e2<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-71"><a href="#annotated-cell-9-71" aria-hidden="true" tabindex="-1"></a>                r <span class="op">=</span> DegradedResult(<span class="op">**</span><span class="bu">vars</span>(SAFE_DEFAULT_RESULT))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-9-72" class="code-annotation-target"><a href="#annotated-cell-9-72" aria-hidden="true" tabindex="-1"></a>                r.error <span class="op">=</span> <span class="bu">str</span>(e2)</span>
+<span id="annotated-cell-9-73"><a href="#annotated-cell-9-73" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> r</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="41" data-code-annotation="1"><code>json.loads</code> will raise if the model produces malformed JSON — this is intentional. A parse failure escalates to the partial path rather than silently returning a corrupted result.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="62" data-code-annotation="2">We always attempt the highest-quality path first.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="66" data-code-annotation="3">The partial path uses a simpler prompt that is more robust — asking for a single word is harder to get wrong than structured JSON.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="72" data-code-annotation="4">We preserve the error message on the result so the caller can log it for observability even though the degraded path succeeded.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Demonstrating all three tiers:</p>
+<div id="a3c9d2e4" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AlwaysFailLLM:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> <span class="st">"mock-broken"</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, <span class="op">*</span>a, <span class="op">**</span>kw):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"LLM service down"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>TRADE_TEXT <span class="op">=</span> <span class="st">"Execute margin call on account #4492 — positions exceed Reg T limit by 18%."</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Tier 1: both clients working (use real mini client for partial; stub JSON for full)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> StubFullLLM:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> <span class="st">"gpt-4o-stub"</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, <span class="op">*</span>a, <span class="op">**</span>kw):</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> json.dumps({<span class="st">"verdict"</span>: <span class="st">"NON_COMPLIANT"</span>, <span class="st">"reason"</span>: <span class="st">"Position exceeds Reg T margin requirement."</span>})</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>reviewer_full    <span class="op">=</span> GracefulComplianceReviewer(StubFullLLM(), LLMClient(<span class="st">"gpt-4o-mini"</span>))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>reviewer_partial <span class="op">=</span> GracefulComplianceReviewer(AlwaysFailLLM(), LLMClient(<span class="st">"gpt-4o-mini"</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>reviewer_default <span class="op">=</span> GracefulComplianceReviewer(AlwaysFailLLM(), AlwaysFailLLM())</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, rev <span class="kw">in</span> [(<span class="st">"FULL tier"</span>, reviewer_full), (<span class="st">"PARTIAL tier"</span>, reviewer_partial), (<span class="st">"SAFE_DEFAULT"</span>, reviewer_default)]:</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> rev.review(TRADE_TEXT)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">--- </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> ---"</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Verdict  : </span><span class="sc">{</span>res<span class="sc">.</span>verdict<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Level    : </span><span class="sc">{</span>res<span class="sc">.</span>level<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Explain  : </span><span class="sc">{</span>res<span class="sc">.</span>explanation<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="context-overflow-handling" class="level2">
+<h2 class="anchored" data-anchor-id="context-overflow-handling">Context Overflow Handling</h2>
+<p>LLM context windows are finite. GPT-4o supports 128k tokens; a naive implementation that concatenates all retrieved chunks and the user query can silently overflow if the retrieval system returns many long documents. When overflow occurs, the API raises an error (a permanent error — not retryable). The correct fix is <strong>pre-call truncation</strong>: measure the prompt size before sending and drop the lowest-ranked chunks until the payload fits.</p>
+<p>We formalize the truncation policy. Let <span class="math inline">C</span> be the context limit, <span class="math inline">S_{\text{sys}}</span> the fixed token cost of the system prompt, <span class="math inline">S_q</span> the query tokens, and <span class="math inline">\{s_1, s_2, \ldots, s_k\}</span> the token sizes of retrieved chunks sorted by descending rank (rank 1 is most relevant). We greedily include chunks in rank order until adding the next chunk would overflow:</p>
+<p><span class="math display">\text{included} = \left\{ i : \sum_{j=1}^{i} s_j \leq C - S_{\text{sys}} - S_q - \delta \right\}</span></p>
+<p>where <span class="math inline">\delta</span> is a safety margin (we use <span class="math inline">\delta = 200</span> tokens) to accommodate the model’s own output tokens and any prompt formatting overhead.</p>
+<p>Implementing the guard:</p>
+<div id="e7a1b6c8" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _approx_tokens(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Fast token approximation: ~4 characters per token (GPT-4 average)."""</span></span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">len</span>(text) <span class="op">//</span> <span class="dv">4</span>)</span>
+<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-8"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ContextWindowGuard:</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Truncates retrieved chunks to fit within the context window."""</span></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>        context_limit: <span class="bu">int</span> <span class="op">=</span> <span class="dv">128_000</span>,</span>
+<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a>        output_reserve: <span class="bu">int</span> <span class="op">=</span> <span class="dv">512</span>,</span>
+<span id="annotated-cell-11-16"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a>        safety_margin: <span class="bu">int</span> <span class="op">=</span> <span class="dv">200</span>,</span>
+<span id="annotated-cell-11-17"><a href="#annotated-cell-11-17" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="annotated-cell-11-18"><a href="#annotated-cell-11-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._limit   <span class="op">=</span> context_limit</span>
+<span id="annotated-cell-11-19"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._reserve <span class="op">=</span> output_reserve  <span class="co"># tokens reserved for model output</span></span>
+<span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._margin  <span class="op">=</span> safety_margin</span>
+<span id="annotated-cell-11-21"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(</span>
+<span id="annotated-cell-11-23"><a href="#annotated-cell-11-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-11-24"><a href="#annotated-cell-11-24" aria-hidden="true" tabindex="-1"></a>        system_prompt: <span class="bu">str</span>,</span>
+<span id="annotated-cell-11-25"><a href="#annotated-cell-11-25" aria-hidden="true" tabindex="-1"></a>        query: <span class="bu">str</span>,</span>
+<span id="annotated-cell-11-26"><a href="#annotated-cell-11-26" aria-hidden="true" tabindex="-1"></a>        chunks: <span class="bu">list</span>[<span class="bu">str</span>],            <span class="co"># ordered by descending rank</span></span>
+<span id="annotated-cell-11-27"><a href="#annotated-cell-11-27" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">list</span>[<span class="bu">str</span>], <span class="bu">bool</span>]:</span>
+<span id="annotated-cell-11-28"><a href="#annotated-cell-11-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return (included_chunks, was_truncated)."""</span></span>
+<span id="annotated-cell-11-29"><a href="#annotated-cell-11-29" aria-hidden="true" tabindex="-1"></a>        budget <span class="op">=</span> (</span>
+<span id="annotated-cell-11-30"><a href="#annotated-cell-11-30" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._limit</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-11-31" class="code-annotation-target"><a href="#annotated-cell-11-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> _approx_tokens(system_prompt)</span>
+<span id="annotated-cell-11-32"><a href="#annotated-cell-11-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> _approx_tokens(query)</span>
+<span id="annotated-cell-11-33"><a href="#annotated-cell-11-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> <span class="va">self</span>._reserve</span>
+<span id="annotated-cell-11-34"><a href="#annotated-cell-11-34" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> <span class="va">self</span>._margin</span>
+<span id="annotated-cell-11-35"><a href="#annotated-cell-11-35" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-11-36"><a href="#annotated-cell-11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-37"><a href="#annotated-cell-11-37" aria-hidden="true" tabindex="-1"></a>        included: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">=</span> []</span>
+<span id="annotated-cell-11-38"><a href="#annotated-cell-11-38" aria-hidden="true" tabindex="-1"></a>        used <span class="op">=</span> <span class="dv">0</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-11-39" class="code-annotation-target"><a href="#annotated-cell-11-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> chunk <span class="kw">in</span> chunks:</span>
+<span id="annotated-cell-11-40"><a href="#annotated-cell-11-40" aria-hidden="true" tabindex="-1"></a>            cost <span class="op">=</span> _approx_tokens(chunk)</span>
+<span id="annotated-cell-11-41"><a href="#annotated-cell-11-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> used <span class="op">+</span> cost <span class="op">&gt;</span> budget:</span>
+<span id="annotated-cell-11-42"><a href="#annotated-cell-11-42" aria-hidden="true" tabindex="-1"></a>                warnings.warn(</span>
+<span id="annotated-cell-11-43"><a href="#annotated-cell-11-43" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"ContextWindowGuard: dropped </span><span class="sc">{</span><span class="bu">len</span>(chunks) <span class="op">-</span> <span class="bu">len</span>(included)<span class="sc">}</span><span class="ss"> "</span></span>
+<span id="annotated-cell-11-44"><a href="#annotated-cell-11-44" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"chunk(s) to fit within </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>_limit<span class="sc">}</span><span class="ss">-token context window."</span>,</span>
+<span id="annotated-cell-11-45"><a href="#annotated-cell-11-45" aria-hidden="true" tabindex="-1"></a>                    stacklevel<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="annotated-cell-11-46"><a href="#annotated-cell-11-46" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-11-47"><a href="#annotated-cell-11-47" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> included, <span class="va">True</span></span>
+<span id="annotated-cell-11-48"><a href="#annotated-cell-11-48" aria-hidden="true" tabindex="-1"></a>            included.append(chunk)</span>
+<span id="annotated-cell-11-49"><a href="#annotated-cell-11-49" aria-hidden="true" tabindex="-1"></a>            used <span class="op">+=</span> cost</span>
+<span id="annotated-cell-11-50"><a href="#annotated-cell-11-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-51"><a href="#annotated-cell-11-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> included, <span class="va">False</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="31" data-code-annotation="1">We deduct fixed costs first: system prompt, query, output reserve, and safety margin. The remainder is the budget available for retrieved context.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="39" data-code-annotation="2">Chunks are already sorted by descending relevance score, so we greedily include the best chunks and drop the tail. This is the minimal-information-loss truncation policy.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Testing the guard with a tight context limit:</p>
+<div id="b0d4f9a1" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings <span class="im">as</span> _w</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>_w.simplefilter(<span class="st">"always"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>guard <span class="op">=</span> ContextWindowGuard(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    context_limit<span class="op">=</span><span class="dv">500</span>,    <span class="co"># deliberately small to trigger truncation</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    output_reserve<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    safety_margin<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>system_prompt <span class="op">=</span> <span class="st">"You are a compliance officer reviewing trade activity."</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Does this trade comply with Reg T margin requirements?"</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>chunks <span class="op">=</span> [</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Regulation T (12 CFR 220) requires that the initial margin on equity purchases be at least 50</span><span class="sc">% o</span><span class="st">f the purchase price. The broker-dealer must collect this margin within the settlement period."</span>,   <span class="co"># rank 1</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Federal Reserve Board Regulation T governs the amount of credit that broker-dealers may extend to customers for the purchase of securities. Margin calls must be satisfied within five business days."</span>,  <span class="co"># rank 2</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Maintenance margin requirements under FINRA Rule 4210 require customers to maintain at least 25</span><span class="sc">% e</span><span class="st">quity in their margin accounts at all times. Failure triggers a margin call."</span>,                        <span class="co"># rank 3</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Basel III capital requirements mandate that globally systemically important banks maintain additional capital buffers. This is unrelated to Reg T but is included as a low-ranked retrieval result."</span>,   <span class="co"># rank 4 (low relevance)</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>included, truncated <span class="op">=</span> guard.fit(system_prompt, query, chunks)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Included </span><span class="sc">{</span><span class="bu">len</span>(included)<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span><span class="bu">len</span>(chunks)<span class="sc">}</span><span class="ss"> chunks (truncated=</span><span class="sc">{</span>truncated<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(included):</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>c[:<span class="dv">80</span>]<span class="sc">}</span><span class="ss">..."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The character-per-token approximation (<code>len(text) // 4</code>) underestimates token counts for texts heavy with numbers, symbols, or non-ASCII characters — common in financial documents. For production use, replace <code>_approx_tokens</code> with <code>tiktoken.encoding_for_model(model).encode(text)</code> to get exact token counts at the cost of a small per-call overhead.</p>
+</div>
+</div>
+</section>
+<section id="full-demo-resilientcomplianceservice" class="level2">
+<h2 class="anchored" data-anchor-id="full-demo-resilientcomplianceservice">Full Demo: ResilientComplianceService</h2>
+<p>We assemble all six patterns into a single <code>ResilientComplianceService</code>. The request path is:</p>
+<ol type="1">
+<li><strong>Bulkhead</strong> — enforce per-tenant concurrency limit.</li>
+<li><strong>ContextWindowGuard</strong> — truncate retrieved context to fit the window.</li>
+<li><strong>CircuitBreaker</strong> — reject calls to a failing primary model.</li>
+<li><strong>RetryClient</strong> — retry transient errors with jitter.</li>
+<li><strong>FallbackChain</strong> — cascade to cheaper models on failure.</li>
+<li><strong>GracefulDegradation</strong> — guarantee a safe response at every tier.</li>
+</ol>
+<p>We then run a simulation with 20 requests from two tenants where the primary model fails probabilistically at rate <span class="math inline">p = 0.4</span>.</p>
+<p>Defining the probabilistic mock LLM for the simulation:</p>
+<div id="a5c9d4f6" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ProbabilisticLLM:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Stub LLM that fails with probability `fail_p` on each call."""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        fail_p: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.4</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        response: <span class="bu">str</span> <span class="op">=</span> <span class="st">"COMPLIANT"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        error_type: <span class="bu">type</span>[<span class="pp">Exception</span>] <span class="op">=</span> RateLimitError,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        seed: <span class="bu">int</span> <span class="op">=</span> <span class="dv">42</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fail_p     <span class="op">=</span> fail_p</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._response   <span class="op">=</span> response</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._error_type <span class="op">=</span> error_type</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._rng        <span class="op">=</span> random.Random(seed)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model       <span class="op">=</span> <span class="st">"mock-probabilistic"</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> complete(<span class="va">self</span>, messages, <span class="op">**</span>kwargs):</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._rng.random() <span class="op">&lt;</span> <span class="va">self</span>._fail_p:</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="va">self</span>._error_type(<span class="st">"Simulated failure"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._response</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assembling the resilient service:</p>
+<div id="c7ebe6b8" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ServiceResponse:</span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a>    tenant: <span class="bu">str</span></span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>    req_id: <span class="bu">int</span></span>
+<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>    verdict: <span class="bu">str</span></span>
+<span id="annotated-cell-14-9"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a>    level: <span class="bu">str</span></span>
+<span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a>    source: <span class="bu">str</span></span>
+<span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a>    error: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="annotated-cell-14-12"><a href="#annotated-cell-14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-13"><a href="#annotated-cell-14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-14"><a href="#annotated-cell-14-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResilientComplianceService:</span>
+<span id="annotated-cell-14-15"><a href="#annotated-cell-14-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compliance reviewer combining all six resilience patterns."""</span></span>
+<span id="annotated-cell-14-16"><a href="#annotated-cell-14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-17"><a href="#annotated-cell-14-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-14-18"><a href="#annotated-cell-14-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-14-19"><a href="#annotated-cell-14-19" aria-hidden="true" tabindex="-1"></a>        primary_llm,</span>
+<span id="annotated-cell-14-20"><a href="#annotated-cell-14-20" aria-hidden="true" tabindex="-1"></a>        fallback_llm,</span>
+<span id="annotated-cell-14-21"><a href="#annotated-cell-14-21" aria-hidden="true" tabindex="-1"></a>        max_concurrent_per_tenant: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>,</span>
+<span id="annotated-cell-14-22"><a href="#annotated-cell-14-22" aria-hidden="true" tabindex="-1"></a>        cb_window: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="annotated-cell-14-23"><a href="#annotated-cell-14-23" aria-hidden="true" tabindex="-1"></a>        cb_threshold: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.6</span>,</span>
+<span id="annotated-cell-14-24"><a href="#annotated-cell-14-24" aria-hidden="true" tabindex="-1"></a>        cb_cooldown: <span class="bu">float</span> <span class="op">=</span> <span class="fl">2.0</span>,</span>
+<span id="annotated-cell-14-25"><a href="#annotated-cell-14-25" aria-hidden="true" tabindex="-1"></a>        context_limit: <span class="bu">int</span> <span class="op">=</span> <span class="dv">128_000</span>,</span>
+<span id="annotated-cell-14-26"><a href="#annotated-cell-14-26" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-27" class="code-annotation-target"><a href="#annotated-cell-14-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._guard    <span class="op">=</span> ContextWindowGuard(context_limit<span class="op">=</span>context_limit)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-28" class="code-annotation-target"><a href="#annotated-cell-14-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._cb       <span class="op">=</span> CircuitBreaker(</span>
+<span id="annotated-cell-14-29"><a href="#annotated-cell-14-29" aria-hidden="true" tabindex="-1"></a>            RetryClient(primary_llm, max_attempts<span class="op">=</span><span class="dv">3</span>, base<span class="op">=</span><span class="fl">0.01</span>, cap<span class="op">=</span><span class="fl">0.1</span>),</span>
+<span id="annotated-cell-14-30"><a href="#annotated-cell-14-30" aria-hidden="true" tabindex="-1"></a>            window<span class="op">=</span>cb_window, failure_threshold<span class="op">=</span>cb_threshold, cooldown<span class="op">=</span>cb_cooldown,</span>
+<span id="annotated-cell-14-31"><a href="#annotated-cell-14-31" aria-hidden="true" tabindex="-1"></a>        )</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-14-32" class="code-annotation-target"><a href="#annotated-cell-14-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._fallback <span class="op">=</span> fallback_llm</span>
+<span id="annotated-cell-14-33"><a href="#annotated-cell-14-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._bulkhead <span class="op">=</span> BulkheadExecutor(max_concurrent<span class="op">=</span>max_concurrent_per_tenant)</span>
+<span id="annotated-cell-14-34"><a href="#annotated-cell-14-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-35"><a href="#annotated-cell-14-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _do_review(<span class="va">self</span>, text: <span class="bu">str</span>, chunks: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> ServiceResponse:</span>
+<span id="annotated-cell-14-36"><a href="#annotated-cell-14-36" aria-hidden="true" tabindex="-1"></a>        sys_prompt <span class="op">=</span> <span class="st">"You are a compliance officer. Reply COMPLIANT or NON_COMPLIANT."</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-14-37" class="code-annotation-target"><a href="#annotated-cell-14-37" aria-hidden="true" tabindex="-1"></a>        kept, truncated <span class="op">=</span> <span class="va">self</span>._guard.fit(sys_prompt, text, chunks)</span>
+<span id="annotated-cell-14-38"><a href="#annotated-cell-14-38" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(kept)</span>
+<span id="annotated-cell-14-39"><a href="#annotated-cell-14-39" aria-hidden="true" tabindex="-1"></a>        full_text <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>context<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Trade: </span><span class="sc">{</span>text<span class="sc">}</span><span class="ss">"</span> <span class="cf">if</span> context <span class="cf">else</span> text</span>
+<span id="annotated-cell-14-40"><a href="#annotated-cell-14-40" aria-hidden="true" tabindex="-1"></a>        messages  <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: sys_prompt},</span>
+<span id="annotated-cell-14-41"><a href="#annotated-cell-14-41" aria-hidden="true" tabindex="-1"></a>                     {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: full_text}]</span>
+<span id="annotated-cell-14-42"><a href="#annotated-cell-14-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-14-43" class="code-annotation-target"><a href="#annotated-cell-14-43" aria-hidden="true" tabindex="-1"></a>            verdict <span class="op">=</span> <span class="va">self</span>._cb.complete(messages).strip().upper()</span>
+<span id="annotated-cell-14-44"><a href="#annotated-cell-14-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> ServiceResponse(<span class="st">""</span>, <span class="dv">0</span>, verdict, <span class="st">"full"</span>, <span class="st">"primary"</span>)</span>
+<span id="annotated-cell-14-45"><a href="#annotated-cell-14-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> (CircuitBreakerOpen, RateLimitError, <span class="pp">RuntimeError</span>) <span class="im">as</span> e:</span>
+<span id="annotated-cell-14-46"><a href="#annotated-cell-14-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-14-47" class="code-annotation-target"><a href="#annotated-cell-14-47" aria-hidden="true" tabindex="-1"></a>                verdict <span class="op">=</span> <span class="va">self</span>._fallback.complete(messages).strip().upper()</span>
+<span id="annotated-cell-14-48"><a href="#annotated-cell-14-48" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> ServiceResponse(<span class="st">""</span>, <span class="dv">0</span>, verdict, <span class="st">"partial"</span>, <span class="st">"fallback"</span>, <span class="bu">str</span>(e))</span>
+<span id="annotated-cell-14-49"><a href="#annotated-cell-14-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e2:</span>
+<span id="annotated-cell-14-50"><a href="#annotated-cell-14-50" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> ServiceResponse(<span class="st">""</span>, <span class="dv">0</span>, <span class="st">"REVIEW_REQUIRED"</span>, <span class="st">"safe_default"</span>, <span class="st">"none"</span>, <span class="bu">str</span>(e2))</span>
+<span id="annotated-cell-14-51"><a href="#annotated-cell-14-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-52"><a href="#annotated-cell-14-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="kw">def</span> review(<span class="va">self</span>, tenant: <span class="bu">str</span>, req_id: <span class="bu">int</span>, text: <span class="bu">str</span>,</span>
+<span id="annotated-cell-14-53"><a href="#annotated-cell-14-53" aria-hidden="true" tabindex="-1"></a>                     chunks: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ServiceResponse:</span>
+<span id="annotated-cell-14-54"><a href="#annotated-cell-14-54" aria-hidden="true" tabindex="-1"></a>        chunks <span class="op">=</span> chunks <span class="kw">or</span> []</span>
+<span id="annotated-cell-14-55"><a href="#annotated-cell-14-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-14-56" class="code-annotation-target"><a href="#annotated-cell-14-56" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> <span class="cf">await</span> <span class="va">self</span>._bulkhead.execute(</span>
+<span id="annotated-cell-14-57"><a href="#annotated-cell-14-57" aria-hidden="true" tabindex="-1"></a>                tenant,</span>
+<span id="annotated-cell-14-58"><a href="#annotated-cell-14-58" aria-hidden="true" tabindex="-1"></a>                asyncio.to_thread(<span class="va">self</span>._do_review, text, chunks),</span>
+<span id="annotated-cell-14-59"><a href="#annotated-cell-14-59" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-14-60"><a href="#annotated-cell-14-60" aria-hidden="true" tabindex="-1"></a>            result.tenant <span class="op">=</span> tenant</span>
+<span id="annotated-cell-14-61"><a href="#annotated-cell-14-61" aria-hidden="true" tabindex="-1"></a>            result.req_id <span class="op">=</span> req_id</span>
+<span id="annotated-cell-14-62"><a href="#annotated-cell-14-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> result</span>
+<span id="annotated-cell-14-63"><a href="#annotated-cell-14-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> BulkheadFull <span class="im">as</span> e:</span>
+<span id="annotated-cell-14-64"><a href="#annotated-cell-14-64" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> ServiceResponse(tenant, req_id, <span class="st">"REVIEW_REQUIRED"</span>, <span class="st">"safe_default"</span>, <span class="st">"none"</span>, <span class="bu">str</span>(e))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="27" data-code-annotation="1">The context guard runs first, before any network call, so we never send an oversized prompt.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="28" data-code-annotation="2">The circuit breaker wraps a <code>RetryClient</code>, so transient errors are retried with jitter before the breaker counts them as failures.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="32" data-code-annotation="3">The fallback LLM is accessed directly — it has no circuit breaker — since it is already the last-resort before the safe default.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="37" data-code-annotation="4">Truncation is logged via <code>warnings.warn</code>; the <code>truncated</code> flag can be used for metrics.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="43" data-code-annotation="5">Errors from the primary path (circuit open, retries exhausted, or any runtime error) are caught and escalated to the fallback.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="47" data-code-annotation="6">If the fallback also fails, we return <code>SAFE_DEFAULT</code> — guaranteeing the degraded-safe rate SLO.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="56" data-code-annotation="7">The bulkhead wraps the entire synchronous <code>_do_review</code> call, including retries, so the semaphore slot is held for the full duration of the request.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Running the simulation:</p>
+<div id="f0b2c1e2" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>SAMPLE_TRADES <span class="op">=</span> [</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sell 10,000 shares of ACME Corp for hedge fund client #221. Client is on restricted list."</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Execute market order: buy 500 SPY contracts for proprietary desk account #881."</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Transfer $2.1M from omnibus account to client #334. No AML flag in system."</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Margin call: account #992 is below maintenance margin. Liquidate 15</span><span class="sc">% o</span><span class="st">f position."</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Block trade: buy 50,000 shares of ZYX Inc at $42.10 for pension fund client #17."</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>SAMPLE_CONTEXT <span class="op">=</span> [</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Reg T requires 50</span><span class="sc">% i</span><span class="st">nitial margin on equity positions."</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"FINRA Rule 4110 governs maintenance margin requirements."</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AML policy requires enhanced due diligence for transfers over $1M."</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> run_simulation(n_requests: <span class="bu">int</span> <span class="op">=</span> <span class="dv">20</span>, fail_p: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.4</span>):</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    primary  <span class="op">=</span> ProbabilisticLLM(fail_p<span class="op">=</span>fail_p, response<span class="op">=</span><span class="st">"COMPLIANT"</span>, seed<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    fallback <span class="op">=</span> ProbabilisticLLM(fail_p<span class="op">=</span><span class="fl">0.1</span>,    response<span class="op">=</span><span class="st">"COMPLIANT"</span>, seed<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    svc <span class="op">=</span> ResilientComplianceService(</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        primary_llm<span class="op">=</span>primary,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        fallback_llm<span class="op">=</span>fallback,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        max_concurrent_per_tenant<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        cb_window<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        cb_threshold<span class="op">=</span><span class="fl">0.75</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        cb_cooldown<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        context_limit<span class="op">=</span><span class="dv">100_000</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    tenants <span class="op">=</span> [<span class="st">"compliance-team"</span>, <span class="st">"trade-desk"</span>]</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">=</span> []</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> random.Random(<span class="dv">99</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_requests):</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        tenant <span class="op">=</span> rng.choice(tenants)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        trade  <span class="op">=</span> rng.choice(SAMPLE_TRADES)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        tasks.append(svc.review(tenant, i, trade, SAMPLE_CONTEXT))</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    responses: <span class="bu">list</span>[ServiceResponse] <span class="op">=</span> <span class="cf">await</span> asyncio.gather(<span class="op">*</span>tasks)</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> {<span class="st">"full"</span>: <span class="dv">0</span>, <span class="st">"partial"</span>: <span class="dv">0</span>, <span class="st">"safe_default"</span>: <span class="dv">0</span>}</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> responses:</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        counts[r.level] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="bu">len</span>(responses)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Simulation: </span><span class="sc">{</span>total<span class="sc">}</span><span class="ss"> requests, primary fail_p=</span><span class="sc">{</span>fail_p<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Level'</span><span class="sc">:&lt;16}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Count'</span><span class="sc">:&gt;6}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Rate'</span><span class="sc">:&gt;8}</span><span class="ss">"</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">32</span>)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> level, count <span class="kw">in</span> counts.items():</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>level<span class="sc">:&lt;16}</span><span class="ss"> </span><span class="sc">{</span>count<span class="sc">:&gt;6}</span><span class="ss"> </span><span class="sc">{</span>count<span class="op">/</span>total<span class="sc">:&gt;8.1%}</span><span class="ss">"</span>)</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Sample responses:"</span>)</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> responses[:<span class="dv">5</span>]:</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>        err_str <span class="op">=</span> <span class="ss">f" (err: </span><span class="sc">{</span>r<span class="sc">.</span>error[:<span class="dv">40</span>]<span class="sc">}</span><span class="ss">...)"</span> <span class="cf">if</span> r.error <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>r<span class="sc">.</span>tenant<span class="sc">}</span><span class="ss">] req=</span><span class="sc">{</span>r<span class="sc">.</span>req_id<span class="sc">:2d}</span><span class="ss"> verdict=</span><span class="sc">{</span>r<span class="sc">.</span>verdict<span class="sc">:&lt;17}</span><span class="ss"> level=</span><span class="sc">{</span>r<span class="sc">.</span>level<span class="sc">}</span><span class="ss"> source=</span><span class="sc">{</span>r<span class="sc">.</span>source<span class="sc">}{</span>err_str<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> run_simulation(n_requests<span class="op">=</span><span class="dv">20</span>, fail_p<span class="op">=</span><span class="fl">0.4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Despite a 40% primary failure rate, the service delivers actionable results on every request: some at full quality (primary succeeded or retried successfully), some at partial quality (fallback), and the remainder at safe default (flagged for human review). The degraded-safe rate SLO — that no request returns an unhandled exception — is met unconditionally.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The resilience patterns here are defense-in-depth, not a substitute for model quality. A service that routinely falls back to safe default is not resilient — it is broken. Monitor the ratio of full-to-degraded responses as a leading indicator of model health, and page on-call when the fallback rate exceeds 5% over a 5-minute window.</p>
+</div>
+</div>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Add observability to <code>CircuitBreaker</code>.</strong> Extend <code>CircuitBreaker</code> with a <code>metrics()</code> method returning <code>{"state": ..., "failure_rate": ..., "total_calls": ..., "total_rejections": ...}</code>. Instrument <code>ResilientComplianceService</code> to call <code>metrics()</code> after each batch of requests and print a summary table.</p></li>
+<li><p><strong>Implement adaptive bulkhead sizing.</strong> Modify <code>BulkheadExecutor</code> to dynamically adjust <code>max_concurrent</code> per tenant based on observed p99 latency: if latency exceeds 1.5s, halve the limit; if latency is below 0.5s for 30 consecutive requests, increase by 1 (up to a configured maximum). Use a rolling latency window of 20 samples.</p></li>
+<li><p><strong>Integrate <code>ContextWindowGuard</code> with tiktoken.</strong> Replace <code>_approx_tokens</code> with an exact token counter using <code>tiktoken.encoding_for_model("gpt-4o")</code>. Measure the approximation error on the <code>SAMPLE_CONTEXT</code> strings above. At what document length does the approximation first disagree with the exact count by more than 10%?</p></li>
+</ol>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="pagination-link" aria-label="03. Agent Memory">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">03. Agent Memory</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/prep/deep-dives/05-mlops.html" class="pagination-link" aria-label="05. MLOps: CI/CD for AI">
+        <span class="nav-page-text">05. MLOps: CI/CD for AI</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>DeepSeek Architecture – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" rel="next">
+<link href="../../../notebooks/llm/deepseek/index.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/index.html">DeepSeek</a></li><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/01-deepseek-architecture.html">01. MLA &amp; Mixture of Experts</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-kv-cache-bottleneck" id="toc-the-kv-cache-bottleneck" class="nav-link active" data-scroll-target="#the-kv-cache-bottleneck">The KV Cache Bottleneck</a></li>
+  <li><a href="#multi-head-latent-attention-mla" id="toc-multi-head-latent-attention-mla" class="nav-link" data-scroll-target="#multi-head-latent-attention-mla">Multi-Head Latent Attention (MLA)</a>
+  <ul class="collapse">
+  <li><a href="#low-rank-kv-compression" id="toc-low-rank-kv-compression" class="nav-link" data-scroll-target="#low-rank-kv-compression">Low-rank KV compression</a></li>
+  <li><a href="#decoupled-rope" id="toc-decoupled-rope" class="nav-link" data-scroll-target="#decoupled-rope">Decoupled RoPE</a></li>
+  </ul></li>
+  <li><a href="#mixture-of-experts-moe" id="toc-mixture-of-experts-moe" class="nav-link" data-scroll-target="#mixture-of-experts-moe">Mixture of Experts (MoE)</a>
+  <ul class="collapse">
+  <li><a href="#the-dense-ffn-problem" id="toc-the-dense-ffn-problem" class="nav-link" data-scroll-target="#the-dense-ffn-problem">The dense FFN problem</a></li>
+  <li><a href="#the-moe-solution" id="toc-the-moe-solution" class="nav-link" data-scroll-target="#the-moe-solution">The MoE solution</a></li>
+  <li><a href="#expert-load-balancing" id="toc-expert-load-balancing" class="nav-link" data-scroll-target="#expert-load-balancing">Expert load balancing</a></li>
+  </ul></li>
+  <li><a href="#supporting-components-rmsnorm" id="toc-supporting-components-rmsnorm" class="nav-link" data-scroll-target="#supporting-components-rmsnorm">Supporting Components: RMSNorm</a></li>
+  <li><a href="#assembling-nanodeepseek" id="toc-assembling-nanodeepseek" class="nav-link" data-scroll-target="#assembling-nanodeepseek">Assembling NanoDeepSeek</a></li>
+  <li><a href="#parameter-count-and-kv-cache-comparison" id="toc-parameter-count-and-kv-cache-comparison" class="nav-link" data-scroll-target="#parameter-count-and-kv-cache-comparison">Parameter Count and KV Cache Comparison</a></li>
+  <li><a href="#memory-taxonomy-three-axes-of-sparsity" id="toc-memory-taxonomy-three-axes-of-sparsity" class="nav-link" data-scroll-target="#memory-taxonomy-three-axes-of-sparsity">Memory Taxonomy — Three Axes of Sparsity</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/index.html">DeepSeek</a></li><li class="breadcrumb-item"><a href="../../../notebooks/llm/deepseek/01-deepseek-architecture.html">01. MLA &amp; Mixture of Experts</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">DeepSeek Architecture</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The GPT architecture from <a href="../../../notebooks/llm/01-gpt-architecture.html">Notebook 01</a> is correct and fully trainable, but it has two well-known inefficiencies at scale. First, the <strong>KV cache</strong> grows as <span class="math inline">O(n_{\text{heads}} \cdot d_{\text{head}} \cdot \text{seq\_len})</span> per layer — for a 27B model generating 8k tokens this can exceed the model weight memory. Second, the <strong>dense FFN</strong> activates every parameter for every token on every forward pass, spending equal compute regardless of what knowledge a token actually needs.</p>
+<p>DeepSeek-V3 solves both with two architectural innovations. <strong>Multi-head Latent Attention (MLA)</strong> compresses keys and values through a low-rank bottleneck, caching only the bottleneck vector rather than the full K/V tensors. <strong>Mixture of Experts (MoE)</strong> replaces the dense FFN with a bank of expert networks, routing each token to only the top-<span class="math inline">k</span> experts — large total parameter count, small <em>activated</em> parameter count.</p>
+<p>This notebook builds both from scratch and assembles them into <code>NanoDeepSeek</code>. We derive the low-rank KV compression and decoupled RoPE for MLA, implement top-<span class="math inline">k</span> routing with auxiliary load-balancing loss for MoE, then close with a side-by-side comparison of NanoGPT vs NanoDeepSeek on parameter count, KV cache footprint, and activated FLOPs.</p>
+<div id="cell-3" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional, Tuple</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="the-kv-cache-bottleneck" class="level2">
+<h2 class="anchored" data-anchor-id="the-kv-cache-bottleneck">The KV Cache Bottleneck</h2>
+<p>During inference, autoregressive generation processes one token at a time. At step <span class="math inline">t</span> the model needs keys and values for all previous tokens <span class="math inline">1, \ldots, t-1</span>. Recomputing them from scratch costs <span class="math inline">O(t^2)</span> total, so instead we cache them: after processing token <span class="math inline">i</span> we store <span class="math inline">K_i</span> and <span class="math inline">V_i</span> for every layer. This is the KV cache.</p>
+<p>The memory cost per token per layer for standard MHA:</p>
+<p><span class="math display">\text{KV cache per token per layer} = 2 \times n_{\text{heads}} \times d_{\text{head}} \times \text{bytes\_per\_element}</span></p>
+<p>For the NanoGPT config (<code>n_heads=6</code>, <code>d_model=384</code>, so <code>d_head=64</code>, bfloat16 = 2 bytes):</p>
+<p><span class="math display">2 \times 6 \times 64 \times 2 = 1{,}536 \text{ bytes per token per layer}</span></p>
+<p>For a 6-layer model generating 256 tokens that is <span class="math inline">1{,}536 \times 256 \times 6 = 2.36</span> MB — manageable. But scale to 30 layers and 8k context and it grows to hundreds of MB, competing with the model weights themselves.</p>
+<p><mark>MLA’s insight: we don’t need to cache the full <span class="math inline">K</span> and <span class="math inline">V</span> matrices.</mark> We can cache a single low-rank <em>latent vector</em> <span class="math inline">c_{KV}</span> per token per layer and reconstruct <span class="math inline">K</span> and <span class="math inline">V</span> from it on demand during attention. With latent dimension <span class="math inline">d_c \ll n_{\text{heads}} \times d_{\text{head}}</span>, the cache shrinks dramatically.</p>
+<div id="cell-5" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># KV cache memory comparison: standard MHA vs MLA</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kv_cache_bytes(n_heads, d_head, n_layers, seq_len, bytes_per_elem<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Standard MHA: cache K and V for all heads."""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> n_heads <span class="op">*</span> d_head <span class="op">*</span> n_layers <span class="op">*</span> seq_len <span class="op">*</span> bytes_per_elem</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kv_cache_bytes_mla(d_compressed, n_layers, seq_len, bytes_per_elem<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""MLA: cache only the low-rank latent c_KV per token."""</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d_compressed <span class="op">*</span> n_layers <span class="op">*</span> seq_len <span class="op">*</span> bytes_per_elem</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># NanoGPT config</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>n_heads, d_model, n_layers <span class="op">=</span> <span class="dv">6</span>, <span class="dv">384</span>, <span class="dv">6</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>d_head <span class="op">=</span> d_model <span class="op">//</span> n_heads   <span class="co"># 64</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># NanoDeepSeek: d_compressed = d_model // 4</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>d_c <span class="op">=</span> d_model <span class="op">//</span> <span class="dv">4</span>   <span class="co"># 96</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seq_len <span class="kw">in</span> [<span class="dv">256</span>, <span class="dv">1024</span>, <span class="dv">4096</span>]:</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    mha <span class="op">=</span> kv_cache_bytes(n_heads, d_head, n_layers, seq_len)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    mla <span class="op">=</span> kv_cache_bytes_mla(d_c, n_layers, seq_len)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"seq_len=</span><span class="sc">{</span>seq_len<span class="sc">:5d}</span><span class="ss"> | MHA: </span><span class="sc">{</span>mha<span class="op">/</span><span class="dv">1024</span><span class="sc">:8.1f}</span><span class="ss"> KB | MLA: </span><span class="sc">{</span>mla<span class="op">/</span><span class="dv">1024</span><span class="sc">:6.1f}</span><span class="ss"> KB | ratio: </span><span class="sc">{</span>mha<span class="op">/</span>mla<span class="sc">:.1f}</span><span class="ss">x"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="multi-head-latent-attention-mla" class="level2">
+<h2 class="anchored" data-anchor-id="multi-head-latent-attention-mla">Multi-Head Latent Attention (MLA)</h2>
+<section id="low-rank-kv-compression" class="level3">
+<h3 class="anchored" data-anchor-id="low-rank-kv-compression">Low-rank KV compression</h3>
+<p>Standard MHA projects the input <span class="math inline">x \in \mathbb{R}^{d}</span> directly into queries, keys, and values:</p>
+<p><span class="math display">Q = x W_Q, \quad K = x W_K, \quad V = x W_V</span></p>
+<p>MLA replaces the K and V projections with a two-step process. First, <strong>compress</strong> to a low-rank latent:</p>
+<p><span class="math display">c_{KV} = x W_c \quad \in \mathbb{R}^{d_c}, \qquad d_c \ll n_{\text{heads}} \times d_{\text{head}}</span></p>
+<p>Then <strong>expand</strong> from the latent back to full K and V:</p>
+<p><span class="math display">K = c_{KV} W_K, \qquad V = c_{KV} W_V</span></p>
+<p>At inference we cache only <span class="math inline">c_{KV}</span> — one vector of dimension <span class="math inline">d_c</span> per token per layer. When computing attention at step <span class="math inline">t</span> we reconstruct K and V for all cached positions by passing their stored <span class="math inline">c_{KV}</span> through <span class="math inline">W_K</span> and <span class="math inline">W_V</span>. Queries are also compressed for efficiency, though this does not affect cache size since queries are never cached:</p>
+<p><span class="math display">c_Q = x W_{cQ} \in \mathbb{R}^{d_{cQ}}, \qquad Q = c_Q W_Q</span></p>
+</section>
+<section id="decoupled-rope" class="level3">
+<h3 class="anchored" data-anchor-id="decoupled-rope">Decoupled RoPE</h3>
+<p>There is a subtlety with rotary positional encoding (RoPE). RoPE applies a position-dependent rotation to Q and K before the dot product. But if we cache <span class="math inline">c_{KV}</span> and reconstruct K later, the rotated K must be computed at attention time — not at caching time. Rotating <span class="math inline">K</span> at caching time would embed the position into the cached latent, breaking reconstruction.</p>
+<p>MLA solves this with <strong>decoupled RoPE</strong>: a separate <span class="math inline">d_r</span>-dimensional slice of Q and K carries the rotary encoding. This slice is <em>not</em> part of the compressed latent — it is computed fresh from the original input <span class="math inline">x</span> via dedicated projections <span class="math inline">W_{QR}</span>, <span class="math inline">W_{KR}</span> at attention time. The cache stores <span class="math inline">c_{KV}</span> plus a compact RoPE key slice <span class="math inline">k_R</span>.</p>
+<p>In the nano-scale implementation below we use a simplified version: single-path Q, no separate decoupled RoPE slice, with RoPE applied after reconstruction. The KV cache savings are identical.</p>
+<div id="cell-7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_rope(x, cos, sin):</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Apply rotary positional encoding. x: (B, n_heads, T, d_head)"""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-3-3" class="code-annotation-target"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> x[..., ::<span class="dv">2</span>]</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>    x2 <span class="op">=</span> x[..., <span class="dv">1</span>::<span class="dv">2</span>]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-3-5" class="code-annotation-target"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>    x_rot <span class="op">=</span> torch.stack([<span class="op">-</span>x2, x1], dim<span class="op">=-</span><span class="dv">1</span>).flatten(<span class="op">-</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">*</span> cos <span class="op">+</span> x_rot <span class="op">*</span> sin</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_rope_cache(max_seq_len, d_head, device):</span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Precompute cos/sin tables for RoPE."""</span></span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (<span class="dv">10000</span> <span class="op">**</span> (torch.arange(<span class="dv">0</span>, d_head, <span class="dv">2</span>, device<span class="op">=</span>device).<span class="bu">float</span>() <span class="op">/</span> d_head))</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    positions <span class="op">=</span> torch.arange(max_seq_len, device<span class="op">=</span>device).<span class="bu">float</span>()</span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>    freqs <span class="op">=</span> torch.outer(positions, theta)               <span class="co"># (T, d_head//2)</span></span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a>    freqs <span class="op">=</span> torch.cat([freqs, freqs], dim<span class="op">=-</span><span class="dv">1</span>)           <span class="co"># (T, d_head)</span></span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> freqs.cos()[<span class="va">None</span>, <span class="va">None</span>, :, :]                 <span class="co"># (1, 1, T, d_head)</span></span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    sin <span class="op">=</span> freqs.sin()[<span class="va">None</span>, <span class="va">None</span>, :, :]</span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cos, sin</span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-19"><a href="#annotated-cell-3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-20"><a href="#annotated-cell-3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoMLA(nn.Module):</span>
+<span id="annotated-cell-3-21"><a href="#annotated-cell-3-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Multi-head Latent Attention (simplified, no decoupled RoPE).</span></span>
+<span id="annotated-cell-3-22"><a href="#annotated-cell-3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-23"><a href="#annotated-cell-3-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Standard MHA caches K and V directly: O(n_heads * d_head) per token.</span></span>
+<span id="annotated-cell-3-24"><a href="#annotated-cell-3-24" aria-hidden="true" tabindex="-1"></a><span class="co">    MLA compresses: cache only c_KV of dim d_compressed, then reconstruct K, V.</span></span>
+<span id="annotated-cell-3-25"><a href="#annotated-cell-3-25" aria-hidden="true" tabindex="-1"></a><span class="co">    KV cache reduction: 2*n_heads*d_head → d_compressed (typically 4x smaller).</span></span>
+<span id="annotated-cell-3-26"><a href="#annotated-cell-3-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-3-27"><a href="#annotated-cell-3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-28"><a href="#annotated-cell-3-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, n_heads: <span class="bu">int</span>, d_compressed: <span class="bu">int</span>, max_seq_len: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1024</span>):</span>
+<span id="annotated-cell-3-29"><a href="#annotated-cell-3-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-3-30"><a href="#annotated-cell-3-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> d_model <span class="op">%</span> n_heads <span class="op">==</span> <span class="dv">0</span></span>
+<span id="annotated-cell-3-31"><a href="#annotated-cell-3-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_heads <span class="op">=</span> n_heads</span>
+<span id="annotated-cell-3-32"><a href="#annotated-cell-3-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_head <span class="op">=</span> d_model <span class="op">//</span> n_heads</span>
+<span id="annotated-cell-3-33"><a href="#annotated-cell-3-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model <span class="op">=</span> d_model</span>
+<span id="annotated-cell-3-34"><a href="#annotated-cell-3-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_compressed <span class="op">=</span> d_compressed</span>
+<span id="annotated-cell-3-35"><a href="#annotated-cell-3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-36"><a href="#annotated-cell-3-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_c <span class="op">=</span> nn.Linear(d_model, d_compressed, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># compress to latent</span></span>
+<span id="annotated-cell-3-37"><a href="#annotated-cell-3-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_K <span class="op">=</span> nn.Linear(d_compressed, d_model, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># expand to keys</span></span>
+<span id="annotated-cell-3-38"><a href="#annotated-cell-3-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_V <span class="op">=</span> nn.Linear(d_compressed, d_model, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># expand to values</span></span>
+<span id="annotated-cell-3-39"><a href="#annotated-cell-3-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_Q <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)        <span class="co"># queries (not cached)</span></span>
+<span id="annotated-cell-3-40"><a href="#annotated-cell-3-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_O <span class="op">=</span> nn.Linear(d_model, d_model, bias<span class="op">=</span><span class="va">False</span>)        <span class="co"># output projection</span></span>
+<span id="annotated-cell-3-41"><a href="#annotated-cell-3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-42"><a href="#annotated-cell-3-42" aria-hidden="true" tabindex="-1"></a>        cos, sin <span class="op">=</span> make_rope_cache(max_seq_len, <span class="va">self</span>.d_head, device<span class="op">=</span><span class="st">"cpu"</span>)</span>
+<span id="annotated-cell-3-43"><a href="#annotated-cell-3-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"cos"</span>, cos)</span>
+<span id="annotated-cell-3-44"><a href="#annotated-cell-3-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"sin"</span>, sin)</span>
+<span id="annotated-cell-3-45"><a href="#annotated-cell-3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-46"><a href="#annotated-cell-3-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor, mask: Optional[torch.Tensor] <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-3-47"><a href="#annotated-cell-3-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="annotated-cell-3-48"><a href="#annotated-cell-3-48" aria-hidden="true" tabindex="-1"></a><span class="co">        x:    (B, T, d_model)</span></span>
+<span id="annotated-cell-3-49"><a href="#annotated-cell-3-49" aria-hidden="true" tabindex="-1"></a><span class="co">        mask: (1, 1, T, T) causal mask — True where attention is forbidden</span></span>
+<span id="annotated-cell-3-50"><a href="#annotated-cell-3-50" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-3-51"><a href="#annotated-cell-3-51" aria-hidden="true" tabindex="-1"></a>        B, T, _ <span class="op">=</span> x.shape</span>
+<span id="annotated-cell-3-52"><a href="#annotated-cell-3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-53"><a href="#annotated-cell-3-53" aria-hidden="true" tabindex="-1"></a>        c_kv <span class="op">=</span> <span class="va">self</span>.W_c(x)                                      <span class="co"># (B, T, d_compressed)</span></span>
+<span id="annotated-cell-3-54"><a href="#annotated-cell-3-54" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.W_K(c_kv)                                      <span class="co"># (B, T, d_model)</span></span>
+<span id="annotated-cell-3-55"><a href="#annotated-cell-3-55" aria-hidden="true" tabindex="-1"></a>        V <span class="op">=</span> <span class="va">self</span>.W_V(c_kv)</span>
+<span id="annotated-cell-3-56"><a href="#annotated-cell-3-56" aria-hidden="true" tabindex="-1"></a>        Q <span class="op">=</span> <span class="va">self</span>.W_Q(x)                                         <span class="co"># (B, T, d_model)</span></span>
+<span id="annotated-cell-3-57"><a href="#annotated-cell-3-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-58"><a href="#annotated-cell-3-58" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> split_heads(t):</span>
+<span id="annotated-cell-3-59"><a href="#annotated-cell-3-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> t.view(B, T, <span class="va">self</span>.n_heads, <span class="va">self</span>.d_head).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="annotated-cell-3-60"><a href="#annotated-cell-3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-61"><a href="#annotated-cell-3-61" aria-hidden="true" tabindex="-1"></a>        Q, K, V <span class="op">=</span> split_heads(Q), split_heads(K), split_heads(V)</span>
+<span id="annotated-cell-3-62"><a href="#annotated-cell-3-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-63"><a href="#annotated-cell-3-63" aria-hidden="true" tabindex="-1"></a>        cos <span class="op">=</span> <span class="va">self</span>.cos[:, :, :T, :].to(x.device)</span>
+<span id="annotated-cell-3-64"><a href="#annotated-cell-3-64" aria-hidden="true" tabindex="-1"></a>        sin <span class="op">=</span> <span class="va">self</span>.sin[:, :, :T, :].to(x.device)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-3-65" class="code-annotation-target"><a href="#annotated-cell-3-65" aria-hidden="true" tabindex="-1"></a>        Q <span class="op">=</span> apply_rope(Q, cos, sin)</span>
+<span id="annotated-cell-3-66"><a href="#annotated-cell-3-66" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> apply_rope(K, cos, sin)</span>
+<span id="annotated-cell-3-67"><a href="#annotated-cell-3-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-68"><a href="#annotated-cell-3-68" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> Q <span class="op">@</span> K.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>) <span class="op">/</span> math.sqrt(<span class="va">self</span>.d_head)</span>
+<span id="annotated-cell-3-69"><a href="#annotated-cell-3-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-3-70"><a href="#annotated-cell-3-70" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> scores.masked_fill(mask, <span class="bu">float</span>(<span class="st">"-inf"</span>))</span>
+<span id="annotated-cell-3-71"><a href="#annotated-cell-3-71" aria-hidden="true" tabindex="-1"></a>        weights <span class="op">=</span> F.softmax(scores, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-3-72"><a href="#annotated-cell-3-72" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> weights <span class="op">@</span> V</span>
+<span id="annotated-cell-3-73"><a href="#annotated-cell-3-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-74"><a href="#annotated-cell-3-74" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> out.transpose(<span class="dv">1</span>, <span class="dv">2</span>).contiguous().view(B, T, <span class="va">self</span>.d_model)</span>
+<span id="annotated-cell-3-75"><a href="#annotated-cell-3-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.W_O(out)</span>
+<span id="annotated-cell-3-76"><a href="#annotated-cell-3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-77"><a href="#annotated-cell-3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-3-78"><a href="#annotated-cell-3-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify shapes</span></span>
+<span id="annotated-cell-3-79"><a href="#annotated-cell-3-79" aria-hidden="true" tabindex="-1"></a>B, T, d <span class="op">=</span> <span class="dv">2</span>, <span class="dv">16</span>, <span class="dv">384</span></span>
+<span id="annotated-cell-3-80"><a href="#annotated-cell-3-80" aria-hidden="true" tabindex="-1"></a>mla <span class="op">=</span> NanoMLA(d_model<span class="op">=</span>d, n_heads<span class="op">=</span><span class="dv">6</span>, d_compressed<span class="op">=</span><span class="dv">96</span>)</span>
+<span id="annotated-cell-3-81"><a href="#annotated-cell-3-81" aria-hidden="true" tabindex="-1"></a>x_in <span class="op">=</span> torch.randn(B, T, d)</span>
+<span id="annotated-cell-3-82"><a href="#annotated-cell-3-82" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> mla(x_in)</span>
+<span id="annotated-cell-3-83"><a href="#annotated-cell-3-83" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NanoMLA: input </span><span class="sc">{</span><span class="bu">tuple</span>(x_in.shape)<span class="sc">}</span><span class="ss"> → output </span><span class="sc">{</span><span class="bu">tuple</span>(out.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-3-84"><a href="#annotated-cell-3-84" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"KV compressed dim: </span><span class="sc">{</span>mla<span class="sc">.</span>d_compressed<span class="sc">}</span><span class="ss"> (vs full K+V: </span><span class="sc">{</span><span class="dv">2</span> <span class="op">*</span> d<span class="sc">}</span><span class="ss"> dims)"</span>)</span>
+<span id="annotated-cell-3-85"><a href="#annotated-cell-3-85" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Cache saving at inference: </span><span class="sc">{</span><span class="dv">2</span><span class="op">*</span>mla<span class="sc">.</span>n_heads<span class="op">*</span>mla<span class="sc">.</span>d_head <span class="op">/</span> mla<span class="sc">.</span>d_compressed<span class="sc">:.1f}</span><span class="ss">x"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="3,53" data-code-annotation="1">Compress input to low-rank latent <span class="math inline">c_{KV}</span> — this single vector per token is what gets stored in the KV cache at inference.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="5,54" data-code-annotation="2">Expand <span class="math inline">c_{KV}</span> to full-rank K and V at attention time; at inference this reconstruction runs on the entire cached sequence.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="65" data-code-annotation="3">Apply RoPE after reconstruction so position encoding does not need to be embedded in the cached latent.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+</section>
+<section id="mixture-of-experts-moe" class="level2">
+<h2 class="anchored" data-anchor-id="mixture-of-experts-moe">Mixture of Experts (MoE)</h2>
+<section id="the-dense-ffn-problem" class="level3">
+<h3 class="anchored" data-anchor-id="the-dense-ffn-problem">The dense FFN problem</h3>
+<p>A standard FFN block computes:</p>
+<p><span class="math display">\text{FFN}(x) = W_2 \cdot \text{SwiGLU}(W_1 x, W_3 x)</span></p>
+<p>where <span class="math inline">\text{SwiGLU}(a, b) = \text{SiLU}(a) \odot b</span>. All <span class="math inline">P_{\text{FFN}}</span> parameters activate for every token on every forward pass — total FLOPs per token scale linearly with parameter count, so more capacity always means proportionally more compute.</p>
+</section>
+<section id="the-moe-solution" class="level3">
+<h3 class="anchored" data-anchor-id="the-moe-solution">The MoE solution</h3>
+<p>Replace the single FFN with <span class="math inline">E</span> expert FFNs. Per token, activate only the top-<span class="math inline">k</span> experts. DeepSeek uses two types:</p>
+<ul>
+<li><strong>Shared experts</strong> (<span class="math inline">N_s</span>): always active — handle universal patterns every token needs.</li>
+<li><strong>Routed experts</strong> (<span class="math inline">N_r</span>): conditionally active — each token activates its top-<span class="math inline">k</span> routed experts.</li>
+</ul>
+<p>The routing decision is made by a linear router: given <span class="math inline">x</span>, compute scores <span class="math inline">s = x W_r \in \mathbb{R}^{N_r}</span>, take top-<span class="math inline">k</span>, softmax over only those <span class="math inline">k</span> scores to get weights <span class="math inline">g_i</span>, then:</p>
+<p><span class="math display">\text{MoE}(x) = \sum_{i \in \text{shared}} E_i(x) + \sum_{i \in \text{top-}k} g_i \cdot E_i(x)</span></p>
+<p><mark>Total params: <span class="math inline">(N_s + N_r) \times P_{\text{expert}}</span>. Activated params per token: <span class="math inline">(N_s + k) \times P_{\text{expert}}</span>.</mark> With <span class="math inline">N_r = 55, k = 6</span> (DeepSeek-V3), the sparsity ratio is approximately <span class="math inline">10\times</span>.</p>
+</section>
+<section id="expert-load-balancing" class="level3">
+<h3 class="anchored" data-anchor-id="expert-load-balancing">Expert load balancing</h3>
+<p><mark>Without regularization, the router collapses — all tokens route to the same few experts.</mark> The standard fix is an auxiliary load-balancing loss:</p>
+<p><span class="math display">\mathcal{L}_{\text{aux}} = \alpha \cdot N_r \cdot \sum_{i=1}^{N_r} f_i \cdot P_i</span></p>
+<p>where <span class="math inline">f_i</span> is the fraction of tokens routed to expert <span class="math inline">i</span> (non-differentiable, stops gradient), and <span class="math inline">P_i</span> is the average router probability for expert <span class="math inline">i</span> (differentiable). This penalizes routing imbalance: if one expert gets all tokens (<span class="math inline">f_i = 1, f_j = 0</span>), the loss is large.</p>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SwiGLU(nn.Module):</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""SwiGLU activation: SiLU(W1 x) * W3 x — used in LLaMA and DeepSeek."""</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, d_ffn: <span class="bu">int</span>):</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W1 <span class="op">=</span> nn.Linear(d_model, d_ffn, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># gate</span></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W3 <span class="op">=</span> nn.Linear(d_model, d_ffn, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># pass-through</span></span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W2 <span class="op">=</span> nn.Linear(d_ffn, d_model, bias<span class="op">=</span><span class="va">False</span>)  <span class="co"># down-project</span></span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.W2(F.silu(<span class="va">self</span>.W1(x)) <span class="op">*</span> <span class="va">self</span>.W3(x))</span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoMoE(nn.Module):</span>
+<span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""DeepSeek-style Mixture of Experts: shared + routed experts, top-k routing.</span></span>
+<span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns: (output, aux_loss) where aux_loss is the load-balancing penalty.</span></span>
+<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-4-19"><a href="#annotated-cell-4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-20"><a href="#annotated-cell-4-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-4-21"><a href="#annotated-cell-4-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-4-22"><a href="#annotated-cell-4-22" aria-hidden="true" tabindex="-1"></a>        d_model: <span class="bu">int</span>,</span>
+<span id="annotated-cell-4-23"><a href="#annotated-cell-4-23" aria-hidden="true" tabindex="-1"></a>        d_ffn: <span class="bu">int</span>,</span>
+<span id="annotated-cell-4-24"><a href="#annotated-cell-4-24" aria-hidden="true" tabindex="-1"></a>        n_shared: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="annotated-cell-4-25"><a href="#annotated-cell-4-25" aria-hidden="true" tabindex="-1"></a>        n_routed: <span class="bu">int</span> <span class="op">=</span> <span class="dv">8</span>,</span>
+<span id="annotated-cell-4-26"><a href="#annotated-cell-4-26" aria-hidden="true" tabindex="-1"></a>        top_k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>,</span>
+<span id="annotated-cell-4-27"><a href="#annotated-cell-4-27" aria-hidden="true" tabindex="-1"></a>        aux_loss_coeff: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-2</span>,</span>
+<span id="annotated-cell-4-28"><a href="#annotated-cell-4-28" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="annotated-cell-4-29"><a href="#annotated-cell-4-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-4-30"><a href="#annotated-cell-4-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_shared <span class="op">=</span> n_shared</span>
+<span id="annotated-cell-4-31"><a href="#annotated-cell-4-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_routed <span class="op">=</span> n_routed</span>
+<span id="annotated-cell-4-32"><a href="#annotated-cell-4-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.top_k <span class="op">=</span> top_k</span>
+<span id="annotated-cell-4-33"><a href="#annotated-cell-4-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.aux_alpha <span class="op">=</span> aux_loss_coeff</span>
+<span id="annotated-cell-4-34"><a href="#annotated-cell-4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-35"><a href="#annotated-cell-4-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.shared_experts <span class="op">=</span> nn.ModuleList([SwiGLU(d_model, d_ffn) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_shared)])</span>
+<span id="annotated-cell-4-36"><a href="#annotated-cell-4-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.routed_experts <span class="op">=</span> nn.ModuleList([SwiGLU(d_model, d_ffn) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_routed)])</span>
+<span id="annotated-cell-4-37"><a href="#annotated-cell-4-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.router <span class="op">=</span> nn.Linear(d_model, n_routed, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-4-38"><a href="#annotated-cell-4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-39"><a href="#annotated-cell-4-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> Tuple[torch.Tensor, torch.Tensor]:</span>
+<span id="annotated-cell-4-40"><a href="#annotated-cell-4-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="annotated-cell-4-41"><a href="#annotated-cell-4-41" aria-hidden="true" tabindex="-1"></a><span class="co">        x: (B, T, d_model)</span></span>
+<span id="annotated-cell-4-42"><a href="#annotated-cell-4-42" aria-hidden="true" tabindex="-1"></a><span class="co">        returns: output (B, T, d_model), aux_loss scalar</span></span>
+<span id="annotated-cell-4-43"><a href="#annotated-cell-4-43" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="annotated-cell-4-44"><a href="#annotated-cell-4-44" aria-hidden="true" tabindex="-1"></a>        B, T, d <span class="op">=</span> x.shape</span>
+<span id="annotated-cell-4-45"><a href="#annotated-cell-4-45" aria-hidden="true" tabindex="-1"></a>        x_flat <span class="op">=</span> x.view(B <span class="op">*</span> T, d)</span>
+<span id="annotated-cell-4-46"><a href="#annotated-cell-4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-47"><a href="#annotated-cell-4-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Shared experts: always active</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-4-48" class="code-annotation-target"><a href="#annotated-cell-4-48" aria-hidden="true" tabindex="-1"></a>        shared_out <span class="op">=</span> <span class="bu">sum</span>(e(x_flat) <span class="cf">for</span> e <span class="kw">in</span> <span class="va">self</span>.shared_experts)  <span class="co"># (B*T, d)</span></span>
+<span id="annotated-cell-4-49"><a href="#annotated-cell-4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-50"><a href="#annotated-cell-4-50" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Router: compute logits, select top-k experts</span></span>
+<span id="annotated-cell-4-51"><a href="#annotated-cell-4-51" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.router(x_flat)                              <span class="co"># (B*T, n_routed)</span></span>
+<span id="annotated-cell-4-52"><a href="#annotated-cell-4-52" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> F.softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-4-53"><a href="#annotated-cell-4-53" aria-hidden="true" tabindex="-1"></a>        topk_vals, topk_idx <span class="op">=</span> torch.topk(probs, <span class="va">self</span>.top_k, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-4-54" class="code-annotation-target"><a href="#annotated-cell-4-54" aria-hidden="true" tabindex="-1"></a>        gates <span class="op">=</span> topk_vals <span class="op">/</span> (topk_vals.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>) <span class="op">+</span> <span class="fl">1e-9</span>)</span>
+<span id="annotated-cell-4-55"><a href="#annotated-cell-4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-56"><a href="#annotated-cell-4-56" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Routed expert computation: accumulate weighted outputs</span></span>
+<span id="annotated-cell-4-57"><a href="#annotated-cell-4-57" aria-hidden="true" tabindex="-1"></a>        routed_out <span class="op">=</span> torch.zeros_like(x_flat)</span>
+<span id="annotated-cell-4-58"><a href="#annotated-cell-4-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k_pos <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.top_k):</span>
+<span id="annotated-cell-4-59"><a href="#annotated-cell-4-59" aria-hidden="true" tabindex="-1"></a>            expert_ids <span class="op">=</span> topk_idx[:, k_pos]</span>
+<span id="annotated-cell-4-60"><a href="#annotated-cell-4-60" aria-hidden="true" tabindex="-1"></a>            gate_vals <span class="op">=</span> gates[:, k_pos].unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-4-61"><a href="#annotated-cell-4-61" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> expert_id <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.n_routed):</span>
+<span id="annotated-cell-4-62"><a href="#annotated-cell-4-62" aria-hidden="true" tabindex="-1"></a>                mask <span class="op">=</span> expert_ids <span class="op">==</span> expert_id</span>
+<span id="annotated-cell-4-63"><a href="#annotated-cell-4-63" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> mask.<span class="bu">any</span>():</span>
+<span id="annotated-cell-4-64"><a href="#annotated-cell-4-64" aria-hidden="true" tabindex="-1"></a>                    routed_out[mask] <span class="op">+=</span> gate_vals[mask] <span class="op">*</span> <span class="va">self</span>.routed_experts[expert_id](x_flat[mask])</span>
+<span id="annotated-cell-4-65"><a href="#annotated-cell-4-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-66"><a href="#annotated-cell-4-66" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> (shared_out <span class="op">+</span> routed_out).view(B, T, d)</span>
+<span id="annotated-cell-4-67"><a href="#annotated-cell-4-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-68"><a href="#annotated-cell-4-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Auxiliary load-balancing loss</span></span>
+<span id="annotated-cell-4-69"><a href="#annotated-cell-4-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-4-70"><a href="#annotated-cell-4-70" aria-hidden="true" tabindex="-1"></a>            top1_idx <span class="op">=</span> topk_idx[:, <span class="dv">0</span>]</span>
+<span id="annotated-cell-4-71"><a href="#annotated-cell-4-71" aria-hidden="true" tabindex="-1"></a>            one_hot <span class="op">=</span> F.one_hot(top1_idx, <span class="va">self</span>.n_routed).<span class="bu">float</span>()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-4-72" class="code-annotation-target"><a href="#annotated-cell-4-72" aria-hidden="true" tabindex="-1"></a>            f <span class="op">=</span> one_hot.mean(dim<span class="op">=</span><span class="dv">0</span>)                               <span class="co"># fraction per expert</span></span>
+<span id="annotated-cell-4-73"><a href="#annotated-cell-4-73" aria-hidden="true" tabindex="-1"></a>        P <span class="op">=</span> probs.mean(dim<span class="op">=</span><span class="dv">0</span>)                                     <span class="co"># avg probability per expert</span></span>
+<span id="annotated-cell-4-74"><a href="#annotated-cell-4-74" aria-hidden="true" tabindex="-1"></a>        aux_loss <span class="op">=</span> <span class="va">self</span>.aux_alpha <span class="op">*</span> <span class="va">self</span>.n_routed <span class="op">*</span> (f <span class="op">*</span> P).<span class="bu">sum</span>()</span>
+<span id="annotated-cell-4-75"><a href="#annotated-cell-4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-76"><a href="#annotated-cell-4-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output, aux_loss</span>
+<span id="annotated-cell-4-77"><a href="#annotated-cell-4-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-78"><a href="#annotated-cell-4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-79"><a href="#annotated-cell-4-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify shapes and aux loss</span></span>
+<span id="annotated-cell-4-80"><a href="#annotated-cell-4-80" aria-hidden="true" tabindex="-1"></a>moe <span class="op">=</span> NanoMoE(d_model<span class="op">=</span><span class="dv">384</span>, d_ffn<span class="op">=</span><span class="dv">384</span> <span class="op">*</span> <span class="dv">4</span>, n_shared<span class="op">=</span><span class="dv">1</span>, n_routed<span class="op">=</span><span class="dv">8</span>, top_k<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-4-81"><a href="#annotated-cell-4-81" aria-hidden="true" tabindex="-1"></a>x_in <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">16</span>, <span class="dv">384</span>)</span>
+<span id="annotated-cell-4-82"><a href="#annotated-cell-4-82" aria-hidden="true" tabindex="-1"></a>out, aux <span class="op">=</span> moe(x_in)</span>
+<span id="annotated-cell-4-83"><a href="#annotated-cell-4-83" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NanoMoE: input </span><span class="sc">{</span><span class="bu">tuple</span>(x_in.shape)<span class="sc">}</span><span class="ss"> → output </span><span class="sc">{</span><span class="bu">tuple</span>(out.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-4-84"><a href="#annotated-cell-4-84" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"aux_loss: </span><span class="sc">{</span>aux<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-4-85"><a href="#annotated-cell-4-85" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Activated experts per token: </span><span class="sc">{</span>moe<span class="sc">.</span>n_shared <span class="op">+</span> moe<span class="sc">.</span>top_k<span class="sc">}</span><span class="ss"> / </span><span class="sc">{</span>moe<span class="sc">.</span>n_shared <span class="op">+</span> moe<span class="sc">.</span>n_routed<span class="sc">}</span><span class="ss"> total"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="48" data-code-annotation="1">Shared experts run unconditionally on every token — they learn universal, token-agnostic transformations.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="54" data-code-annotation="2">Re-normalize the top-<span class="math inline">k</span> gate weights over the selected subset so they sum to 1; this stabilizes gradient magnitude.</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="72" data-code-annotation="3"><span class="math inline">f_i</span> uses <code>torch.no_grad()</code> because it is a hard assignment indicator — its gradient is zero everywhere, so backprop must flow through <span class="math inline">P_i</span> alone.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+</section>
+<section id="supporting-components-rmsnorm" class="level2">
+<h2 class="anchored" data-anchor-id="supporting-components-rmsnorm">Supporting Components: RMSNorm</h2>
+<p>DeepSeek uses <strong>RMSNorm</strong> instead of LayerNorm. The difference: RMSNorm skips the mean-centering step, normalizing by the RMS of activations only:</p>
+<p><span class="math display">\text{RMSNorm}(x) = \frac{x}{\text{RMS}(x)} \cdot \gamma, \qquad \text{RMS}(x) = \sqrt{\frac{1}{d}\sum_{i=1}^d x_i^2 + \epsilon}</span></p>
+<p><u>This is slightly faster (no mean subtraction) and performs equally well in practice.</u> Removing one reduction kernel saves approximately 15% compute per normalization call, and avoids the numerical instability that can occur when the mean is non-zero and large in very deep networks.</p>
+<div id="cell-13" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RMSNorm(nn.Module):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model: <span class="bu">int</span>, eps: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-6</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> eps</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.gamma <span class="op">=</span> nn.Parameter(torch.ones(d_model))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        rms <span class="op">=</span> x.<span class="bu">pow</span>(<span class="dv">2</span>).mean(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>).add(<span class="va">self</span>.eps).sqrt()</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (x <span class="op">/</span> rms) <span class="op">*</span> <span class="va">self</span>.gamma</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify RMSNorm is approximately unit-RMS post-norm</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>rn <span class="op">=</span> RMSNorm(<span class="dv">384</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">4</span>, <span class="dv">16</span>, <span class="dv">384</span>) <span class="op">*</span> <span class="fl">5.0</span>   <span class="co"># large activations</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> rn(x)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Input  RMS: </span><span class="sc">{</span>x<span class="sc">.</span><span class="bu">pow</span>(<span class="dv">2</span>)<span class="sc">.</span>mean()<span class="sc">.</span>sqrt()<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output RMS: </span><span class="sc">{</span>y<span class="sc">.</span><span class="bu">pow</span>(<span class="dv">2</span>)<span class="sc">.</span>mean()<span class="sc">.</span>sqrt()<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">  (≈1.0 with unit gamma init)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="assembling-nanodeepseek" class="level2">
+<h2 class="anchored" data-anchor-id="assembling-nanodeepseek">Assembling NanoDeepSeek</h2>
+<p>We now have all the pieces. The <code>NanoDeepSeek</code> block follows DeepSeek’s pre-norm residual pattern:</p>
+<pre><code>x  →  RMSNorm → MLA → + x  →  RMSNorm → MoE → + x</code></pre>
+<p>The full model stacks <span class="math inline">L</span> such blocks between token embeddings and the LM head, with weight tying between the embedding matrix and the LM head projection.</p>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoDeepSeekConfig:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    vocab_size:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">50257</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    d_model:        <span class="bu">int</span>   <span class="op">=</span> <span class="dv">384</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    n_layers:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    n_heads:        <span class="bu">int</span>   <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    d_compressed:   <span class="bu">int</span>   <span class="op">=</span> <span class="dv">96</span>     <span class="co"># MLA KV latent dim  (d_model // 4)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    d_ffn:          <span class="bu">int</span>   <span class="op">=</span> <span class="dv">1024</span>   <span class="co"># per-expert hidden dim</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    n_shared:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">1</span>      <span class="co"># shared experts (always active)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    n_routed:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">8</span>      <span class="co"># routed expert pool size</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    top_k:          <span class="bu">int</span>   <span class="op">=</span> <span class="dv">2</span>      <span class="co"># routed experts activated per token</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    max_seq_len:    <span class="bu">int</span>   <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    aux_loss_coeff: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-2</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_causal_mask(seq_len: <span class="bu">int</span>, device: torch.device) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.triu(</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        torch.ones(seq_len, seq_len, dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device),</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        diagonal<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    ).unsqueeze(<span class="dv">0</span>).unsqueeze(<span class="dv">0</span>)   <span class="co"># (1, 1, T, T)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DeepSeekBlock(nn.Module):</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One transformer block: pre-norm MLA + pre-norm MoE."""</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: NanoDeepSeekConfig):</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_attn <span class="op">=</span> RMSNorm(config.d_model)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn <span class="op">=</span> NanoMLA(</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            d_model<span class="op">=</span>config.d_model,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>            n_heads<span class="op">=</span>config.n_heads,</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            d_compressed<span class="op">=</span>config.d_compressed,</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>            max_seq_len<span class="op">=</span>config.max_seq_len,</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_ffn <span class="op">=</span> RMSNorm(config.d_model)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.moe <span class="op">=</span> NanoMoE(</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>            d_model<span class="op">=</span>config.d_model,</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>            d_ffn<span class="op">=</span>config.d_ffn,</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>            n_shared<span class="op">=</span>config.n_shared,</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>            n_routed<span class="op">=</span>config.n_routed,</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>            top_k<span class="op">=</span>config.top_k,</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>            aux_loss_coeff<span class="op">=</span>config.aux_loss_coeff,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, x: torch.Tensor, mask: Optional[torch.Tensor] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Tuple[torch.Tensor, torch.Tensor]:</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.attn(<span class="va">self</span>.norm_attn(x), mask)</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        moe_out, aux_loss <span class="op">=</span> <span class="va">self</span>.moe(<span class="va">self</span>.norm_ffn(x))</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> moe_out</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x, aux_loss</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NanoDeepSeek(nn.Module):</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Nano DeepSeek: MLA + MoE transformer for the capstone series."""</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: NanoDeepSeekConfig):</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.config <span class="op">=</span> config</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_embedding <span class="op">=</span> nn.Embedding(config.vocab_size, config.d_model)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.blocks <span class="op">=</span> nn.ModuleList([DeepSeekBlock(config) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(config.n_layers)])</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_out <span class="op">=</span> RMSNorm(config.d_model)</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lm_head <span class="op">=</span> nn.Linear(config.d_model, config.vocab_size, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lm_head.weight <span class="op">=</span> <span class="va">self</span>.token_embedding.weight  <span class="co"># weight tying</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        idx: torch.Tensor,</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        targets: Optional[torch.Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Tuple[torch.Tensor, Optional[torch.Tensor]]:</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="co">        idx:     (B, T) token indices</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="co">        targets: (B, T) next-token targets, or None</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="co">        returns: logits (B, T, vocab), total_loss (lm_loss + sum aux_losses) or None</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>        B, T <span class="op">=</span> idx.shape</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.token_embedding(idx)           <span class="co"># (B, T, d_model)</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> make_causal_mask(T, idx.device)</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>        total_aux <span class="op">=</span> torch.tensor(<span class="fl">0.0</span>, device<span class="op">=</span>idx.device)</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> block <span class="kw">in</span> <span class="va">self</span>.blocks:</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>            x, aux <span class="op">=</span> block(x, mask)</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>            total_aux <span class="op">=</span> total_aux <span class="op">+</span> aux</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm_out(x)</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.lm_head(x)                <span class="co"># (B, T, vocab_size)</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> targets <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>            lm_loss <span class="op">=</span> F.cross_entropy(</span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>                logits.view(<span class="op">-</span><span class="dv">1</span>, logits.size(<span class="op">-</span><span class="dv">1</span>)),</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>                targets.view(<span class="op">-</span><span class="dv">1</span>),</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> lm_loss <span class="op">+</span> total_aux</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits, loss</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick forward pass check</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> NanoDeepSeekConfig()</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> NanoDeepSeek(cfg)</span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> torch.randint(<span class="dv">0</span>, cfg.vocab_size, (<span class="dv">2</span>, <span class="dv">16</span>))</span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>targets <span class="op">=</span> torch.randint(<span class="dv">0</span>, cfg.vocab_size, (<span class="dv">2</span>, <span class="dv">16</span>))</span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>logits, loss <span class="op">=</span> model(idx, targets)</span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NanoDeepSeek forward pass OK"</span>)</span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  logits: </span><span class="sc">{</span><span class="bu">tuple</span>(logits.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  loss:   </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The total loss passed to the optimizer is the sum of the language modeling cross-entropy and the per-layer auxiliary load-balancing losses. This ensures the router is trained jointly with the model parameters.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>NanoMoE.forward</code> loop iterates over all expert IDs for every top-<span class="math inline">k</span> slot, giving <span class="math inline">O(k \times N_r)</span> conditional dispatches per batch. This is pedagogically clear but inefficient at scale. Production implementations use scatter/gather kernels (e.g.&nbsp;<code>torch.ops.moe_dispatch</code>) that batch tokens by expert assignment in a single pass.</p>
+</div>
+</div>
+</section>
+<section id="parameter-count-and-kv-cache-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="parameter-count-and-kv-cache-comparison">Parameter Count and KV Cache Comparison</h2>
+<p>We now compare NanoGPT against NanoDeepSeek. The key distinction is between <em>total</em> and <em>activated</em> parameters — MoE decouples these two quantities.</p>
+<div id="cell-18" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_params(model):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters())</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_activated_params_ds(config: NanoDeepSeekConfig) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Estimate activated parameters per forward token (excluding embedding)."""</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    d, d_c <span class="op">=</span> config.d_model, config.d_compressed</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MLA: W_c + W_K + W_V + W_Q + W_O</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    p_mla <span class="op">=</span> (d <span class="op">*</span> d_c) <span class="op">+</span> (d_c <span class="op">*</span> d) <span class="op">+</span> (d_c <span class="op">*</span> d) <span class="op">+</span> (d <span class="op">*</span> d) <span class="op">+</span> (d <span class="op">*</span> d)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MoE: (n_shared + top_k) active experts each with W1 + W3 + W2</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    p_expert <span class="op">=</span> <span class="dv">3</span> <span class="op">*</span> config.d_model <span class="op">*</span> config.d_ffn</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    p_moe_active <span class="op">=</span> (config.n_shared <span class="op">+</span> config.top_k) <span class="op">*</span> p_expert</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> config.n_layers <span class="op">*</span> (p_mla <span class="op">+</span> p_moe_active)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>cfg_ds <span class="op">=</span> NanoDeepSeekConfig()</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>model_ds <span class="op">=</span> NanoDeepSeek(cfg_ds)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>total_ds <span class="op">=</span> count_params(model_ds)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>active_ds <span class="op">=</span> count_activated_params_ds(cfg_ds)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># NanoGPT reference values (from Notebook 01, SwiGLU FFN, ~29.9M total)</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>nanogpt_total <span class="op">=</span> <span class="fl">29.9e6</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>nanogpt_active <span class="op">=</span> <span class="fl">29.9e6</span>  <span class="co"># dense: all params activate</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kv_cache_MB(n_heads, d_head, n_layers, seq_len, bpe<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> n_heads <span class="op">*</span> d_head <span class="op">*</span> n_layers <span class="op">*</span> seq_len <span class="op">*</span> bpe <span class="op">/</span> <span class="fl">1e6</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kv_cache_MB_mla(d_c, n_layers, seq_len, bpe<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d_c <span class="op">*</span> n_layers <span class="op">*</span> seq_len <span class="op">*</span> bpe <span class="op">/</span> <span class="fl">1e6</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>seq <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">62</span>)</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">''</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'NanoGPT'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'NanoDeepSeek'</span><span class="sc">:&gt;14s}</span><span class="ss">"</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">62</span>)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Total parameters'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'~29.9M'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span>total_ds<span class="op">/</span><span class="fl">1e6</span><span class="sc">:&gt;13.1f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Activated per token'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'~29.9M'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span>active_ds<span class="op">/</span><span class="fl">1e6</span><span class="sc">:&gt;13.1f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'KV cache @ seq=256 (MB)'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span>kv_cache_MB(<span class="dv">6</span>,<span class="dv">64</span>,<span class="dv">6</span>,seq)<span class="sc">:&gt;11.2f}</span><span class="ss">M </span><span class="sc">{</span>kv_cache_MB_mla(cfg_ds.d_compressed,<span class="dv">6</span>,seq)<span class="sc">:&gt;13.2f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'KV cache @ seq=1024 (MB)'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span>kv_cache_MB(<span class="dv">6</span>,<span class="dv">64</span>,<span class="dv">6</span>,<span class="dv">1024</span>)<span class="sc">:&gt;11.2f}</span><span class="ss">M </span><span class="sc">{</span>kv_cache_MB_mla(cfg_ds.d_compressed,<span class="dv">6</span>,<span class="dv">1024</span>)<span class="sc">:&gt;13.2f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Attention'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'MHA (RoPE)'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'MLA (low-rank KV)'</span><span class="sc">:&gt;14s}</span><span class="ss">"</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'FFN'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'Dense SwiGLU'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'MoE (1s+8r, top-2)'</span><span class="sc">:&gt;14s}</span><span class="ss">"</span>)</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'Normalisation'</span><span class="sc">:32s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'RMSNorm'</span><span class="sc">:&gt;12s}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'RMSNorm'</span><span class="sc">:&gt;14s}</span><span class="ss">"</span>)</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">62</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The table shows the key tradeoff: MoE gives NanoDeepSeek more total parameters (larger capacity for the same training compute budget) while the activated parameter count per token is significantly lower. MLA reduces KV cache by ~4x at the nano scale, with the ratio growing at larger model sizes where <code>d_model ≫ d_compressed</code>.</p>
+</section>
+<section id="memory-taxonomy-three-axes-of-sparsity" class="level2">
+<h2 class="anchored" data-anchor-id="memory-taxonomy-three-axes-of-sparsity">Memory Taxonomy — Three Axes of Sparsity</h2>
+<p>It is useful to place DeepSeek’s architecture in the broader context of memory types a transformer can leverage:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Memory type</th>
+<th>Update speed</th>
+<th>Persistence</th>
+<th>Access mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dense parameters</td>
+<td>Slow (gradient descent)</td>
+<td>Permanent across all inputs</td>
+<td>Dense matmul, all tokens</td>
+</tr>
+<tr class="even">
+<td>KV cache</td>
+<td>Fast</td>
+<td>Per-sequence</td>
+<td>Attention — content-based lookup</td>
+</tr>
+<tr class="odd">
+<td>MoE experts</td>
+<td>Slow (gradient descent)</td>
+<td>Permanent</td>
+<td>Top-<span class="math inline">k</span> routing, token-conditional</td>
+</tr>
+<tr class="even">
+<td>Engram (Notebook 03)</td>
+<td>Fast</td>
+<td>Permanent</td>
+<td><span class="math inline">O(1)</span> hash lookup, <span class="math inline">n</span>-gram conditional</td>
+</tr>
+</tbody>
+</table>
+<p>MLA reduces the <em>cost</em> of the KV cache. MoE conditions which FFN parameters activate on a per-token basis. <u>The Engram layer (Notebook 03) introduces a fourth axis: <span class="math inline">n</span>-gram conditional lookup into a static embedding table — no attention, no routing, just a hash.</u></p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 52%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>What it does</th>
+<th>Key parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>NanoMLA</code></td>
+<td>Low-rank KV compression: cache <span class="math inline">d_c</span> instead of <span class="math inline">n_h \cdot d_h</span></td>
+<td><code>d_compressed</code></td>
+</tr>
+<tr class="even">
+<td>Decoupled RoPE</td>
+<td>Separates position encoding from compressed latent</td>
+<td><span class="math inline">d_r</span> RoPE slice</td>
+</tr>
+<tr class="odd">
+<td><code>NanoMoE</code></td>
+<td>Top-<span class="math inline">k</span> routing over <span class="math inline">N_r</span> routed + <span class="math inline">N_s</span> shared experts</td>
+<td><code>n_routed</code>, <code>top_k</code></td>
+</tr>
+<tr class="even">
+<td>Aux loss</td>
+<td>Penalizes routing imbalance: <span class="math inline">\alpha N_r \sum f_i P_i</span></td>
+<td><code>aux_loss_coeff</code></td>
+</tr>
+<tr class="odd">
+<td><code>RMSNorm</code></td>
+<td>Normalize by RMS, skip mean shift</td>
+<td><code>eps</code></td>
+</tr>
+<tr class="even">
+<td><code>SwiGLU</code></td>
+<td><span class="math inline">W_2(\text{SiLU}(W_1 x) \odot W_3 x)</span> — used in every expert</td>
+<td><code>d_ffn</code></td>
+</tr>
+<tr class="odd">
+<td><code>NanoDeepSeek</code></td>
+<td>Full model: embedding → <code>DeepSeekBlock</code> × <span class="math inline">L</span> → RMSNorm → LM head</td>
+<td><code>NanoDeepSeekConfig</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notebook 02</strong> trains NanoGPT and NanoDeepSeek side-by-side on FineWeb-Edu at matched activated parameter count, comparing loss curves and measuring whether MLA + MoE improves loss per activated FLOP.</p>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Verify compression ratio.</strong> For a model with <code>d_model=1024</code>, <code>n_heads=16</code>, <code>d_compressed=128</code>, compute the KV cache size in MB for sequence lengths 512, 2048, and 8192. By what factor does MLA reduce the cache compared to standard MHA?</p></li>
+<li><p><strong>Decoupled RoPE.</strong> The current <code>NanoMLA</code> applies RoPE after reconstructing K from <span class="math inline">c_{KV}</span>. Implement the decoupled variant: add a separate <code>W_KR</code> projection from the original <code>x</code> that produces a <code>d_rope</code>-dimensional key slice, cache <code>c_kv</code> and <code>k_r</code>, and concatenate <code>[K_content, K_rope]</code> before the dot product.</p></li>
+<li><p><strong>Router collapse.</strong> Train <code>NanoMoE</code> with <code>aux_loss_coeff=0.0</code> for 500 steps on random data and plot the fraction of tokens routed to each expert. Then repeat with <code>aux_loss_coeff=1e-2</code>. How does the load distribution differ?</p></li>
+<li><p><strong>Expert utilization.</strong> Modify <code>NanoMoE.forward</code> to return, alongside <code>aux_loss</code>, a tensor <code>expert_load</code> of shape <code>(n_routed,)</code> giving the fraction of batch tokens assigned to each expert. Log this during training and plot it over time.</p></li>
+<li><p><strong>Capacity factor.</strong> Production MoE implementations drop tokens when an expert exceeds its capacity budget. Add a <code>capacity_factor</code> parameter to <code>NanoMoE</code>: if more than <code>capacity_factor * (B*T / n_routed)</code> tokens are routed to any expert, drop the excess tokens (set their contribution to zero). Verify the model still trains without NaN.</p></li>
+<li><p><strong>Activated vs total FLOPs.</strong> Extend <code>count_activated_params_ds</code> to also estimate the number of multiply-add operations per token for <code>NanoDeepSeek</code>, and compare with <code>NanoGPT</code> at matched <code>d_model</code>. At what sparsity ratio (top-<span class="math inline">k</span> / <span class="math inline">N_r</span>) does NanoDeepSeek achieve equal FLOPs per token to NanoGPT?</p></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+References
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>DeepSeek-AI (2024). <em>DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model.</em> arXiv:2405.04434.</li>
+<li>Dai et al.&nbsp;(2024). <em>DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models.</em> arXiv:2401.06066.</li>
+<li>Zhang &amp; Sennrich (2019). <em>Root Mean Square Layer Normalization.</em> NeurIPS.</li>
+</ul>
+</div>
+</div>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/llm/deepseek/index.html" class="pagination-link" aria-label="DeepSeek">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">DeepSeek</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="pagination-link" aria-label="02. Training NanoDeepSeek">
+        <span class="nav-page-text">02. Training NanoDeepSeek</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

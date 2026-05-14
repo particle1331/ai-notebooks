@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>GUI 1: Chat Interface – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/apps/cda/06-ui2.html" rel="next">
+<link href="../../../notebooks/apps/cda/04-hardening.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/apps/cda/index.html">CDA: Coding Agent From Scratch</a></li><li class="breadcrumb-item"><a href="../../../notebooks/apps/cda/05-ui.html">05. GUI 1: Chat Interface</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/apps/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Application Development</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/01-flet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Flet I: Basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/03-flet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Flet II: Declarative UI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/05-fastapi.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. FastAPI Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/06-docker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Docker &amp; Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/07-database.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Database &amp; ORM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/08-s3-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. S3 &amp; Batch Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/09-embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Embeddings &amp; Vector Search</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/10-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. People Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/11-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Flet ↔︎ FastAPI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/12-realtime.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Realtime &amp; WebSockets</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/13-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Multimodal Queries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/14-photo-app.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Photo App: End-to-End</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/apps/nbx/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">NBX: Compute Platform</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/nbx/01-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Platform Architecture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/nbx/02-registry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Registry &amp; Dashboard</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/nbx/03-packaging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Job Packaging &amp; Execution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/nbx/04-queue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Task Queue &amp; Dispatch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/nbx/05-streaming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Log Streaming &amp; Artifacts</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/apps/cda/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CDA: Coding Agent From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/01-client.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Streaming LLM Client</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/02-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. The Tool System</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/03-agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Agent Loop</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/04-hardening.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Hardening the Agent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/05-ui.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">05. GUI 1: Chat Interface</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/06-ui2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. GUI 2: Tools &amp; Persistence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/apps/cda/07-ui3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. GUI 3: MCP Integration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#application-architecture" id="toc-application-architecture" class="nav-link active" data-scroll-target="#application-architecture">Application Architecture</a></li>
+  <li><a href="#ui-components" id="toc-ui-components" class="nav-link" data-scroll-target="#ui-components">UI Components</a>
+  <ul class="collapse">
+  <li><a href="#messagebubble" id="toc-messagebubble" class="nav-link" data-scroll-target="#messagebubble">MessageBubble</a></li>
+  <li><a href="#toolcallcard" id="toc-toolcallcard" class="nav-link" data-scroll-target="#toolcallcard">ToolCallCard</a></li>
+  <li><a href="#statusbar" id="toc-statusbar" class="nav-link" data-scroll-target="#statusbar">StatusBar</a></li>
+  <li><a href="#approvaldialog" id="toc-approvaldialog" class="nav-link" data-scroll-target="#approvaldialog">ApprovalDialog</a></li>
+  </ul></li>
+  <li><a href="#the-application-controller" id="toc-the-application-controller" class="nav-link" data-scroll-target="#the-application-controller">The Application Controller</a>
+  <ul class="collapse">
+  <li><a href="#page-configuration-and-layout" id="toc-page-configuration-and-layout" class="nav-link" data-scroll-target="#page-configuration-and-layout">Page Configuration and Layout</a></li>
+  <li><a href="#sending-a-message" id="toc-sending-a-message" class="nav-link" data-scroll-target="#sending-a-message">Sending a Message</a></li>
+  <li><a href="#running-the-agent" id="toc-running-the-agent" class="nav-link" data-scroll-target="#running-the-agent">Running the Agent</a></li>
+  <li><a href="#feed-helpers" id="toc-feed-helpers" class="nav-link" data-scroll-target="#feed-helpers">Feed Helpers</a></li>
+  </ul></li>
+  <li><a href="#launching-the-app" id="toc-launching-the-app" class="nav-link" data-scroll-target="#launching-the-app">Launching the App</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/apps/cda/index.html">CDA: Coding Agent From Scratch</a></li><li class="breadcrumb-item"><a href="../../../notebooks/apps/cda/05-ui.html">05. GUI 1: Chat Interface</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">GUI 1: Chat Interface</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Running an agent via <code>async for event in agent.run(...)</code> in a notebook is convenient for demos, but interacting with a coding agent naturally — typing requests, watching tool calls execute live, and reading streaming responses — calls for a proper interface. This notebook wraps the complete agent stack from the previous four notebooks in a Flet desktop application.</p>
+<p>The result is a dark-themed chat window: a scrollable feed of message bubbles and tool-call cards in the center, a text input bar at the bottom, and a thin status bar at the top showing model, turn count, and token usage. Every <code>AgentEvent</code> emitted by <code>agent.run(...)</code> maps to a concrete UI mutation — a new bubble, an updated card, a refreshed counter. The agent runs in an async background task so the interface stays responsive throughout long multi-turn sessions.</p>
+<section id="application-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="application-architecture">Application Architecture</h2>
+<p>The UI package lives at <code>src/notebooks/agent/ui/</code> and contains two files. <code>components.py</code> defines the reusable display widgets and their data models — everything needed to render a single conversation item. <code>app.py</code> defines the <code>AgentApp</code> page controller, which wires Flet’s event loop to the agent’s async generator.</p>
+<pre><code>AgentApp (page controller)
+├── Agent (agentic loop)
+│   └── Session → LLMClient + ToolRegistry
+├── ApprovalManager (approval decisions)
+└── Flet Page
+    ├── StatusBar (model · turn · tokens)
+    ├── ListView (message feed)
+    │   ├── MessageBubble (user / assistant / system)
+    │   └── ToolCallCard (tool invocations)
+    └── InputBar (TextField + Send button)</code></pre>
+<p><code>AgentApp</code> holds five pieces of mutable state: the Flet <code>page</code>, the <code>Agent</code> instance, an <code>ApprovalManager</code>, a <code>_pending_cards</code> dict mapping in-flight call IDs to their live card controls, and three counters (<code>_turn</code>, <code>_total_tokens</code>, <code>_running</code>). The separation between <code>components.py</code> and <code>app.py</code> keeps rendering logic stateless and independently testable — each factory function is a pure function from a data class to a Flet control.</p>
+<p>Importing the <code>ui</code> package and listing its public names:</p>
+<div id="cell-6" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> notebooks.agent.ui <span class="im">as</span> ui</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ui.<span class="va">__all__</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ui-components" class="level2">
+<h2 class="anchored" data-anchor-id="ui-components">UI Components</h2>
+<p>All components are defined in <code>components.py</code>. Each factory function accepts a data class and returns a <code>ft.Container</code> (or <code>ft.AlertDialog</code>) with no side effects on the page. The calling code in <code>app.py</code> is responsible for appending the control to the feed and calling <code>update()</code>.</p>
+<section id="messagebubble" class="level3">
+<h3 class="anchored" data-anchor-id="messagebubble">MessageBubble</h3>
+<p><code>make_message_bubble(msg: MessageData)</code> renders a single conversation turn. The alignment and background color depend on <code>msg.role</code>: user messages sit on the right with a blue (<code>#1565C0</code>) background; assistant messages sit on the left with a dark-grey (<code>#2D2D2D</code>) background; system messages are centered, italic, and muted. All non-system bubbles contain a <code>selectable=True</code> <code>ft.Text</code> so users can copy output with the mouse.</p>
+<p><strong>MessageBubble.</strong> Creating one bubble of each role:</p>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.ui.components <span class="im">import</span> MessageData, make_message_bubble</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>roles <span class="op">=</span> [<span class="st">"user"</span>, <span class="st">"assistant"</span>, <span class="st">"system"</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>msgs  <span class="op">=</span> [MessageData(role<span class="op">=</span>r, content<span class="op">=</span><span class="ss">f"Hello from </span><span class="sc">{</span>r<span class="sc">}</span><span class="ss">"</span>) <span class="cf">for</span> r <span class="kw">in</span> roles]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> msg <span class="kw">in</span> msgs:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    bubble <span class="op">=</span> make_message_bubble(msg)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    align  <span class="op">=</span> bubble.alignment</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    bg     <span class="op">=</span> bubble.bgcolor <span class="kw">or</span> <span class="st">"(none — system)"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>msg<span class="sc">.</span>role<span class="sc">:10s}</span><span class="ss">  bgcolor=</span><span class="sc">{</span>bg<span class="sc">!s:20s}</span><span class="ss">  alignment=(</span><span class="sc">{</span>align<span class="sc">.</span>x<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>align<span class="sc">.</span>y<span class="sc">}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="toolcallcard" class="level3">
+<h3 class="anchored" data-anchor-id="toolcallcard">ToolCallCard</h3>
+<p><code>make_tool_call_card(tc: ToolCallData)</code> renders a compact dark card for a single tool invocation. The status indicator in the top-left changes with <code>tc.success</code>: <code>None</code> (in-progress) shows a <code>ft.ProgressRing</code> spinner; <code>True</code> shows a green <code>CHECK_CIRCLE</code> icon; <code>False</code> shows a red <code>ERROR</code> icon. Below the header row, arguments are formatted as a single truncated line and the output (or error) is shown in a small monospace text block.</p>
+<p><strong>ToolCallCard.</strong> Creating an in-progress card and a succeeded card:</p>
+<div id="cell-14" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> flet <span class="im">as</span> ft</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.ui.components <span class="im">import</span> ToolCallData, make_tool_call_card</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>tc_pending <span class="op">=</span> ToolCallData(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    call_id<span class="op">=</span><span class="st">"c1"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"read_file"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    arguments<span class="op">=</span>{<span class="st">"path"</span>: <span class="st">"src/main.py"</span>},</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>tc_done <span class="op">=</span> ToolCallData(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    call_id<span class="op">=</span><span class="st">"c2"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"shell"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    arguments<span class="op">=</span>{<span class="st">"command"</span>: <span class="st">"pytest tests/"</span>},</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    output<span class="op">=</span><span class="st">"5 passed in 0.42s"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    success<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tc <span class="kw">in</span> [tc_pending, tc_done]:</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    card <span class="op">=</span> make_tool_call_card(tc)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    header_row <span class="op">=</span> card.content.controls[<span class="dv">0</span>]       <span class="co"># ft.Row</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    status_ctrl <span class="op">=</span> header_row.controls[<span class="dv">0</span>]        <span class="co"># spinner or icon</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    status_type <span class="op">=</span> <span class="bu">type</span>(status_ctrl).<span class="va">__name__</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tc<span class="sc">.</span>name<span class="sc">:12s}</span><span class="ss">  success=</span><span class="sc">{</span><span class="bu">str</span>(tc.success)<span class="sc">:5s}</span><span class="ss">  status_widget=</span><span class="sc">{</span>status_type<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="statusbar" class="level3">
+<h3 class="anchored" data-anchor-id="statusbar">StatusBar</h3>
+<p><code>make_status_bar(turn, total_tokens, model, running)</code> returns a thin <code>ft.Container</code> fixed to the top of the page. It renders model name, turn count, and token count separated by <code>·</code> glyphs. When <code>running=True</code>, a small <code>ft.ProgressRing</code> is appended to the right of the row to signal that the agent is active.</p>
+<p><strong>StatusBar.</strong> Inspecting the control row with and without the running spinner:</p>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.ui.components <span class="im">import</span> make_status_bar</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>bar_idle    <span class="op">=</span> make_status_bar(turn<span class="op">=</span><span class="dv">3</span>, total_tokens<span class="op">=</span><span class="dv">12_480</span>, model<span class="op">=</span><span class="st">"anthropic/claude-sonnet-4"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>bar_running <span class="op">=</span> make_status_bar(turn<span class="op">=</span><span class="dv">3</span>, total_tokens<span class="op">=</span><span class="dv">12_480</span>, model<span class="op">=</span><span class="st">"anthropic/claude-sonnet-4"</span>, running<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>idle_parts    <span class="op">=</span> bar_idle.content.controls</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>running_parts <span class="op">=</span> bar_running.content.controls</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Idle    controls : </span><span class="sc">{</span><span class="bu">len</span>(idle_parts)<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span><span class="st">', '</span><span class="sc">.</span>join(<span class="bu">type</span>(c).<span class="va">__name__</span> <span class="cf">for</span> c <span class="kw">in</span> idle_parts)<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Running controls : </span><span class="sc">{</span><span class="bu">len</span>(running_parts)<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span><span class="st">', '</span><span class="sc">.</span>join(<span class="bu">type</span>(c).<span class="va">__name__</span> <span class="cf">for</span> c <span class="kw">in</span> running_parts)<span class="sc">}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="approvaldialog" class="level3">
+<h3 class="anchored" data-anchor-id="approvaldialog">ApprovalDialog</h3>
+<p><code>make_approval_dialog(tool_name, reason, on_approve, on_reject)</code> builds a modal <code>ft.AlertDialog</code> that pauses the agent loop until the user responds. The dialog title is fixed to <code>"Approve tool call?"</code>. Two action buttons — <code>FilledButton("Approve")</code> and <code>TextButton("Reject")</code> — call the provided callbacks, which resolve a <code>Future</code> that <code>_run_agent</code> is awaiting. <code>AgentApp</code> instantiates an <code>ApprovalManager</code> with the default <code>ON_REQUEST</code> policy, but wiring it into <code>_run_agent</code> is left as an extension exercise — the current implementation always shows the dialog when an approval callback fires.</p>
+<p><strong>ApprovalDialog.</strong> Constructing a dialog and inspecting its title and action count:</p>
+<div id="cell-20" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.ui.components <span class="im">import</span> make_approval_dialog</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>dlg <span class="op">=</span> make_approval_dialog(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    tool_name<span class="op">=</span><span class="st">"shell"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    reason<span class="op">=</span><span class="st">"Executing: rm -rf /tmp/scratch"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    on_approve<span class="op">=</span><span class="kw">lambda</span> e: <span class="bu">print</span>(<span class="st">"approved"</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    on_reject<span class="op">=</span><span class="kw">lambda</span> e: <span class="bu">print</span>(<span class="st">"rejected"</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Title   : </span><span class="sc">{</span>dlg<span class="sc">.</span>title<span class="sc">.</span>value<span class="sc">!r}</span><span class="ss">"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actions : </span><span class="sc">{</span><span class="bu">len</span>(dlg.actions)<span class="sc">}</span><span class="ss"> buttons"</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> btn <span class="kw">in</span> dlg.actions:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span><span class="bu">type</span>(btn)<span class="sc">.</span><span class="va">__name__</span><span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>btn<span class="sc">.</span>text<span class="sc">!r}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="the-application-controller" class="level2">
+<h2 class="anchored" data-anchor-id="the-application-controller">The Application Controller</h2>
+<p><code>AgentApp</code> in <code>app.py</code> is the imperative page controller. Its <code>__init__</code> runs four steps in order: configure the page, build the config and agent, initialise the five pieces of mutable UI state, and build the layout. All subsequent interaction happens through <code>_on_send</code> (triggered by the send button or Enter) and <code>_run_agent</code> (the async event-dispatch loop).</p>
+<section id="page-configuration-and-layout" class="level3">
+<h3 class="anchored" data-anchor-id="page-configuration-and-layout">Page Configuration and Layout</h3>
+<p><code>_configure_page()</code> sets the window title to <code>"Coding Agent"</code>, the background color to <code>#121212</code>, and fixes the initial window size to <span class="math inline">900 \times 700</span> pixels with a minimum of <span class="math inline">480 \times 400</span>.</p>
+<p><code>_build_layout()</code> constructs a single full-height <code>ft.Column</code> with three children: the <code>_status_row</code> at the top (a <code>ft.Row</code> wrapping the status bar container), an expanded <code>ft.Container</code> holding the <code>_feed</code> <code>ListView</code>, and the <code>input_bar</code> at the bottom. All three share <code>spacing=0</code> so there are no gaps.</p>
+<p><strong>Page configuration.</strong> Inspecting <code>_configure_page</code> and <code>_build_layout</code> source:</p>
+<div id="cell-25" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebooks.agent.ui.app <span class="im">import</span> AgentApp</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.getsource(AgentApp._configure_page))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"---"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.getsource(AgentApp._build_layout))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="sending-a-message" class="level3">
+<h3 class="anchored" data-anchor-id="sending-a-message">Sending a Message</h3>
+<p><code>_on_send</code> is the entry point for every user interaction. It (1) strips the input text and returns early if empty or if the agent is already running, (2) clears the text field and appends a user bubble immediately so the UI feels responsive, (3) sets <code>_running = True</code> and disables the send button, (4) calls <code>_refresh_status(running=True)</code> to show the spinner, and (5) awaits <code>_run_agent(text)</code>. When the agent finishes, <code>_on_send</code> reverses all the disabled states and calls <code>_refresh_status(running=False)</code>.</p>
+<p><strong>Sending a message.</strong> Inspecting <code>_on_send</code> source:</p>
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.getsource(AgentApp._on_send))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="running-the-agent" class="level3">
+<h3 class="anchored" data-anchor-id="running-the-agent">Running the Agent</h3>
+<p><code>_run_agent(user_message)</code> iterates over <code>agent.run(user_message)</code> and dispatches each <code>AgentEvent</code> to a UI mutation:</p>
+<ul>
+<li><code>TEXT_DELTA</code> — on the first chunk, <code>_add_message</code> creates an assistant bubble and stores a reference in <code>text_bubble_ref</code>; subsequent chunks update <code>bubble.content.value</code> in-place and call <code>bubble.update()</code>.</li>
+<li><code>TEXT_COMPLETE</code> — clears <code>current_text</code> and <code>text_bubble_ref</code> so the next response starts fresh.</li>
+<li><code>TOOL_CALL_START</code> — <code>_add_tool_card</code> appends an in-progress card to the feed and stores it in <code>_pending_cards[call_id]</code>.</li>
+<li><code>TOOL_CALL_COMPLETE</code> — pops the pending card from <code>_pending_cards</code> and calls <code>_update_tool_card</code>, which replaces the card in-place at the same list index.</li>
+<li><code>AGENT_END</code> — increments <code>_turn</code> and accumulates <code>total_tokens</code> from the usage dict.</li>
+<li><code>AGENT_ERROR</code> — appends a system-role message bubble with the error text prefixed by <code>⚠</code>.</li>
+</ul>
+<p><strong>Running the agent.</strong> Inspecting <code>_run_agent</code> source:</p>
+<div id="cell-31" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.getsource(AgentApp._run_agent))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="feed-helpers" class="level3">
+<h3 class="anchored" data-anchor-id="feed-helpers">Feed Helpers</h3>
+<p>Three short methods manage the feed list. <code>_add_message</code> calls <code>make_message_bubble</code>, appends the result to <code>_feed.controls</code>, and calls <code>_feed.update()</code>. <code>_add_tool_card</code> does the same via <code>make_tool_call_card</code>. <code>_update_tool_card</code> locates the old card by index, replaces it with a new card built from the completed <code>ToolCallData</code>, and updates the feed.</p>
+<p><strong>Feed helpers.</strong> Inspecting <code>_add_message</code>, <code>_add_tool_card</code>, and <code>_update_tool_card</code>:</p>
+<div id="cell-34" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> method <span class="kw">in</span> [AgentApp._add_message, AgentApp._add_tool_card, AgentApp._update_tool_card]:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(inspect.getsource(method))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"---"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="launching-the-app" class="level2">
+<h2 class="anchored" data-anchor-id="launching-the-app">Launching the App</h2>
+<p>The application is launched with:</p>
+<div id="cell-37" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># uv run flet run src/notebooks/agent/ui/app.py</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>OPENROUTER_API_KEY</code> must be set in the shell environment before running the command. The agent will refuse to start and raise a configuration error otherwise.</p>
+<p>Below is a screenshot captured from a live session:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./img/05-app.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure. Coding Agent desktop UI — a multi-turn session showing a user message, streaming assistant text, and two completed tool-call cards."><img src="./img/05-app.png" class="img-fluid figure-img" alt="Figure. Coding Agent desktop UI — a multi-turn session showing a user message, streaming assistant text, and two completed tool-call cards."></a></p>
+<figcaption><strong>Figure.</strong> Coding Agent desktop UI — a multi-turn session showing a user message, streaming assistant text, and two completed tool-call cards.</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The approval system is wired but the <code>ON_REQUEST</code> policy requires a live UI hook to display the <code>ApprovalDialog</code> and resolve the <code>Future</code>. For unattended testing, set <code>approval=ApprovalPolicy.YOLO</code> in <code>_build_config()</code> — this bypasses the approval gate entirely and lets every tool call proceed without confirmation.</p>
+</div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 22%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>MessageData</code> / <code>ToolCallData</code></td>
+<td><code>ui/components.py</code></td>
+<td>Data classes for rendering chat messages and tool invocations</td>
+</tr>
+<tr class="even">
+<td><code>make_message_bubble</code></td>
+<td><code>ui/components.py</code></td>
+<td>Chat bubble renderer; role-aware alignment and color</td>
+</tr>
+<tr class="odd">
+<td><code>make_tool_call_card</code></td>
+<td><code>ui/components.py</code></td>
+<td>Tool invocation card with live status indicator</td>
+</tr>
+<tr class="even">
+<td><code>make_status_bar</code></td>
+<td><code>ui/components.py</code></td>
+<td>Thin header showing model, turn count, and token usage</td>
+</tr>
+<tr class="odd">
+<td><code>make_approval_dialog</code></td>
+<td><code>ui/components.py</code></td>
+<td>Modal dialog for approving or rejecting tool calls</td>
+</tr>
+<tr class="even">
+<td><code>AgentApp</code></td>
+<td><code>ui/app.py</code></td>
+<td>Page controller — wires Flet events to the agent’s async generator</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p>This concludes the Coding Agent From Scratch series. We have built a complete async coding agent from a streaming LLM client through tool execution, session management, hardening, and a Flet desktop interface — each layer a self-contained module that can be used or replaced independently.</p>
+<p>← <a href="../../../notebooks/apps/cda/04-hardening.html">Hardening the Agent</a></p>
+<hr>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/apps/cda/04-hardening.html" class="pagination-link" aria-label="04. Hardening the Agent">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">04. Hardening the Agent</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/apps/cda/06-ui2.html" class="pagination-link" aria-label="06. GUI 2: Tools &amp; Persistence">
+        <span class="nav-page-text">06. GUI 2: Tools &amp; Persistence</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

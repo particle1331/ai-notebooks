@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Pretraining nanoGPT on TinyShakespeare – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/llm/07-distributed-training.html" rel="next">
+<link href="../../notebooks/llm/05-scaling-diagnostics.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/06-pretraining.html">06. Pretraining nanoGPT</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Language Models From Scratch</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/01-gpt-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. GPT from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/02-tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Byte Pair Encoding &amp; Tokenization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/03-data-pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Data Pipelines for Pretraining</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/04-training-loop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizer, Schedule &amp; Mixed Precision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Gradient &amp; Activation Diagnostics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/06-pretraining.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">06. Pretraining nanoGPT</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/07-distributed-training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Multi-GPU with DDP &amp; FSDP</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/08-sft-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Instruction Tuning with LoRA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/09-preference-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. DPO &amp; Reward Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/10-grpo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Reinforcement Learning with GRPO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/11-distillation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Knowledge Distillation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/12-quantization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. Model Quantization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/13-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. KV Cache &amp; Speculative Decoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/14-inference-time-scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Inference-Time Scaling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/15-reasoning-model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Training a Reasoning Model</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/llm/deepseek/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepSeek</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/01-deepseek-architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. MLA &amp; Mixture of Experts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/02-training-nanodeepseek.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Training NanoDeepSeek</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/llm/deepseek/03-engram-layer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. The Engram Layer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#mixed-precision-training" id="toc-mixed-precision-training" class="nav-link active" data-scroll-target="#mixed-precision-training">Mixed Precision Training</a>
+  <ul class="collapse">
+  <li><a href="#the-floating-point-formats" id="toc-the-floating-point-formats" class="nav-link" data-scroll-target="#the-floating-point-formats">The floating-point formats</a></li>
+  <li><a href="#torch.autocast" id="toc-torch.autocast" class="nav-link" data-scroll-target="#torch.autocast"><code>torch.autocast</code></a></li>
+  <li><a href="#gradscaler-for-fp16" id="toc-gradscaler-for-fp16" class="nav-link" data-scroll-target="#gradscaler-for-fp16"><code>GradScaler</code> for FP16</a></li>
+  </ul></li>
+  <li><a href="#learning-rate-schedules" id="toc-learning-rate-schedules" class="nav-link" data-scroll-target="#learning-rate-schedules">Learning Rate Schedules</a>
+  <ul class="collapse">
+  <li><a href="#why-warmup" id="toc-why-warmup" class="nav-link" data-scroll-target="#why-warmup">Why warmup?</a></li>
+  <li><a href="#why-cosine-decay" id="toc-why-cosine-decay" class="nav-link" data-scroll-target="#why-cosine-decay">Why cosine decay?</a></li>
+  </ul></li>
+  <li><a href="#scaling-laws" id="toc-scaling-laws" class="nav-link" data-scroll-target="#scaling-laws">Scaling Laws</a>
+  <ul class="collapse">
+  <li><a href="#the-chinchilla-result" id="toc-the-chinchilla-result" class="nav-link" data-scroll-target="#the-chinchilla-result">The Chinchilla result</a></li>
+  </ul></li>
+  <li><a href="#the-complete-pretraining-loop" id="toc-the-complete-pretraining-loop" class="nav-link" data-scroll-target="#the-complete-pretraining-loop">The Complete Pretraining Loop</a>
+  <ul class="collapse">
+  <li><a href="#checkpoint-format-and-resume" id="toc-checkpoint-format-and-resume" class="nav-link" data-scroll-target="#checkpoint-format-and-resume">Checkpoint format and resume</a></li>
+  </ul></li>
+  <li><a href="#running-a-training-session" id="toc-running-a-training-session" class="nav-link" data-scroll-target="#running-a-training-session">Running a Training Session</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/llm/index.html">Language Models From Scratch</a></li><li class="breadcrumb-item"><a href="../../notebooks/llm/06-pretraining.html">06. Pretraining nanoGPT</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Pretraining nanoGPT on TinyShakespeare</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This notebook assembles everything built so far into a complete, instrumented pretraining loop. The three ingredients that separate a loop that merely works from one that is compute-optimal are mixed precision arithmetic, a principled learning rate schedule, and an understanding of scaling laws.</p>
+<p><strong>Mixed precision</strong> — BF16 vs FP16, <code>torch.autocast</code>, <code>GradScaler</code>, and why you should almost always use BF16 on modern hardware. The argument is numerical, not just a recommendation: BF16 shares FP32’s 8-bit exponent and therefore has the same dynamic range; it can never overflow, requires no loss scaling, and frees the optimizer moments to stay in FP32 without any extra machinery.</p>
+<p><strong>Learning rate schedule</strong> — linear warmup plus cosine decay, derived from the structure of the Adam optimizer. Warmup is not a heuristic: at step 1, Adam’s bias correction amplifies the first gradient by <span class="math inline">1/(1 - \beta_1)</span>; warmup keeps the early steps small until the moment estimates are reliable. Cosine decay has the right shape — slow early, fast through the middle, long flat tail — and its <code>min_lr</code> parameter controls how much useful learning continues until the last step.</p>
+<p><strong>Scaling laws</strong> — the Chinchilla result <span class="math inline">D^* \approx 20N</span>. Given a fixed compute budget in FLOPs, the loss surface <span class="math inline">L(N, D) = E + A/N^\alpha + B/D^\beta</span> yields an optimal allocation between model size and token count. We use this to plan and evaluate training runs before writing a single line of the loop.</p>
+<section id="mixed-precision-training" class="level2">
+<h2 class="anchored" data-anchor-id="mixed-precision-training">Mixed Precision Training</h2>
+<section id="the-floating-point-formats" class="level3">
+<h3 class="anchored" data-anchor-id="the-floating-point-formats">The floating-point formats</h3>
+<p>A standard FP32 number uses 32 bits: 1 sign, 8 exponent, 23 mantissa bits (~7 decimal digits of precision).</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 10%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 20%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Bits</th>
+<th>Exponent</th>
+<th>Mantissa</th>
+<th>Max value</th>
+<th>Precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FP32</td>
+<td>32</td>
+<td>8</td>
+<td>23</td>
+<td>3.4e38</td>
+<td>~7 decimal digits</td>
+</tr>
+<tr class="even">
+<td>FP16</td>
+<td>16</td>
+<td>5</td>
+<td>10</td>
+<td>65504</td>
+<td>~3 decimal digits</td>
+</tr>
+<tr class="odd">
+<td>BF16</td>
+<td>16</td>
+<td>8</td>
+<td>7</td>
+<td>3.4e38</td>
+<td>~2 decimal digits</td>
+</tr>
+</tbody>
+</table>
+<p>FP16 has a maximum representable value of 65504. Activations and gradients in a deep network can easily exceed this — especially early in training when the loss is large. Overflow produces <code>inf</code>, which propagates to <code>nan</code> and kills the run. <mark>BF16 has the same 8-bit exponent as FP32, giving it the same dynamic range (<span class="math inline">3.4 \times 10^{38}</span>). It sacrifices mantissa precision but can never overflow.</mark> For neural network training, where values span many orders of magnitude but sub-1% precision rarely matters, BF16 is strictly better than FP16 on hardware that supports it (A100, H100, recent consumer cards):</p>
+<div id="nb06-fp16-overflow" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># FP16 overflow</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(<span class="fl">70000.0</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x.to(torch.float16))   <span class="co"># tensor(inf)    — overflow!</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x.to(torch.bfloat16))  <span class="co"># tensor(69632.) — representable, slightly rounded</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># FP16 gradient underflow</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>small_grad <span class="op">=</span> torch.tensor(<span class="fl">1e-8</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(small_grad.to(torch.float16))   <span class="co"># tensor(0.)         — underflow to zero!</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(small_grad.to(torch.bfloat16))  <span class="co"># tensor(1.0000e-08) — preserved</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="torch.autocast" class="level3">
+<h3 class="anchored" data-anchor-id="torch.autocast"><code>torch.autocast</code></h3>
+<p><code>torch.autocast</code> is a context manager that casts operations to lower precision automatically. It is <em>selective</em> — operations sensitive to precision (softmax, layer norm) stay in FP32; operations that benefit from low-precision throughput (matmul, conv) are cast to BF16/FP16. Model parameters remain FP32 throughout; autocast only affects intermediate computation within the forward pass:</p>
+<div id="nb06-autocast" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> contextlib</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine dtype and device at startup</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>dtype  <span class="op">=</span> torch.bfloat16 <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> torch.float32</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a context that is a no-op on CPU (CPU has no BF16 tensor cores)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>autocast_ctx <span class="op">=</span> (</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    torch.autocast(device_type<span class="op">=</span><span class="st">'cuda'</span>, dtype<span class="op">=</span>dtype)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> contextlib.nullcontext()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># BF16 training step — no GradScaler needed</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># with autocast_ctx:</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     logits, loss = model(x, y)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># loss.backward()</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># optimizer.step()</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"device=</span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">  dtype=</span><span class="sc">{</span>dtype<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="gradscaler-for-fp16" class="level3">
+<h3 class="anchored" data-anchor-id="gradscaler-for-fp16"><code>GradScaler</code> for FP16</h3>
+<p>If you must use FP16 (older hardware with no BF16 support), <code>GradScaler</code> prevents gradient underflow. It multiplies the loss by a large scalar <span class="math inline">S</span> before backward — scaling all gradients up by <span class="math inline">S</span> to keep them representable in FP16 — then divides them back by <span class="math inline">S</span> before the optimizer step. The scaler doubles <span class="math inline">S</span> every 2000 unproblematic steps and halves it whenever a step is skipped due to overflow:</p>
+<div id="nb06-gradscaler" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.cuda.amp <span class="im">import</span> GradScaler</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># FP16 training step</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> GradScaler()   <span class="co"># starts with scale=65536</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># for x, y in dataloader:</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     with torch.autocast(device_type='cuda', dtype=torch.float16):</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#         logits, loss = model(x, y)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     scaler.scale(loss).backward()</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Unscale before clipping — clip_grad_norm_ must see true magnitudes</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     scaler.unscale_(optimizer)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Skips if gradients contain inf/nan; updates scale factor</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     scaler.step(optimizer)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#     scaler.update()</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"GradScaler ready — scale:"</span>, scaler.get_scale())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+BF16 vs FP16 decision rule
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If your GPU supports BF16 (A100, H100, RTX 3090+, 4090), always use BF16. You get the same speed benefit as FP16 with none of the overflow risk and no <code>GradScaler</code> boilerplate. Check with <code>torch.cuda.is_bf16_supported()</code>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="learning-rate-schedules" class="level2">
+<h2 class="anchored" data-anchor-id="learning-rate-schedules">Learning Rate Schedules</h2>
+<section id="why-warmup" class="level3">
+<h3 class="anchored" data-anchor-id="why-warmup">Why warmup?</h3>
+<p>Adam maintains running estimates of the gradient mean (<span class="math inline">m_t</span>) and variance (<span class="math inline">v_t</span>) for each parameter:</p>
+<p><span class="math display">m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t, \qquad v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2</span></p>
+<p>At step 1, <span class="math inline">m_0 = v_0 = 0</span>. The bias-corrected estimates are:</p>
+<p><span class="math display">\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \qquad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}</span></p>
+<p><mark>At <span class="math inline">t=1</span> with <span class="math inline">\beta_1=0.9</span>, <span class="math inline">\hat{m}_1 = m_1 / 0.1 = 10 m_1</span> — the first gradient is amplified 10× by the bias correction.</mark> The effective step size is large and unreliable until <span class="math inline">m_t</span> and <span class="math inline">v_t</span> have accumulated enough history. Warmup counteracts this: by starting with LR <span class="math inline">\approx 0</span> and linearly increasing it over the first <span class="math inline">T_{\text{warm}}</span> steps, we give the optimizer time to build reliable momentum estimates before taking large steps.</p>
+<p><strong>How many warmup steps?</strong> Rule of thumb: 1–2% of total training steps. For a 5000-step run: 50–100 warmup steps.</p>
+</section>
+<section id="why-cosine-decay" class="level3">
+<h3 class="anchored" data-anchor-id="why-cosine-decay">Why cosine decay?</h3>
+<p>Early in training the model is far from a minimum — large steps navigate the loss landscape quickly. Late in training the model is near a minimum — large steps risk overshooting. <u>Cosine decay has the right shape: slow decrease early, rapid decrease through the middle, and a long flat tail approaching <code>min_lr</code>.</u></p>
+<p>The combined schedule:</p>
+<p><span class="math display">\text{lr}(t) = \begin{cases}
+\text{max\_lr} \cdot \dfrac{t}{T_{\text{warm}}} &amp; t &lt; T_{\text{warm}} \\[1em]
+\text{min\_lr} + \dfrac{\text{max\_lr} - \text{min\_lr}}{2}\left(1 + \cos\dfrac{\pi(t - T_{\text{warm}})}{T_{\text{max}} - T_{\text{warm}}}\right) &amp; t \geq T_{\text{warm}}
+\end{cases}</span></p>
+<div id="nb06-cosine-schedule" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim.lr_scheduler <span class="im">import</span> LambdaLR</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_cosine_schedule(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    optimizer,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    max_lr:       <span class="bu">float</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    min_lr:       <span class="bu">float</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    warmup_steps: <span class="bu">int</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    max_steps:    <span class="bu">int</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> LambdaLR:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">    Linear warmup from 0 to max_lr over warmup_steps,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">    then cosine decay from max_lr to min_lr over max_steps.</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">    Set the optimizer's initial lr = max_lr.</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> lr_lambda(step: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">&lt;</span> warmup_steps:</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> step <span class="op">/</span> <span class="bu">max</span>(warmup_steps, <span class="dv">1</span>)          <span class="co"># linear warmup: 0 → 1.0</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        progress <span class="op">=</span> (step <span class="op">-</span> warmup_steps) <span class="op">/</span> <span class="bu">max</span>(max_steps <span class="op">-</span> warmup_steps, <span class="dv">1</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        progress <span class="op">=</span> <span class="bu">min</span>(progress, <span class="fl">1.0</span>)                   <span class="co"># clamp after max_steps</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        cosine   <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">+</span> math.cos(math.pi <span class="op">*</span> progress))</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        min_ratio <span class="op">=</span> min_lr <span class="op">/</span> max_lr</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> min_ratio <span class="op">+</span> (<span class="fl">1.0</span> <span class="op">-</span> min_ratio) <span class="op">*</span> cosine   <span class="co"># scale to [min_ratio, 1.0]</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> LambdaLR(optimizer, lr_lambda)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We visualize the schedule for the nano model configuration — <code>max_lr=3e-4</code>, <code>min_lr=3e-5</code> (10% of max, the Chinchilla convention), 100 warmup steps, 5000 total steps:</p>
+<div id="nb06-schedule-plot" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>MAX_LR    <span class="op">=</span> <span class="fl">3e-4</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>MIN_LR    <span class="op">=</span> <span class="fl">3e-5</span>   <span class="co"># 10% of max — Chinchilla convention</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>WARMUP    <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>MAX_STEPS <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>dummy_param <span class="op">=</span> torch.nn.Parameter(torch.zeros(<span class="dv">1</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>opt   <span class="op">=</span> torch.optim.AdamW([dummy_param], lr<span class="op">=</span>MAX_LR)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>sched <span class="op">=</span> make_cosine_schedule(opt, MAX_LR, MIN_LR, WARMUP, MAX_STEPS)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>lrs <span class="op">=</span> []</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(MAX_STEPS):</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    lrs.append(opt.param_groups[<span class="dv">0</span>][<span class="st">'lr'</span>])</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    sched.step()</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>ax.plot(lrs, color<span class="op">=</span><span class="st">'#9C27B0'</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ax.axvline(WARMUP, color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, lw<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f'warmup ends (step </span><span class="sc">{</span>WARMUP<span class="sc">}</span><span class="ss">)'</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>ax.axhline(MIN_LR, color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">':'</span>, lw<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="ss">f'min_lr=</span><span class="sc">{</span>MIN_LR<span class="sc">:.1e}</span><span class="ss">'</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Step'</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Learning Rate'</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Cosine Schedule with Linear Warmup'</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The <code>min_lr = 0.1 × max_lr</code> choice keeps updates meaningful to the last step. A smaller <code>min_lr</code> (e.g., <code>1e-8</code>) wastes the last 20% of training — weights barely move. A larger <code>min_lr</code> (e.g., <code>0.5 × max_lr</code>) means the schedule decays insufficiently and the model does not converge as tightly.</p>
+</section>
+</section>
+<section id="scaling-laws" class="level2">
+<h2 class="anchored" data-anchor-id="scaling-laws">Scaling Laws</h2>
+<section id="the-chinchilla-result" class="level3">
+<h3 class="anchored" data-anchor-id="the-chinchilla-result">The Chinchilla result</h3>
+<p>Hoffmann et al.&nbsp;(2022) trained hundreds of language models of different sizes on different amounts of data and fit a parametric model to the loss surface:</p>
+<p><span class="math display">L(N, D) = E + \frac{A}{N^\alpha} + \frac{B}{D^\beta}</span></p>
+<p>where <span class="math inline">N</span> is the number of model parameters, <span class="math inline">D</span> is the number of training tokens, <span class="math inline">E \approx 1.69</span> is the irreducible entropy of natural language, and <span class="math inline">A, B, \alpha, \beta</span> are fitted constants.</p>
+<p>Given a compute budget <span class="math inline">C \approx 6ND</span> FLOPs (6 FLOPs per parameter per token for a forward and backward pass<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>), the compute-optimal allocation is:</p>
+<p><span class="math display">N^* \propto C^{0.5}, \qquad D^* \propto C^{0.5}</span></p>
+<p>which yields the famous rule of thumb:</p>
+<p><span class="math display">\boxed{D^* \approx 20 \cdot N}</span></p>
+<div id="nb06-chinchilla" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chinchilla_optimal(compute_flops: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Given a compute budget in FLOPs, return the compute-optimal</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    model size (N*) and token count (D*).</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Uses D* ≈ 20N* from the Chinchilla scaling law.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># C ≈ 6 * N * D → at D* = 20*N*: C = 6 * N* * 20 * N* → N* = sqrt(C / 120)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    optimal_n <span class="op">=</span> (compute_flops <span class="op">/</span> <span class="dv">120</span>) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    optimal_d <span class="op">=</span> <span class="dv">20</span> <span class="op">*</span> optimal_n</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'compute_flops'</span>:    compute_flops,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'compute_pflops'</span>:   compute_flops <span class="op">/</span> <span class="fl">1e15</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'optimal_params'</span>:   optimal_n,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'optimal_params_M'</span>: optimal_n <span class="op">/</span> <span class="fl">1e6</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'optimal_tokens'</span>:   optimal_d,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'optimal_tokens_B'</span>: optimal_d <span class="op">/</span> <span class="fl">1e9</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flops_per_step(n_params: <span class="bu">int</span>, batch_tokens: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Approximate FLOPs for one training step: 6 * N * batch_tokens."""</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">6</span> <span class="op">*</span> n_params <span class="op">*</span> batch_tokens</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plan_training_run(</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    n_params:        <span class="bu">int</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    gpu_flops_per_s: <span class="bu">float</span>,</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    gpu_count:       <span class="bu">int</span>,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    hours:           <span class="bu">float</span>,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    batch_tokens:    <span class="bu">int</span>,</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co">    Given hardware and time budget, print the training plan and</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co">    compare against Chinchilla-optimal allocation.</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    total_flops   <span class="op">=</span> gpu_flops_per_s <span class="op">*</span> gpu_count <span class="op">*</span> hours <span class="op">*</span> <span class="dv">3600</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    flops_per_stp <span class="op">=</span> flops_per_step(n_params, batch_tokens)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    total_steps   <span class="op">=</span> <span class="bu">int</span>(total_flops <span class="op">/</span> flops_per_stp)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    total_tokens  <span class="op">=</span> total_steps <span class="op">*</span> batch_tokens</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    chinchilla    <span class="op">=</span> chinchilla_optimal(total_flops)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    token_ratio   <span class="op">=</span> total_tokens <span class="op">/</span> chinchilla[<span class="st">'optimal_tokens'</span>]</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Training Run Plan"</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'─'</span><span class="op">*</span><span class="dv">52</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Model parameters:     </span><span class="sc">{</span>n_params<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.1f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Hardware:             </span><span class="sc">{</span>gpu_count<span class="sc">}</span><span class="ss">× GPU @ </span><span class="sc">{</span>gpu_flops_per_s<span class="op">/</span><span class="fl">1e12</span><span class="sc">:.0f}</span><span class="ss"> TFLOP/s"</span>)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Time budget:          </span><span class="sc">{</span>hours<span class="sc">:.1f}</span><span class="ss"> hours"</span>)</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Total FLOPs:          </span><span class="sc">{</span>total_flops<span class="op">/</span><span class="fl">1e18</span><span class="sc">:.2f}</span><span class="ss"> EFLOPs"</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Total steps:          </span><span class="sc">{</span>total_steps<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Total tokens:         </span><span class="sc">{</span>total_tokens<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.0f}</span><span class="ss">M"</span>)</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'─'</span><span class="op">*</span><span class="dv">52</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Chinchilla-optimal N: </span><span class="sc">{</span>chinchilla[<span class="st">'optimal_params_M'</span>]<span class="sc">:.1f}</span><span class="ss">M params"</span>)</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Chinchilla-optimal D: </span><span class="sc">{</span>chinchilla[<span class="st">'optimal_tokens_B'</span>]<span class="sc">:.2f}</span><span class="ss">B tokens"</span>)</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Our token ratio:      </span><span class="sc">{</span>token_ratio<span class="sc">:.2f}</span><span class="ss">× optimal"</span>)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> token_ratio <span class="op">&lt;</span> <span class="fl">0.1</span>:</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  ⚠ Severely undertrained — consider a smaller model"</span>)</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> token_ratio <span class="op">&lt;</span> <span class="fl">0.5</span>:</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  ⚠ Undertrained — model could learn more with more data"</span>)</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> token_ratio <span class="op">&gt;</span> <span class="fl">2.0</span>:</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  ⚠ Overtrained on this dataset — model may be memorizing"</span>)</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  ✓ Near compute-optimal"</span>)</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">'total_steps'</span>: total_steps, <span class="st">'total_tokens'</span>: total_tokens, <span class="st">'token_ratio'</span>: token_ratio}</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Our 29.9M nano model on a consumer GPU</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>plan <span class="op">=</span> plan_training_run(</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    n_params<span class="op">=</span><span class="dv">29_900_000</span>,    <span class="co"># 29.9M — actual count with SwiGLU FFN (see NB01)</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    gpu_flops_per_s<span class="op">=</span><span class="fl">20e12</span>,  <span class="co"># RTX 3090: ~20 TFLOP/s BF16</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    gpu_count<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    hours<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    batch_tokens<span class="op">=</span><span class="dv">8</span> <span class="op">*</span> <span class="dv">256</span>,   <span class="co"># batch_size=8, seq_len=256 → 2048 tokens/step</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our 29.9M nano model is Chinchilla-optimal at <span class="math inline">D^* = 20 \times 29.9\text{M} = 598\text{M}</span> tokens. TinyShakespeare has ~1M tokens — about 0.2% of what we need for a compute-optimal run. This means: (1) the model will overfit TinyShakespeare after a few epochs; (2) for a real compute-optimal run we need a much larger corpus; (3) the training runs in this series demonstrate the mechanics and tooling, not production-quality generalization.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The param count matters
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The source tutorials cite <code>10.7M parameters</code> for the nano GPT. That count used a plain GELU FFN with <code>d_ff = 4d</code>. We use SwiGLU with <code>d_ff = int(2 * 4 * d / 3)</code> rounded to the nearest 64, which gives a different FFN size and a total of <strong>29.9M</strong> parameters. All Chinchilla planning must use the correct count.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="the-complete-pretraining-loop" class="level2">
+<h2 class="anchored" data-anchor-id="the-complete-pretraining-loop">The Complete Pretraining Loop</h2>
+<p>Everything assembled: BF16 autocast, gradient accumulation (from <a href="../../notebooks/llm/04-training-loop.html">NB04</a>), cosine schedule, gradient monitoring (from <a href="../../notebooks/llm/05-scaling-diagnostics.html">NB05</a>), data pipeline (from <a href="../../notebooks/llm/03-data-pipelines.html">NB03</a>), and structured logging.</p>
+<p>The <code>TrainingConfig</code> dataclass centralizes all hyperparameters:</p>
+<div id="nb06-training-config" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebook_01 <span class="im">import</span> GPT, NanoGPTConfig   <span class="co"># architecture from NB01</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebook_02 <span class="im">import</span> Tokenizer            <span class="co"># BPE tokenizer from NB02</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebook_03 <span class="im">import</span> PretrainingDataset, make_dataloader  <span class="co"># pipeline from NB03</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> notebook_05 <span class="im">import</span> TrainingLogger       <span class="co"># logger from NB05</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TrainingConfig:</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Model</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    model_config:     NanoGPTConfig <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Optimization</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    max_lr:           <span class="bu">float</span> <span class="op">=</span> <span class="fl">3e-4</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    min_lr:           <span class="bu">float</span> <span class="op">=</span> <span class="fl">3e-5</span>   <span class="co"># 10% of max_lr — Chinchilla convention</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    weight_decay:     <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    beta1:            <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.9</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    beta2:            <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.95</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    grad_clip:        <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Schedule</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    warmup_steps:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    max_steps:        <span class="bu">int</span>   <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Batch</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    batch_size:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    accumulation:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">1</span>    <span class="co"># gradient accumulation micro-steps</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Data</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    block_size:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    num_workers:      <span class="bu">int</span>   <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Logging &amp; checkpointing</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    eval_every:       <span class="bu">int</span>   <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    eval_batches:     <span class="bu">int</span>   <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    log_every:        <span class="bu">int</span>   <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    checkpoint_every: <span class="bu">int</span>   <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Paths</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    data_dir:   <span class="bu">str</span> <span class="op">=</span> <span class="st">'data/shakespeare'</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    run_dir:    <span class="bu">str</span> <span class="op">=</span> <span class="st">'runs/nano_gpt'</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>):</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.model_config <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.model_config <span class="op">=</span> NanoGPTConfig()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>compute_grad_stats</code> helper reads <code>.grad</code> directly after <code>.backward()</code> — no hooks needed — and returns the global gradient norm plus the per-layer ratio statistics used by the logger and <code>HealthReport</code>:</p>
+<div id="nb06-grad-stats" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_grad_stats(model) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute global gradient norm and per-layer ratio statistics in one pass.</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns (gnorm, mean_ratio, min_ratio, max_ratio).</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Call after loss.backward() and before optimizer.step().</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    total_sq, ratios <span class="op">=</span> <span class="fl">0.0</span>, []</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> mod <span class="kw">in</span> model.modules():</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(mod, nn.Linear) <span class="kw">and</span> mod.weight.grad <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            g <span class="op">=</span> mod.weight.grad.norm().item()</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            w <span class="op">=</span> mod.weight.norm().item()</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            total_sq <span class="op">+=</span> g <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            ratios.append(g <span class="op">/</span> (w <span class="op">+</span> <span class="fl">1e-8</span>))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    gnorm <span class="op">=</span> total_sq <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> ratios:</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> gnorm, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gnorm, <span class="bu">float</span>(np.mean(ratios)), <span class="bu">float</span>(np.<span class="bu">min</span>(ratios)), <span class="bu">float</span>(np.<span class="bu">max</span>(ratios))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The main <code>pretrain</code> function:</p>
+<ol type="1">
+<li>Separates weight-decay parameters (2-D weight matrices) from no-decay parameters (biases and RMSNorm scales) — biases and norm parameters should never be regularized.</li>
+<li>Prints the Chinchilla plan before training so you know whether the run is compute-optimal.</li>
+<li>Uses <code>torch.autocast</code> for BF16 on CUDA.</li>
+<li>Accumulates gradients across <code>cfg.accumulation</code> micro-steps before each optimizer step.</li>
+<li>Evaluates on the validation split every <code>eval_every</code> steps and saves the best checkpoint.</li>
+<li>Saves periodic checkpoints that include model, optimizer, and scheduler state.</li>
+</ol>
+<div id="nb06-pretrain" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pretrain(cfg: TrainingConfig):</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(<span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span>)</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>    dtype  <span class="op">=</span> torch.bfloat16 <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> torch.float32</span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">  |  dtype: </span><span class="sc">{</span>dtype<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Model ----</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>    model    <span class="op">=</span> GPT(cfg.model_config).to(device)</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    n_params <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters())</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Model: </span><span class="sc">{</span>n_params<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.1f}</span><span class="ss">M parameters"</span>)</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Optimizer ----</span></span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Weight matrices: apply weight decay.</span></span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Biases + RMSNorm scales (1-D tensors): no weight decay.</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-14" class="code-annotation-target"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>    decay_params   <span class="op">=</span> [p <span class="cf">for</span> n, p <span class="kw">in</span> model.named_parameters() <span class="cf">if</span> p.dim() <span class="op">&gt;=</span> <span class="dv">2</span>]</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>    nodecay_params <span class="op">=</span> [p <span class="cf">for</span> n, p <span class="kw">in</span> model.named_parameters() <span class="cf">if</span> p.dim() <span class="op">&lt;</span> <span class="dv">2</span>]</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW([</span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'params'</span>: decay_params,   <span class="st">'weight_decay'</span>: cfg.weight_decay},</span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'params'</span>: nodecay_params, <span class="st">'weight_decay'</span>: <span class="fl">0.0</span>},</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>    ], lr<span class="op">=</span>cfg.max_lr, betas<span class="op">=</span>(cfg.beta1, cfg.beta2))</span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Optimizer: </span><span class="sc">{</span><span class="bu">len</span>(decay_params)<span class="sc">}</span><span class="ss"> decay params, </span><span class="sc">{</span><span class="bu">len</span>(nodecay_params)<span class="sc">}</span><span class="ss"> no-decay params"</span>)</span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Schedule ----</span></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>    scheduler <span class="op">=</span> make_cosine_schedule(</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>        optimizer, cfg.max_lr, cfg.min_lr, cfg.warmup_steps, cfg.max_steps</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Data ----</span></span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>    tok <span class="op">=</span> Tokenizer.load(<span class="st">'nano_tokenizer.json'</span>)</span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>    train_ds <span class="op">=</span> PretrainingDataset.from_jsonl(</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a>        cfg.data_dir, tok, cfg.block_size, split<span class="op">=</span><span class="st">'train'</span>, buffer_size<span class="op">=</span><span class="dv">500</span></span>
+<span id="annotated-cell-9-31"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>    val_ds <span class="op">=</span> PretrainingDataset.from_jsonl(</span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>        cfg.data_dir, tok, cfg.block_size, split<span class="op">=</span><span class="st">'val'</span>, buffer_size<span class="op">=</span><span class="dv">100</span></span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>    train_loader <span class="op">=</span> make_dataloader(train_ds, cfg.batch_size, cfg.num_workers)</span>
+<span id="annotated-cell-9-36"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a>    val_loader   <span class="op">=</span> make_dataloader(val_ds, cfg.batch_size, <span class="dv">1</span>)</span>
+<span id="annotated-cell-9-37"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Logging ----</span></span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>    logger <span class="op">=</span> TrainingLogger(run_dir<span class="op">=</span>cfg.run_dir, run_name<span class="op">=</span><span class="st">'nano_gpt_pretrain'</span>)</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-41"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Chinchilla plan ----</span></span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>    batch_tokens <span class="op">=</span> cfg.batch_size <span class="op">*</span> cfg.block_size <span class="op">*</span> cfg.accumulation</span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a>    plan_training_run(</span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>        n_params<span class="op">=</span>n_params,</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>        gpu_flops_per_s<span class="op">=</span><span class="fl">20e12</span>,</span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>        gpu_count<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="annotated-cell-9-47"><a href="#annotated-cell-9-47" aria-hidden="true" tabindex="-1"></a>        hours<span class="op">=</span>cfg.max_steps <span class="op">*</span> batch_tokens <span class="op">/</span> (<span class="fl">20e12</span> <span class="op">*</span> <span class="dv">3600</span>),</span>
+<span id="annotated-cell-9-48"><a href="#annotated-cell-9-48" aria-hidden="true" tabindex="-1"></a>        batch_tokens<span class="op">=</span>batch_tokens,</span>
+<span id="annotated-cell-9-49"><a href="#annotated-cell-9-49" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-50"><a href="#annotated-cell-9-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-51"><a href="#annotated-cell-9-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- Training loop ----</span></span>
+<span id="annotated-cell-9-52"><a href="#annotated-cell-9-52" aria-hidden="true" tabindex="-1"></a>    Path(cfg.run_dir).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-9-53"><a href="#annotated-cell-9-53" aria-hidden="true" tabindex="-1"></a>    autocast_ctx <span class="op">=</span> (</span>
+<span id="annotated-cell-9-54"><a href="#annotated-cell-9-54" aria-hidden="true" tabindex="-1"></a>        torch.autocast(device_type<span class="op">=</span><span class="st">'cuda'</span>, dtype<span class="op">=</span>dtype)</span>
+<span id="annotated-cell-9-55"><a href="#annotated-cell-9-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="annotated-cell-9-56"><a href="#annotated-cell-9-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> contextlib.nullcontext()</span>
+<span id="annotated-cell-9-57"><a href="#annotated-cell-9-57" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-9-58"><a href="#annotated-cell-9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-59"><a href="#annotated-cell-9-59" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="annotated-cell-9-60"><a href="#annotated-cell-9-60" aria-hidden="true" tabindex="-1"></a>    total_tokens <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-9-61"><a href="#annotated-cell-9-61" aria-hidden="true" tabindex="-1"></a>    step         <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-9-62"><a href="#annotated-cell-9-62" aria-hidden="true" tabindex="-1"></a>    best_eval    <span class="op">=</span> <span class="bu">float</span>(<span class="st">'inf'</span>)</span>
+<span id="annotated-cell-9-63"><a href="#annotated-cell-9-63" aria-hidden="true" tabindex="-1"></a>    train_iter   <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="annotated-cell-9-64"><a href="#annotated-cell-9-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-65"><a href="#annotated-cell-9-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> step <span class="op">&lt;</span> cfg.max_steps:</span>
+<span id="annotated-cell-9-66"><a href="#annotated-cell-9-66" aria-hidden="true" tabindex="-1"></a>        t0 <span class="op">=</span> time.time()</span>
+<span id="annotated-cell-9-67"><a href="#annotated-cell-9-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-68"><a href="#annotated-cell-9-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Gradient accumulation ----</span></span>
+<span id="annotated-cell-9-69"><a href="#annotated-cell-9-69" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="annotated-cell-9-70"><a href="#annotated-cell-9-70" aria-hidden="true" tabindex="-1"></a>        step_loss <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-9-71"><a href="#annotated-cell-9-71" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-72" class="code-annotation-target"><a href="#annotated-cell-9-72" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> micro_step <span class="kw">in</span> <span class="bu">range</span>(cfg.accumulation):</span>
+<span id="annotated-cell-9-73"><a href="#annotated-cell-9-73" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="annotated-cell-9-74"><a href="#annotated-cell-9-74" aria-hidden="true" tabindex="-1"></a>                x, y <span class="op">=</span> <span class="bu">next</span>(train_iter)</span>
+<span id="annotated-cell-9-75"><a href="#annotated-cell-9-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">StopIteration</span>:</span>
+<span id="annotated-cell-9-76"><a href="#annotated-cell-9-76" aria-hidden="true" tabindex="-1"></a>                train_iter <span class="op">=</span> <span class="bu">iter</span>(train_loader)</span>
+<span id="annotated-cell-9-77"><a href="#annotated-cell-9-77" aria-hidden="true" tabindex="-1"></a>                x, y <span class="op">=</span> <span class="bu">next</span>(train_iter)</span>
+<span id="annotated-cell-9-78"><a href="#annotated-cell-9-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-79"><a href="#annotated-cell-9-79" aria-hidden="true" tabindex="-1"></a>            x, y <span class="op">=</span> x.to(device), y.to(device)</span>
+<span id="annotated-cell-9-80"><a href="#annotated-cell-9-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-81"><a href="#annotated-cell-9-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> autocast_ctx:</span>
+<span id="annotated-cell-9-82"><a href="#annotated-cell-9-82" aria-hidden="true" tabindex="-1"></a>                _, loss <span class="op">=</span> model(x, y)</span>
+<span id="annotated-cell-9-83"><a href="#annotated-cell-9-83" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-84" class="code-annotation-target"><a href="#annotated-cell-9-84" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> loss <span class="op">/</span> cfg.accumulation</span>
+<span id="annotated-cell-9-85"><a href="#annotated-cell-9-85" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="annotated-cell-9-86"><a href="#annotated-cell-9-86" aria-hidden="true" tabindex="-1"></a>            step_loss    <span class="op">+=</span> loss.item()</span>
+<span id="annotated-cell-9-87"><a href="#annotated-cell-9-87" aria-hidden="true" tabindex="-1"></a>            total_tokens <span class="op">+=</span> x.numel()</span>
+<span id="annotated-cell-9-88"><a href="#annotated-cell-9-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-89"><a href="#annotated-cell-9-89" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Gradient stats (before clip) ----</span></span>
+<span id="annotated-cell-9-90"><a href="#annotated-cell-9-90" aria-hidden="true" tabindex="-1"></a>        gnorm, mean_r, min_r, max_r <span class="op">=</span> compute_grad_stats(model)</span>
+<span id="annotated-cell-9-91"><a href="#annotated-cell-9-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-92"><a href="#annotated-cell-9-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Clip and step ----</span></span>
+<span id="annotated-cell-9-93"><a href="#annotated-cell-9-93" aria-hidden="true" tabindex="-1"></a>        torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)</span>
+<span id="annotated-cell-9-94"><a href="#annotated-cell-9-94" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="annotated-cell-9-95"><a href="#annotated-cell-9-95" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="annotated-cell-9-96"><a href="#annotated-cell-9-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-97"><a href="#annotated-cell-9-97" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Throughput ----</span></span>
+<span id="annotated-cell-9-98"><a href="#annotated-cell-9-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> device.<span class="bu">type</span> <span class="op">==</span> <span class="st">'cuda'</span>:</span>
+<span id="annotated-cell-9-99"><a href="#annotated-cell-9-99" aria-hidden="true" tabindex="-1"></a>            torch.cuda.synchronize()</span>
+<span id="annotated-cell-9-100"><a href="#annotated-cell-9-100" aria-hidden="true" tabindex="-1"></a>        elapsed <span class="op">=</span> time.time() <span class="op">-</span> t0</span>
+<span id="annotated-cell-9-101"><a href="#annotated-cell-9-101" aria-hidden="true" tabindex="-1"></a>        tps     <span class="op">=</span> x.numel() <span class="op">/</span> elapsed</span>
+<span id="annotated-cell-9-102"><a href="#annotated-cell-9-102" aria-hidden="true" tabindex="-1"></a>        lr      <span class="op">=</span> optimizer.param_groups[<span class="dv">0</span>][<span class="st">'lr'</span>]</span>
+<span id="annotated-cell-9-103"><a href="#annotated-cell-9-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-104"><a href="#annotated-cell-9-104" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Log ----</span></span>
+<span id="annotated-cell-9-105"><a href="#annotated-cell-9-105" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> cfg.log_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-9-106"><a href="#annotated-cell-9-106" aria-hidden="true" tabindex="-1"></a>            logger.log_step(</span>
+<span id="annotated-cell-9-107"><a href="#annotated-cell-9-107" aria-hidden="true" tabindex="-1"></a>                step<span class="op">=</span>step,</span>
+<span id="annotated-cell-9-108"><a href="#annotated-cell-9-108" aria-hidden="true" tabindex="-1"></a>                train_loss<span class="op">=</span>step_loss,</span>
+<span id="annotated-cell-9-109"><a href="#annotated-cell-9-109" aria-hidden="true" tabindex="-1"></a>                learning_rate<span class="op">=</span>lr,</span>
+<span id="annotated-cell-9-110"><a href="#annotated-cell-9-110" aria-hidden="true" tabindex="-1"></a>                global_grad_norm<span class="op">=</span>gnorm,</span>
+<span id="annotated-cell-9-111"><a href="#annotated-cell-9-111" aria-hidden="true" tabindex="-1"></a>                total_tokens<span class="op">=</span>total_tokens,</span>
+<span id="annotated-cell-9-112"><a href="#annotated-cell-9-112" aria-hidden="true" tabindex="-1"></a>                mean_grad_ratio<span class="op">=</span>mean_r,</span>
+<span id="annotated-cell-9-113"><a href="#annotated-cell-9-113" aria-hidden="true" tabindex="-1"></a>                min_grad_ratio<span class="op">=</span>min_r,</span>
+<span id="annotated-cell-9-114"><a href="#annotated-cell-9-114" aria-hidden="true" tabindex="-1"></a>                max_grad_ratio<span class="op">=</span>max_r,</span>
+<span id="annotated-cell-9-115"><a href="#annotated-cell-9-115" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-9-116"><a href="#annotated-cell-9-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-117"><a href="#annotated-cell-9-117" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Eval ----</span></span>
+<span id="annotated-cell-9-118"><a href="#annotated-cell-9-118" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> cfg.eval_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-9-119"><a href="#annotated-cell-9-119" aria-hidden="true" tabindex="-1"></a>            model.<span class="bu">eval</span>()</span>
+<span id="annotated-cell-9-120"><a href="#annotated-cell-9-120" aria-hidden="true" tabindex="-1"></a>            eval_losses <span class="op">=</span> []</span>
+<span id="annotated-cell-9-121"><a href="#annotated-cell-9-121" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():</span>
+<span id="annotated-cell-9-122"><a href="#annotated-cell-9-122" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> i, (xv, yv) <span class="kw">in</span> <span class="bu">enumerate</span>(val_loader):</span>
+<span id="annotated-cell-9-123"><a href="#annotated-cell-9-123" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> i <span class="op">&gt;=</span> cfg.eval_batches:</span>
+<span id="annotated-cell-9-124"><a href="#annotated-cell-9-124" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">break</span></span>
+<span id="annotated-cell-9-125"><a href="#annotated-cell-9-125" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">with</span> autocast_ctx:</span>
+<span id="annotated-cell-9-126"><a href="#annotated-cell-9-126" aria-hidden="true" tabindex="-1"></a>                        _, vl <span class="op">=</span> model(xv.to(device), yv.to(device))</span>
+<span id="annotated-cell-9-127"><a href="#annotated-cell-9-127" aria-hidden="true" tabindex="-1"></a>                    eval_losses.append(vl.item())</span>
+<span id="annotated-cell-9-128"><a href="#annotated-cell-9-128" aria-hidden="true" tabindex="-1"></a>            eval_loss <span class="op">=</span> <span class="bu">float</span>(np.mean(eval_losses))</span>
+<span id="annotated-cell-9-129"><a href="#annotated-cell-9-129" aria-hidden="true" tabindex="-1"></a>            model.train()</span>
+<span id="annotated-cell-9-130"><a href="#annotated-cell-9-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-131"><a href="#annotated-cell-9-131" aria-hidden="true" tabindex="-1"></a>            logger.log_step(</span>
+<span id="annotated-cell-9-132"><a href="#annotated-cell-9-132" aria-hidden="true" tabindex="-1"></a>                step<span class="op">=</span>step,</span>
+<span id="annotated-cell-9-133"><a href="#annotated-cell-9-133" aria-hidden="true" tabindex="-1"></a>                train_loss<span class="op">=</span>step_loss,</span>
+<span id="annotated-cell-9-134"><a href="#annotated-cell-9-134" aria-hidden="true" tabindex="-1"></a>                learning_rate<span class="op">=</span>lr,</span>
+<span id="annotated-cell-9-135"><a href="#annotated-cell-9-135" aria-hidden="true" tabindex="-1"></a>                global_grad_norm<span class="op">=</span>gnorm,</span>
+<span id="annotated-cell-9-136"><a href="#annotated-cell-9-136" aria-hidden="true" tabindex="-1"></a>                total_tokens<span class="op">=</span>total_tokens,</span>
+<span id="annotated-cell-9-137"><a href="#annotated-cell-9-137" aria-hidden="true" tabindex="-1"></a>                eval_loss<span class="op">=</span>eval_loss,</span>
+<span id="annotated-cell-9-138"><a href="#annotated-cell-9-138" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-9-139"><a href="#annotated-cell-9-139" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(</span>
+<span id="annotated-cell-9-140"><a href="#annotated-cell-9-140" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"step </span><span class="sc">{</span>step<span class="sc">:5d}</span><span class="ss">  "</span></span>
+<span id="annotated-cell-9-141"><a href="#annotated-cell-9-141" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"train=</span><span class="sc">{</span>step_loss<span class="sc">:.4f}</span><span class="ss">  eval=</span><span class="sc">{</span>eval_loss<span class="sc">:.4f}</span><span class="ss">  "</span></span>
+<span id="annotated-cell-9-142"><a href="#annotated-cell-9-142" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"lr=</span><span class="sc">{</span>lr<span class="sc">:.2e}</span><span class="ss">  gnorm=</span><span class="sc">{</span>gnorm<span class="sc">:.3f}</span><span class="ss">  "</span></span>
+<span id="annotated-cell-9-143"><a href="#annotated-cell-9-143" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"ρ=[</span><span class="sc">{</span>min_r<span class="sc">:.1e}</span><span class="ss">,</span><span class="sc">{</span>max_r<span class="sc">:.1e}</span><span class="ss">]"</span></span>
+<span id="annotated-cell-9-144"><a href="#annotated-cell-9-144" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-9-145"><a href="#annotated-cell-9-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-146"><a href="#annotated-cell-9-146" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> eval_loss <span class="op">&lt;</span> best_eval:</span>
+<span id="annotated-cell-9-147"><a href="#annotated-cell-9-147" aria-hidden="true" tabindex="-1"></a>                best_eval <span class="op">=</span> eval_loss</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-9-148" class="code-annotation-target"><a href="#annotated-cell-9-148" aria-hidden="true" tabindex="-1"></a>                torch.save({</span>
+<span id="annotated-cell-9-149"><a href="#annotated-cell-9-149" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'step'</span>:      step,</span>
+<span id="annotated-cell-9-150"><a href="#annotated-cell-9-150" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'model'</span>:     model.state_dict(),</span>
+<span id="annotated-cell-9-151"><a href="#annotated-cell-9-151" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'optimizer'</span>: optimizer.state_dict(),</span>
+<span id="annotated-cell-9-152"><a href="#annotated-cell-9-152" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'scheduler'</span>: scheduler.state_dict(),</span>
+<span id="annotated-cell-9-153"><a href="#annotated-cell-9-153" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'config'</span>:    cfg,</span>
+<span id="annotated-cell-9-154"><a href="#annotated-cell-9-154" aria-hidden="true" tabindex="-1"></a>                    <span class="st">'eval_loss'</span>: eval_loss,</span>
+<span id="annotated-cell-9-155"><a href="#annotated-cell-9-155" aria-hidden="true" tabindex="-1"></a>                }, <span class="ss">f'</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/best_checkpoint.pt'</span>)</span>
+<span id="annotated-cell-9-156"><a href="#annotated-cell-9-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-157"><a href="#annotated-cell-9-157" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- Periodic checkpoint ----</span></span>
+<span id="annotated-cell-9-158"><a href="#annotated-cell-9-158" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> step <span class="op">%</span> cfg.checkpoint_every <span class="op">==</span> <span class="dv">0</span> <span class="kw">and</span> step <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-9-159"><a href="#annotated-cell-9-159" aria-hidden="true" tabindex="-1"></a>            torch.save({</span>
+<span id="annotated-cell-9-160"><a href="#annotated-cell-9-160" aria-hidden="true" tabindex="-1"></a>                <span class="st">'step'</span>:      step,</span>
+<span id="annotated-cell-9-161"><a href="#annotated-cell-9-161" aria-hidden="true" tabindex="-1"></a>                <span class="st">'model'</span>:     model.state_dict(),</span>
+<span id="annotated-cell-9-162"><a href="#annotated-cell-9-162" aria-hidden="true" tabindex="-1"></a>                <span class="st">'optimizer'</span>: optimizer.state_dict(),</span>
+<span id="annotated-cell-9-163"><a href="#annotated-cell-9-163" aria-hidden="true" tabindex="-1"></a>                <span class="st">'scheduler'</span>: scheduler.state_dict(),</span>
+<span id="annotated-cell-9-164"><a href="#annotated-cell-9-164" aria-hidden="true" tabindex="-1"></a>            }, <span class="ss">f'</span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/checkpoint_step</span><span class="sc">{</span>step<span class="sc">:05d}</span><span class="ss">.pt'</span>)</span>
+<span id="annotated-cell-9-165"><a href="#annotated-cell-9-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-166"><a href="#annotated-cell-9-166" aria-hidden="true" tabindex="-1"></a>        step <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="annotated-cell-9-167"><a href="#annotated-cell-9-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-168"><a href="#annotated-cell-9-168" aria-hidden="true" tabindex="-1"></a>    logger.close()</span>
+<span id="annotated-cell-9-169"><a href="#annotated-cell-9-169" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Pretraining complete."</span>)</span>
+<span id="annotated-cell-9-170"><a href="#annotated-cell-9-170" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Total tokens: </span><span class="sc">{</span>total_tokens<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-171"><a href="#annotated-cell-9-171" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Best eval loss: </span><span class="sc">{</span>best_eval<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-9-172"><a href="#annotated-cell-9-172" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Checkpoint: </span><span class="sc">{</span>cfg<span class="sc">.</span>run_dir<span class="sc">}</span><span class="ss">/best_checkpoint.pt"</span>)</span>
+<span id="annotated-cell-9-173"><a href="#annotated-cell-9-173" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="14" data-code-annotation="1"><code>p.dim() &gt;= 2</code> selects all weight matrices. Biases and RMSNorm scale parameters are 1-D and should not be regularized — L2 regularization on biases discourages the network from using constant offsets, which is almost never what you want.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="72" data-code-annotation="2">Each micro-step accumulates gradients without calling <code>optimizer.step()</code>. This is equivalent to a single step with a larger batch — the gradients sum before the optimizer sees them.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="84" data-code-annotation="3">Dividing by <code>accumulation</code> before backward normalizes the gradient scale to be independent of the number of micro-steps. Without this, the effective gradient magnitude scales with <code>accumulation</code>, requiring you to tune LR every time you change batch size.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="148" data-code-annotation="4">The checkpoint saves model, optimizer, and scheduler together. <u>Always save the optimizer state.</u> The Adam moments encode recent gradient history for every parameter. Restarting without them means the first 100–200 steps after a reload behave like fresh training — the optimizer takes large, unstable steps until the moments rebuild.</span>
+</dd>
+</dl>
+</div>
+</div>
+<section id="checkpoint-format-and-resume" class="level3">
+<h3 class="anchored" data-anchor-id="checkpoint-format-and-resume">Checkpoint format and resume</h3>
+<p>The checkpoint dictionary contains everything needed to resume training from exactly the state where it was interrupted:</p>
+<div id="nb06-checkpoint" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_checkpoint(path: <span class="bu">str</span>, model, optimizer, scheduler) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Resume training from a checkpoint.</span></span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns the step number to continue from.</span></span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>    ckpt <span class="op">=</span> torch.load(path, map_location<span class="op">=</span><span class="st">'cpu'</span>)</span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>    model.load_state_dict(ckpt[<span class="st">'model'</span>])</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-8" class="code-annotation-target"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>    optimizer.load_state_dict(ckpt[<span class="st">'optimizer'</span>])</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-10-9" class="code-annotation-target"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a>    scheduler.load_state_dict(ckpt[<span class="st">'scheduler'</span>])</span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a>    step <span class="op">=</span> ckpt[<span class="st">'step'</span>]</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Resumed from step </span><span class="sc">{</span>step<span class="sc">}</span><span class="ss">  eval_loss=</span><span class="sc">{</span>ckpt<span class="sc">.</span>get(<span class="st">'eval_loss'</span>, <span class="st">'?'</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> step</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="8" data-code-annotation="1">Loading optimizer state restores the Adam <span class="math inline">m_t</span> and <span class="math inline">v_t</span> moments for every parameter — the memory of the last several hundred gradient directions.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="9" data-code-annotation="2">Loading scheduler state restores the current step count inside the LR schedule. Without this, the schedule resets to step 0 and the LR jumps back to the warmup phase.</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Stale checkpoints after architecture changes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you change the model architecture between runs (add a layer, change <code>d_model</code>), the checkpoint’s optimizer state will not match the new model’s parameters. The parameter group sizes will differ and <code>optimizer.load_state_dict()</code> will either fail or silently load state for the wrong parameters. Always verify that <code>len(model.parameters())</code> matches the number of state tensors in the checkpoint before loading.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="running-a-training-session" class="level2">
+<h2 class="anchored" data-anchor-id="running-a-training-session">Running a Training Session</h2>
+<p>With all pieces in place, launching a pretraining session is a single call:</p>
+<div id="nb06-run" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cfg = TrainingConfig(</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     max_steps=5000,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#     batch_size=8,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     accumulation=4,        # effective batch = 32 sequences</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     block_size=256,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#     max_lr=3e-4,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     min_lr=3e-5,</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#     warmup_steps=100,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     eval_every=500,</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     checkpoint_every=1000,</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     data_dir='data/shakespeare',</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     run_dir='runs/nano_gpt_v1',</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># model = pretrain(cfg)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Post-run analysis from the JSONL log:</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># import pandas as pd</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># df = pd.DataFrame(TrainingLogger.load_records('runs/nano_gpt_v1/metrics.jsonl'))</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># best_step = df.dropna(subset=['eval_loss'])['eval_loss'].idxmin()</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co"># print(f"Best eval loss at step {df.loc[best_step, 'step']}: "</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#       f"{df.loc[best_step, 'eval_loss']:.4f}")</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Training config ready. Call pretrain(cfg) to launch."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>Key detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FP16 overflow</td>
+<td>Max value 65504 — activations can exceed this. Requires <code>GradScaler</code>.</td>
+</tr>
+<tr class="even">
+<td>BF16 dynamic range</td>
+<td>Same 8-bit exponent as FP32 — never overflows. No <code>GradScaler</code> needed.</td>
+</tr>
+<tr class="odd">
+<td><code>torch.autocast</code></td>
+<td>Casts matmul/conv to BF16; sensitive ops (softmax, RMSNorm) stay FP32.</td>
+</tr>
+<tr class="even">
+<td><code>GradScaler</code></td>
+<td>For FP16 only: scales loss up before backward, down before optimizer step.</td>
+</tr>
+<tr class="odd">
+<td>Adam warmup reason</td>
+<td>Bias correction at <span class="math inline">t=1</span> amplifies first gradient <span class="math inline">1/(1-\beta_1) = 10\times</span>.</td>
+</tr>
+<tr class="even">
+<td>Warmup duration</td>
+<td>1–2% of total steps. Too short → early instability; too long → delayed learning.</td>
+</tr>
+<tr class="odd">
+<td>Cosine decay</td>
+<td>Slow early, fast through middle, long flat tail. Matches loss landscape curvature.</td>
+</tr>
+<tr class="even">
+<td><code>min_lr</code> choice</td>
+<td>10% of <code>max_lr</code> — keeps updates meaningful to the last step.</td>
+</tr>
+<tr class="odd">
+<td>Chinchilla <span class="math inline">D^* = 20N</span></td>
+<td>Compute-optimal: 20 tokens per parameter.</td>
+</tr>
+<tr class="even">
+<td>FLOPs per token</td>
+<td><span class="math inline">\approx 6N</span> (2× forward + 4× backward).</td>
+</tr>
+<tr class="odd">
+<td>Nano model param count</td>
+<td><strong>29.9M</strong> with SwiGLU FFN — not 10.7M (old GELU count).</td>
+</tr>
+<tr class="even">
+<td>Decay vs no-decay</td>
+<td>Weight matrices: weight decay. Biases + RMSNorm scales: no weight decay.</td>
+</tr>
+<tr class="odd">
+<td>Gradient accumulation</td>
+<td>Divide loss by <code>accumulation</code> before backward — normalizes gradient scale.</td>
+</tr>
+<tr class="even">
+<td>Checkpoint contents</td>
+<td>Model + optimizer + scheduler state. Load all three to resume correctly.</td>
+</tr>
+<tr class="odd">
+<td>Stale checkpoint</td>
+<td>Verify param count matches before loading optimizer state.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<p><strong>1.</strong> Run <code>pretrain</code> with <code>dtype=torch.float32</code> and <code>dtype=torch.bfloat16</code> and compare throughput (tokens/sec). On a CUDA GPU, BF16 should be significantly faster due to tensor core utilization. Report the speedup ratio.</p>
+<p><strong>2.</strong> Plot the LR schedule for three <code>warmup_steps</code> values (10, 100, 500) and two <code>min_lr</code> values (0, 0.1×max). For each, run 500 training steps and compare loss curves. Confirm that too little warmup causes instability in early steps and <code>min_lr=0</code> causes the model to plateau earlier.</p>
+<p><strong>3.</strong> Verify the gradient accumulation equivalence: train for 100 steps with <code>batch_size=32, accumulation=1</code> and separately with <code>batch_size=8, accumulation=4</code>. Both have effective batch size 32. Compare the final loss and gradient norm trace. They should be nearly identical.</p>
+<p><strong>4.</strong> Use <code>plan_training_run</code> to compute the Chinchilla-optimal training duration for the nano model on your machine. Run for exactly that many steps and compare the final eval loss to a run that uses 5× more steps. Confirm that overtraining on TinyShakespeare widens the eval/train gap.</p>
+<p><strong>5.</strong> Implement learning rate <strong>restart</strong> (SGDR): after each full cosine cycle, reset LR to <code>max_lr</code> and start a new cosine decay with period 2× the previous period. Compare loss curves between standard cosine and SGDR on 5000 training steps.</p>
+<p><strong>6.</strong> Add a <code>detect_stale_checkpoint</code> function that loads a checkpoint and checks whether the optimizer state is consistent with the model: compare the number of parameters in <code>model.state_dict()</code> against the number of parameter tensors in <code>optimizer.state_dict()['state']</code>. If they differ, print a warning and re-initialize the optimizer instead of loading the stale state.</p>
+<p>■</p>
+
+
+</section>
+
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The <span class="math inline">6N</span> FLOPs per token approximation counts 2 FLOPs per multiply-add in the forward pass (giving <span class="math inline">2N</span>) and doubles this for the backward pass (<span class="math inline">4N</span>), totaling <span class="math inline">6N</span> FLOPs per training token. This is a rough count that ignores attention FLOPs (which scale with sequence length) and is accurate to within a factor of 2 for most transformer configurations.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/llm/05-scaling-diagnostics.html" class="pagination-link" aria-label="05. Gradient &amp; Activation Diagnostics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">05. Gradient &amp; Activation Diagnostics</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/llm/07-distributed-training.html" class="pagination-link" aria-label="07. Multi-GPU with DDP &amp; FSDP">
+        <span class="nav-page-text">07. Multi-GPU with DDP &amp; FSDP</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

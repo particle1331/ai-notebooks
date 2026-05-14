@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Semantic Segmentation – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/deep/advanced/17-captioning.html" rel="next">
+<link href="../../../notebooks/deep/advanced/15-diffusion.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/index.html">Advanced Topics</a></li><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/16-segmentation.html">16. Semantic Segmentation</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/01-softmax-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Softmax Regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/02-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/03-autodiff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Automatic Differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/04-optimizers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Optimizers: SGD to AdamW</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/05-activations-and-gradients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Activations and Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/06-cnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Convolutional Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/07-language-modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Language Modeling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/08-rnn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Recurrent Neural Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/09-attention-transformers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Attention &amp; Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Appendix</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/11-appendix-expressivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Activation Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/12-appendix-resnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. ResNet from Scratch</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/18-appendix-double-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">18. Double Descent</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/deep/advanced/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced Topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/13-translation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Machine Translation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/14-generative-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">14. Generative Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/15-diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">15. Diffusion Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/16-segmentation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">16. Semantic Segmentation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/deep/advanced/17-captioning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">17. Image Captioning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dataset" id="toc-dataset" class="nav-link active" data-scroll-target="#dataset">Dataset</a></li>
+  <li><a href="#evaluation-metrics" id="toc-evaluation-metrics" class="nav-link" data-scroll-target="#evaluation-metrics">Evaluation metrics</a></li>
+  <li><a href="#u-net-architecture" id="toc-u-net-architecture" class="nav-link" data-scroll-target="#u-net-architecture">U-Net architecture</a></li>
+  <li><a href="#loss-functions" id="toc-loss-functions" class="nav-link" data-scroll-target="#loss-functions">Loss functions</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training">Training</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#appendix-transposed-convolutions" id="toc-appendix-transposed-convolutions" class="nav-link" data-scroll-target="#appendix-transposed-convolutions">Appendix: Transposed convolutions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/index.html">Advanced Topics</a></li><li class="breadcrumb-item"><a href="../../../notebooks/deep/advanced/16-segmentation.html">16. Semantic Segmentation</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Semantic Segmentation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Image classification assigns a single label to an entire image. <strong>Semantic segmentation</strong> is a denser task: we assign a class label to <em>every</em> pixel, producing a prediction map of the same spatial resolution as the input. Suppose you want to build an autonomous driving system or a medical imaging pipeline — knowing which class each pixel belongs to is essential, and no single image-level label can capture that.</p>
+<p>We implement a <strong>U-Net</strong> <span class="citation" data-cites="unet">(<a href="#ref-unet" role="doc-biblioref">Ronneberger, Fischer, and Brox 2015</a>)</span> with a ResNet-18 encoder for 3-class segmentation on the Oxford-IIIT Pet dataset <span class="citation" data-cites="pets">(<a href="#ref-pets" role="doc-biblioref">Parkhi et al. 2012</a>)</span>: foreground (pet), background, and uncertain/boundary. The core architectural idea is an <strong>encoder-decoder</strong> with <strong>skip connections</strong> — the encoder progressively compresses spatial resolution while building rich feature representations, and the decoder symmetrically recovers spatial detail by fusing coarse encoder features with fine-grained ones from earlier layers. We also study <strong>Dice loss</strong>, a loss function designed for imbalanced pixel-class distributions that complements the standard cross-entropy.</p>
+<p>CNN primitives and data augmentation patterns were covered in <a href="../../../notebooks/deep/06-cnn.html">NB06</a>. The ResNet-18 architecture — <code>BasicBlock</code> and the <code>ResNet</code> class — was built from scratch in <a href="../../../notebooks/deep/12-appendix-resnet.html">NB12</a>; we reuse those definitions here as the encoder backbone.</p>
+<p><br></p>
+<div id="imports-cell" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.colors <span class="im">as</span> mcolors</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib_inline <span class="im">import</span> backend_inline</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader, Dataset, random_split</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim.lr_scheduler <span class="im">import</span> OneCycleLR</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> transforms</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>DATASET_DIR <span class="op">=</span> Path(<span class="st">"./data"</span>).resolve()</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>DATASET_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED <span class="op">=</span> <span class="dv">42</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>MATPLOTLIB_FORMAT <span class="op">=</span> <span class="st">"png"</span> <span class="cf">if</span> DEBUG <span class="cf">else</span> <span class="st">"svg"</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>np.random.seed(RANDOM_SEED)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>random.seed(RANDOM_SEED)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(action<span class="op">=</span><span class="st">"ignore"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>backend_inline.set_matplotlib_formats(MATPLOTLIB_FORMAT)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>DEVICE <span class="op">=</span> (</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    torch.device(<span class="st">"cuda:0"</span>) <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> torch.device(<span class="st">"mps"</span>) <span class="cf">if</span> torch.backends.mps.is_available()</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> torch.device(<span class="st">"cpu"</span>)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Device: </span><span class="sc">{</span>DEVICE<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="dataset" class="level2">
+<h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
+<p>The Oxford-IIIT Pet dataset <span class="citation" data-cites="pets">(<a href="#ref-pets" role="doc-biblioref">Parkhi et al. 2012</a>)</span> contains 7,349 images of 37 pet breeds with pixel-level trimap annotations. Each annotation mask takes one of three integer values: 1 = foreground (the pet), 2 = background, 3 = uncertain/boundary. We treat this as a 3-class segmentation problem and remap mask values to <span class="math inline">\{0, 1, 2\}</span> to match PyTorch’s zero-indexed class convention.</p>
+<p>Images are resized to <span class="math inline">256 \times 256</span>. A key requirement for segmentation is <strong>joint spatial augmentation</strong>: any geometric transformation applied to an image must be applied identically to its mask, so that pixel-level alignment is preserved. We implement this by applying the same random horizontal flip and random crop to both the image and the mask using <code>torchvision.transforms.functional</code> with a shared random state.</p>
+<p>Defining the dataset class:</p>
+<div id="dataset-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PetsDataset(Dataset):</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Oxford-IIIT Pet dataset with joint spatial augmentation."""</span></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    IMG_MEAN <span class="op">=</span> (<span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span>)</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>    IMG_STD  <span class="op">=</span> (<span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span>)</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, split<span class="op">=</span><span class="st">"trainval"</span>, img_size<span class="op">=</span><span class="dv">256</span>, augment<span class="op">=</span><span class="va">False</span>):</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.img_size <span class="op">=</span> img_size</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.augment  <span class="op">=</span> augment</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-11" class="code-annotation-target"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base <span class="op">=</span> torchvision.datasets.OxfordIIITPet(</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>            root<span class="op">=</span>DATASET_DIR,</span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>            split<span class="op">=</span>split,</span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>            target_types<span class="op">=</span><span class="st">"segmentation"</span>,</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a>            download<span class="op">=</span><span class="va">True</span>,</span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.normalize <span class="op">=</span> transforms.Normalize(<span class="va">self</span>.IMG_MEAN, <span class="va">self</span>.IMG_STD)</span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.base)</span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-23" class="code-annotation-target"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a>        img, mask <span class="op">=</span> <span class="va">self</span>.base[idx]</span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Resize both to img_size x img_size</span></span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>        img  <span class="op">=</span> TF.resize(img,  [<span class="va">self</span>.img_size, <span class="va">self</span>.img_size])</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> TF.resize(mask, [<span class="va">self</span>.img_size, <span class="va">self</span>.img_size],</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-28" class="code-annotation-target"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>                         interpolation<span class="op">=</span>TF.InterpolationMode.NEAREST)</span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Joint augmentation: identical random transforms on image and mask</span></span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.augment:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-2-32" class="code-annotation-target"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> random.random() <span class="op">&gt;</span> <span class="fl">0.5</span>:</span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>                img  <span class="op">=</span> TF.hflip(img)</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>                mask <span class="op">=</span> TF.hflip(mask)</span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a>            i, j, h, w <span class="op">=</span> transforms.RandomCrop.get_params(</span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>                img, output_size<span class="op">=</span>(<span class="va">self</span>.img_size, <span class="va">self</span>.img_size)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-2-38" class="code-annotation-target"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>            img  <span class="op">=</span> TF.crop(img,  i, j, h, w)</span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> TF.crop(mask, i, j, h, w)</span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-2-42" class="code-annotation-target"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>        img  <span class="op">=</span> <span class="va">self</span>.normalize(TF.to_tensor(img))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-2-43" class="code-annotation-target"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> torch.as_tensor(np.array(mask), dtype<span class="op">=</span>torch.<span class="bu">long</span>) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img, mask</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="11" data-code-annotation="1"><code>torchvision.datasets.OxfordIIITPet</code> with <code>target_types="segmentation"</code> returns <code>(PIL image, PIL mask)</code> pairs.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="23" data-code-annotation="2"><code>mask</code> is a PIL image with integer pixel values <span class="math inline">\{1, 2, 3\}.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="28" data-code-annotation="3">Mask pixels are class indices — we use nearest-neighbor interpolation to avoid introducing spurious fractional class values when resizing.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="32" data-code-annotation="4">Horizontal flip applied to both image and mask with the same 50% probability.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="38" data-code-annotation="5"><code>RandomCrop.get_params</code> samples the top-left corner <code>(i, j)</code> and dimensions <code>(h, w)</code> once; the same crop is applied to both <code>img</code> and <code>mask</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="42" data-code-annotation="6">Convert PIL image to a <code>[0, 1]</code> tensor, then normalize with ImageNet statistics.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="43" data-code-annotation="7">Shift mask values from <span class="math inline">\{1, 2, 3\}</span> to <span class="math inline">\{0, 1, 2\}</span> for zero-indexed cross-entropy.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Building train and validation splits, then wrapping in <code>DataLoader</code>s:</p>
+<div id="dataloader-cell" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>BATCH_SIZE <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>IMG_SIZE   <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>NUM_CLASSES <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>full_train <span class="op">=</span> PetsDataset(split<span class="op">=</span><span class="st">"trainval"</span>, img_size<span class="op">=</span>IMG_SIZE, augment<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>test_ds    <span class="op">=</span> PetsDataset(split<span class="op">=</span><span class="st">"test"</span>,     img_size<span class="op">=</span>IMG_SIZE, augment<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 80 / 20 split for training and validation</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>n_val   <span class="op">=</span> <span class="bu">int</span>(<span class="fl">0.2</span> <span class="op">*</span> <span class="bu">len</span>(full_train))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="bu">len</span>(full_train) <span class="op">-</span> n_val</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>train_ds, val_ds <span class="op">=</span> random_split(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    full_train, [n_train, n_val],</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    generator<span class="op">=</span>torch.Generator().manual_seed(RANDOM_SEED)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_ds, batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">True</span>,  num_workers<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>val_loader   <span class="op">=</span> DataLoader(val_ds,   batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>test_loader  <span class="op">=</span> DataLoader(test_ds,  batch_size<span class="op">=</span>BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train: </span><span class="sc">{</span><span class="bu">len</span>(train_ds)<span class="sc">}</span><span class="ss">, Val: </span><span class="sc">{</span><span class="bu">len</span>(val_ds)<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span><span class="bu">len</span>(test_ds)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visualizing sample image–mask pairs from the training set:</p>
+<div id="fig-pets-samples" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pets-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>MASK_CMAP <span class="op">=</span> mcolors.ListedColormap([<span class="st">"#888888"</span>, <span class="st">"#4caf50"</span>, <span class="st">"#ff9800"</span>])  <span class="co"># bg, fg, boundary</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">10</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>img_mean <span class="op">=</span> torch.tensor(PetsDataset.IMG_MEAN).view(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>img_std  <span class="op">=</span> torch.tensor(PetsDataset.IMG_STD).view(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sample_indices <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, idx <span class="kw">in</span> <span class="bu">enumerate</span>(sample_indices):</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    img_t, mask_t <span class="op">=</span> full_train[idx]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    img_np <span class="op">=</span> (img_t <span class="op">*</span> img_std <span class="op">+</span> img_mean).clamp(<span class="dv">0</span>, <span class="dv">1</span>).permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].imshow(img_np)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        axes[row, <span class="dv">0</span>].set_title(<span class="st">"Image"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].imshow(mask_t.numpy(), cmap<span class="op">=</span>MASK_CMAP, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        axes[row, <span class="dv">1</span>].set_title(<span class="st">"Mask"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-pets-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="evaluation-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation-metrics">Evaluation metrics</h2>
+<p>Per-pixel accuracy counts the fraction of correctly classified pixels. While simple, it is biased toward the dominant class: a model that always predicts background will score high accuracy on a dataset where backgrounds occupy most pixels. A better metric for segmentation is <strong>Intersection over Union (IoU)</strong>.</p>
+<p>For class <span class="math inline">c</span>, IoU measures the ratio of the overlap between the predicted region <span class="math inline">\hat{P}_c</span> and the ground-truth region <span class="math inline">G_c</span> to their union:</p>
+<p><span class="math display">
+\text{IoU}_c = \frac{|\hat{P}_c \cap G_c|}{|\hat{P}_c \cup G_c|} = \frac{\text{TP}_c}{\text{TP}_c + \text{FP}_c + \text{FN}_c}
+</span></p>
+<p>where <span class="math inline">\text{TP}_c</span> counts pixels correctly labeled <span class="math inline">c</span>, <span class="math inline">\text{FP}_c</span> counts pixels incorrectly labeled <span class="math inline">c</span>, and <span class="math inline">\text{FN}_c</span> counts pixels of class <span class="math inline">c</span> that were missed. The denominator <span class="math inline">\text{TP}_c + \text{FP}_c + \text{FN}_c = |\hat{P}_c \cup G_c|</span> follows from the <span class="math inline">2\times 2</span> confusion matrix:</p>
+<p><span class="math display">
+|\hat{P}_c| + |G_c| - |\hat{P}_c \cap G_c| = (\text{TP}_c + \text{FP}_c) + (\text{TP}_c + \text{FN}_c) - \text{TP}_c = \text{TP}_c + \text{FP}_c + \text{FN}_c.
+</span></p>
+<p><strong>Mean IoU (mIoU)</strong> averages <span class="math inline">\text{IoU}_c</span> over all <span class="math inline">C</span> classes, giving equal weight to each class regardless of its pixel frequency. A class that is rarely present but badly predicted will pull mIoU down, making it a strict and informative metric.</p>
+<p>Implementing <code>compute_metrics</code> for per-pixel accuracy and mIoU:</p>
+<div id="metrics-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.inference_mode</span>()</span>
+<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_metrics(preds: torch.Tensor, targets: torch.Tensor, num_classes: <span class="bu">int</span>):</span>
+<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute per-pixel accuracy and mIoU.</span></span>
+<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6" aria-hidden="true" tabindex="-1"></a><span class="co">        preds:   (B, H, W) integer class predictions.</span></span>
+<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7" aria-hidden="true" tabindex="-1"></a><span class="co">        targets: (B, H, W) integer class targets.</span></span>
+<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8" aria-hidden="true" tabindex="-1"></a><span class="co">        num_classes: number of classes C.</span></span>
+<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11" aria-hidden="true" tabindex="-1"></a><span class="co">        accuracy: float, fraction of correctly classified pixels.</span></span>
+<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12" aria-hidden="true" tabindex="-1"></a><span class="co">        miou:     float, mean IoU across all classes.</span></span>
+<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13" aria-hidden="true" tabindex="-1"></a><span class="co">        iou_per_class: list[float] of length C.</span></span>
+<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-5-15"><a href="#annotated-cell-5-15" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> (preds <span class="op">==</span> targets).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-5-16"><a href="#annotated-cell-5-16" aria-hidden="true" tabindex="-1"></a>    total   <span class="op">=</span> targets.numel()</span>
+<span id="annotated-cell-5-17"><a href="#annotated-cell-5-17" aria-hidden="true" tabindex="-1"></a>    accuracy <span class="op">=</span> correct <span class="op">/</span> total</span>
+<span id="annotated-cell-5-18"><a href="#annotated-cell-5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-19"><a href="#annotated-cell-5-19" aria-hidden="true" tabindex="-1"></a>    iou_per_class <span class="op">=</span> []</span>
+<span id="annotated-cell-5-20"><a href="#annotated-cell-5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(num_classes):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-21" class="code-annotation-target"><a href="#annotated-cell-5-21" aria-hidden="true" tabindex="-1"></a>        pred_c   <span class="op">=</span> (preds   <span class="op">==</span> c)</span>
+<span id="annotated-cell-5-22"><a href="#annotated-cell-5-22" aria-hidden="true" tabindex="-1"></a>        target_c <span class="op">=</span> (targets <span class="op">==</span> c)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-23" class="code-annotation-target"><a href="#annotated-cell-5-23" aria-hidden="true" tabindex="-1"></a>        tp <span class="op">=</span> (pred_c <span class="op">&amp;</span> target_c).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-5-24"><a href="#annotated-cell-5-24" aria-hidden="true" tabindex="-1"></a>        fp <span class="op">=</span> (pred_c <span class="op">&amp;</span> <span class="op">~</span>target_c).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-5-25"><a href="#annotated-cell-5-25" aria-hidden="true" tabindex="-1"></a>        fn <span class="op">=</span> (<span class="op">~</span>pred_c <span class="op">&amp;</span> target_c).<span class="bu">sum</span>().item()</span>
+<span id="annotated-cell-5-26"><a href="#annotated-cell-5-26" aria-hidden="true" tabindex="-1"></a>        denom <span class="op">=</span> tp <span class="op">+</span> fp <span class="op">+</span> fn</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-27" class="code-annotation-target"><a href="#annotated-cell-5-27" aria-hidden="true" tabindex="-1"></a>        iou_per_class.append(tp <span class="op">/</span> denom <span class="cf">if</span> denom <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="bu">float</span>(<span class="st">"nan"</span>))</span>
+<span id="annotated-cell-5-28"><a href="#annotated-cell-5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-5-29"><a href="#annotated-cell-5-29" aria-hidden="true" tabindex="-1"></a>    valid <span class="op">=</span> [v <span class="cf">for</span> v <span class="kw">in</span> iou_per_class <span class="cf">if</span> <span class="kw">not</span> math.isnan(v)]</span>
+<span id="annotated-cell-5-30"><a href="#annotated-cell-5-30" aria-hidden="true" tabindex="-1"></a>    miou  <span class="op">=</span> <span class="bu">sum</span>(valid) <span class="op">/</span> <span class="bu">len</span>(valid) <span class="cf">if</span> valid <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="annotated-cell-5-31"><a href="#annotated-cell-5-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> accuracy, miou, iou_per_class</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="21" data-code-annotation="1">Binary indicator masks for class <span class="math inline">c</span>: <code>pred_c[i,j]</code> is <code>True</code> iff the model predicted class <span class="math inline">c</span> at pixel <span class="math inline">(i, j).</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="23" data-code-annotation="2"><span class="math inline">\text{TP}_c</span> = predicted <span class="math inline">c</span> AND ground truth <span class="math inline">c</span>; <span class="math inline">\text{FP}_c</span> = predicted <span class="math inline">c</span> AND ground truth <span class="math inline">\neq c</span>; <span class="math inline">\text{FN}_c</span> = not predicted <span class="math inline">c</span> AND ground truth <span class="math inline">c.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-5" data-code-lines="27" data-code-annotation="3">If a class is absent from both predictions and targets in a batch, the IoU is undefined — we skip it rather than recording 0.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="u-net-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="u-net-architecture">U-Net architecture</h2>
+<p>U-Net <span class="citation" data-cites="unet">(<a href="#ref-unet" role="doc-biblioref">Ronneberger, Fischer, and Brox 2015</a>)</span> has a symmetric encoder-decoder structure. The <strong>encoder</strong> (or contracting path) progressively reduces spatial resolution while increasing feature channels, building a hierarchy of feature maps at multiple scales. The <strong>decoder</strong> (or expansive path) symmetrically upsamples back to the input resolution. At each resolution level, the corresponding encoder feature map is concatenated to the decoder input via a <strong>skip connection</strong> — this allows the decoder to recover fine-grained spatial detail that is lost during downsampling.</p>
+<p>We use a pretrained ResNet-18 as the encoder backbone, extracting feature maps at 5 spatial scales. Given a <span class="math inline">256 \times 256</span> input:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>Layer</th>
+<th>Output shape</th>
+<th>Stride from input</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>s0</code></td>
+<td>stem (conv + bn + relu)</td>
+<td><span class="math inline">B \times 64 \times 128 \times 128</span></td>
+<td><span class="math inline">/2</span></td>
+</tr>
+<tr class="even">
+<td><code>s1</code></td>
+<td><code>layer1</code></td>
+<td><span class="math inline">B \times 64 \times 64 \times 64</span></td>
+<td><span class="math inline">/4</span></td>
+</tr>
+<tr class="odd">
+<td><code>s2</code></td>
+<td><code>layer2</code></td>
+<td><span class="math inline">B \times 128 \times 32 \times 32</span></td>
+<td><span class="math inline">/8</span></td>
+</tr>
+<tr class="even">
+<td><code>s3</code></td>
+<td><code>layer3</code></td>
+<td><span class="math inline">B \times 256 \times 16 \times 16</span></td>
+<td><span class="math inline">/16</span></td>
+</tr>
+<tr class="odd">
+<td><code>s4</code></td>
+<td><code>layer4</code></td>
+<td><span class="math inline">B \times 512 \times 8 \times 8</span></td>
+<td><span class="math inline">/32</span></td>
+</tr>
+</tbody>
+</table>
+<p>The decoder then applies four <code>DecoderBlock</code>s in sequence, each doubling the spatial resolution via a transposed convolution, concatenating the corresponding skip feature, and fusing with two convolutional layers. A final <span class="math inline">1 \times 1</span> convolution maps the 64-channel feature map to <span class="math inline">C = 3</span> class logits at full <span class="math inline">256 \times 256</span> resolution.</p>
+<p>Defining the decoder block:</p>
+<div id="decoder-block-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DecoderBlock(nn.Module):</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Upsample + concatenate skip connection + two conv-BN-ReLU layers."""</span></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_ch: <span class="bu">int</span>, skip_ch: <span class="bu">int</span>, out_ch: <span class="bu">int</span>):</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-6" class="code-annotation-target"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.up <span class="op">=</span> nn.ConvTranspose2d(in_ch, out_ch, kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv <span class="op">=</span> nn.Sequential(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-8" class="code-annotation-target"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(out_ch <span class="op">+</span> skip_ch, out_ch, <span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>            nn.BatchNorm2d(out_ch),</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>),</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(out_ch, out_ch, <span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>            nn.BatchNorm2d(out_ch),</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>),</span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor, skip: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-6-17" class="code-annotation-target"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.up(x)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-6-18" class="code-annotation-target"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat([x, skip], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.conv(x)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="6" data-code-annotation="1"><code>ConvTranspose2d</code> with <code>kernel_size=2, stride=2</code> doubles spatial dimensions: <span class="math inline">(B, \text{in\_ch}, H, W) \to (B, \text{out\_ch}, 2H, 2W).</span> See the Appendix for how this operation works.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="8" data-code-annotation="2">After concatenating with the skip, the number of input channels to the first convolution is <code>out_ch + skip_ch</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="17" data-code-annotation="3">Upsample the lower-resolution decoder feature map before fusion.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="18" data-code-annotation="4">Concatenate along the channel dimension: skip features carry high-resolution spatial detail from the encoder.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Wrapping ResNet-18 as a multi-scale feature extractor:</p>
+<div id="encoder-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResNetEncoder(nn.Module):</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Extract multi-scale features from a ResNet-18 backbone."""</span></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, pretrained: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>):</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>        weights <span class="op">=</span> torchvision.models.ResNet18_Weights.DEFAULT <span class="cf">if</span> pretrained <span class="cf">else</span> <span class="va">None</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-7" class="code-annotation-target"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>        backbone <span class="op">=</span> torchvision.models.resnet18(weights<span class="op">=</span>weights)</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decompose backbone into named stages</span></span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stem   <span class="op">=</span> nn.Sequential(backbone.conv1, backbone.bn1, backbone.relu)  <span class="co"># /2</span></span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pool   <span class="op">=</span> backbone.maxpool                                             <span class="co"># /4</span></span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer1 <span class="op">=</span> backbone.layer1   <span class="co"># 64 ch,  /4</span></span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer2 <span class="op">=</span> backbone.layer2   <span class="co"># 128 ch, /8</span></span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer3 <span class="op">=</span> backbone.layer3   <span class="co"># 256 ch, /16</span></span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layer4 <span class="op">=</span> backbone.layer4   <span class="co"># 512 ch, /32</span></span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> <span class="bu">list</span>:</span>
+<span id="annotated-cell-7-18"><a href="#annotated-cell-7-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return feature maps [s0, s1, s2, s3, s4] at /2, /4, /8, /16, /32."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-7-19" class="code-annotation-target"><a href="#annotated-cell-7-19" aria-hidden="true" tabindex="-1"></a>        s0 <span class="op">=</span> <span class="va">self</span>.stem(x)    <span class="co"># (B, 64,  H/2,  W/2)</span></span>
+<span id="annotated-cell-7-20"><a href="#annotated-cell-7-20" aria-hidden="true" tabindex="-1"></a>        s1 <span class="op">=</span> <span class="va">self</span>.layer1(<span class="va">self</span>.pool(s0))  <span class="co"># (B, 64,  H/4,  W/4)</span></span>
+<span id="annotated-cell-7-21"><a href="#annotated-cell-7-21" aria-hidden="true" tabindex="-1"></a>        s2 <span class="op">=</span> <span class="va">self</span>.layer2(s1) <span class="co"># (B, 128, H/8,  W/8)</span></span>
+<span id="annotated-cell-7-22"><a href="#annotated-cell-7-22" aria-hidden="true" tabindex="-1"></a>        s3 <span class="op">=</span> <span class="va">self</span>.layer3(s2) <span class="co"># (B, 256, H/16, W/16)</span></span>
+<span id="annotated-cell-7-23"><a href="#annotated-cell-7-23" aria-hidden="true" tabindex="-1"></a>        s4 <span class="op">=</span> <span class="va">self</span>.layer4(s3) <span class="co"># (B, 512, H/32, W/32)</span></span>
+<span id="annotated-cell-7-24"><a href="#annotated-cell-7-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [s0, s1, s2, s3, s4]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="7" data-code-annotation="1">Using <code>torchvision.models.ResNet18_Weights.DEFAULT</code> loads ImageNet-pretrained weights. The pretrained encoder provides much richer initial features than random initialization — especially important when the target dataset is small.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="19" data-code-annotation="2">We expose <code>s0</code> (post-stem, pre-pool) as a high-resolution skip feature at <span class="math inline">/2</span> spatial stride. This gives the decoder access to fine spatial detail for the final upsampling step.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Assembling the full U-Net:</p>
+<div id="unet-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UNet(nn.Module):</span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""U-Net with ResNet-18 encoder for semantic segmentation."""</span></span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_classes: <span class="bu">int</span> <span class="op">=</span> <span class="dv">3</span>, pretrained: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>):</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="annotated-cell-8-6"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.encoder  <span class="op">=</span> ResNetEncoder(pretrained<span class="op">=</span>pretrained)</span>
+<span id="annotated-cell-8-7"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-8"><a href="#annotated-cell-8-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decoder: each block receives (in_ch from below, skip_ch from encoder, out_ch)</span></span>
+<span id="annotated-cell-8-9"><a href="#annotated-cell-8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder4 <span class="op">=</span> DecoderBlock(<span class="dv">512</span>, <span class="dv">256</span>, <span class="dv">256</span>)  <span class="co"># /32 -&gt; /16</span></span>
+<span id="annotated-cell-8-10"><a href="#annotated-cell-8-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder3 <span class="op">=</span> DecoderBlock(<span class="dv">256</span>, <span class="dv">128</span>, <span class="dv">128</span>)  <span class="co"># /16 -&gt; /8</span></span>
+<span id="annotated-cell-8-11"><a href="#annotated-cell-8-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder2 <span class="op">=</span> DecoderBlock(<span class="dv">128</span>,  <span class="dv">64</span>,  <span class="dv">64</span>)  <span class="co"># /8  -&gt; /4</span></span>
+<span id="annotated-cell-8-12"><a href="#annotated-cell-8-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder1 <span class="op">=</span> DecoderBlock( <span class="dv">64</span>,  <span class="dv">64</span>,  <span class="dv">64</span>)  <span class="co"># /4  -&gt; /2</span></span>
+<span id="annotated-cell-8-13"><a href="#annotated-cell-8-13" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-8-14" class="code-annotation-target"><a href="#annotated-cell-8-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head <span class="op">=</span> nn.Conv2d(<span class="dv">64</span>, num_classes, kernel_size<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-8-15"><a href="#annotated-cell-8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-16"><a href="#annotated-cell-8-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-8-17"><a href="#annotated-cell-8-17" aria-hidden="true" tabindex="-1"></a>        B, C, H, W <span class="op">=</span> x.shape</span>
+<span id="annotated-cell-8-18"><a href="#annotated-cell-8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-19"><a href="#annotated-cell-8-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Encoder: extract multi-scale features</span></span>
+<span id="annotated-cell-8-20"><a href="#annotated-cell-8-20" aria-hidden="true" tabindex="-1"></a>        s0, s1, s2, s3, s4 <span class="op">=</span> <span class="va">self</span>.encoder(x)</span>
+<span id="annotated-cell-8-21"><a href="#annotated-cell-8-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># s0: (B, 64,  H/2,  W/2)</span></span>
+<span id="annotated-cell-8-22"><a href="#annotated-cell-8-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># s1: (B, 64,  H/4,  W/4)</span></span>
+<span id="annotated-cell-8-23"><a href="#annotated-cell-8-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># s2: (B, 128, H/8,  W/8)</span></span>
+<span id="annotated-cell-8-24"><a href="#annotated-cell-8-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># s3: (B, 256, H/16, W/16)</span></span>
+<span id="annotated-cell-8-25"><a href="#annotated-cell-8-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># s4: (B, 512, H/32, W/32)</span></span>
+<span id="annotated-cell-8-26"><a href="#annotated-cell-8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-27"><a href="#annotated-cell-8-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decoder: upsample + skip concatenation</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-8-28" class="code-annotation-target"><a href="#annotated-cell-8-28" aria-hidden="true" tabindex="-1"></a>        d4 <span class="op">=</span> <span class="va">self</span>.decoder4(s4, s3)   <span class="co"># (B, 256, H/16, W/16)</span></span>
+<span id="annotated-cell-8-29"><a href="#annotated-cell-8-29" aria-hidden="true" tabindex="-1"></a>        d3 <span class="op">=</span> <span class="va">self</span>.decoder3(d4, s2)   <span class="co"># (B, 128, H/8,  W/8)</span></span>
+<span id="annotated-cell-8-30"><a href="#annotated-cell-8-30" aria-hidden="true" tabindex="-1"></a>        d2 <span class="op">=</span> <span class="va">self</span>.decoder2(d3, s1)   <span class="co"># (B, 64,  H/4,  W/4)</span></span>
+<span id="annotated-cell-8-31"><a href="#annotated-cell-8-31" aria-hidden="true" tabindex="-1"></a>        d1 <span class="op">=</span> <span class="va">self</span>.decoder1(d2, s0)   <span class="co"># (B, 64,  H/2,  W/2)</span></span>
+<span id="annotated-cell-8-32"><a href="#annotated-cell-8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-33"><a href="#annotated-cell-8-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Final upsample to input resolution + classification head</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-8-34" class="code-annotation-target"><a href="#annotated-cell-8-34" aria-hidden="true" tabindex="-1"></a>        d0 <span class="op">=</span> F.interpolate(d1, size<span class="op">=</span>(H, W), mode<span class="op">=</span><span class="st">"bilinear"</span>, align_corners<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-8-35"><a href="#annotated-cell-8-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.head(d0)          <span class="co"># (B, num_classes, H, W)</span></span>
+<span id="annotated-cell-8-36"><a href="#annotated-cell-8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-37"><a href="#annotated-cell-8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-8-38"><a href="#annotated-cell-8-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Sanity check: verify output shape and print parameter count</span></span>
+<span id="annotated-cell-8-39"><a href="#annotated-cell-8-39" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> UNet(num_classes<span class="op">=</span>NUM_CLASSES, pretrained<span class="op">=</span><span class="va">False</span>)</span>
+<span id="annotated-cell-8-40"><a href="#annotated-cell-8-40" aria-hidden="true" tabindex="-1"></a>dummy <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, IMG_SIZE, IMG_SIZE)</span>
+<span id="annotated-cell-8-41"><a href="#annotated-cell-8-41" aria-hidden="true" tabindex="-1"></a>out   <span class="op">=</span> model(dummy)</span>
+<span id="annotated-cell-8-42"><a href="#annotated-cell-8-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Input:  </span><span class="sc">{</span><span class="bu">tuple</span>(dummy.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-8-43"><a href="#annotated-cell-8-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output: </span><span class="sc">{</span><span class="bu">tuple</span>(out.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-8-44"><a href="#annotated-cell-8-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Parameters: </span><span class="sc">{</span><span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters())<span class="sc">:,}</span><span class="ss">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="14" data-code-annotation="1">A <span class="math inline">1 \times 1</span> convolution maps the 64-channel feature map to <code>num_classes</code> logits. No activation — we return raw logits for use with <code>F.cross_entropy</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="28" data-code-annotation="2">The decoder proceeds from the bottleneck (coarsest features, <span class="math inline">H/32</span>) upward. Each block takes the previous decoder output and the corresponding encoder skip, doubling the spatial resolution at each step.</span>
+</dd>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="34" data-code-annotation="3">After the four decoder blocks we are at <span class="math inline">H/2</span> resolution. A final bilinear upsample restores the full input resolution — this last step does not carry a skip connection.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="loss-functions" class="level2">
+<h2 class="anchored" data-anchor-id="loss-functions">Loss functions</h2>
+<p><strong>Cross-entropy</strong> for segmentation is applied pixel-wise. Given logits <span class="math inline">\mathbf{z}_{ij} \in \mathbb{R}^C</span> at pixel <span class="math inline">(i, j)</span> and ground-truth class <span class="math inline">y_{ij}</span>:</p>
+<p><span class="math display">
+\mathcal{L}_\text{CE} = -\frac{1}{HW}\sum_{i=1}^H\sum_{j=1}^W \log p_{y_{ij}}(i, j)
+</span></p>
+<p>where <span class="math inline">\mathbf{p}(i,j) = \text{Softmax}(\mathbf{z}_{ij}).</span> With strong class imbalance — background pixels typically dominate — the model can achieve low cross-entropy loss by concentrating on the most frequent class, while minority classes remain poorly predicted.</p>
+<p><br></p>
+<p><strong>Dice loss</strong> addresses this by optimizing an overlap measure directly. The <strong>Dice similarity coefficient</strong> between two binary sets <span class="math inline">A</span> and <span class="math inline">B</span> is <span class="math inline">\text{DSC}(A, B) = 2|A \cap B| / (|A| + |B|)</span>. For soft predictions (class probability <span class="math inline">p_c</span> and one-hot target <span class="math inline">y_c</span> for class <span class="math inline">c</span>, summed over all pixels):</p>
+<p><span class="math display">
+\text{Dice}_c = \frac{2\sum_{i,j} p_c(i,j)\, y_c(i,j) + \varepsilon}{\sum_{i,j} p_c(i,j) + \sum_{i,j} y_c(i,j) + \varepsilon}
+</span></p>
+<p>where <span class="math inline">\varepsilon &gt; 0</span> prevents division by zero when a class is absent. The loss is:</p>
+<p><span class="math display">
+\mathcal{L}_\text{Dice} = 1 - \frac{1}{C}\sum_{c=1}^C \text{Dice}_c
+</span></p>
+<p>Because each class <span class="math inline">c</span> contributes equally to <span class="math inline">\mathcal{L}_\text{Dice}</span> regardless of how many pixels it occupies, the loss gives the same gradient signal to minority and majority classes alike. Combining both objectives, <span class="math inline">\mathcal{L} = \mathcal{L}_\text{CE} + \mathcal{L}_\text{Dice}</span>, gives the model both pixel-wise calibration (from cross-entropy) and class-balanced region overlap (from Dice).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <span class="math inline">\varepsilon</span> term is added to both numerator and denominator — not just the denominator. Adding it to the numerator as well prevents <span class="math inline">\text{Dice}_c = 0</span> when both prediction and ground truth are zero (the class is absent), which would incorrectly penalize the model.</p>
+</div>
+</div>
+<p>Implementing Dice loss and the combined segmentation loss:</p>
+<div id="loss-cell" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dice_loss(logits: torch.Tensor, targets: torch.Tensor,</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>              num_classes: <span class="bu">int</span>, eps: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Soft multiclass Dice loss averaged over classes."""</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-4" class="code-annotation-target"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>    probs <span class="op">=</span> F.softmax(logits, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># One-hot encode targets: (B, H, W) -&gt; (B, C, H, W)</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>    B, C, H, W <span class="op">=</span> probs.shape</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-8" class="code-annotation-target"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a>    one_hot <span class="op">=</span> torch.zeros_like(probs)</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a>    one_hot.scatter_(<span class="dv">1</span>, targets.unsqueeze(<span class="dv">1</span>), <span class="fl">1.0</span>)</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Flatten spatial dimensions for each class</span></span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>    probs   <span class="op">=</span> probs.view(B, C, <span class="op">-</span><span class="dv">1</span>)                 <span class="co"># (B, C, H*W)</span></span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>    one_hot <span class="op">=</span> one_hot.view(B, C, <span class="op">-</span><span class="dv">1</span>)               <span class="co"># (B, C, H*W)</span></span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Numerator: 2 * sum(p * y) + eps; denominator: sum(p) + sum(y) + eps</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-16" class="code-annotation-target"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>    num   <span class="op">=</span> <span class="fl">2.0</span> <span class="op">*</span> (probs <span class="op">*</span> one_hot).<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">2</span>) <span class="op">+</span> eps   <span class="co"># (B, C)</span></span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a>    denom <span class="op">=</span> probs.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">2</span>) <span class="op">+</span> one_hot.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">2</span>) <span class="op">+</span> eps <span class="co"># (B, C)</span></span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-9-19" class="code-annotation-target"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>    dice_per_class <span class="op">=</span> (num <span class="op">/</span> denom).mean(dim<span class="op">=</span><span class="dv">0</span>)    <span class="co"># average over batch -&gt; (C,)</span></span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">1.0</span> <span class="op">-</span> dice_per_class.mean()            <span class="co"># scalar loss</span></span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> segmentation_loss(logits: torch.Tensor, targets: torch.Tensor,</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>                      num_classes: <span class="bu">int</span>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Combined cross-entropy + Dice loss."""</span></span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> F.cross_entropy(logits, targets) <span class="op">+</span> dice_loss(logits, targets, num_classes)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="4" data-code-annotation="1">Apply softmax over the class dimension to convert logits to probabilities <span class="math inline">p_c \in [0, 1]</span> with <span class="math inline">\sum_c p_c = 1.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="8" data-code-annotation="2"><code>scatter_</code> fills the one-hot tensor: at each spatial location <span class="math inline">(i,j)</span>, it sets <code>one_hot[b, y[b,i,j], i, j] = 1.0</code> for each batch element <span class="math inline">b.</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="16" data-code-annotation="3">Dice numerator and denominator are computed per sample and per class by summing over flattened spatial dimension.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="19" data-code-annotation="4">Average Dice first over the batch dimension, then over classes, to get <span class="math inline">\mathcal{L}_\text{Dice} = 1 - \frac{1}{C}\sum_c \text{Dice}_c.</span></span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+<section id="training" class="level2">
+<h2 class="anchored" data-anchor-id="training">Training</h2>
+<p><strong>Training.</strong> We train UNet with a pretrained ResNet-18 encoder using AdamW with learning rate <span class="math inline">10^{-3}</span> and OneCycleLR scheduling over 30 epochs. Using a pretrained encoder allows the model to leverage ImageNet features for the early layers, reducing the number of epochs needed to converge on the relatively small Pet dataset.</p>
+<div id="training-loop-cell" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>LR     <span class="op">=</span> <span class="fl">1e-3</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> UNet(num_classes<span class="op">=</span>NUM_CLASSES, pretrained<span class="op">=</span><span class="va">True</span>).to(DEVICE)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.AdamW(model.parameters(), lr<span class="op">=</span>LR, weight_decay<span class="op">=</span><span class="fl">1e-4</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>scheduler <span class="op">=</span> OneCycleLR(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    optimizer, max_lr<span class="op">=</span>LR,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    steps_per_epoch<span class="op">=</span><span class="bu">len</span>(train_loader), epochs<span class="op">=</span>EPOCHS</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> {<span class="st">"train_loss"</span>: [], <span class="st">"val_miou"</span>: []}</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Training ---</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> imgs, masks <span class="kw">in</span> train_loader:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        imgs, masks <span class="op">=</span> imgs.to(DEVICE), masks.to(DEVICE)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(imgs)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        loss   <span class="op">=</span> segmentation_loss(logits, masks, NUM_CLASSES)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        scheduler.step()</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">+=</span> loss.item() <span class="op">*</span> imgs.size(<span class="dv">0</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    train_loss <span class="op">=</span> total_loss <span class="op">/</span> <span class="bu">len</span>(train_ds)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Validation ---</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    all_preds, all_targets <span class="op">=</span> [], []</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.inference_mode():</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> imgs, masks <span class="kw">in</span> val_loader:</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>            imgs <span class="op">=</span> imgs.to(DEVICE)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            preds <span class="op">=</span> model(imgs).argmax(dim<span class="op">=</span><span class="dv">1</span>).cpu()</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>            all_preds.append(preds)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>            all_targets.append(masks)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    all_preds   <span class="op">=</span> torch.cat(all_preds)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    all_targets <span class="op">=</span> torch.cat(all_targets)</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    _, val_miou, _ <span class="op">=</span> compute_metrics(all_preds, all_targets, NUM_CLASSES)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"train_loss"</span>].append(train_loss)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"val_miou"</span>].append(val_miou)</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">5</span> <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> epoch <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"[Epoch </span><span class="sc">{</span>epoch<span class="sc">:&gt;3d}</span><span class="ss">/</span><span class="sc">{</span>EPOCHS<span class="sc">}</span><span class="ss">]  "</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>              <span class="ss">f"train_loss: </span><span class="sc">{</span>train_loss<span class="sc">:.4f}</span><span class="ss">  val_mIoU: </span><span class="sc">{</span>val_miou<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Figure.</strong> Training loss and validation mIoU over 30 epochs:</p>
+<div id="fig-training-curves" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-training-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>epochs_range <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax1.plot(epochs_range, history[<span class="st">"train_loss"</span>], color<span class="op">=</span><span class="st">"C0"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">"epoch"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">"train loss (CE + Dice)"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>ax1.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>ax2.plot(epochs_range, history[<span class="st">"val_miou"</span>], color<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">"epoch"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">"val mIoU"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>ax2.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-training-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p><strong>Figure.</strong> Qualitative results on the test set — original image, ground truth mask, and predicted mask:</p>
+<div id="fig-qualitative" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-qualitative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>img_mean_t <span class="op">=</span> torch.tensor(PetsDataset.IMG_MEAN).view(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>img_std_t  <span class="op">=</span> torch.tensor(PetsDataset.IMG_STD).view(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>sample_ids <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="bu">len</span>(sample_ids), <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">10</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>col_titles <span class="op">=</span> [<span class="st">"Image"</span>, <span class="st">"Ground Truth"</span>, <span class="st">"Prediction"</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col, title <span class="kw">in</span> <span class="bu">enumerate</span>(col_titles):</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>, col].set_title(title, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, idx <span class="kw">in</span> <span class="bu">enumerate</span>(sample_ids):</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    img_t, mask_t <span class="op">=</span> test_ds[idx]</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.inference_mode():</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> model(img_t.unsqueeze(<span class="dv">0</span>).to(DEVICE)).argmax(dim<span class="op">=</span><span class="dv">1</span>).squeeze(<span class="dv">0</span>).cpu()</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    img_np <span class="op">=</span> (img_t <span class="op">*</span> img_std_t <span class="op">+</span> img_mean_t).clamp(<span class="dv">0</span>, <span class="dv">1</span>).permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).numpy()</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].imshow(img_np)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].imshow(mask_t.numpy(), cmap<span class="op">=</span>MASK_CMAP, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">2</span>].imshow(pred.numpy(), cmap<span class="op">=</span>MASK_CMAP, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">2</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>plt.show()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-qualitative-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+<p>Per-class IoU on the full test set:</p>
+<div id="per-class-cell" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>all_preds, all_targets <span class="op">=</span> [], []</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.inference_mode():</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> imgs, masks <span class="kw">in</span> test_loader:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> model(imgs.to(DEVICE)).argmax(dim<span class="op">=</span><span class="dv">1</span>).cpu()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        all_preds.append(preds)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        all_targets.append(masks)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>all_preds   <span class="op">=</span> torch.cat(all_preds)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>all_targets <span class="op">=</span> torch.cat(all_targets)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>accuracy, miou, iou_per_class <span class="op">=</span> compute_metrics(all_preds, all_targets, NUM_CLASSES)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>class_names <span class="op">=</span> [<span class="st">"Background"</span>, <span class="st">"Foreground"</span>, <span class="st">"Boundary"</span>]</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Pixel accuracy: </span><span class="sc">{</span>accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"mIoU:           </span><span class="sc">{</span>miou<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, iou <span class="kw">in</span> <span class="bu">zip</span>(class_names, iou_per_class):</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  IoU [</span><span class="sc">{</span>name<span class="sc">:&lt;12s}</span><span class="ss">]: </span><span class="sc">{</span>iou<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="appendix-transposed-convolutions" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-transposed-convolutions">Appendix: Transposed convolutions</h2>
+<p>A regular convolution <span class="math inline">\mathbf{y} = W * \mathbf{x}</span> downsamples or preserves spatial resolution. A <strong>transposed convolution</strong> (<code>ConvTranspose2d</code>) is the adjoint of this operation and produces upsampled output. To see why, consider representing a convolution as a linear map <span class="math inline">W_\text{mat}</span> acting on a vectorized input <span class="math inline">\mathbf{x}_\text{vec}</span>:</p>
+<p><span class="math display">
+\mathbf{y}_\text{vec} = W_\text{mat}\, \mathbf{x}_\text{vec}
+</span></p>
+<p>The backward pass computes <span class="math inline">\partial \mathcal{L}/\partial \mathbf{x}_\text{vec} = W_\text{mat}^\top\, (\partial \mathcal{L}/\partial \mathbf{y}_\text{vec})</span>, i.e.&nbsp;multiplication by the transpose of the convolution matrix. <code>ConvTranspose2d</code> computes exactly this transposed operation in the forward pass:</p>
+<p><span class="math display">
+\mathbf{z}_\text{vec} = W_\text{mat}^\top\, \mathbf{x}_\text{vec}.
+</span></p>
+<p>This is not the mathematical inverse of the convolution, but its <strong>adjoint</strong> (or gradient operation). In practice, with <code>kernel_size=k</code> and <code>stride=s</code>, <code>ConvTranspose2d</code> inserts <span class="math inline">s - 1</span> zeros between input elements before convolving — this is sometimes called a <strong>fractionally strided convolution</strong>. For <code>kernel_size=2, stride=2</code>, a <span class="math inline">H \times W</span> input maps to an exactly <span class="math inline">2H \times 2W</span> output, making it a clean <span class="math inline">2\times</span> upsampler.</p>
+<p><strong>Example.</strong> For a <span class="math inline">2 \times 2</span> input with a <span class="math inline">2 \times 2</span> kernel and stride <span class="math inline">s=2</span>:</p>
+<p><span class="math display">
+\underbrace{\begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix}}_{2 \times 2}
+\xrightarrow{\text{ConvTranspose2d}(k=2, s=2)}
+\underbrace{\begin{bmatrix} \cdot &amp; \cdot &amp; \cdot &amp; \cdot \\ \cdot &amp; \cdot &amp; \cdot &amp; \cdot \\ \cdot &amp; \cdot &amp; \cdot &amp; \cdot \\ \cdot &amp; \cdot &amp; \cdot &amp; \cdot \end{bmatrix}}_{4 \times 4}
+</span></p>
+<p>Each input element <span class="math inline">a, b, c, d</span> produces a <span class="math inline">2 \times 2</span> patch in the output (by convolving with the kernel), and the patches are placed non-overlappingly, doubling the spatial resolution in both dimensions.</p>
+<p>Verifying output dimensions:</p>
+<div id="transposed-conv-cell" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>up <span class="op">=</span> nn.ConvTranspose2d(<span class="dv">64</span>, <span class="dv">32</span>, kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x  <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">64</span>, <span class="dv">7</span>, <span class="dv">7</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Input:  </span><span class="sc">{</span><span class="bu">tuple</span>(x.shape)<span class="sc">}</span><span class="ss">"</span>)         <span class="co"># (1, 64, 7, 7)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Output: </span><span class="sc">{</span><span class="bu">tuple</span>(up(x).shape)<span class="sc">}</span><span class="ss">"</span>)     <span class="co"># (1, 32, 14, 14)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Also confirm the decoder block doubles spatial dims</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>block <span class="op">=</span> DecoderBlock(in_ch<span class="op">=</span><span class="dv">512</span>, skip_ch<span class="op">=</span><span class="dv">256</span>, out_ch<span class="op">=</span><span class="dv">256</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>x_low  <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">512</span>,  <span class="dv">8</span>,  <span class="dv">8</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>x_skip <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">256</span>, <span class="dv">16</span>, <span class="dv">16</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">DecoderBlock input:  </span><span class="sc">{</span><span class="bu">tuple</span>(x_low.shape)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"DecoderBlock output: </span><span class="sc">{</span><span class="bu">tuple</span>(block(x_low, x_skip).shape)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>■</p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-pets" class="csl-entry" role="listitem">
+Parkhi, Omkar M., Andrea Vedaldi, Andrew Zisserman, and C. V. Jawahar. 2012. <span>“The Oxford-IIIT Pet Dataset.”</span> <em>IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</em>. <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">https://www.robots.ox.ac.uk/~vgg/data/pets/</a>.
+</div>
+<div id="ref-unet" class="csl-entry" role="listitem">
+Ronneberger, Olaf, Philipp Fischer, and Thomas Brox. 2015. <span>“U-Net: Convolutional Networks for Biomedical Image Segmentation.”</span> In <em>Medical Image Computing and Computer-Assisted Intervention (MICCAI)</em>. <a href="https://arxiv.org/abs/1505.04597">https://arxiv.org/abs/1505.04597</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/deep/advanced/15-diffusion.html" class="pagination-link" aria-label="15. Diffusion Models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">15. Diffusion Models</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/deep/advanced/17-captioning.html" class="pagination-link" aria-label="17. Image Captioning">
+        <span class="nav-page-text">17. Image Captioning</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

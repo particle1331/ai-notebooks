@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Automated Eval Pipelines – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../notebooks/prep/deep-dives/03-agent-memory.html" rel="next">
+<link href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" rel="prev">
+<link href="../../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html">02. Automated Eval Pipelines</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Crash Course</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/01-llm-api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. LLM APIs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/02-prompt-engg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">02. Prompt Engineering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/03-rag-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. RAG Concepts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/04-eval-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. LLM Evaluation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/05-agents-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. Agentic AI I</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/06-observability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. Observability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/07-rag-pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Production RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/08-agents-langgraph.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Agentic AI II</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/09-fine-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. Fine-Tuning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/10-model-serving.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Model Serving</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/11-cost-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Cost Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/12-ai-infra.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">12. AI Infrastructure</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/13-capstone-compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">13. Capstone</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../notebooks/prep/deep-dives/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Dives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">01. Advanced RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">02. Automated Eval Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">03. Agent Memory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/04-resilience.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">04. Resilience Patterns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/05-mlops.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">05. MLOps: CI/CD for AI</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/06-ai-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">06. AI Security &amp; Compliance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/07-embeddings-advanced.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">07. Advanced Embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/08-multimodal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">08. Multimodal LLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../notebooks/prep/deep-dives/09-iac-containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">09. IaC &amp; Container Orchestration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dataset-curation-strategy" id="toc-dataset-curation-strategy" class="nav-link active" data-scroll-target="#dataset-curation-strategy">Dataset Curation Strategy</a></li>
+  <li><a href="#llm-as-judge-patterns" id="toc-llm-as-judge-patterns" class="nav-link" data-scroll-target="#llm-as-judge-patterns">LLM-as-Judge Patterns</a></li>
+  <li><a href="#eval-harness-with-ci-integration" id="toc-eval-harness-with-ci-integration" class="nav-link" data-scroll-target="#eval-harness-with-ci-integration">Eval Harness with CI Integration</a></li>
+  <li><a href="#prompt-regression-detection" id="toc-prompt-regression-detection" class="nav-link" data-scroll-target="#prompt-regression-detection">Prompt Regression Detection</a></li>
+  <li><a href="#statistical-significance" id="toc-statistical-significance" class="nav-link" data-scroll-target="#statistical-significance">Statistical Significance</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/index.html">Deep Dives</a></li><li class="breadcrumb-item"><a href="../../../notebooks/prep/deep-dives/02-eval-pipelines.html">02. Automated Eval Pipelines</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Automated Eval Pipelines</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Deep Dive 02. The <a href="../../../notebooks/prep/04-eval-concepts.html">parent notebook</a> introduced the three-tier evaluation stack and showed that RAGAS scores drop when context is degraded and that an LLM judge calibrates correctly across good, partial, and hallucinated answers. This notebook operationalizes those ideas into a production eval pipeline: we build a <code>DatasetCurator</code> that generates a 20-example golden dataset from the SEC filings corpus using synthetic question-answer generation, implement an <code>LLMJudge</code> with three judge prompts (relevance, faithfulness, and pairwise preference), assemble a <code>CIEvalHarness</code> that computes RAGAS metrics, stores results as JSON, and compares against a baseline to detect regressions, introduce a <code>PromptVersionRegistry</code> for tracking metric snapshots per prompt hash, and close with a <code>bootstrap_ci</code> function for principled uncertainty quantification on eval scores.</p>
+<p>Setup:</p>
+<section id="dataset-curation-strategy" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-curation-strategy">Dataset Curation Strategy</h2>
+<p>A <strong>golden dataset</strong> is a fixed collection of (question, reference answer, context) triples whose quality you trust enough to use as a regression benchmark. “Fixed” is the key word: once you adopt a golden set, you do not retroactively edit it to match model outputs — that defeats the purpose. The dataset defines what the system should do, not what it currently does.</p>
+<p><br></p>
+<p><strong>Three sourcing strategies.</strong> In practice, golden datasets are assembled from multiple sources: (1) <strong>production logs</strong> — sampled queries from real users, annotated by domain experts; (2) <strong>analyst-curated edge cases</strong> — questions that the team knows are tricky, such as queries requiring exact identifier matching (“What is the FINRA Rule 4110 net capital requirement?”) or multi-hop reasoning across sections; and (3) <strong>synthetic generation</strong> — an LLM reads a passage and writes a question whose answer is entirely contained in that passage. Synthetic generation is the fastest way to bootstrap a dataset when production logs are unavailable.</p>
+<p><br></p>
+<p><strong>Synthetic generation quality.</strong> The generator LLM tends to ask simple extractive questions — “What was the CET1 ratio?” — rather than multi-step reasoning questions. This is fine for catching hallucinations and faithfulness regressions, which is the primary use of automated evals. For evaluating reasoning quality, supplement with analyst-curated cases. We implement a <code>DatasetCurator</code> that wraps the synthetic generation pattern with Pydantic output parsing so each generated example is structurally valid.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Synthetic evals are a starting point, not a destination. Treat them as a fast regression floor. As your system matures, replace synthetic examples with real annotated queries from production traffic — those reflect the actual distribution of questions your users ask.</p>
+</div>
+</div>
+<p>We use the same 20-passage SEC filings corpus from <a href="../../../notebooks/prep/07-rag-pipeline.html">notebook 07</a>:</p>
+<div id="b8c9d0e1" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CORPUS <span class="op">=</span> [</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: risk_factors (indices 0-4)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Interest rate risk represents one of the most significant market risks facing the firm. A 100 basis point increase in interest rates would reduce the fair value of our fixed-rate debt portfolio by approximately $2.3 billion."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Credit risk arises from the potential that a counterparty will fail to perform its obligations. We manage credit risk through diversification, collateral requirements, and credit limits by counterparty."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Operational risk includes the risk of loss resulting from inadequate or failed internal processes, people, systems, or external events, including cybersecurity threats and technology failures."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our derivatives portfolio had a notional value of $1.2 trillion at year-end. Net market value exposure after netting and collateral was $18.4 billion, primarily concentrated in interest rate and foreign exchange derivatives."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our Value at Risk (VaR) at the 99th percentile for a one-day holding period was $142 million, reflecting the diversified nature of our trading portfolios across equities, fixed income, and commodities."</span>, <span class="st">"section"</span>: <span class="st">"risk_factors"</span>},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: mda (indices 5-9)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Net revenues for the fiscal year were $47.4 billion, an increase of 8</span><span class="sc">% c</span><span class="st">ompared to the prior year. The increase was driven primarily by higher net interest income reflecting the rising interest rate environment."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Investment banking revenues decreased 23% to $6.1 billion, reflecting lower advisory fees amid reduced M&amp;A activity and a challenging environment for equity and debt underwriting."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Return on equity for the year was 12.4%, compared to 15.1</span><span class="sc">% i</span><span class="st">n the prior year. Book value per share increased to $312.50, up from $290.20."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Net interest margin expanded 18 basis points to 2.94%, driven by higher short-term rates partially offset by increased funding costs. Provision for credit losses increased to $2.1 billion, reflecting normalization from historically low levels."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Assets under management in our investment management segment grew to $2.8 trillion, an increase of 6</span><span class="sc">% f</span><span class="st">rom prior year. Prime brokerage revenues increased 12% to $4.3 billion on higher client balances and margin loan activity."</span>, <span class="st">"section"</span>: <span class="st">"mda"</span>},</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: capital_liquidity (indices 10-14)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Our Common Equity Tier 1 (CET1) capital ratio was 14.8% at year-end, well above the regulatory minimum of 4.5% and our internal target of 13%."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We maintain a liquidity coverage ratio (LCR) of 128%, exceeding the regulatory requirement of 100%. Our high-quality liquid assets totaled $280 billion at year-end."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Under Basel III framework requirements, our leverage ratio was 5.8%, comfortably above the 3% minimum. Our total risk-weighted assets were $1.47 trillion at year-end, consistent with prior year."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We are subject to FINRA Rule 4110 and SEC Rule 15c3-1 (the Net Capital Rule), which require us to maintain minimum net capital of not less than the greater of $250,000 or 2</span><span class="sc">% o</span><span class="st">f aggregate debit items. Our net capital exceeded the minimum by $12.4 billion."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"The liquidity stress test results indicate the firm could withstand a 30-day severe market stress scenario while maintaining positive liquidity. The Internal Liquidity Adequacy Assessment Process (ILAAP) was completed in Q3 and reviewed by the Board Risk Committee."</span>, <span class="st">"section"</span>: <span class="st">"capital_liquidity"</span>},</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Section: guidance (indices 15-19)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Looking ahead to fiscal 2025, management expects continued revenue growth in the range of 4-6%, supported by a stable rate environment and improving capital markets activity."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We plan to return $8 billion to shareholders through dividends and share repurchases in fiscal 2025, subject to regulatory approval and market conditions."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Earnings per share for fiscal 2024 were $42.30, compared to $47.20 in the prior year, reflecting lower net income partially offset by the reduction in diluted share count from ongoing repurchases."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"Management has identified three strategic priorities for fiscal 2025: (1) expanding the wealth management client base to $500 billion in AUM, (2) growing transaction banking revenues by 15%, and (3) reducing the expense ratio below 65%."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"text"</span>: <span class="st">"We expect our CET1 ratio to remain in the 13.5-15.0</span><span class="sc">% r</span><span class="st">ange through fiscal 2025, subject to regulatory stress test outcomes. Any excess capital above 14.5% will be returned to shareholders under our capital return policy."</span>, <span class="st">"section"</span>: <span class="st">"guidance"</span>},</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Corpus: </span><span class="sc">{</span><span class="bu">len</span>(CORPUS)<span class="sc">}</span><span class="ss"> passages across </span><span class="sc">{</span><span class="bu">len</span>({c[<span class="st">'section'</span>] <span class="cf">for</span> c <span class="kw">in</span> CORPUS})<span class="sc">}</span><span class="ss"> sections"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We define <code>DatasetCurator</code> with a Pydantic output schema for the generated examples:</p>
+<div id="d0e1f2a3" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GeneratedExample(BaseModel):</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>    question: <span class="bu">str</span></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    reference_answer: <span class="bu">str</span></span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DatasetCurator:</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Generate (question, reference_answer, context) triples from a corpus."""</span></span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>    _SYSTEM <span class="op">=</span> (</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"You are a financial analyst building an evaluation dataset. "</span></span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Given a passage from a SEC filing, write one factual question whose complete answer "</span></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"is contained verbatim or near-verbatim in the passage. "</span></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"The reference_answer must be a single sentence using only information in the passage."</span></span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, generator: LLMClient):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-17" class="code-annotation-target"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._llm <span class="op">=</span> generator</span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate_one(<span class="va">self</span>, passage: <span class="bu">dict</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return a single eval example for one corpus passage."""</span></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._SYSTEM},</span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Passage: </span><span class="sc">{</span>passage[<span class="st">'text'</span>]<span class="sc">}</span><span class="ss">"</span>},</span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>        result: GeneratedExample <span class="op">=</span> <span class="va">self</span>._llm.complete(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-26" class="code-annotation-target"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>            messages, response_format<span class="op">=</span>GeneratedExample</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">"question"</span>: result.question,</span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>            <span class="st">"reference_answer"</span>: result.reference_answer,</span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a>            <span class="st">"context"</span>: passage[<span class="st">"text"</span>],</span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>            <span class="st">"section"</span>: passage[<span class="st">"section"</span>],</span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-35" class="code-annotation-target"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate_dataset(<span class="va">self</span>, corpus: <span class="bu">list</span>[<span class="bu">dict</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Generate one example per passage."""</span></span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [<span class="va">self</span>.generate_one(p) <span class="cf">for</span> p <span class="kw">in</span> corpus]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="17" data-code-annotation="1">We inject <code>generator</code> so the curator can be tested with a mock client without making real API calls.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="26" data-code-annotation="2">Structured output via <code>response_format=GeneratedExample</code> guarantees we always receive a valid <code>question</code> and <code>reference_answer</code> string — no regex parsing needed and no risk of a malformed JSON response crashing the curator.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="35" data-code-annotation="3"><code>generate_dataset</code> runs one LLM call per passage. For a 20-passage corpus at <code>gpt-4o-mini</code> pricing, this costs roughly $0.003 — cheap enough to regenerate the dataset on demand when the corpus changes.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Generating the 20-example golden dataset:</p>
+<div id="a3b4c5d6" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>curator <span class="op">=</span> DatasetCurator(generator<span class="op">=</span>LLMClient(model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>golden_dataset <span class="op">=</span> curator.generate_dataset(CORPUS)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Generated </span><span class="sc">{</span><span class="bu">len</span>(golden_dataset)<span class="sc">}</span><span class="ss"> examples"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ex <span class="kw">in</span> golden_dataset[:<span class="dv">3</span>]:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>ex[<span class="st">'section'</span>]<span class="sc">}</span><span class="ss">] Q: </span><span class="sc">{</span>ex[<span class="st">'question'</span>][:<span class="dv">70</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"           A: </span><span class="sc">{</span>ex[<span class="st">'reference_answer'</span>][:<span class="dv">70</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We persist the golden dataset to disk so it can be version-controlled and loaded without re-running the generator:</p>
+<div id="c5d6e7f8" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>GOLDEN_PATH <span class="op">=</span> pathlib.Path(<span class="st">"/tmp/golden_dataset.json"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>GOLDEN_PATH.write_text(json.dumps(golden_dataset, indent<span class="op">=</span><span class="dv">2</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Reload to confirm round-trip</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>loaded <span class="op">=</span> json.loads(GOLDEN_PATH.read_text())</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved and reloaded </span><span class="sc">{</span><span class="bu">len</span>(loaded)<span class="sc">}</span><span class="ss"> examples from </span><span class="sc">{</span>GOLDEN_PATH<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="llm-as-judge-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="llm-as-judge-patterns">LLM-as-Judge Patterns</h2>
+<p>The <a href="../../../notebooks/prep/04-eval-concepts.html">parent notebook</a> implemented a single G-Eval scorer on a 1–5 rubric. We now implement three specialized judge prompts, each targeting a distinct failure mode.</p>
+<p><strong>Relevance judge.</strong> Scores 0–3 on whether the answer addresses the question. A score of 0 means the answer is completely off-topic; 3 means it directly answers the question with the appropriate level of detail. This catches cases where the LLM drifts toward a related but different question — common when the context contains multiple relevant passages.</p>
+<p><br></p>
+<p><strong>Faithfulness judge.</strong> Binary (0 or 1): does the answer contain only claims that are supported by the retrieved context? A 0 does not mean the answer is factually wrong in the real world — it means the answer makes claims beyond what the context warrants. This distinction matters in compliance contexts: an answer that adds a true fact not present in the retrieved passage is still a faithfulness failure, because the model is drawing on parametric knowledge rather than the authorized source.</p>
+<p><br></p>
+<p><strong>Pairwise preference judge.</strong> Given two candidate answers to the same question, which is better? Pairwise comparisons are more reliable than absolute scores because humans and models are better at relative ranking than absolute quality judgments. This pattern is useful for A/B testing prompt versions: instead of comparing aggregate scores (which can obscure which individual cases changed), we run head-to-head comparisons on each test case.</p>
+<p>All three judges include chain-of-thought extraction: the reasoning field is returned alongside the score. Logging the reasoning is essential for debugging — when a regression is detected, the reasoning explains which specific claim the judge flagged.</p>
+<p>We define Pydantic output schemas for the three judge types:</p>
+<div id="a9b0c1d2" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RelevanceResult(BaseModel):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    reasoning: <span class="bu">str</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    score: <span class="bu">int</span>  <span class="co"># 0-3</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FaithfulnessResult(BaseModel):</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    reasoning: <span class="bu">str</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    is_faithful: <span class="bu">bool</span>  <span class="co"># True if all claims are supported by context</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    unsupported_claims: <span class="bu">list</span>[<span class="bu">str</span>]  <span class="co"># empty list if faithful</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PreferenceResult(BaseModel):</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    reasoning: <span class="bu">str</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    preferred: <span class="bu">str</span>  <span class="co"># "A" | "B" | "tie"</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    confidence: <span class="bu">str</span>  <span class="co"># "clear" | "slight" | "tie"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We implement <code>LLMJudge</code> with one method per judge type:</p>
+<div id="c1d2e3f4" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LLMJudge:</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Three-prompt LLM judge for RAG answer evaluation."""</span></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    _RELEVANCE_SYSTEM <span class="op">=</span> <span class="st">"""</span></span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a><span class="st">You are a financial QA evaluator. Score the answer on relevance to the question (0-3):</span></span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a><span class="st">3 = Directly and completely answers the question with appropriate detail.</span></span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a><span class="st">2 = Answers the question but omits important details or is overly verbose.</span></span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a><span class="st">1 = Partially answers the question or addresses only part of it.</span></span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a><span class="st">0 = Does not answer the question; off-topic or irrelevant.</span></span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a><span class="st">First reason step by step, then give a score.</span></span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>    _FAITHFULNESS_SYSTEM <span class="op">=</span> <span class="st">"""</span></span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a><span class="st">You are a financial compliance evaluator checking answer grounding.</span></span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a><span class="st">Determine whether every claim in the answer is directly supported by the provided context.</span></span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a><span class="st">An answer is NOT faithful if it introduces any specific figure, fact, or claim not present in the context,</span></span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a><span class="st">even if that claim might be true in the real world.</span></span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a><span class="st">List any unsupported claims. If none, return an empty list.</span></span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>    _PREFERENCE_SYSTEM <span class="op">=</span> <span class="st">"""</span></span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a><span class="st">You are a financial QA quality evaluator. Given a question and two candidate answers (A and B),</span></span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a><span class="st">determine which answer is better for a financial analyst audience.</span></span>
+<span id="annotated-cell-6-24"><a href="#annotated-cell-6-24" aria-hidden="true" tabindex="-1"></a><span class="st">Consider: factual accuracy, completeness, conciseness, and appropriate use of specific figures.</span></span>
+<span id="annotated-cell-6-25"><a href="#annotated-cell-6-25" aria-hidden="true" tabindex="-1"></a><span class="st">First reason through the comparison, then state your preference: "A", "B", or "tie".</span></span>
+<span id="annotated-cell-6-26"><a href="#annotated-cell-6-26" aria-hidden="true" tabindex="-1"></a><span class="st">Also state your confidence: "clear" if one answer is obviously better, "slight" for a marginal difference, "tie" if equivalent.</span></span>
+<span id="annotated-cell-6-27"><a href="#annotated-cell-6-27" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="annotated-cell-6-28"><a href="#annotated-cell-6-28" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-29" class="code-annotation-target"><a href="#annotated-cell-6-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, judge_model: <span class="bu">str</span> <span class="op">=</span> <span class="st">"gpt-4o"</span>):</span>
+<span id="annotated-cell-6-30"><a href="#annotated-cell-6-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._llm <span class="op">=</span> LLMClient(model<span class="op">=</span>judge_model, temperature<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="annotated-cell-6-31"><a href="#annotated-cell-6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-32"><a href="#annotated-cell-6-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> relevance(</span>
+<span id="annotated-cell-6-33"><a href="#annotated-cell-6-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, question: <span class="bu">str</span>, answer: <span class="bu">str</span></span>
+<span id="annotated-cell-6-34"><a href="#annotated-cell-6-34" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> RelevanceResult:</span>
+<span id="annotated-cell-6-35"><a href="#annotated-cell-6-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Score how well the answer addresses the question (0-3)."""</span></span>
+<span id="annotated-cell-6-36"><a href="#annotated-cell-6-36" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="annotated-cell-6-37"><a href="#annotated-cell-6-37" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._RELEVANCE_SYSTEM.strip()},</span>
+<span id="annotated-cell-6-38"><a href="#annotated-cell-6-38" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Answer: </span><span class="sc">{</span>answer<span class="sc">}</span><span class="ss">"</span>},</span>
+<span id="annotated-cell-6-39"><a href="#annotated-cell-6-39" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="annotated-cell-6-40"><a href="#annotated-cell-6-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._llm.complete(messages, response_format<span class="op">=</span>RelevanceResult)</span>
+<span id="annotated-cell-6-41"><a href="#annotated-cell-6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-42"><a href="#annotated-cell-6-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> faithfulness(</span>
+<span id="annotated-cell-6-43"><a href="#annotated-cell-6-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, question: <span class="bu">str</span>, answer: <span class="bu">str</span>, context: <span class="bu">str</span></span>
+<span id="annotated-cell-6-44"><a href="#annotated-cell-6-44" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> FaithfulnessResult:</span>
+<span id="annotated-cell-6-45"><a href="#annotated-cell-6-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Check whether every claim in the answer is grounded in the context."""</span></span>
+<span id="annotated-cell-6-46"><a href="#annotated-cell-6-46" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="annotated-cell-6-47"><a href="#annotated-cell-6-47" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._FAITHFULNESS_SYSTEM.strip()},</span>
+<span id="annotated-cell-6-48"><a href="#annotated-cell-6-48" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="annotated-cell-6-49"><a href="#annotated-cell-6-49" aria-hidden="true" tabindex="-1"></a>                <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="annotated-cell-6-50"><a href="#annotated-cell-6-50" aria-hidden="true" tabindex="-1"></a>                <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-6-51"><a href="#annotated-cell-6-51" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Context: </span><span class="sc">{</span>context<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-52"><a href="#annotated-cell-6-52" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-53"><a href="#annotated-cell-6-53" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Answer: </span><span class="sc">{</span>answer<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-54"><a href="#annotated-cell-6-54" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="annotated-cell-6-55"><a href="#annotated-cell-6-55" aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="annotated-cell-6-56"><a href="#annotated-cell-6-56" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-57" class="code-annotation-target"><a href="#annotated-cell-6-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._llm.complete(messages, response_format<span class="op">=</span>FaithfulnessResult)</span>
+<span id="annotated-cell-6-58"><a href="#annotated-cell-6-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-59"><a href="#annotated-cell-6-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pairwise(</span>
+<span id="annotated-cell-6-60"><a href="#annotated-cell-6-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, question: <span class="bu">str</span>, answer_a: <span class="bu">str</span>, answer_b: <span class="bu">str</span>, context: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span></span>
+<span id="annotated-cell-6-61"><a href="#annotated-cell-6-61" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> PreferenceResult:</span>
+<span id="annotated-cell-6-62"><a href="#annotated-cell-6-62" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Compare two candidate answers and return a preference."""</span></span>
+<span id="annotated-cell-6-63"><a href="#annotated-cell-6-63" aria-hidden="true" tabindex="-1"></a>        context_block <span class="op">=</span> <span class="ss">f"Context: </span><span class="sc">{</span>context<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span> <span class="cf">if</span> context <span class="cf">else</span> <span class="st">""</span></span>
+<span id="annotated-cell-6-64"><a href="#annotated-cell-6-64" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="annotated-cell-6-65"><a href="#annotated-cell-6-65" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="va">self</span>._PREFERENCE_SYSTEM.strip()},</span>
+<span id="annotated-cell-6-66"><a href="#annotated-cell-6-66" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="annotated-cell-6-67"><a href="#annotated-cell-6-67" aria-hidden="true" tabindex="-1"></a>                <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="annotated-cell-6-68"><a href="#annotated-cell-6-68" aria-hidden="true" tabindex="-1"></a>                <span class="st">"content"</span>: (</span>
+<span id="annotated-cell-6-69"><a href="#annotated-cell-6-69" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"</span><span class="sc">{</span>context_block<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-70"><a href="#annotated-cell-6-70" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-71"><a href="#annotated-cell-6-71" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Answer A: </span><span class="sc">{</span>answer_a<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-72"><a href="#annotated-cell-6-72" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"Answer B: </span><span class="sc">{</span>answer_b<span class="sc">}</span><span class="ss">"</span></span>
+<span id="annotated-cell-6-73"><a href="#annotated-cell-6-73" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="annotated-cell-6-74"><a href="#annotated-cell-6-74" aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="annotated-cell-6-75"><a href="#annotated-cell-6-75" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-6-76" class="code-annotation-target"><a href="#annotated-cell-6-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._llm.complete(messages, response_format<span class="op">=</span>PreferenceResult)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="29" data-code-annotation="1">We always use a stronger model (<code>gpt-4o</code>) as the judge than the model under test (<code>gpt-4o-mini</code>). A model judging its own outputs introduces self-serving bias.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="57" data-code-annotation="2">The <code>faithfulness</code> judge returns <code>unsupported_claims</code> as a list rather than a count. This is more actionable for debugging: when a regression is detected you can see exactly which claims the judge flagged rather than just that the binary score flipped.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="76" data-code-annotation="3"><code>pairwise</code> is deliberately position-agnostic: the <code>preferred</code> field is always “A” or “B” relative to what was passed in, not an absolute label. In practice, run each comparison twice with A and B swapped and take the majority verdict to cancel out position bias — the judge tends to slightly favor whichever answer appears first.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We exercise all three judges on hand-crafted examples to verify calibration:</p>
+<div id="f4a5b6c7" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>judge <span class="op">=</span> LLMJudge(judge_model<span class="op">=</span><span class="st">"gpt-4o"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> <span class="st">"What was the CET1 capital ratio at year-end?"</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ctx <span class="op">=</span> CORPUS[<span class="dv">10</span>][<span class="st">"text"</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>good_answer     <span class="op">=</span> <span class="st">"The CET1 ratio was 14.8% at year-end, well above the 4.5</span><span class="sc">% r</span><span class="st">egulatory minimum."</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>vague_answer    <span class="op">=</span> <span class="st">"The CET1 ratio was well above the regulatory minimum."</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>halluc_answer   <span class="op">=</span> <span class="st">"The CET1 ratio was 11.2%, just below the 12</span><span class="sc">% r</span><span class="st">egulatory requirement."</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Relevance judge</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"=== Relevance ==="</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, ans <span class="kw">in</span> [(<span class="st">"good"</span>, good_answer), (<span class="st">"vague"</span>, vague_answer), (<span class="st">"hallucinated"</span>, halluc_answer)]:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> judge.relevance(q, ans)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">] score=</span><span class="sc">{</span>r<span class="sc">.</span>score<span class="sc">}</span><span class="ss">/3  reasoning: </span><span class="sc">{</span>r<span class="sc">.</span>reasoning[:<span class="dv">80</span>]<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Faithfulness judge</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== Faithfulness ==="</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, ans <span class="kw">in</span> [(<span class="st">"good"</span>, good_answer), (<span class="st">"hallucinated"</span>, halluc_answer)]:</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> judge.faithfulness(q, ans, ctx)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">] faithful=</span><span class="sc">{</span>r<span class="sc">.</span>is_faithful<span class="sc">}</span><span class="ss">  unsupported=</span><span class="sc">{</span>r<span class="sc">.</span>unsupported_claims<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Pairwise judge</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== Pairwise ==="</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> judge.pairwise(q, good_answer, halluc_answer, context<span class="op">=</span>ctx)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  preferred=</span><span class="sc">{</span>r<span class="sc">.</span>preferred<span class="sc">}</span><span class="ss">  confidence=</span><span class="sc">{</span>r<span class="sc">.</span>confidence<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  reasoning: </span><span class="sc">{</span>r<span class="sc">.</span>reasoning[:<span class="dv">120</span>]<span class="sc">}</span><span class="ss">..."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The relevance judge correctly distinguishes between the specific answer (score 3), the vague answer (score 2, missing the exact figure), and the hallucinated answer (score 0 or 1, answering a different question with fabricated numbers). The faithfulness judge returns <code>is_faithful=False</code> for the hallucinated answer and lists the fabricated figures in <code>unsupported_claims</code>. The pairwise judge prefers the good answer with clear confidence.</p>
+</section>
+<section id="eval-harness-with-ci-integration" class="level2">
+<h2 class="anchored" data-anchor-id="eval-harness-with-ci-integration">Eval Harness with CI Integration</h2>
+<p>The <code>CIEvalHarness</code> has four responsibilities: (1) run a pipeline over all golden dataset examples and collect answers; (2) compute RAGAS metrics (faithfulness, answer relevancy, context recall) using <code>ragas.evaluate</code>; (3) persist results as a JSON snapshot keyed by a run identifier; and (4) compare the current snapshot against a baseline and return exit code 0 (pass) or 1 (fail) based on configurable thresholds.</p>
+<p>The exit code convention is what allows the harness to integrate with GitHub Actions. The CI workflow runs the harness as a Python script step; if the harness returns exit code 1, the step fails and the pull request is blocked. No custom GitHub Action plugin is needed — it is a plain <code>python eval_harness.py</code> call in the workflow YAML.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The baseline JSON must be committed to the repository alongside the code. A new baseline is only committed when the team consciously decides to accept a new performance level — not automatically on every merge. Treat baseline updates like schema migrations: deliberate, reviewed, and documented.</p>
+</div>
+</div>
+<p>We define a simple pipeline function that generates answers from context using <code>llm</code>:</p>
+<div id="e9f0a1b2" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_pipeline(system_prompt: <span class="bu">str</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return a (question, context) -&gt; answer function backed by the given system prompt."""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pipeline(question: <span class="bu">str</span>, context: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_prompt},</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"Context:</span><span class="ch">\n</span><span class="sc">{</span>context<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ss">"</span>},</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm.complete(messages)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>STRONG_PROMPT <span class="op">=</span> (</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"You are a financial analyst assistant. "</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Answer using ONLY the provided context. "</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Include specific numbers and figures. "</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"If the context does not contain the answer, say so explicitly."</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pipeline defined."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now implement <code>CIEvalHarness</code>:</p>
+<div id="a1b2c3d5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ragas <span class="im">import</span> evaluate</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ragas.metrics <span class="im">import</span> faithfulness <span class="im">as</span> ragas_faithfulness</span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ragas.metrics <span class="im">import</span> answer_relevancy, context_recall</span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI, OpenAIEmbeddings</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pathlib, datetime</span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CIEvalHarness:</span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""RAGAS-based eval harness with baseline comparison and JSON persistence."""</span></span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-12" class="code-annotation-target"><a href="#annotated-cell-9-12" aria-hidden="true" tabindex="-1"></a>    THRESHOLDS <span class="op">=</span> {</span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"faithfulness"</span>: <span class="fl">0.75</span>,</span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"answer_relevancy"</span>: <span class="fl">0.70</span>,</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"context_recall"</span>: <span class="fl">0.70</span>,</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="annotated-cell-9-19"><a href="#annotated-cell-9-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="annotated-cell-9-20"><a href="#annotated-cell-9-20" aria-hidden="true" tabindex="-1"></a>        pipeline_fn,</span>
+<span id="annotated-cell-9-21"><a href="#annotated-cell-9-21" aria-hidden="true" tabindex="-1"></a>        golden_dataset: <span class="bu">list</span>[<span class="bu">dict</span>],</span>
+<span id="annotated-cell-9-22"><a href="#annotated-cell-9-22" aria-hidden="true" tabindex="-1"></a>        results_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"/tmp/eval_results"</span>,</span>
+<span id="annotated-cell-9-23"><a href="#annotated-cell-9-23" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="annotated-cell-9-24"><a href="#annotated-cell-9-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._pipeline <span class="op">=</span> pipeline_fn</span>
+<span id="annotated-cell-9-25"><a href="#annotated-cell-9-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._dataset <span class="op">=</span> golden_dataset</span>
+<span id="annotated-cell-9-26"><a href="#annotated-cell-9-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._dir <span class="op">=</span> pathlib.Path(results_dir)</span>
+<span id="annotated-cell-9-27"><a href="#annotated-cell-9-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._dir.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-9-28"><a href="#annotated-cell-9-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._judge_llm <span class="op">=</span> ChatOpenAI(model<span class="op">=</span><span class="st">"gpt-4o-mini"</span>)</span>
+<span id="annotated-cell-9-29"><a href="#annotated-cell-9-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._embed <span class="op">=</span> OpenAIEmbeddings(model<span class="op">=</span><span class="st">"text-embedding-3-small"</span>)</span>
+<span id="annotated-cell-9-30"><a href="#annotated-cell-9-30" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-31" class="code-annotation-target"><a href="#annotated-cell-9-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _build_ragas_dataset(<span class="va">self</span>) <span class="op">-&gt;</span> Dataset:</span>
+<span id="annotated-cell-9-32"><a href="#annotated-cell-9-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Run the pipeline over all golden examples to produce a RAGAS Dataset."""</span></span>
+<span id="annotated-cell-9-33"><a href="#annotated-cell-9-33" aria-hidden="true" tabindex="-1"></a>        rows <span class="op">=</span> []</span>
+<span id="annotated-cell-9-34"><a href="#annotated-cell-9-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ex <span class="kw">in</span> <span class="va">self</span>._dataset:</span>
+<span id="annotated-cell-9-35"><a href="#annotated-cell-9-35" aria-hidden="true" tabindex="-1"></a>            answer <span class="op">=</span> <span class="va">self</span>._pipeline(ex[<span class="st">"question"</span>], ex[<span class="st">"context"</span>])</span>
+<span id="annotated-cell-9-36"><a href="#annotated-cell-9-36" aria-hidden="true" tabindex="-1"></a>            rows.append({</span>
+<span id="annotated-cell-9-37"><a href="#annotated-cell-9-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">"question"</span>: ex[<span class="st">"question"</span>],</span>
+<span id="annotated-cell-9-38"><a href="#annotated-cell-9-38" aria-hidden="true" tabindex="-1"></a>                <span class="st">"answer"</span>: answer,</span>
+<span id="annotated-cell-9-39"><a href="#annotated-cell-9-39" aria-hidden="true" tabindex="-1"></a>                <span class="st">"contexts"</span>: [ex[<span class="st">"context"</span>]],</span>
+<span id="annotated-cell-9-40"><a href="#annotated-cell-9-40" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ground_truth"</span>: ex[<span class="st">"reference_answer"</span>],</span>
+<span id="annotated-cell-9-41"><a href="#annotated-cell-9-41" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="annotated-cell-9-42"><a href="#annotated-cell-9-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Dataset.from_list(rows)</span>
+<span id="annotated-cell-9-43"><a href="#annotated-cell-9-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-44"><a href="#annotated-cell-9-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> run(<span class="va">self</span>, run_id: <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="annotated-cell-9-45"><a href="#annotated-cell-9-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Run the full eval suite and persist results. Returns the metrics dict."""</span></span>
+<span id="annotated-cell-9-46"><a href="#annotated-cell-9-46" aria-hidden="true" tabindex="-1"></a>        run_id <span class="op">=</span> run_id <span class="kw">or</span> datetime.datetime.utcnow().strftime(<span class="st">"%Y%m</span><span class="sc">%d</span><span class="st">T%H%M%SZ"</span>)</span>
+<span id="annotated-cell-9-47"><a href="#annotated-cell-9-47" aria-hidden="true" tabindex="-1"></a>        ds <span class="op">=</span> <span class="va">self</span>._build_ragas_dataset()</span>
+<span id="annotated-cell-9-48"><a href="#annotated-cell-9-48" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> evaluate(</span>
+<span id="annotated-cell-9-49"><a href="#annotated-cell-9-49" aria-hidden="true" tabindex="-1"></a>            dataset<span class="op">=</span>ds,</span>
+<span id="annotated-cell-9-50"><a href="#annotated-cell-9-50" aria-hidden="true" tabindex="-1"></a>            metrics<span class="op">=</span>[ragas_faithfulness, answer_relevancy, context_recall],</span>
+<span id="annotated-cell-9-51"><a href="#annotated-cell-9-51" aria-hidden="true" tabindex="-1"></a>            llm<span class="op">=</span><span class="va">self</span>._judge_llm,</span>
+<span id="annotated-cell-9-52"><a href="#annotated-cell-9-52" aria-hidden="true" tabindex="-1"></a>            embeddings<span class="op">=</span><span class="va">self</span>._embed,</span>
+<span id="annotated-cell-9-53"><a href="#annotated-cell-9-53" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-9-54"><a href="#annotated-cell-9-54" aria-hidden="true" tabindex="-1"></a>        metrics <span class="op">=</span> {</span>
+<span id="annotated-cell-9-55"><a href="#annotated-cell-9-55" aria-hidden="true" tabindex="-1"></a>            <span class="st">"run_id"</span>: run_id,</span>
+<span id="annotated-cell-9-56"><a href="#annotated-cell-9-56" aria-hidden="true" tabindex="-1"></a>            <span class="st">"faithfulness"</span>: <span class="bu">float</span>(result[<span class="st">"faithfulness"</span>]),</span>
+<span id="annotated-cell-9-57"><a href="#annotated-cell-9-57" aria-hidden="true" tabindex="-1"></a>            <span class="st">"answer_relevancy"</span>: <span class="bu">float</span>(result[<span class="st">"answer_relevancy"</span>]),</span>
+<span id="annotated-cell-9-58"><a href="#annotated-cell-9-58" aria-hidden="true" tabindex="-1"></a>            <span class="st">"context_recall"</span>: <span class="bu">float</span>(result[<span class="st">"context_recall"</span>]),</span>
+<span id="annotated-cell-9-59"><a href="#annotated-cell-9-59" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="annotated-cell-9-60"><a href="#annotated-cell-9-60" aria-hidden="true" tabindex="-1"></a>        out_path <span class="op">=</span> <span class="va">self</span>._dir <span class="op">/</span> <span class="ss">f"</span><span class="sc">{</span>run_id<span class="sc">}</span><span class="ss">.json"</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-61" class="code-annotation-target"><a href="#annotated-cell-9-61" aria-hidden="true" tabindex="-1"></a>        out_path.write_text(json.dumps(metrics, indent<span class="op">=</span><span class="dv">2</span>))</span>
+<span id="annotated-cell-9-62"><a href="#annotated-cell-9-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> metrics</span>
+<span id="annotated-cell-9-63"><a href="#annotated-cell-9-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-64"><a href="#annotated-cell-9-64" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> compare_to_baseline(</span>
+<span id="annotated-cell-9-65"><a href="#annotated-cell-9-65" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, current: <span class="bu">dict</span>, baseline_path: <span class="bu">str</span>, delta_threshold: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.05</span></span>
+<span id="annotated-cell-9-66"><a href="#annotated-cell-9-66" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">int</span>, <span class="bu">list</span>[<span class="bu">str</span>]]:</span>
+<span id="annotated-cell-9-67"><a href="#annotated-cell-9-67" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Compare current metrics to a baseline file. Returns (exit_code, failure_messages)."""</span></span>
+<span id="annotated-cell-9-68"><a href="#annotated-cell-9-68" aria-hidden="true" tabindex="-1"></a>        baseline <span class="op">=</span> json.loads(pathlib.Path(baseline_path).read_text())</span>
+<span id="annotated-cell-9-69"><a href="#annotated-cell-9-69" aria-hidden="true" tabindex="-1"></a>        failures <span class="op">=</span> []</span>
+<span id="annotated-cell-9-70"><a href="#annotated-cell-9-70" aria-hidden="true" tabindex="-1"></a>        metric_keys <span class="op">=</span> [<span class="st">"faithfulness"</span>, <span class="st">"answer_relevancy"</span>, <span class="st">"context_recall"</span>]</span>
+<span id="annotated-cell-9-71"><a href="#annotated-cell-9-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> key <span class="kw">in</span> metric_keys:</span>
+<span id="annotated-cell-9-72"><a href="#annotated-cell-9-72" aria-hidden="true" tabindex="-1"></a>            curr_val <span class="op">=</span> current.get(key, <span class="fl">0.0</span>)</span>
+<span id="annotated-cell-9-73"><a href="#annotated-cell-9-73" aria-hidden="true" tabindex="-1"></a>            base_val <span class="op">=</span> baseline.get(key, <span class="fl">0.0</span>)</span>
+<span id="annotated-cell-9-74"><a href="#annotated-cell-9-74" aria-hidden="true" tabindex="-1"></a>            drop <span class="op">=</span> base_val <span class="op">-</span> curr_val</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-9-75" class="code-annotation-target"><a href="#annotated-cell-9-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> drop <span class="op">&gt;</span> delta_threshold:</span>
+<span id="annotated-cell-9-76"><a href="#annotated-cell-9-76" aria-hidden="true" tabindex="-1"></a>                failures.append(</span>
+<span id="annotated-cell-9-77"><a href="#annotated-cell-9-77" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"</span><span class="sc">{</span>key<span class="sc">}</span><span class="ss">: dropped </span><span class="sc">{</span>drop<span class="sc">:.3f}</span><span class="ss"> (baseline=</span><span class="sc">{</span>base_val<span class="sc">:.3f}</span><span class="ss">, current=</span><span class="sc">{</span>curr_val<span class="sc">:.3f}</span><span class="ss">)"</span></span>
+<span id="annotated-cell-9-78"><a href="#annotated-cell-9-78" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-9-79"><a href="#annotated-cell-9-79" aria-hidden="true" tabindex="-1"></a>            floor <span class="op">=</span> <span class="va">self</span>.THRESHOLDS.get(key, <span class="fl">0.0</span>)</span>
+<span id="annotated-cell-9-80"><a href="#annotated-cell-9-80" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> curr_val <span class="op">&lt;</span> floor:</span>
+<span id="annotated-cell-9-81"><a href="#annotated-cell-9-81" aria-hidden="true" tabindex="-1"></a>                failures.append(</span>
+<span id="annotated-cell-9-82"><a href="#annotated-cell-9-82" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f"</span><span class="sc">{</span>key<span class="sc">}</span><span class="ss">: below floor threshold (</span><span class="sc">{</span>curr_val<span class="sc">:.3f}</span><span class="ss"> &lt; </span><span class="sc">{</span>floor<span class="sc">:.3f}</span><span class="ss">)"</span></span>
+<span id="annotated-cell-9-83"><a href="#annotated-cell-9-83" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="annotated-cell-9-84"><a href="#annotated-cell-9-84" aria-hidden="true" tabindex="-1"></a>        exit_code <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> failures <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="annotated-cell-9-85"><a href="#annotated-cell-9-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> exit_code, failures</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="12" data-code-annotation="1"><code>THRESHOLDS</code> defines absolute floors for each metric. Even if the current run shows no regression relative to the baseline, a score below the floor indicates the pipeline is not production-ready and the CI step fails.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="31" data-code-annotation="2"><code>_build_ragas_dataset</code> calls the pipeline once per golden example. For a 20-example dataset this takes roughly 30 seconds end-to-end including the RAGAS metric computation; budget ~60 seconds for the full CI step.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="61" data-code-annotation="3">Each run is saved as an individual JSON file named by the run ID. This creates an immutable audit trail of every eval run — useful for tracking score trends over time and for post-incident analysis.</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="75" data-code-annotation="4"><code>delta_threshold=0.05</code> means a 5-point drop triggers a failure. This is deliberately loose enough to absorb LLM stochasticity (which can cause ±2–3 point swings between identical runs) while still catching real regressions.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Running the harness on the strong pipeline and saving the result as our baseline:</p>
+<div id="d4e5f6a8" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>harness <span class="op">=</span> CIEvalHarness(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pipeline_fn<span class="op">=</span>make_pipeline(STRONG_PROMPT),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    golden_dataset<span class="op">=</span>golden_dataset,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    results_dir<span class="op">=</span><span class="st">"/tmp/eval_results"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>baseline_metrics <span class="op">=</span> harness.run(run_id<span class="op">=</span><span class="st">"baseline-v1"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Baseline metrics:"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k, v <span class="kw">in</span> baseline_metrics.items():</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> k <span class="op">!=</span> <span class="st">"run_id"</span>:</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>v<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Save as the canonical baseline</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shutil</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>shutil.copy(<span class="st">"/tmp/eval_results/baseline-v1.json"</span>, <span class="st">"/tmp/eval_results/baseline.json"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Baseline saved to /tmp/eval_results/baseline.json"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The GitHub Actions integration is a single workflow step. No custom action is required:</p>
+<p>The <code>paths</code> trigger means the eval workflow only runs when prompt or pipeline files change — not on documentation changes or test file changes. This keeps CI costs low: at $0.003 per 20-example run, running on every PR touching <code>src/prompts/</code> costs approximately $0.50 per month at typical PR velocity.</p>
+</section>
+<section id="prompt-regression-detection" class="level2">
+<h2 class="anchored" data-anchor-id="prompt-regression-detection">Prompt Regression Detection</h2>
+<p>We now walk through a concrete regression scenario: the system prompt is changed, we run the harness, and we confirm that the harness catches the faithfulness drop. We also introduce a <code>PromptVersionRegistry</code> that maps prompt hashes to their metric snapshots — this makes it possible to answer “when did faithfulness first drop below 0.80, and which commit caused it?” without reconstructing the history from commit logs.</p>
+<p>We define <code>PromptVersionRegistry</code>:</p>
+<div id="e1f2a3b5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> hashlib</span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PromptVersionRegistry:</span>
+<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map prompt hash -&gt; metric snapshot for regression traceability."""</span></span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, registry_path: <span class="bu">str</span> <span class="op">=</span> <span class="st">"/tmp/prompt_registry.json"</span>):</span>
+<span id="annotated-cell-11-8"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._path <span class="op">=</span> pathlib.Path(registry_path)</span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._data: <span class="bu">dict</span> <span class="op">=</span> json.loads(<span class="va">self</span>._path.read_text()) <span class="cf">if</span> <span class="va">self</span>._path.exists() <span class="cf">else</span> {}</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-11-12" class="code-annotation-target"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> hash_prompt(prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return the first 12 hex characters of SHA-256(prompt)."""</span></span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hashlib.sha256(prompt.encode()).hexdigest()[:<span class="dv">12</span>]</span>
+<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-16"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> register(<span class="va">self</span>, prompt: <span class="bu">str</span>, metrics: <span class="bu">dict</span>, label: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="annotated-cell-11-17"><a href="#annotated-cell-11-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Store metrics under the prompt's hash. Returns the hash."""</span></span>
+<span id="annotated-cell-11-18"><a href="#annotated-cell-11-18" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> <span class="va">self</span>.hash_prompt(prompt)</span>
+<span id="annotated-cell-11-19"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._data[h] <span class="op">=</span> {</span>
+<span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"label"</span>: label,</span>
+<span id="annotated-cell-11-21"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">"prompt_preview"</span>: prompt[:<span class="dv">80</span>],</span>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">"metrics"</span>: metrics,</span>
+<span id="annotated-cell-11-23"><a href="#annotated-cell-11-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">"registered_at"</span>: datetime.datetime.utcnow().isoformat(),</span>
+<span id="annotated-cell-11-24"><a href="#annotated-cell-11-24" aria-hidden="true" tabindex="-1"></a>        }</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-11-25" class="code-annotation-target"><a href="#annotated-cell-11-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._path.write_text(json.dumps(<span class="va">self</span>._data, indent<span class="op">=</span><span class="dv">2</span>))</span>
+<span id="annotated-cell-11-26"><a href="#annotated-cell-11-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> h</span>
+<span id="annotated-cell-11-27"><a href="#annotated-cell-11-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-28"><a href="#annotated-cell-11-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> lookup(<span class="va">self</span>, prompt: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">dict</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="annotated-cell-11-29"><a href="#annotated-cell-11-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return the stored metrics for a given prompt, or None."""</span></span>
+<span id="annotated-cell-11-30"><a href="#annotated-cell-11-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._data.get(<span class="va">self</span>.hash_prompt(prompt))</span>
+<span id="annotated-cell-11-31"><a href="#annotated-cell-11-31" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-11-32" class="code-annotation-target"><a href="#annotated-cell-11-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> history(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="annotated-cell-11-33"><a href="#annotated-cell-11-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Return all registered entries sorted by registration time."""</span></span>
+<span id="annotated-cell-11-34"><a href="#annotated-cell-11-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">sorted</span>(<span class="va">self</span>._data.values(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="st">"registered_at"</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="12" data-code-annotation="1">SHA-256 hash of the full prompt text gives a stable, content-addressed identifier. Two prompts that differ by a single space will have completely different hashes — this is intentional, since even minor wording changes can affect model behavior.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="25" data-code-annotation="2">The registry persists to disk on every <code>register</code> call. In production, use a proper key-value store (Redis, DynamoDB) and append rather than overwrite, so concurrent eval runs do not race.</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="32" data-code-annotation="3"><code>history()</code> exposes the full audit trail. You can iterate over it to plot faithfulness scores over time or to find the first commit at which a metric dropped below a threshold.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We register the baseline prompt, then run the harness with a degraded prompt and demonstrate that the harness catches the regression:</p>
+<div id="b4c5d6e8" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>WEAK_PROMPT <span class="op">=</span> <span class="st">"Answer the question based on the context."</span>  <span class="co"># deliberately vague</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> PromptVersionRegistry()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Register the strong-prompt baseline</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>h_strong <span class="op">=</span> registry.register(STRONG_PROMPT, baseline_metrics, label<span class="op">=</span><span class="st">"strong-v1"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Registered strong prompt: hash=</span><span class="sc">{</span>h_strong<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the harness with the weak prompt</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>harness_weak <span class="op">=</span> CIEvalHarness(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    pipeline_fn<span class="op">=</span>make_pipeline(WEAK_PROMPT),</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    golden_dataset<span class="op">=</span>golden_dataset,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    results_dir<span class="op">=</span><span class="st">"/tmp/eval_results"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>weak_metrics <span class="op">=</span> harness_weak.run(run_id<span class="op">=</span><span class="st">"weak-prompt-run"</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Register weak prompt metrics</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>h_weak <span class="op">=</span> registry.register(WEAK_PROMPT, weak_metrics, label<span class="op">=</span><span class="st">"weak-v1"</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Registered weak prompt:   hash=</span><span class="sc">{</span>h_weak<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">--- Metric comparison ---"</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> [<span class="st">"faithfulness"</span>, <span class="st">"answer_relevancy"</span>, <span class="st">"context_recall"</span>]:</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    delta <span class="op">=</span> weak_metrics[k] <span class="op">-</span> baseline_metrics[k]</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    flag <span class="op">=</span> <span class="st">" ← REGRESSION"</span> <span class="cf">if</span> delta <span class="op">&lt;</span> <span class="op">-</span><span class="fl">0.05</span> <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>k<span class="sc">:20s}</span><span class="ss">: baseline=</span><span class="sc">{</span>baseline_metrics[k]<span class="sc">:.3f}</span><span class="ss">  current=</span><span class="sc">{</span>weak_metrics[k]<span class="sc">:.3f}</span><span class="ss">  Δ=</span><span class="sc">{</span>delta<span class="sc">:+.3f}{</span>flag<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now invoke <code>compare_to_baseline</code> to get the formal CI verdict:</p>
+<div id="d6e7f8aa" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>exit_code, failures <span class="op">=</span> harness_weak.compare_to_baseline(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    current<span class="op">=</span>weak_metrics,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    baseline_path<span class="op">=</span><span class="st">"/tmp/eval_results/baseline.json"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    delta_threshold<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"CI exit code: </span><span class="sc">{</span>exit_code<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="st">'PASS'</span> <span class="cf">if</span> exit_code <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">'FAIL'</span><span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> failures:</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Failures detected:"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> f <span class="kw">in</span> failures:</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  - </span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No regressions detected."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The harness returns exit code 1 and lists the specific metric(s) that regressed, giving a clear signal to the PR author about what to fix. We can also inspect the registry history to confirm the audit trail is intact:</p>
+<div id="f8a9b0c2" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Prompt version history:"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> entry <span class="kw">in</span> registry.history():</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> entry[<span class="st">"metrics"</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    faith <span class="op">=</span> m.get(<span class="st">"faithfulness"</span>, <span class="bu">float</span>(<span class="st">"nan"</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  [</span><span class="sc">{</span>entry[<span class="st">'label'</span>]<span class="sc">:12s}</span><span class="ss">] faithfulness=</span><span class="sc">{</span>faith<span class="sc">:.3f}</span><span class="ss">  preview: </span><span class="sc">{</span>entry[<span class="st">'prompt_preview'</span>][:<span class="dv">60</span>]<span class="sc">}</span><span class="ss">..."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="statistical-significance" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-significance">Statistical Significance</h2>
+<p>Saying “our faithfulness score went from 0.80 to 0.82” is only meaningful if the difference is larger than the noise inherent in the evaluation process. There are two sources of variance in an eval run: (1) <strong>LLM stochasticity</strong> — even at temperature 0.0 the model can return slightly different outputs due to floating-point nondeterminism; and (2) <strong>dataset sampling variance</strong> — if we ran the eval on a different 20-example sample from the same distribution, we would get a different score.</p>
+<p><br></p>
+<p>The <strong>bootstrap confidence interval</strong> addresses source (2): we treat the observed per-example scores as a sample from the true score distribution and simulate the sampling variance by drawing many bootstrap resamples. Formally, given <span class="math inline">n</span> per-example scores <span class="math inline">s_1, \ldots, s_n</span>, the bootstrap procedure draws <span class="math inline">B</span> samples of size <span class="math inline">n</span> with replacement, computes the mean <span class="math inline">\bar{s}^{(b)}</span> for each, and reports the <span class="math inline">\alpha/2</span> and <span class="math inline">1 - \alpha/2</span> quantiles of the resulting distribution as the confidence interval:</p>
+<p><span class="math display">\text{CI}_{1-\alpha} = \left[\hat{q}_{\alpha/2}, \hat{q}_{1-\alpha/2}\right]</span></p>
+<p>where <span class="math inline">\hat{q}_p</span> is the <span class="math inline">p</span>-th quantile of <span class="math inline">\{\bar{s}^{(1)}, \ldots, \bar{s}^{(B)}\}</span>. For small eval sets (<span class="math inline">n &lt; 50</span>), the <span class="math inline">95\%</span> confidence interval on a mean score is typically <span class="math inline">\pm 0.05</span> to <span class="math inline">\pm 0.10</span> — meaning a change of <span class="math inline">0.02</span> is not statistically distinguishable from noise.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Bootstrap CIs address sampling variance within a fixed eval set. They do not address distribution shift between the eval set and production traffic. A tight CI with a biased eval set is false precision — it confirms that you are consistently measuring the wrong thing.</p>
+</div>
+</div>
+<p>We implement <code>bootstrap_ci</code> and apply it to the per-example faithfulness scores from both pipeline runs:</p>
+<div id="d2e3f4a6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bootstrap_ci(</span>
+<span id="annotated-cell-15-2"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a>    scores: <span class="bu">list</span>[<span class="bu">float</span>],</span>
+<span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a>    n_bootstrap: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1000</span>,</span>
+<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a>    confidence: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a>    seed: <span class="bu">int</span> <span class="op">=</span> <span class="dv">42</span>,</span>
+<span id="annotated-cell-15-6"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Bootstrap confidence interval for the mean of `scores`.</span></span>
+<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns (mean, lower_bound, upper_bound).</span></span>
+<span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="annotated-cell-15-12"><a href="#annotated-cell-15-12" aria-hidden="true" tabindex="-1"></a>    arr <span class="op">=</span> np.array(scores, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="annotated-cell-15-13"><a href="#annotated-cell-15-13" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(arr)</span>
+<span id="annotated-cell-15-14"><a href="#annotated-cell-15-14" aria-hidden="true" tabindex="-1"></a>    boot_means <span class="op">=</span> np.empty(n_bootstrap)</span>
+<span id="annotated-cell-15-15"><a href="#annotated-cell-15-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> b <span class="kw">in</span> <span class="bu">range</span>(n_bootstrap):</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-16" class="code-annotation-target"><a href="#annotated-cell-15-16" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> rng.choice(arr, size<span class="op">=</span>n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="annotated-cell-15-17"><a href="#annotated-cell-15-17" aria-hidden="true" tabindex="-1"></a>        boot_means[b] <span class="op">=</span> sample.mean()</span>
+<span id="annotated-cell-15-18"><a href="#annotated-cell-15-18" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="fl">1.0</span> <span class="op">-</span> confidence</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-15-19" class="code-annotation-target"><a href="#annotated-cell-15-19" aria-hidden="true" tabindex="-1"></a>    lo <span class="op">=</span> <span class="bu">float</span>(np.quantile(boot_means, alpha <span class="op">/</span> <span class="dv">2</span>))</span>
+<span id="annotated-cell-15-20"><a href="#annotated-cell-15-20" aria-hidden="true" tabindex="-1"></a>    hi <span class="op">=</span> <span class="bu">float</span>(np.quantile(boot_means, <span class="fl">1.0</span> <span class="op">-</span> alpha <span class="op">/</span> <span class="dv">2</span>))</span>
+<span id="annotated-cell-15-21"><a href="#annotated-cell-15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(arr.mean()), lo, hi</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="16" data-code-annotation="1">Drawing <code>size=n</code> with replacement is the definition of a bootstrap resample. Each resample will over-represent some observations and exclude others, mimicking the variance you would observe if you had drawn a different 20-example sample from the same distribution.</span>
+</dd>
+<dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="19" data-code-annotation="2">The percentile method confidence interval uses the empirical quantiles of the bootstrap distribution directly. This is the simplest correct approach; more refined methods (BCa — bias-corrected accelerated) are warranted when the distribution is heavily skewed, but for eval means on 20+ examples the percentile method is adequate.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We simulate per-example faithfulness scores for the two pipeline runs and compute confidence intervals:</p>
+<div id="a5b6c7d9" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate per-example binary faithfulness scores (0 or 1)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In a real run these come from RAGAS per-row scores via result.to_pandas()</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">0</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Strong pipeline: faithfulness ~ 0.85</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>strong_scores <span class="op">=</span> rng.binomial(<span class="dv">1</span>, <span class="fl">0.85</span>, size<span class="op">=</span><span class="dv">20</span>).tolist()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Weak pipeline: faithfulness ~ 0.71 (simulating the regression)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>weak_scores <span class="op">=</span> rng.binomial(<span class="dv">1</span>, <span class="fl">0.71</span>, size<span class="op">=</span><span class="dv">20</span>).tolist()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>strong_mean, strong_lo, strong_hi <span class="op">=</span> bootstrap_ci(strong_scores)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>weak_mean,   weak_lo,   weak_hi   <span class="op">=</span> bootstrap_ci(weak_scores)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"95% bootstrap CIs on faithfulness:"</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Strong prompt: </span><span class="sc">{</span>strong_mean<span class="sc">:.3f}</span><span class="ss">  [</span><span class="sc">{</span>strong_lo<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>strong_hi<span class="sc">:.3f}</span><span class="ss">]"</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Weak prompt:   </span><span class="sc">{</span>weak_mean<span class="sc">:.3f}</span><span class="ss">  [</span><span class="sc">{</span>weak_lo<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>weak_hi<span class="sc">:.3f}</span><span class="ss">]"</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Check interval overlap</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>overlap <span class="op">=</span> strong_lo <span class="op">&lt;</span> weak_hi <span class="kw">and</span> weak_lo <span class="op">&lt;</span> strong_hi</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">  Confidence intervals overlap: </span><span class="sc">{</span>overlap<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Conclusion: </span><span class="sc">{</span><span class="st">'difference is NOT statistically distinguishable'</span> <span class="cf">if</span> overlap <span class="cf">else</span> <span class="st">'regression is statistically significant'</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We visualize the two distributions to make the overlap (or separation) visually clear:</p>
+<div id="c7d8e9fb" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>config InlineBackend.figure_formats <span class="op">=</span> [<span class="st">'svg'</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _bootstrap_distribution(scores, n_bootstrap<span class="op">=</span><span class="dv">1000</span>, seed<span class="op">=</span><span class="dv">42</span>):</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    arr <span class="op">=</span> np.array(scores, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [rng.choice(arr, size<span class="op">=</span><span class="bu">len</span>(arr), replace<span class="op">=</span><span class="va">True</span>).mean() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_bootstrap)]</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>strong_dist <span class="op">=</span> _bootstrap_distribution(strong_scores)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>weak_dist   <span class="op">=</span> _bootstrap_distribution(weak_scores)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>ax.hist(strong_dist, bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.65</span>, color<span class="op">=</span><span class="st">"#3a7ebf"</span>, label<span class="op">=</span><span class="ss">f"Strong prompt (mean=</span><span class="sc">{</span>strong_mean<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>ax.hist(weak_dist,   bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.65</span>, color<span class="op">=</span><span class="st">"#e05a4e"</span>, label<span class="op">=</span><span class="ss">f"Weak prompt (mean=</span><span class="sc">{</span>weak_mean<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>ax.axvline(strong_lo, color<span class="op">=</span><span class="st">"#3a7ebf"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>ax.axvline(strong_hi, color<span class="op">=</span><span class="st">"#3a7ebf"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>ax.axvline(weak_lo,   color<span class="op">=</span><span class="st">"#e05a4e"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>ax.axvline(weak_hi,   color<span class="op">=</span><span class="st">"#e05a4e"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Bootstrap mean faithfulness"</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Bootstrap distributions of faithfulness (1000 resamples, n=20)"</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>ax.grid(alpha<span class="op">=</span><span class="fl">0.4</span>, linestyle<span class="op">=</span><span class="st">"dashed"</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>Figure.</strong> Bootstrap distributions of mean faithfulness for the strong and weak prompt pipelines over 1000 resamples of 20 examples. Dashed vertical lines mark the 95% confidence interval boundaries. Non-overlapping intervals indicate a statistically detectable regression; overlapping intervals mean the observed difference could plausibly be sampling noise.</p>
+<p>We define a helper that formats a metric result in the reporting style recommended for eval notes — always report mean with CI, never a bare number:</p>
+<div id="f0a1b2c4" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> report_metric(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    name: <span class="bu">str</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    scores: <span class="bu">list</span>[<span class="bu">float</span>],</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    n_bootstrap: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1000</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    confidence: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return a human-readable metric report string with confidence interval."""</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    mean, lo, hi <span class="op">=</span> bootstrap_ci(scores, n_bootstrap<span class="op">=</span>n_bootstrap, confidence<span class="op">=</span>confidence)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    pct <span class="op">=</span> <span class="bu">int</span>(confidence <span class="op">*</span> <span class="dv">100</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>mean<span class="sc">:.3f}</span><span class="ss">  (95% CI [</span><span class="sc">{</span>lo<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>hi<span class="sc">:.3f}</span><span class="ss">], n=</span><span class="sc">{</span><span class="bu">len</span>(scores)<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(report_metric(<span class="st">"faithfulness (strong)"</span>, strong_scores))</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(report_metric(<span class="st">"faithfulness (weak)"</span>,   weak_scores))</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstrate: a small difference on a small set may not be meaningful</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>rng2 <span class="op">=</span> np.random.default_rng(<span class="dv">7</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>run_a <span class="op">=</span> rng2.binomial(<span class="dv">1</span>, <span class="fl">0.80</span>, size<span class="op">=</span><span class="dv">20</span>).tolist()</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>run_b <span class="op">=</span> rng2.binomial(<span class="dv">1</span>, <span class="fl">0.82</span>, size<span class="op">=</span><span class="dv">20</span>).tolist()</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Runs with nominally different means (0.80 vs 0.82, n=20):"</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  "</span>, report_metric(<span class="st">"run_a"</span>, run_a))</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"  "</span>, report_metric(<span class="st">"run_b"</span>, run_b))</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>_, lo_a, hi_a <span class="op">=</span> bootstrap_ci(run_a)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>_, lo_b, hi_b <span class="op">=</span> bootstrap_ci(run_b)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>overlap_ab <span class="op">=</span> lo_a <span class="op">&lt;</span> hi_b <span class="kw">and</span> lo_b <span class="op">&lt;</span> hi_a</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  Intervals overlap: </span><span class="sc">{</span>overlap_ab<span class="sc">}</span><span class="ss"> — </span><span class="sc">{</span>(<span class="st">'indistinguishable from noise'</span> <span class="cf">if</span> overlap_ab <span class="cf">else</span> <span class="st">'detectable difference'</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The last block demonstrates the key point: a faithfulness change from 0.80 to 0.82 on a 20-example dataset almost always has overlapping bootstrap CIs — the difference is within sampling noise. This is why eval sets should be as large as practical. Doubling from 20 to 40 examples roughly halves the CI width (variance scales as <span class="math inline">1/n</span>), making a 0.02 improvement detectable at 95% confidence.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For production eval sets with <span class="math inline">n \geq 100</span> examples, a 0.02 improvement in faithfulness is typically statistically significant at the 95% level. For the 20-example golden datasets we build in this series, only differences larger than <span class="math inline">\approx 0.08</span> should be treated as real. Calibrate your regression thresholds accordingly.</p>
+</div>
+</div>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p><strong>Extend <code>DatasetCurator</code> with multi-hop examples.</strong> Add a <code>generate_multihop</code> method that selects two passages from different sections and asks the LLM to write a question whose complete answer requires information from both passages. These are harder for RAG pipelines and better stress-test the retrieval component.</p></li>
+<li><p><strong>Add position-bias correction to the pairwise judge.</strong> Extend <code>LLMJudge.pairwise</code> to run each comparison twice with A and B swapped, then return the majority verdict. If the judge disagrees between the two orderings, return <code>preferred="tie"</code> with <code>confidence="tie"</code>. Test this on a pair of nearly equivalent answers and verify the tie rate is higher than with a single-direction comparison.</p></li>
+<li><p><strong>Implement metric trend detection.</strong> Write a function <code>detect_trend(registry: PromptVersionRegistry, metric: str, window: int = 5)</code> that reads the last <code>window</code> entries from the registry and returns <code>"degrading"</code> if the metric shows a monotonically decreasing trend, <code>"improving"</code> if monotonically increasing, or <code>"stable"</code> otherwise. Populate the registry with 8 synthetic entries with a gradual faithfulness decay and verify the function returns <code>"degrading"</code>.</p></li>
+</ol>
+<hr>
+<p><span class="math inline">\blacksquare</span></p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../../notebooks/prep/deep-dives/01-advanced-rag.html" class="pagination-link" aria-label="01. Advanced RAG">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">01. Advanced RAG</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../../notebooks/prep/deep-dives/03-agent-memory.html" class="pagination-link" aria-label="03. Agent Memory">
+        <span class="nav-page-text">03. Agent Memory</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -75,7 +75,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-63ed81e4b7024dfd846e609cdb8e6b0f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -135,16 +135,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
         <li>
-    <a class="dropdown-item" href="./topics/deep/index.html">
- <span class="dropdown-text">Deep Learning</span></a>
+    <a class="dropdown-item" href="./notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./topics/agents/index.html">
+    <a class="dropdown-item" href="./notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/agents/index.html">
  <span class="dropdown-text">Agentic Systems</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./topics/tooling/index.html">
- <span class="dropdown-text">Tooling</span></a>
+    <a class="dropdown-item" href="./notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
   </li>  
     </ul>
   </li>
@@ -186,16 +202,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="ai-notebooks" class="level1">
 <h1>AI notebooks</h1>
-<p>Jupyter notebooks containing notes and implementation of AI models, algorithms, &amp; applications.</p>
+<p>Jupyter notebooks containing experiments and discussions on <strong>AI models</strong>, <strong>algorithms</strong>, &amp; <strong>applications</strong>.</p>
 <p><img src="./assets/ai.png"></p>
 <section id="venv" class="level2">
 <h2 class="anchored" data-anchor-id="venv">venv</h2>
 <p>The venv used to run the notebooks can be re-created easily using <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You can also install requirements via <code>pip</code> entirely skipping <code>uv</code>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> requirements</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-e</span> .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:particle1331/ai-notebooks.git <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ai-notebooks</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> venv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can also install requirements via <code>pip</code> (without using <code>uv</code> as dependency manager):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install required python version, pip, and activate venv</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> uv</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> python install 3.13</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> venv .venv <span class="kw">&amp;&amp;</span> <span class="bu">source</span> .venv/bin/activate</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sS</span> https://bootstrap.pypa.io/get-pip.py <span class="kw">|</span> <span class="ex">.venv/bin/python</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># install requirements on venv</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> requirements</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> pip install <span class="at">-r</span> requirements.txt</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> pip install <span class="at">-e</span> .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -217,23 +241,10 @@ uv run python -m ipykernel install --user --name=ai-notebooks
 </section>
 <section id="the-notebooks" class="level2">
 <h2 class="anchored" data-anchor-id="the-notebooks">the notebooks</h2>
-<p>The notebooks for each topic can be found in separate folders in the <code>/topics</code> directory:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;"><strong>Topic</strong></th>
-<th style="text-align: left;"><strong>Folder</strong></th>
-<th style="text-align: left;"><strong>Primary Reference(s)</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><a href="./topics/deep/">Deep Learning</a></td>
-<td style="text-align: left;"><code>/deep</code></td>
-<td style="text-align: left;"><a href="https://dlsyscourse.org/lectures/">CMU 10-414/714: Deep Learning Systems</a> (Fall 2022)</td>
-</tr>
-</tbody>
-</table>
+<p>The notebooks are located in <a href="https://github.com/particle1331/ai-notebooks/tree/main/notebooks"><code>/notebooks</code></a> under separate directories for each topic. <!-- 
+| **Topic** | **Folder** | **Primary Reference(s)** |
+| :-- | :-- | :-- |
+| [Deep Learning](/topics/deep/) | `/deep` | [CMU 10-414/714: Deep Learning Systems](https://dlsyscourse.org/lectures/) (Fall 2022) | --></p>
 
 
 </section>

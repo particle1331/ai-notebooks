@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Policy Gradients: From REINFORCE to Actor-Critic – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/tooling/09-rl-ppo.html" rel="next">
+<link href="../../notebooks/tooling/07-rl-foundations.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/08-rl-policy-gradients.html">RL2: Policy Gradients</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/tooling/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Special Topics &amp; Tooling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/01-runpod.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Runpod Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/02-weak-supervision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Weak Supervision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/03-prompt-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/04-svd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Singular Value Decomposition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/05-mcp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MCP Servers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/06-security.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Security Tooling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/07-rl-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL1: Foundations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/08-rl-policy-gradients.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">RL2: Policy Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/09-rl-ppo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL3: Proximal Policy Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/10-rl-for-llms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL4: RL for Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/11-text-to-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text-to-LoRA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-policy-gradients" id="toc-why-policy-gradients" class="nav-link active" data-scroll-target="#why-policy-gradients">Why Policy Gradients?</a></li>
+  <li><a href="#the-policy-gradient-theorem" id="toc-the-policy-gradient-theorem" class="nav-link" data-scroll-target="#the-policy-gradient-theorem">The Policy Gradient Theorem</a></li>
+  <li><a href="#setup-and-cartpole" id="toc-setup-and-cartpole" class="nav-link" data-scroll-target="#setup-and-cartpole">Setup and CartPole</a></li>
+  <li><a href="#reinforce" id="toc-reinforce" class="nav-link" data-scroll-target="#reinforce">REINFORCE</a></li>
+  <li><a href="#baselines-and-variance-reduction" id="toc-baselines-and-variance-reduction" class="nav-link" data-scroll-target="#baselines-and-variance-reduction">Baselines and Variance Reduction</a></li>
+  <li><a href="#actor-critic" id="toc-actor-critic" class="nav-link" data-scroll-target="#actor-critic">Actor-Critic</a></li>
+  <li><a href="#appendix-the-variance-reduction-landscape" id="toc-appendix-the-variance-reduction-landscape" class="nav-link" data-scroll-target="#appendix-the-variance-reduction-landscape">Appendix: The Variance Reduction Landscape</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/08-rl-policy-gradients.html">RL2: Policy Gradients</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Policy Gradients: From REINFORCE to Actor-Critic</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Value-based methods — as developed in <a href="../../notebooks/tooling/07-rl-foundations.html">rl-foundations.ipynb</a> — learn an action-value function <span class="math inline">Q^*(s, a)</span> and extract a policy by acting greedily. Policy gradient methods flip this: they parameterize <span class="math inline">\pi_\theta(a \mid s)</span> directly and optimize by gradient ascent on the expected return <span class="math inline">J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[G_0].</span> The policy is the primary object; no value function is strictly required.</p>
+<p>There are compelling reasons for this. When the action space is large or continuous — think robotic joint torques, or the vocabulary of an LLM — maintaining a table or network over all <span class="math inline">(s, a)</span> pairs becomes unwieldy. A parameterized policy maps directly from states to action probabilities (or distributions), sidestepping this explosion. Stochastic policies also provide natural exploration: the agent does not need an <span class="math inline">\varepsilon</span>-greedy heuristic; it simply samples from <span class="math inline">\pi_\theta.</span> And crucially, the objective <span class="math inline">J(\theta)</span> is differentiable with respect to <span class="math inline">\theta</span>, so we can use gradient ascent directly on what we care about.</p>
+<p>This notebook derives the <strong>policy gradient theorem</strong>, implements <strong>REINFORCE</strong> from scratch on CartPole-v1, then progressively reduces variance via a <strong>learned baseline</strong> and finally <strong>actor-critic</strong> (TD advantages). Each step introduces exactly one idea to stabilize training. By the end, we have a working A2C implementation trained entirely on short rollouts, without waiting for episode completion.</p>
+<p><strong>Prerequisites:</strong> <a href="../../notebooks/tooling/07-rl-foundations.html">rl-foundations.ipynb</a>. We use PyTorch for neural networks and <code>gymnasium</code> for CartPole-v1.</p>
+<section id="why-policy-gradients" class="level2">
+<h2 class="anchored" data-anchor-id="why-policy-gradients">Why Policy Gradients?</h2>
+<p>Q-learning finds the optimal <span class="math inline">Q^*</span> and then reads off the policy as <span class="math inline">\pi(s) = \operatorname{argmax}_a Q^*(s, a).</span> This works beautifully when the action space is a small discrete set, but breaks down in two regimes: (1) when actions are continuous (so <span class="math inline">\operatorname{argmax}</span> requires a separate optimization at each step), and (2) when the optimal policy is stochastic — for instance in partially observed environments where randomness is genuinely useful. Policy gradient methods address both issues at once by treating the policy itself as the learnable object.</p>
+<p>The comparison below summarizes the key differences:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Value-based</th>
+<th>Policy-based</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What is learned</td>
+<td><span class="math inline">Q^*(s, a)</span>, policy is derived</td>
+<td><span class="math inline">\pi_\theta(a \mid s)</span> directly</td>
+</tr>
+<tr class="even">
+<td>Action spaces</td>
+<td>Discrete, small</td>
+<td>Discrete or continuous</td>
+</tr>
+<tr class="odd">
+<td>Stochasticity</td>
+<td>Deterministic policy</td>
+<td>Natural</td>
+</tr>
+<tr class="even">
+<td>Example algorithms</td>
+<td>Q-learning, DQN</td>
+<td>REINFORCE, PPO</td>
+</tr>
+</tbody>
+</table>
+<p>LLM alignment is an extreme instance of the policy gradient setting: the action space is the full vocabulary (~100K tokens), a trajectory is the complete generated response, and the “environment” is human preferences encoded in a reward model. Algorithms like GRPO and PPO are direct applications of the framework we develop here — the only difference in scale, not in principle.</p>
+</section>
+<section id="the-policy-gradient-theorem" class="level2">
+<h2 class="anchored" data-anchor-id="the-policy-gradient-theorem">The Policy Gradient Theorem</h2>
+<p>We want to maximize the expected return over trajectories <span class="math inline">\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)</span> sampled from <span class="math inline">\pi_\theta</span>:</p>
+<p><span class="math display">J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \int p_\theta(\tau)\, R(\tau)\, d\tau.</span></p>
+<p>Taking the gradient with respect to <span class="math inline">\theta</span>:</p>
+<p><span class="math display">\nabla_\theta J(\theta) = \int \nabla_\theta p_\theta(\tau)\, R(\tau)\, d\tau.</span></p>
+<p>This is intractable to evaluate directly — we cannot differentiate through an integral over all trajectories. The <strong>log-derivative trick</strong> converts it into an expectation:</p>
+<p><span class="math display">\nabla_\theta p_\theta(\tau) = p_\theta(\tau)\, \nabla_\theta \log p_\theta(\tau),</span></p>
+<p>so <span class="math inline">\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[\nabla_\theta \log p_\theta(\tau) \cdot R(\tau)].</span> Now we need <span class="math inline">\nabla_\theta \log p_\theta(\tau).</span> Expanding the trajectory probability:</p>
+<p><span class="math display">\log p_\theta(\tau) = \log p(s_0) + \sum_{t=0}^{T-1} \left[\log \pi_\theta(a_t \mid s_t) + \log P(s_{t+1} \mid s_t, a_t)\right].</span></p>
+<p>The initial state distribution <span class="math inline">\log p(s_0)</span> and the environment dynamics <span class="math inline">\log P(s_{t+1} \mid s_t, a_t)</span> do not depend on <span class="math inline">\theta</span>, so their gradients vanish. Only the policy terms survive:</p>
+<p><span class="math display">\nabla_\theta \log p_\theta(\tau) = \sum_{t=0}^{T-1} \nabla_\theta \log \pi_\theta(a_t \mid s_t).</span></p>
+<p>Substituting back gives the <strong>policy gradient theorem</strong>:</p>
+<p><span class="math display">\boxed{\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^{T-1} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot R(\tau)\right].}</span></p>
+<p>We can sharpen this further. Past rewards at time <span class="math inline">t' &lt; t</span> cannot be influenced by the action <span class="math inline">a_t</span> taken at time <span class="math inline">t</span>, so they contribute zero in expectation to the gradient. Replacing <span class="math inline">R(\tau)</span> with the <strong>reward-to-go</strong> <span class="math inline">G_t = \sum_{t'=t}^{T} r_{t'}</span>:</p>
+<p><span class="math display">\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^{T-1} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot G_t\right].</span></p>
+<p>This is still unbiased but has lower variance than using the full trajectory return.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The log-derivative trick <span class="math inline">\nabla_\theta \log \pi_\theta(a \mid s) = \nabla_\theta \pi_\theta(a \mid s) / \pi_\theta(a \mid s)</span> converts an intractable gradient of an expectation into an expectation of gradients — estimable by sampling. This same identity underlies every LLM alignment gradient (DPO, GRPO, PPO).</p>
+</div>
+</div>
+</section>
+<section id="setup-and-cartpole" class="level2">
+<h2 class="anchored" data-anchor-id="setup-and-cartpole">Setup and CartPole</h2>
+<p>We work with <strong>CartPole-v1</strong>: a 4-dimensional continuous state space (cart position, cart velocity, pole angle, pole angular velocity) and 2 discrete actions (push left or push right). An episode terminates when the pole tips past <span class="math inline">\pm 12°</span>, the cart exits <span class="math inline">\pm 2.4\text{m}</span>, or 500 steps are reached. The environment is considered <strong>solved</strong> when a rolling average reward of <span class="math inline">\geq 475</span> over 100 consecutive episodes is achieved. The simplicity of CartPole lets us focus entirely on the algorithmic differences between REINFORCE, REINFORCE with baseline, and actor-critic, without GPU requirements.</p>
+<p><strong>Setup.</strong> We import libraries and fix random seeds for reproducibility:</p>
+<div id="d0a1b2c3" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gymnasium <span class="im">as</span> gym</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib_inline <span class="im">import</span> backend_inline</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>backend_inline.set_matplotlib_formats(<span class="st">"svg"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Environment check.</strong> We instantiate CartPole-v1 and inspect its spaces:</p>
+<div id="f2c3d4e5" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>env <span class="op">=</span> gym.make(<span class="st">"CartPole-v1"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>obs, _ <span class="op">=</span> env.reset(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observation space: </span><span class="sc">{</span>env<span class="sc">.</span>observation_space<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Action space:      </span><span class="sc">{</span>env<span class="sc">.</span>action_space<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Initial obs:       </span><span class="sc">{</span>obs<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>env.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Rollout utility.</strong> A helper that collects one full episode given any policy function:</p>
+<div id="b4e5f6a7" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rollout(env, policy_fn, seed<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Collect one episode. Returns list of (state, action, reward) triples."""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    obs, _ <span class="op">=</span> env.reset(seed<span class="op">=</span>seed)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    trajectory <span class="op">=</span> []</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    done <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">not</span> done:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        action <span class="op">=</span> policy_fn(obs)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        next_obs, reward, terminated, truncated, _ <span class="op">=</span> env.step(action)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        trajectory.append((obs, action, reward))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        obs <span class="op">=</span> next_obs</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        done <span class="op">=</span> terminated <span class="kw">or</span> truncated</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> trajectory</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="reinforce" class="level2">
+<h2 class="anchored" data-anchor-id="reinforce">REINFORCE</h2>
+<p>REINFORCE is the simplest policy gradient algorithm. We parameterize <span class="math inline">\pi_\theta(a \mid s)</span> as a neural network, sample complete trajectories, compute the gradient estimate, and update <span class="math inline">\theta</span> by gradient ascent. Using the reward-to-go form, the Monte Carlo estimator averaged over <span class="math inline">N</span> episodes is:</p>
+<p><span class="math display">\hat{g} = \frac{1}{N} \sum_{n=1}^{N} \sum_{t=0}^{T_n - 1} \nabla_\theta \log \pi_\theta(a_t^n \mid s_t^n) \cdot G_t^n.</span></p>
+<p>In practice we maximize <span class="math inline">J(\theta)</span> by minimizing the negative: <span class="math inline">\mathcal{L} = -\frac{1}{N}\sum_{n,t} \log \pi_\theta(a_t^n \mid s_t^n) \cdot G_t^n.</span> PyTorch’s autograd then computes <span class="math inline">\hat{g}</span> automatically.</p>
+<p><strong>Policy network.</strong> A two-hidden-layer MLP that outputs a softmax probability distribution over actions:</p>
+<div id="f8c9d0e1" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PolicyNet(nn.Module):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, obs_dim<span class="op">=</span><span class="dv">4</span>, hidden_dim<span class="op">=</span><span class="dv">64</span>, n_actions<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.net <span class="op">=</span> nn.Sequential(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(obs_dim, hidden_dim),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            nn.Tanh(),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(hidden_dim, hidden_dim),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            nn.Tanh(),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            nn.Linear(hidden_dim, n_actions),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> F.softmax(<span class="va">self</span>.net(x), dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> act(<span class="va">self</span>, obs):</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Sample action from policy distribution; return action and log prob."""</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        obs_t <span class="op">=</span> torch.FloatTensor(obs).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> <span class="va">self</span>(obs_t)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        dist <span class="op">=</span> torch.distributions.Categorical(probs)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        action <span class="op">=</span> dist.sample()</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> action.item(), dist.log_prob(action)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Returns.</strong> We compute discounted reward-to-go <span class="math inline">G_t = \sum_{t'=t}^{T} \gamma^{t'-t} r_{t'}</span> by iterating in reverse:</p>
+<div id="b0e1f2a3" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_returns(rewards, gamma<span class="op">=</span><span class="fl">0.99</span>):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute discounted reward-to-go for each timestep."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    G <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    returns <span class="op">=</span> []</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">reversed</span>(rewards):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        G <span class="op">=</span> r <span class="op">+</span> gamma <span class="op">*</span> G</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        returns.insert(<span class="dv">0</span>, G)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.FloatTensor(returns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>REINFORCE training loop.</strong> We collect one episode per update step, compute returns, normalize them, and take a gradient step:</p>
+<div id="d2a3b4c5" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_reinforce(n_episodes<span class="op">=</span><span class="dv">1000</span>, gamma<span class="op">=</span><span class="fl">0.99</span>, lr<span class="op">=</span><span class="fl">1e-2</span>, log_interval<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>    env <span class="op">=</span> gym.make(<span class="st">"CartPole-v1"</span>)</span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> PolicyNet()</span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(policy.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>    episode_returns <span class="op">=</span> []</span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ep <span class="kw">in</span> <span class="bu">range</span>(n_episodes):</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Collect one episode</span></span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>        obs, _ <span class="op">=</span> env.reset()</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>        log_probs, rewards <span class="op">=</span> [], []</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>        done <span class="op">=</span> <span class="va">False</span></span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="kw">not</span> done:</span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>            action, log_prob <span class="op">=</span> policy.act(obs)</span>
+<span id="annotated-cell-6-15"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>            obs, r, terminated, truncated, _ <span class="op">=</span> env.step(action)</span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>            log_probs.append(log_prob)</span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>            rewards.append(r)</span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>            done <span class="op">=</span> terminated <span class="kw">or</span> truncated</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-20"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>        episode_returns.append(<span class="bu">sum</span>(rewards))</span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-22"><a href="#annotated-cell-6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute returns and policy gradient loss</span></span>
+<span id="annotated-cell-6-23"><a href="#annotated-cell-6-23" aria-hidden="true" tabindex="-1"></a>        returns <span class="op">=</span> compute_returns(rewards, gamma)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-24" class="code-annotation-target"><a href="#annotated-cell-6-24" aria-hidden="true" tabindex="-1"></a>        returns <span class="op">=</span> (returns <span class="op">-</span> returns.mean()) <span class="op">/</span> (returns.std() <span class="op">+</span> <span class="fl">1e-8</span>)</span>
+<span id="annotated-cell-6-25"><a href="#annotated-cell-6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-26"><a href="#annotated-cell-6-26" aria-hidden="true" tabindex="-1"></a>        log_probs <span class="op">=</span> torch.stack(log_probs)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-27" class="code-annotation-target"><a href="#annotated-cell-6-27" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="op">-</span>(log_probs <span class="op">*</span> returns).mean()</span>
+<span id="annotated-cell-6-28"><a href="#annotated-cell-6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-29"><a href="#annotated-cell-6-29" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="annotated-cell-6-30"><a href="#annotated-cell-6-30" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="annotated-cell-6-31"><a href="#annotated-cell-6-31" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="annotated-cell-6-32"><a href="#annotated-cell-6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-33"><a href="#annotated-cell-6-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (ep <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> log_interval <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-6-34"><a href="#annotated-cell-6-34" aria-hidden="true" tabindex="-1"></a>            avg <span class="op">=</span> np.mean(episode_returns[<span class="op">-</span><span class="dv">100</span>:])</span>
+<span id="annotated-cell-6-35"><a href="#annotated-cell-6-35" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Episode </span><span class="sc">{</span>ep<span class="op">+</span><span class="dv">1</span><span class="sc">:4d}</span><span class="ss">  avg_return=</span><span class="sc">{</span>avg<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-6-36"><a href="#annotated-cell-6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-37"><a href="#annotated-cell-6-37" aria-hidden="true" tabindex="-1"></a>    env.close()</span>
+<span id="annotated-cell-6-38"><a href="#annotated-cell-6-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> policy, episode_returns</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="24" data-code-annotation="1">Normalizing returns within each episode reduces gradient variance significantly. This is a heuristic baseline — §5 introduces the principled version via a learned value function.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="27" data-code-annotation="2">The REINFORCE loss is <span class="math inline">\mathcal{L} = -\sum_t \log \pi_\theta(a_t \mid s_t)\, G_t</span>; maximizing <span class="math inline">J(\theta)</span> corresponds to minimizing this negative quantity.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Training.</strong> We run REINFORCE for 1000 episodes and record the results:</p>
+<div id="a5d6e7f8" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>policy_reinforce, returns_reinforce <span class="op">=</span> train_reinforce(n_episodes<span class="op">=</span><span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Figure.</strong> Learning curve for plain REINFORCE. The 100-episode rolling average shows the overall trend, while the raw episode returns illustrate the high variance:</p>
+<div id="c7f8a9b0" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> smooth(x, window<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Rolling mean with a given window size."""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.convolve(x, np.ones(window) <span class="op">/</span> window, mode<span class="op">=</span><span class="st">"valid"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>ax.plot(returns_reinforce, alpha<span class="op">=</span><span class="fl">0.25</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"Episode return"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>ax.plot(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    np.arange(<span class="dv">99</span>, <span class="bu">len</span>(returns_reinforce)),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    smooth(returns_reinforce),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"100-ep rolling avg"</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">475</span>, color<span class="op">=</span><span class="st">"tomato"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>, label<span class="op">=</span><span class="st">"Solved (475)"</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Episode"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Return"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"REINFORCE on CartPole-v1"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>REINFORCE learns, but is noisy and slow. The variance comes from using full Monte Carlo returns <span class="math inline">G_t</span>: each <span class="math inline">G_t</span> averages over all future randomness in the trajectory, including luck of the environment that has nothing to do with the quality of action <span class="math inline">a_t.</span> We address this in §5.</p>
+</section>
+<section id="baselines-and-variance-reduction" class="level2">
+<h2 class="anchored" data-anchor-id="baselines-and-variance-reduction">Baselines and Variance Reduction</h2>
+<p>Any function <span class="math inline">b(s)</span> that depends only on the state (not the action) is called a <strong>baseline</strong>. Subtracting it from the return does not bias the gradient:</p>
+<p><span class="math display">\mathbb{E}_{a \sim \pi_\theta}\!\left[\nabla_\theta \log \pi_\theta(a \mid s) \cdot b(s)\right] = b(s) \cdot \nabla_\theta \underbrace{\sum_a \pi_\theta(a \mid s)}_{=1} = 0.</span></p>
+<p>So the gradient estimate <span class="math inline">\hat{g} = \sum_t \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot (G_t - b(s_t))</span> remains unbiased for any choice of <span class="math inline">b.</span> The <strong>advantage function</strong> is:</p>
+<p><span class="math display">A^\pi(s_t, a_t) = G_t - V^\pi(s_t),</span></p>
+<p>where <span class="math inline">V^\pi(s_t) = \mathbb{E}_{\pi}[G_t \mid s_t]</span> is the expected return from state <span class="math inline">s_t</span> under <span class="math inline">\pi.</span> The optimal baseline that minimizes variance is <span class="math inline">b^*(s) = V^\pi(s).</span> We approximate this with a learned value network <span class="math inline">V_\phi</span> trained alongside the policy.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In <a href="../../notebooks/llm/tutorial_14_grpo.html">GRPO</a>, the baseline is the group mean <span class="math inline">\bar{r} = \frac{1}{G}\sum_{i=1}^G r_i</span>. This is a Monte Carlo estimate of <span class="math inline">V^\pi(x) = \mathbb{E}_{y \sim \pi}[r(x, y)]</span> — the expected reward over all possible responses to prompt <span class="math inline">x</span>. The same principle applies: subtract an estimate of state value to obtain an advantage.</p>
+</div>
+</div>
+<p><strong>Value network.</strong> A separate MLP <span class="math inline">V_\phi\colon \mathbb{R}^4 \to \mathbb{R}</span> that estimates the state value:</p>
+<div id="b2e3f4a5" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ValueNet(nn.Module):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, obs_dim<span class="op">=</span><span class="dv">4</span>, hidden_dim<span class="op">=</span><span class="dv">64</span>):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.net <span class="op">=</span> nn.Sequential(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(obs_dim, hidden_dim),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            nn.Tanh(),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(hidden_dim, hidden_dim),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            nn.Tanh(),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            nn.Linear(hidden_dim, <span class="dv">1</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.net(x).squeeze(<span class="op">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>REINFORCE with baseline.</strong> We add <span class="math inline">V_\phi</span> and compute advantages <span class="math inline">\hat{A}_t = G_t - V_\phi(s_t)</span> at each timestep. The value network is trained by minimizing the mean-squared error against the observed returns:</p>
+<div id="d4a5b6c7" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_reinforce_baseline(n_episodes<span class="op">=</span><span class="dv">1000</span>, gamma<span class="op">=</span><span class="fl">0.99</span>, lr<span class="op">=</span><span class="fl">1e-2</span>, log_interval<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>    env <span class="op">=</span> gym.make(<span class="st">"CartPole-v1"</span>)</span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> PolicyNet()</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>    value_net <span class="op">=</span> ValueNet()</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>    policy_opt <span class="op">=</span> torch.optim.Adam(policy.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>    value_opt <span class="op">=</span> torch.optim.Adam(value_net.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>    episode_returns <span class="op">=</span> []</span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ep <span class="kw">in</span> <span class="bu">range</span>(n_episodes):</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>        obs, _ <span class="op">=</span> env.reset()</span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a>        log_probs, rewards, states <span class="op">=</span> [], [], []</span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>        done <span class="op">=</span> <span class="va">False</span></span>
+<span id="annotated-cell-10-14"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="kw">not</span> done:</span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a>            states.append(obs)</span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a>            action, log_prob <span class="op">=</span> policy.act(obs)</span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17" aria-hidden="true" tabindex="-1"></a>            obs, r, terminated, truncated, _ <span class="op">=</span> env.step(action)</span>
+<span id="annotated-cell-10-18"><a href="#annotated-cell-10-18" aria-hidden="true" tabindex="-1"></a>            log_probs.append(log_prob)</span>
+<span id="annotated-cell-10-19"><a href="#annotated-cell-10-19" aria-hidden="true" tabindex="-1"></a>            rewards.append(r)</span>
+<span id="annotated-cell-10-20"><a href="#annotated-cell-10-20" aria-hidden="true" tabindex="-1"></a>            done <span class="op">=</span> terminated <span class="kw">or</span> truncated</span>
+<span id="annotated-cell-10-21"><a href="#annotated-cell-10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-22"><a href="#annotated-cell-10-22" aria-hidden="true" tabindex="-1"></a>        episode_returns.append(<span class="bu">sum</span>(rewards))</span>
+<span id="annotated-cell-10-23"><a href="#annotated-cell-10-23" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-24" class="code-annotation-target"><a href="#annotated-cell-10-24" aria-hidden="true" tabindex="-1"></a>        returns <span class="op">=</span> compute_returns(rewards, gamma)</span>
+<span id="annotated-cell-10-25"><a href="#annotated-cell-10-25" aria-hidden="true" tabindex="-1"></a>        states_t <span class="op">=</span> torch.FloatTensor(np.array(states))</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-10-26" class="code-annotation-target"><a href="#annotated-cell-10-26" aria-hidden="true" tabindex="-1"></a>        values <span class="op">=</span> value_net(states_t)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-10-27" class="code-annotation-target"><a href="#annotated-cell-10-27" aria-hidden="true" tabindex="-1"></a>        advantages <span class="op">=</span> (returns <span class="op">-</span> values.detach())</span>
+<span id="annotated-cell-10-28"><a href="#annotated-cell-10-28" aria-hidden="true" tabindex="-1"></a>        advantages <span class="op">=</span> (advantages <span class="op">-</span> advantages.mean()) <span class="op">/</span> (advantages.std() <span class="op">+</span> <span class="fl">1e-8</span>)</span>
+<span id="annotated-cell-10-29"><a href="#annotated-cell-10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-30"><a href="#annotated-cell-10-30" aria-hidden="true" tabindex="-1"></a>        log_probs_t <span class="op">=</span> torch.stack(log_probs)</span>
+<span id="annotated-cell-10-31"><a href="#annotated-cell-10-31" aria-hidden="true" tabindex="-1"></a>        policy_loss <span class="op">=</span> <span class="op">-</span>(log_probs_t <span class="op">*</span> advantages).mean()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-10-32" class="code-annotation-target"><a href="#annotated-cell-10-32" aria-hidden="true" tabindex="-1"></a>        value_loss <span class="op">=</span> F.mse_loss(values, returns)</span>
+<span id="annotated-cell-10-33"><a href="#annotated-cell-10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-34"><a href="#annotated-cell-10-34" aria-hidden="true" tabindex="-1"></a>        policy_opt.zero_grad()</span>
+<span id="annotated-cell-10-35"><a href="#annotated-cell-10-35" aria-hidden="true" tabindex="-1"></a>        policy_loss.backward()</span>
+<span id="annotated-cell-10-36"><a href="#annotated-cell-10-36" aria-hidden="true" tabindex="-1"></a>        policy_opt.step()</span>
+<span id="annotated-cell-10-37"><a href="#annotated-cell-10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-38"><a href="#annotated-cell-10-38" aria-hidden="true" tabindex="-1"></a>        value_opt.zero_grad()</span>
+<span id="annotated-cell-10-39"><a href="#annotated-cell-10-39" aria-hidden="true" tabindex="-1"></a>        value_loss.backward()</span>
+<span id="annotated-cell-10-40"><a href="#annotated-cell-10-40" aria-hidden="true" tabindex="-1"></a>        value_opt.step()</span>
+<span id="annotated-cell-10-41"><a href="#annotated-cell-10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-42"><a href="#annotated-cell-10-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (ep <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> log_interval <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="annotated-cell-10-43"><a href="#annotated-cell-10-43" aria-hidden="true" tabindex="-1"></a>            avg <span class="op">=</span> np.mean(episode_returns[<span class="op">-</span><span class="dv">100</span>:])</span>
+<span id="annotated-cell-10-44"><a href="#annotated-cell-10-44" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Episode </span><span class="sc">{</span>ep<span class="op">+</span><span class="dv">1</span><span class="sc">:4d}</span><span class="ss">  avg_return=</span><span class="sc">{</span>avg<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-10-45"><a href="#annotated-cell-10-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-46"><a href="#annotated-cell-10-46" aria-hidden="true" tabindex="-1"></a>    env.close()</span>
+<span id="annotated-cell-10-47"><a href="#annotated-cell-10-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> policy, episode_returns</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="24" data-code-annotation="1">We still compute full Monte Carlo returns <span class="math inline">G_t</span> — REINFORCE with baseline remains an on-policy Monte Carlo method.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="26" data-code-annotation="2"><span class="math inline">V_\phi(s_t)</span> approximates the expected return from state <span class="math inline">s_t,</span> serving as the baseline.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="27" data-code-annotation="3">We detach the value estimates when computing advantages so that the policy gradient does not flow into the value network through this path.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="32" data-code-annotation="4">The value network is trained separately to minimize <span class="math inline">\mathcal{L}_V = \frac{1}{T}\sum_t (G_t - V_\phi(s_t))^2.</span></span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Training.</strong> We run REINFORCE with baseline and compare against plain REINFORCE:</p>
+<div id="a7d8e9f0" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>policy_baseline, returns_baseline <span class="op">=</span> train_reinforce_baseline(n_episodes<span class="op">=</span><span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Figure.</strong> Comparing REINFORCE and REINFORCE with learned value baseline. Both 100-episode rolling averages are shown:</p>
+<div id="c9f0a1b2" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>r1 <span class="op">=</span> np.array(returns_reinforce)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> np.array(returns_baseline)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(r1), <span class="bu">len</span>(r2))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>ax.plot(r1[:n], alpha<span class="op">=</span><span class="fl">0.15</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>ax.plot(r2[:n], alpha<span class="op">=</span><span class="fl">0.15</span>, color<span class="op">=</span><span class="st">"darkorange"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>ax.plot(</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    np.arange(<span class="dv">99</span>, n),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    smooth(r1[:n]),</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"REINFORCE"</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ax.plot(</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    np.arange(<span class="dv">99</span>, n),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    smooth(r2[:n]),</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"darkorange"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"REINFORCE + baseline"</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">475</span>, color<span class="op">=</span><span class="st">"tomato"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>, label<span class="op">=</span><span class="st">"Solved (475)"</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Episode"</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Return"</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Variance Reduction via Baseline"</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="actor-critic" class="level2">
+<h2 class="anchored" data-anchor-id="actor-critic">Actor-Critic</h2>
+<p>REINFORCE — even with a baseline — uses full Monte Carlo returns <span class="math inline">G_t</span>: we must wait until the episode ends before computing any gradient. <strong>Actor-Critic</strong> methods replace <span class="math inline">G_t</span> with a <strong>bootstrapped TD target</strong>, enabling online updates after every step (or short rollout). The tradeoff is a small amount of bias from the imperfect critic, but variance drops substantially.</p>
+<p>The <strong>one-step TD advantage</strong> (TD error <span class="math inline">\delta_t</span>) is:</p>
+<p><span class="math display">\hat{A}_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t) = \delta_t.</span></p>
+<p>This is the core of the <strong>Advantage Actor-Critic (A2C)</strong> algorithm. The <strong>actor</strong> (policy <span class="math inline">\pi_\theta</span>) is updated to maximize the expected advantage; the <strong>critic</strong> (value function <span class="math inline">V_\phi</span>) is updated to minimize the Bellman residual. The combined objective on a batch of <span class="math inline">T</span> steps is:</p>
+<p><span class="math display">\mathcal{L} = \underbrace{-\frac{1}{T}\sum_{t=0}^{T-1} \log \pi_\theta(a_t \mid s_t) \cdot \hat{A}_t}_{\text{policy loss}} + \underbrace{\frac{c_1}{T}\sum_{t=0}^{T-1}\left(V_\phi(s_t) - G_t^{\text{ret}}\right)^2}_{\text{value loss}} - \underbrace{c_2 \cdot H[\pi_\theta(\cdot \mid s_t)]}_{\text{entropy bonus}},</span></p>
+<p>with <span class="math inline">c_1 = 0.5</span> and <span class="math inline">c_2 = 0.01.</span> The <strong>entropy bonus</strong> <span class="math inline">H[\pi] = -\sum_a \pi \log \pi</span> encourages the policy to remain exploratory and prevents premature convergence to a deterministic solution.</p>
+<p><strong>A2C training loop.</strong> We collect short rollouts of fixed length (5 steps), compute <span class="math inline">n</span>-step returns, and update after each rollout:</p>
+<div id="a3d4e5f6" class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_a2c(n_updates<span class="op">=</span><span class="dv">5000</span>, rollout_len<span class="op">=</span><span class="dv">5</span>, gamma<span class="op">=</span><span class="fl">0.99</span>, lr<span class="op">=</span><span class="fl">3e-4</span>,</span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a>              c1<span class="op">=</span><span class="fl">0.5</span>, c2<span class="op">=</span><span class="fl">0.01</span>, log_interval<span class="op">=</span><span class="dv">500</span>):</span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>    env <span class="op">=</span> gym.make(<span class="st">"CartPole-v1"</span>)</span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> PolicyNet()</span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a>    value_net <span class="op">=</span> ValueNet()</span>
+<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(</span>
+<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">list</span>(policy.parameters()) <span class="op">+</span> <span class="bu">list</span>(value_net.parameters()), lr<span class="op">=</span>lr</span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10" aria-hidden="true" tabindex="-1"></a>    obs, _ <span class="op">=</span> env.reset(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11" aria-hidden="true" tabindex="-1"></a>    current_return <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-13-12"><a href="#annotated-cell-13-12" aria-hidden="true" tabindex="-1"></a>    all_returns <span class="op">=</span> []</span>
+<span id="annotated-cell-13-13"><a href="#annotated-cell-13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-14"><a href="#annotated-cell-13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> update <span class="kw">in</span> <span class="bu">range</span>(n_updates):</span>
+<span id="annotated-cell-13-15"><a href="#annotated-cell-13-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Collect rollout_len steps</span></span>
+<span id="annotated-cell-13-16"><a href="#annotated-cell-13-16" aria-hidden="true" tabindex="-1"></a>        states, rewards, dones, log_probs_list <span class="op">=</span> [], [], [], []</span>
+<span id="annotated-cell-13-17"><a href="#annotated-cell-13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-18"><a href="#annotated-cell-13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(rollout_len):</span>
+<span id="annotated-cell-13-19"><a href="#annotated-cell-13-19" aria-hidden="true" tabindex="-1"></a>            action, log_prob <span class="op">=</span> policy.act(obs)</span>
+<span id="annotated-cell-13-20"><a href="#annotated-cell-13-20" aria-hidden="true" tabindex="-1"></a>            next_obs, reward, terminated, truncated, _ <span class="op">=</span> env.step(action)</span>
+<span id="annotated-cell-13-21"><a href="#annotated-cell-13-21" aria-hidden="true" tabindex="-1"></a>            done <span class="op">=</span> terminated <span class="kw">or</span> truncated</span>
+<span id="annotated-cell-13-22"><a href="#annotated-cell-13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-23"><a href="#annotated-cell-13-23" aria-hidden="true" tabindex="-1"></a>            states.append(obs)</span>
+<span id="annotated-cell-13-24"><a href="#annotated-cell-13-24" aria-hidden="true" tabindex="-1"></a>            rewards.append(reward)</span>
+<span id="annotated-cell-13-25"><a href="#annotated-cell-13-25" aria-hidden="true" tabindex="-1"></a>            dones.append(done)</span>
+<span id="annotated-cell-13-26"><a href="#annotated-cell-13-26" aria-hidden="true" tabindex="-1"></a>            log_probs_list.append(log_prob)</span>
+<span id="annotated-cell-13-27"><a href="#annotated-cell-13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-28"><a href="#annotated-cell-13-28" aria-hidden="true" tabindex="-1"></a>            current_return <span class="op">+=</span> reward</span>
+<span id="annotated-cell-13-29"><a href="#annotated-cell-13-29" aria-hidden="true" tabindex="-1"></a>            obs <span class="op">=</span> next_obs</span>
+<span id="annotated-cell-13-30"><a href="#annotated-cell-13-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> done:</span>
+<span id="annotated-cell-13-31"><a href="#annotated-cell-13-31" aria-hidden="true" tabindex="-1"></a>                all_returns.append(current_return)</span>
+<span id="annotated-cell-13-32"><a href="#annotated-cell-13-32" aria-hidden="true" tabindex="-1"></a>                current_return <span class="op">=</span> <span class="dv">0</span></span>
+<span id="annotated-cell-13-33"><a href="#annotated-cell-13-33" aria-hidden="true" tabindex="-1"></a>                obs, _ <span class="op">=</span> env.reset()</span>
+<span id="annotated-cell-13-34"><a href="#annotated-cell-13-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-35"><a href="#annotated-cell-13-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute n-step returns and advantages</span></span>
+<span id="annotated-cell-13-36"><a href="#annotated-cell-13-36" aria-hidden="true" tabindex="-1"></a>        states_t <span class="op">=</span> torch.FloatTensor(np.array(states))</span>
+<span id="annotated-cell-13-37"><a href="#annotated-cell-13-37" aria-hidden="true" tabindex="-1"></a>        next_obs_t <span class="op">=</span> torch.FloatTensor(next_obs).unsqueeze(<span class="dv">0</span>)</span>
+<span id="annotated-cell-13-38"><a href="#annotated-cell-13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-39"><a href="#annotated-cell-13-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-40" class="code-annotation-target"><a href="#annotated-cell-13-40" aria-hidden="true" tabindex="-1"></a>            next_value <span class="op">=</span> value_net(next_obs_t) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> <span class="bu">float</span>(done))</span>
+<span id="annotated-cell-13-41"><a href="#annotated-cell-13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-42"><a href="#annotated-cell-13-42" aria-hidden="true" tabindex="-1"></a>        returns <span class="op">=</span> []</span>
+<span id="annotated-cell-13-43"><a href="#annotated-cell-13-43" aria-hidden="true" tabindex="-1"></a>        R <span class="op">=</span> next_value.item()</span>
+<span id="annotated-cell-13-44"><a href="#annotated-cell-13-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> r, d <span class="kw">in</span> <span class="bu">zip</span>(<span class="bu">reversed</span>(rewards), <span class="bu">reversed</span>(dones)):</span>
+<span id="annotated-cell-13-45"><a href="#annotated-cell-13-45" aria-hidden="true" tabindex="-1"></a>            R <span class="op">=</span> r <span class="op">+</span> gamma <span class="op">*</span> R <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> <span class="bu">float</span>(d))</span>
+<span id="annotated-cell-13-46"><a href="#annotated-cell-13-46" aria-hidden="true" tabindex="-1"></a>            returns.insert(<span class="dv">0</span>, R)</span>
+<span id="annotated-cell-13-47"><a href="#annotated-cell-13-47" aria-hidden="true" tabindex="-1"></a>        returns_t <span class="op">=</span> torch.FloatTensor(returns)</span>
+<span id="annotated-cell-13-48"><a href="#annotated-cell-13-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-49"><a href="#annotated-cell-13-49" aria-hidden="true" tabindex="-1"></a>        values <span class="op">=</span> value_net(states_t)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-13-50" class="code-annotation-target"><a href="#annotated-cell-13-50" aria-hidden="true" tabindex="-1"></a>        advantages <span class="op">=</span> returns_t <span class="op">-</span> values.detach()</span>
+<span id="annotated-cell-13-51"><a href="#annotated-cell-13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-52"><a href="#annotated-cell-13-52" aria-hidden="true" tabindex="-1"></a>        log_probs_t <span class="op">=</span> torch.stack(log_probs_list)</span>
+<span id="annotated-cell-13-53"><a href="#annotated-cell-13-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-54"><a href="#annotated-cell-13-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Entropy bonus</span></span>
+<span id="annotated-cell-13-55"><a href="#annotated-cell-13-55" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> policy(states_t)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-13-56" class="code-annotation-target"><a href="#annotated-cell-13-56" aria-hidden="true" tabindex="-1"></a>        entropy <span class="op">=</span> <span class="op">-</span>(probs <span class="op">*</span> probs.log()).<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>).mean()</span>
+<span id="annotated-cell-13-57"><a href="#annotated-cell-13-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-58"><a href="#annotated-cell-13-58" aria-hidden="true" tabindex="-1"></a>        policy_loss <span class="op">=</span> <span class="op">-</span>(log_probs_t <span class="op">*</span> advantages).mean()</span>
+<span id="annotated-cell-13-59"><a href="#annotated-cell-13-59" aria-hidden="true" tabindex="-1"></a>        value_loss <span class="op">=</span> F.mse_loss(values, returns_t)</span>
+<span id="annotated-cell-13-60"><a href="#annotated-cell-13-60" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> policy_loss <span class="op">+</span> c1 <span class="op">*</span> value_loss <span class="op">-</span> c2 <span class="op">*</span> entropy</span>
+<span id="annotated-cell-13-61"><a href="#annotated-cell-13-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-62"><a href="#annotated-cell-13-62" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="annotated-cell-13-63"><a href="#annotated-cell-13-63" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-13-64" class="code-annotation-target"><a href="#annotated-cell-13-64" aria-hidden="true" tabindex="-1"></a>        torch.nn.utils.clip_grad_norm_(</span>
+<span id="annotated-cell-13-65"><a href="#annotated-cell-13-65" aria-hidden="true" tabindex="-1"></a>            <span class="bu">list</span>(policy.parameters()) <span class="op">+</span> <span class="bu">list</span>(value_net.parameters()), <span class="fl">0.5</span></span>
+<span id="annotated-cell-13-66"><a href="#annotated-cell-13-66" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="annotated-cell-13-67"><a href="#annotated-cell-13-67" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="annotated-cell-13-68"><a href="#annotated-cell-13-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-69"><a href="#annotated-cell-13-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (update <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> log_interval <span class="op">==</span> <span class="dv">0</span> <span class="kw">and</span> <span class="bu">len</span>(all_returns) <span class="op">&gt;=</span> <span class="dv">100</span>:</span>
+<span id="annotated-cell-13-70"><a href="#annotated-cell-13-70" aria-hidden="true" tabindex="-1"></a>            avg <span class="op">=</span> np.mean(all_returns[<span class="op">-</span><span class="dv">100</span>:])</span>
+<span id="annotated-cell-13-71"><a href="#annotated-cell-13-71" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Update </span><span class="sc">{</span>update<span class="op">+</span><span class="dv">1</span><span class="sc">:5d}</span><span class="ss">  avg_return=</span><span class="sc">{</span>avg<span class="sc">:.1f}</span><span class="ss">  episodes=</span><span class="sc">{</span><span class="bu">len</span>(all_returns)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="annotated-cell-13-72"><a href="#annotated-cell-13-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-73"><a href="#annotated-cell-13-73" aria-hidden="true" tabindex="-1"></a>    env.close()</span>
+<span id="annotated-cell-13-74"><a href="#annotated-cell-13-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> policy, all_returns</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="40" data-code-annotation="1">Bootstrap from the next state value; zero it out if the last step was a terminal state, since there is no future reward after episode termination.</span>
+</dd>
+<dt data-target-cell="annotated-cell-13" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="50" data-code-annotation="2">We detach the critic’s value estimates when computing advantages to prevent gradients flowing into the critic through this path — the critic is trained separately via <code>value_loss</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-13" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="56" data-code-annotation="3">Entropy of the policy distribution: <span class="math inline">H[\pi] = -\sum_a \pi(a \mid s) \log \pi(a \mid s).</span> The negative sign in the loss turns maximizing entropy into a regularizer that discourages collapse to a deterministic policy.</span>
+</dd>
+<dt data-target-cell="annotated-cell-13" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="64" data-code-annotation="4">Gradient clipping prevents exploding gradients, which are common in on-policy RL with small batches and bootstrapped targets.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p><strong>Training.</strong> We run A2C for 5000 update steps, each consuming 5 environment steps:</p>
+<div id="d6a7b8c9" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>policy_a2c, returns_a2c <span class="op">=</span> train_a2c(n_updates<span class="op">=</span><span class="dv">5000</span>, rollout_len<span class="op">=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Figure.</strong> Comparing all three algorithms by 100-episode rolling average return:</p>
+<div id="f8c9d0e1" class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">3.5</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> {<span class="st">"REINFORCE"</span>: <span class="st">"steelblue"</span>, <span class="st">"REINFORCE + baseline"</span>: <span class="st">"darkorange"</span>, <span class="st">"A2C"</span>: <span class="st">"seagreen"</span>}</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>all_data <span class="op">=</span> [</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    (returns_reinforce, <span class="st">"REINFORCE"</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    (returns_baseline, <span class="st">"REINFORCE + baseline"</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    (returns_a2c, <span class="st">"A2C"</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> data, label <span class="kw">in</span> all_data:</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    arr <span class="op">=</span> np.array(data)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    ax.plot(arr, alpha<span class="op">=</span><span class="fl">0.12</span>, color<span class="op">=</span>colors[label], linewidth<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(arr) <span class="op">&gt;=</span> <span class="dv">100</span>:</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        ax.plot(</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            np.arange(<span class="dv">99</span>, <span class="bu">len</span>(arr)),</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            smooth(arr),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>colors[label], linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>label</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">475</span>, color<span class="op">=</span><span class="st">"tomato"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">1.2</span>, label<span class="op">=</span><span class="st">"Solved (475)"</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Episode"</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Return"</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"REINFORCE vs. REINFORCE + Baseline vs. A2C"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>ax.grid(linestyle<span class="op">=</span><span class="st">"dotted"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>A2C uses short rollouts of 5 steps instead of full episodes, enabling more frequent updates. The TD advantages have lower variance than Monte Carlo returns but introduce bias from the imperfect critic. It turns out that controlling this bias-variance tradeoff precisely is the key to further improvement. The next notebook introduces <strong>Generalized Advantage Estimation</strong> (GAE), which blends one-step TD and Monte Carlo returns via an exponential weighting parameter <span class="math inline">\lambda \in [0, 1]</span>, and <strong>Proximal Policy Optimization</strong> (PPO) to prevent destabilizing policy updates.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A2C with very short rollouts can underperform REINFORCE on simple environments like CartPole if the critic is insufficiently trained. The bootstrapped targets create a moving learning signal for the critic, and with only 5-step rollouts the <span class="math inline">n</span>-step returns may carry significant bias early in training. In practice, A2C shines on harder tasks where episode lengths are too long for Monte Carlo methods to be practical.</p>
+</div>
+</div>
+</section>
+<section id="appendix-the-variance-reduction-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-the-variance-reduction-landscape">Appendix: The Variance Reduction Landscape</h2>
+<p>The methods developed in this notebook occupy specific positions in the bias-variance tradeoff of advantage estimation. The table below situates each algorithm and previews what the next two notebooks introduce:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Advantage Estimate</th>
+<th>Variance</th>
+<th>Bias</th>
+<th>Sample Efficiency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>REINFORCE</td>
+<td><span class="math inline">G_t</span> (full return)</td>
+<td>High</td>
+<td>None</td>
+<td>Low</td>
+</tr>
+<tr class="even">
+<td>REINFORCE + baseline</td>
+<td><span class="math inline">G_t - V_\phi(s_t)</span></td>
+<td>Medium</td>
+<td>None</td>
+<td>Low</td>
+</tr>
+<tr class="odd">
+<td>A2C (TD)</td>
+<td><span class="math inline">r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)</span></td>
+<td>Low</td>
+<td>Yes (critic)</td>
+<td>High</td>
+</tr>
+<tr class="even">
+<td>GAE (next notebook)</td>
+<td>Exponentially-weighted blend</td>
+<td>Tunable</td>
+<td>Tunable</td>
+<td>High</td>
+</tr>
+<tr class="odd">
+<td>PPO (next notebook)</td>
+<td>GAE with clipped updates</td>
+<td>Low</td>
+<td>Tunable</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<p>The fundamental tension is that lower variance requires more reliance on the critic (bootstrapping), which introduces bias proportional to the critic’s approximation error. GAE controls this with a single parameter <span class="math inline">\lambda</span>: at <span class="math inline">\lambda = 0</span> we recover one-step TD (low variance, high bias); at <span class="math inline">\lambda = 1</span> we recover Monte Carlo (no bias, high variance). PPO then adds a mechanism to prevent the policy from updating too aggressively in a single step, which is the remaining instability in A2C.</p>
+<hr>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/tooling/07-rl-foundations.html" class="pagination-link" aria-label="RL1: Foundations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">RL1: Foundations</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/tooling/09-rl-ppo.html" class="pagination-link" aria-label="RL3: Proximal Policy Optimization">
+        <span class="nav-page-text">RL3: Proximal Policy Optimization</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

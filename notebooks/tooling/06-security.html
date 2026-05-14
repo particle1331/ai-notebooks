@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Security Tooling for Developers – particle1331/ai-notebooks</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/tooling/07-rl-foundations.html" rel="next">
+<link href="../../notebooks/tooling/05-mcp.html" rel="prev">
+<link href="../../assets/robot.jpg" rel="icon" type="image/jpeg">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-52c6e1275b981e62e0a8ba9d25c20c18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">particle1331/ai-notebooks</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">README</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="../../notebooks/apps/index.html">
+ <span class="dropdown-text">Application Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/prep/index.html">
+ <span class="dropdown-text">AI Engineering Crash Course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/agents/index.html">
+ <span class="dropdown-text">Agentic Systems</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/deep/index.html">
+ <span class="dropdown-text">Deep Learning Foundations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/llm/index.html">
+ <span class="dropdown-text">Language Models From Scratch</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/classical/index.html">
+ <span class="dropdown-text">Classical Machine Learning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../notebooks/tooling/index.html">
+ <span class="dropdown-text">Special Topics &amp; Tooling</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/particle1331/ai-notebooks" title="GitHub" class="quarto-navigation-tool px-1" aria-label="GitHub"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/06-security.html">Security Tooling</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../notebooks/tooling/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Special Topics &amp; Tooling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/01-runpod.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Runpod Setup</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/02-weak-supervision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Weak Supervision</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/03-prompt-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prompt Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/04-svd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Singular Value Decomposition</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/05-mcp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MCP Servers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/06-security.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Security Tooling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/07-rl-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL1: Foundations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/08-rl-policy-gradients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL2: Policy Gradients</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/09-rl-ppo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL3: Proximal Policy Optimization</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/10-rl-for-llms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RL4: RL for Language Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/tooling/11-text-to-lora.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text-to-LoRA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#pre-commit-secrets-scanner" id="toc-pre-commit-secrets-scanner" class="nav-link active" data-scroll-target="#pre-commit-secrets-scanner">Pre-commit Secrets Scanner</a></li>
+  <li><a href="#dependency-vulnerability-checking" id="toc-dependency-vulnerability-checking" class="nav-link" data-scroll-target="#dependency-vulnerability-checking">Dependency Vulnerability Checking</a></li>
+  <li><a href="#supply-chain-attack-defense" id="toc-supply-chain-attack-defense" class="nav-link" data-scroll-target="#supply-chain-attack-defense">Supply Chain Attack Defense</a></li>
+  <li><a href="#ci-security-checks" id="toc-ci-security-checks" class="nav-link" data-scroll-target="#ci-security-checks">CI Security Checks</a></li>
+  <li><a href="#github-actions-workflow-hardening" id="toc-github-actions-workflow-hardening" class="nav-link" data-scroll-target="#github-actions-workflow-hardening">GitHub Actions Workflow Hardening</a></li>
+  <li><a href="#static-code-security-analysis" id="toc-static-code-security-analysis" class="nav-link" data-scroll-target="#static-code-security-analysis">Static Code Security Analysis</a></li>
+  <li><a href="#runtime-secret-management" id="toc-runtime-secret-management" class="nav-link" data-scroll-target="#runtime-secret-management">Runtime Secret Management</a></li>
+  <li><a href="#appendix-evaluating-untrusted-dependencies" id="toc-appendix-evaluating-untrusted-dependencies" class="nav-link" data-scroll-target="#appendix-evaluating-untrusted-dependencies">Appendix: Evaluating Untrusted Dependencies</a>
+  <ul class="collapse">
+  <li><a href="#repository-health-signals" id="toc-repository-health-signals" class="nav-link" data-scroll-target="#repository-health-signals">Repository Health Signals</a></li>
+  <li><a href="#source-code-and-dependency-audit" id="toc-source-code-and-dependency-audit" class="nav-link" data-scroll-target="#source-code-and-dependency-audit">Source Code and Dependency Audit</a></li>
+  <li><a href="#sandboxing-first-runs" id="toc-sandboxing-first-runs" class="nav-link" data-scroll-target="#sandboxing-first-runs">Sandboxing First Runs</a></li>
+  <li><a href="#private-pypi-index-trust" id="toc-private-pypi-index-trust" class="nav-link" data-scroll-target="#private-pypi-index-trust">Private PyPI Index Trust</a></li>
+  </ul></li>
+  <li><a href="#appendix-recovering-from-a-leaked-secret" id="toc-appendix-recovering-from-a-leaked-secret" class="nav-link" data-scroll-target="#appendix-recovering-from-a-leaked-secret">Appendix: Recovering from a Leaked Secret</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../notebooks/tooling/index.html">Special Topics &amp; Tooling</a></li><li class="breadcrumb-item"><a href="../../notebooks/tooling/06-security.html">Security Tooling</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Security Tooling for Developers</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A leaked API key in git history is practically permanent once pushed. GitHub indexes commit history, and forks preserve deleted content — rotating the key is the only reliable fix. The two distinct threat classes are (1) <em>secrets in code</em>, where credentials end up in committed files or commit history, and (2) <em>vulnerable dependencies</em>, where a package already in the lockfile is later found to have a known CVE. These require different defenses.</p>
+<p>This notebook documents a defense-in-depth stack for Python projects addressing both: (1) a pre-commit hook catches secrets before they leave the machine, (2) dependency vulnerability scanning triggers when dependencies change, (3) CI gates block secrets and vulnerable packages on every pull request, and (4) runtime secret management prevents secrets from entering source files in the first place. Additional topics covered include supply chain attack defense using <code>uv</code>’s lockfile integrity model, workflow hardening via SHA-pinned Actions and <code>zizmor</code> auditing, and static analysis with Bandit for Python-specific security issues. The appendix covers recovery from a leak.</p>
+<p>All tooling discussed targets the Python ecosystem specifically: <code>uv</code> for dependency management, <code>pip-audit</code> against the PyPA and GitHub Advisory Databases, Bandit for Python AST analysis, and <code>python-dotenv</code> for runtime secret loading.</p>
+<section id="pre-commit-secrets-scanner" class="level2">
+<h2 class="anchored" data-anchor-id="pre-commit-secrets-scanner">Pre-commit Secrets Scanner</h2>
+<p>The primary tool is <strong>Gitleaks</strong> — a fast, Go-based scanner with built-in rules for over 150 secret types (OpenAI keys, AWS credentials, GitHub tokens, etc.). For teams needing a Python-installable alternative or large false-positive baseline management, <strong>detect-secrets</strong> is an option, but Gitleaks is preferred here for its zero-Python-dependency installation and broad default ruleset.</p>
+<p><strong>Install.</strong> Add <code>pre-commit</code> as a dev dependency and register the hook:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> pre-commit</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pre-commit</span> install</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>pre-commit</code> manages hook environments in isolation — it downloads and installs Gitleaks automatically via the hook config, so no separate binary installation is needed. The hook runs on every <code>git commit</code>.</p>
+<p><strong>Configure.</strong> The <code>.pre-commit-config.yaml</code> file at the repo root declares which hooks to run:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.pre-commit-config.yaml</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename=".pre-commit-config.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">repos</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">repo</span><span class="kw">:</span><span class="at"> https://github.com/gitleaks/gitleaks</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">rev</span><span class="kw">:</span><span class="at"> v8.24.2</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">hooks</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> gitleaks</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Pin <code>rev</code> to a specific release tag rather than <code>main</code> — mutable branch refs mean the hook silently changes behavior on the next <code>pre-commit autoupdate</code>.</p>
+<p><strong>Run (audit existing repo).</strong> <code>pre-commit run gitleaks --all-files</code> scans all tracked files, not just staged ones. This is useful for an initial audit of an existing repository:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pre-commit</span> run gitleaks <span class="at">--all-files</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A finding looks like:</p>
+<pre><code>Finding:     secret_key="sk-proj-REDACTED..."
+Secret:      sk-proj-REDACTED...
+RuleID:      openai-api-key
+Entropy:     4.12
+File:        notebooks/agents/01.ipynb
+Line:        42
+Fingerprint: notebooks/agents/01.ipynb:openai-api-key:42</code></pre>
+<p>The <code>Fingerprint</code> field is a stable identifier for the finding — it is used to permanently suppress false positives.</p>
+<p><strong>False positives.</strong> Three mechanisms handle legitimate strings that resemble secrets: (1) inline suppression via <code># gitleaks:allow</code> on the offending line, (2) a <code>.gitleaksignore</code> file containing fingerprints to suppress permanently, and (3) a custom <code>.gitleaks.toml</code> for project-wide allow-listing of paths or patterns.</p>
+<p>A minimal <code>.gitleaks.toml</code> extending the default ruleset:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.gitleaks.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename=".gitleaks.toml"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[extend]</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">useDefault</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">[allowlist]</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dt">paths</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"tests/fixtures/"</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>useDefault = true</code> line ensures all built-in rules remain active — the config only adds to them.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do not habitually skip the hook with <code>SKIP=gitleaks git commit</code>. Use it once for a confirmed false positive, then immediately add the fingerprint to <code>.gitleaksignore</code> so the suppression is tracked in version control.</p>
+</div>
+</div>
+</section>
+<section id="dependency-vulnerability-checking" class="level2">
+<h2 class="anchored" data-anchor-id="dependency-vulnerability-checking">Dependency Vulnerability Checking</h2>
+<p><strong>pip-audit</strong> queries the Python Packaging Advisory Database (PyPA) and the GitHub Advisory Database for CVEs in installed packages. <strong>Dependabot</strong> complements it by automatically opening pull requests to upgrade vulnerable packages. The two tools are used together: Dependabot fixes the problem proactively, pip-audit in CI enforces the fix is deployed before code ships.</p>
+<p><strong>Timing trade-offs.</strong> Where to run pip-audit involves a friction/freshness trade-off:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Option</th>
+<th>Dev friction</th>
+<th>Freshness</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pre-commit hook</td>
+<td>High — blocks every commit</td>
+<td>At commit time</td>
+<td>Avoid — network-bound, slows all commits</td>
+</tr>
+<tr class="even">
+<td>Manual after <code>uv add</code></td>
+<td>None</td>
+<td>At dep change</td>
+<td>Good habit; run <code>pip-audit --locked .</code></td>
+</tr>
+<tr class="odd">
+<td>Scheduled CI workflow</td>
+<td>None</td>
+<td>Weekly</td>
+<td>Best for background scanning</td>
+</tr>
+<tr class="even">
+<td>Dependabot</td>
+<td>None</td>
+<td>Near-real-time</td>
+<td>Best for automated upgrade PRs</td>
+</tr>
+</tbody>
+</table>
+<p>The recommended approach is to add Dependabot for automated security PRs, add a scheduled CI workflow for periodic audits, and run <code>pip-audit --locked .</code> manually after <code>uv add</code>. Do NOT add pip-audit as a pre-commit hook.</p>
+<p><strong>Install and run locally.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> tool install pip-audit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Useful invocations:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip-audit</span> <span class="at">--locked</span> .                                      <span class="co"># audit the locked dependency tree</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip-audit</span> <span class="at">--locked</span> . <span class="at">--desc</span> <span class="at">--aliases</span>                    <span class="co"># include CVE descriptions and aliases</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip-audit</span> <span class="at">--locked</span> . <span class="at">--ignore-vuln</span> GHSA-w596-4wvx-j9j6  <span class="co"># suppress a known false positive</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Advisory IDs use three prefixes: <code>PYSEC-</code> (PyPI Advisory Database), <code>CVE-</code> (NIST National Vulnerability Database), and <code>GHSA-</code> (GitHub Advisory Database). A finding looks like:</p>
+<pre><code>Found 1 known vulnerability in 1 package
+Name    Version ID                  Fix Versions
+------- ------- ------------------- ------------
+pillow  9.0.0   GHSA-56pw-mpj4-fxjw 9.0.1</code></pre>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>--locked</code> audits <code>uv.lock</code>, not the activated environment — it catches vulnerabilities before <code>uv sync</code> installs them. Omitting <code>--locked</code> audits the live environment instead, which may differ from the lockfile.</p>
+</div>
+</div>
+<p><strong>Dependabot.</strong> Enable automated dependency upgrade PRs by adding <code>.github/dependabot.yml</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.github/dependabot.yml</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename=".github/dependabot.yml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">updates</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">package-ecosystem</span><span class="kw">:</span><span class="at"> </span><span class="st">"uv"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">directory</span><span class="kw">:</span><span class="at"> </span><span class="st">"/"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">schedule</span><span class="kw">:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> </span><span class="st">"weekly"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">groups</span><span class="kw">:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">patch-and-minor</span><span class="kw">:</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">update-types</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"patch"</span><span class="kw">,</span><span class="at"> </span><span class="st">"minor"</span><span class="kw">]</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">package-ecosystem</span><span class="kw">:</span><span class="at"> </span><span class="st">"github-actions"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">directory</span><span class="kw">:</span><span class="at"> </span><span class="st">"/"</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">schedule</span><span class="kw">:</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> </span><span class="st">"weekly"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice that <code>package-ecosystem: "uv"</code> is the correct value for <code>uv</code>-managed projects — not <code>"pip"</code>. The <code>groups</code> block batches patch and minor upgrades into a single PR rather than one PR per package, reducing noise.</p>
+<p>Do not enable auto-merge on Dependabot PRs. The <code>uv.lock</code> diff in each PR shows exactly which version changed and what the new hashes are — reviewing it is the human gate that makes a supply chain compromise visible before it ships.</p>
+</section>
+<section id="supply-chain-attack-defense" class="level2">
+<h2 class="anchored" data-anchor-id="supply-chain-attack-defense">Supply Chain Attack Defense</h2>
+<p>CVE-based scanning (pip-audit, Dependabot) catches vulnerabilities that have already been disclosed and indexed in an advisory database. Supply chain attacks arrive through a different vector: a legitimate, well-known package is compromised <em>before</em> any CVE exists. The typical scenario is a compromised maintainer account — an attacker gains PyPI credentials and publishes a new patch or minor release that passes all name and signature checks. Automated CI that pulls the latest matching version installs it silently, and advisory databases are empty at the time of installation. pip-audit will not flag this. The defense operates at the artifact level rather than the advisory level.</p>
+<p><strong>How <code>uv</code> provides integrity guarantees.</strong> The <code>uv.lock</code> file records the exact version, download URL, SHA-256 hash, and byte size of every package artifact — one entry per wheel variant per platform, plus the sdist. A representative entry looks like:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[[package]]</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"litellm"</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"1.63.2"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="dt">source</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">registry</span><span class="op"> =</span> <span class="st">"https://pypi.org/simple"</span><span class="op"> }</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">sdist</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">url</span><span class="op"> =</span> <span class="st">"https://files.pythonhosted.org/..."</span><span class="op">, </span><span class="dt">hash</span><span class="op"> =</span> <span class="st">"sha256:a1b2c3..."</span><span class="op">, </span><span class="dt">size</span><span class="op"> =</span> <span class="dv">5823104</span><span class="op"> }</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="dt">wheels</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{ </span><span class="dt">url</span><span class="op"> =</span> <span class="st">"https://files.pythonhosted.org/..."</span><span class="op">, </span><span class="dt">hash</span><span class="op"> =</span> <span class="st">"sha256:d4e5f6..."</span><span class="op">, </span><span class="dt">size</span><span class="op"> =</span> <span class="dv">6012287</span><span class="op"> },</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When <code>uv sync --frozen</code> runs, it downloads the artifact and verifies the hash before writing anything to the environment. If the file served by PyPI does not match the recorded SHA-256 — even for the same version string — the install fails immediately. This is the artifact-level defense: the version is pinned and the file content is pinned independently.</p>
+<p><strong><code>--frozen</code> in CI.</strong> The default <code>uv sync</code> re-resolves the dependency graph on each run, which can pull in a newer compatible release if the lockfile is absent or stale. In CI, always use <code>--frozen</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (CI)</strong></pre>
+</div>
+<div class="sourceCode" id="cb11" data-filename="$ (CI)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--frozen</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>--frozen</code> refuses to update <code>uv.lock</code> and raises an error if the lockfile is missing or inconsistent with <code>pyproject.toml</code>. Combined with the hash verification above, this means a compromised release can only enter the environment if someone first runs <code>uv lock --upgrade-package litellm</code> locally and commits the resulting lockfile diff — a deliberate, reviewable action.</p>
+<p><strong>The upgrade gate.</strong> The practical consequence is that upgrades become explicit and reviewable:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> lock <span class="at">--upgrade-package</span> litellm   <span class="co"># bump one package, regenerate lockfile</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff uv.lock                    <span class="co"># review: new version, new hashes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>uv.lock</code> diff shows exactly which version changed and what the new hashes are. This is the point at which a supply chain attack becomes visible — a Dependabot PR for a patch bump from a popular package during an active incident will show an unexpected hash change. Reviewing lockfile diffs on Dependabot PRs (rather than auto-merging them) is the human gate that complements the technical controls.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do not configure Dependabot with <code>auto-merge: true</code> for packages that have write access to production systems or CI secrets. Auto-merging removes the human review step that makes the lockfile diff visible.</p>
+</div>
+</div>
+<p><strong>Socket.dev: behavioral scanning before CVEs exist.</strong> <code>socket.dev</code> analyzes each new release at publish time and flags behavioral anomalies: a new network call added to an install script, a new maintainer added to the project, new use of <code>exec()</code> or <code>subprocess</code> that was not in the previous version. These signals appear within minutes of a malicious release, before any CVE is filed. Install the <a href="https://github.com/apps/socket-security">Socket GitHub App</a> to automatically scan every Dependabot PR. When a PR bumps a package to a flagged release, Socket posts a comment with the specific anomalies detected. No configuration beyond app installation is required.</p>
+<p>The division of responsibility between the three tools is: pip-audit catches <em>known-bad</em> packages (CVE exists), Socket catches <em>newly-suspicious</em> packages (behavior changed), and <code>uv sync --frozen</code> ensures <em>only the reviewed version</em> is installed.</p>
+</section>
+<section id="ci-security-checks" class="level2">
+<h2 class="anchored" data-anchor-id="ci-security-checks">CI Security Checks</h2>
+<p>Two CI workflows enforce security gates on every push and pull request: a secrets scan using <code>gitleaks/gitleaks-action@v2</code> and a dependency audit using <code>pypa/gh-action-pip-audit@v1</code>.</p>
+<p><strong>Secrets scan on every push and PR.</strong> The following workflow runs Gitleaks against the full commit history on every push to any branch and every pull request:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.github/workflows/security-secrets.yml</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-13" data-filename=".github/workflows/security-secrets.yml"><pre class="sourceCode yaml code-annotation-code code-with-copy code-annotated"><code class="sourceCode yaml"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Secrets Scan</span></span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">branches</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"**"</span><span class="kw">]</span></span>
+<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pull_request</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">branches</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"**"</span><span class="kw">]</span></span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">gitleaks</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="annotated-cell-13-12"><a href="#annotated-cell-13-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-13"><a href="#annotated-cell-13-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="annotated-cell-13-14"><a href="#annotated-cell-13-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-15" class="code-annotation-target"><a href="#annotated-cell-13-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">fetch-depth</span><span class="kw">:</span><span class="at"> </span><span class="dv">0</span></span>
+<span id="annotated-cell-13-16"><a href="#annotated-cell-13-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> gitleaks/gitleaks-action@v2</span></span>
+<span id="annotated-cell-13-17"><a href="#annotated-cell-13-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="annotated-cell-13-18"><a href="#annotated-cell-13-18" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="15" data-code-annotation="1">Gitleaks scans git history — full history requires <code>fetch-depth: 0</code>. The default shallow clone misses all commits beyond the latest, allowing a secret introduced in an older commit to pass undetected.</span>
+</dd>
+</dl>
+<p>For personal repositories, no <code>GITLEAKS_LICENSE</code> secret is needed. GitHub organization repositories require a license key set as a repository secret.</p>
+<p><strong>Scheduled dependency audit.</strong> The following workflow runs pip-audit on a weekly schedule and also triggers immediately when the lockfile or manifest changes:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.github/workflows/security-audit.yml</strong></pre>
+</div>
+<div class="sourceCode" id="annotated-cell-14" data-filename=".github/workflows/security-audit.yml"><pre class="sourceCode yaml code-annotation-code code-with-copy code-annotated"><code class="sourceCode yaml"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Dependency Audit</span></span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">schedule</span><span class="kw">:</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-5" class="code-annotation-target"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">cron</span><span class="kw">:</span><span class="at"> </span><span class="st">"0 9 * * 1"</span></span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">paths</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"uv.lock"</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-9" class="code-annotation-target"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"pyproject.toml"</span></span>
+<span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-12"><a href="#annotated-cell-14-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">pip-audit</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-13"><a href="#annotated-cell-14-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="annotated-cell-14-14"><a href="#annotated-cell-14-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-15"><a href="#annotated-cell-14-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="annotated-cell-14-16"><a href="#annotated-cell-14-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> astral-sh/setup-uv@v7</span></span>
+<span id="annotated-cell-14-17"><a href="#annotated-cell-14-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> pypa/gh-action-pip-audit@v1.1.0</span></span>
+<span id="annotated-cell-14-18"><a href="#annotated-cell-14-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="annotated-cell-14-19"><a href="#annotated-cell-14-19" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="st">"."</span></span>
+<span id="annotated-cell-14-20"><a href="#annotated-cell-14-20" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="st">"--locked"</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="5" data-code-annotation="1">Runs every Monday at 09:00 UTC regardless of commits — catches new CVEs disclosed since the last code change.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="9" data-code-annotation="2">Also triggers immediately on any push that modifies the dependency lockfile or manifest, so a <code>uv add</code> that introduces a known vulnerability fails in CI before merging.</span>
+</dd>
+</dl>
+<p>In any workflow that installs the project before running code, use <code>uv sync --frozen</code> rather than <code>uv sync</code>. The <code>--frozen</code> flag refuses to re-resolve the dependency graph and verifies the SHA-256 hash of every downloaded artifact against <code>uv.lock</code> before writing to the environment. Replace the plain checkout-and-sync pattern with:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> astral-sh/setup-uv@v7</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">run</span><span class="kw">:</span><span class="at"> uv sync --frozen</span><span class="co">   # verifies hashes; fails if lockfile is stale</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dependabot creates PRs to upgrade vulnerable packages — it is asynchronous and proactive. pip-audit in CI blocks a merge if a vulnerability exists at that moment. Both are necessary: Dependabot surfaces the fix, pip-audit enforces that the fix is deployed before code ships.</p>
+</div>
+</div>
+</section>
+<section id="github-actions-workflow-hardening" class="level2">
+<h2 class="anchored" data-anchor-id="github-actions-workflow-hardening">GitHub Actions Workflow Hardening</h2>
+<p>The supply-chain risk in GitHub Actions is subtle: <code>uses: actions/checkout@v4</code> pins to a tag, but tags are mutable pointers — a compromised maintainer account can update <code>v4</code> to point to a different, malicious commit. Pinning to a full commit SHA eliminates this vector entirely:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683</span><span class="co">  # v4.2.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The inline comment preserves human readability while the SHA provides immutability. Tools like <code>zizmor</code> and Dependabot’s <code>github-actions</code> ecosystem can automate the maintenance of SHA pins.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Third-party Actions execute arbitrary code in the CI runner with access to <code>secrets.GITHUB_TOKEN</code> and any secrets loaded into the job. A malicious action can exfiltrate credentials or push code to the repository. Pin to commit SHAs for any action in a security-sensitive workflow.</p>
+</div>
+</div>
+<p><strong>Install and run zizmor.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb15" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> tool install zizmor</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zizmor</span> .github/workflows/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>zizmor</code> audits workflow YAML files for: unpinned action refs, over-permissioned <code>permissions:</code> blocks, <code>pull_request_target</code> misuse (a common privilege escalation vector), and expression injection vulnerabilities where untrusted input like <code>github.event.pull_request.title</code> flows into a <code>run:</code> step.</p>
+<p>Example output:</p>
+<pre><code>.github/workflows/publish.yml:
+  1 finding(s):
+
+  ⚠ unpinned-uses [medium]
+    Line 17: uses: quarto-dev/quarto-actions/setup@v2
+    Fix: pin to commit SHA</code></pre>
+<p><strong>CODEOWNERS.</strong> Requiring a code-owner review for any workflow file change prevents an unauthorized contributor from adding a malicious step to an existing workflow:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.github/CODEOWNERS</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename=".github/CODEOWNERS"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">.github/workflows/</span>  @your-github-username</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With this in place, a pull request touching any file under <code>.github/workflows/</code> cannot be merged without an approving review from the listed owner, even if the repository allows auto-merge for other PRs.</p>
+<p><strong>Permissions: principle of least privilege.</strong> By default, GitHub Actions grants the <code>GITHUB_TOKEN</code> <code>read</code> access to all scopes. Scope permissions at the job level so that only the job that needs write access gets it:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">build-deploy</span><span class="kw">:</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">permissions</span><span class="kw">:</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">contents</span><span class="kw">:</span><span class="at"> write</span><span class="co">      # only this job needs write; others default to read</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Setting <code>permissions</code> at the workflow level with a permissive default and overriding per-job is less safe than starting from a restrictive default. A top-level <code>permissions: read-all</code> with explicit job-level grants is the recommended structure.</p>
+</section>
+<section id="static-code-security-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="static-code-security-analysis">Static Code Security Analysis</h2>
+<p><strong>Bandit</strong> analyzes Python source for common security issues: hardcoded passwords (<code>B105</code>–<code>B107</code>), shell injection via <code>subprocess</code> with <code>shell=True</code> (<code>B602</code>/<code>B603</code>), use of <code>assert</code> for authentication checks (<code>B101</code>), and unsafe deserialization via <code>pickle</code> (<code>B301</code>). It is a static analysis tool — it does not execute code.</p>
+<p><strong>Install and run.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb19" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dev</span> bandit</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bandit</span> <span class="at">-r</span> src/ <span class="at">-ll</span>        <span class="co"># medium and high severity only</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>-ll</code> flag filters to medium and high severity, reducing noise from low-severity informational findings during initial setup.</p>
+<p><strong>Configure in <code>pyproject.toml</code>.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pyproject.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb20" data-filename="pyproject.toml"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.bandit]</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="dt">exclude_dirs</span> <span class="op">=</span> <span class="op">[</span><span class="st">"tests"</span><span class="op">,</span> <span class="st">"notebooks"</span><span class="op">]</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="dt">skips</span> <span class="op">=</span> <span class="op">[</span><span class="st">"B101"</span><span class="op">]</span>          <span class="co"># assert statements are acceptable in tests</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notebooks are excluded because they routinely use patterns that Bandit flags — hardcoded example values, <code>subprocess</code> calls for shell demos, and <code>pickle</code> for model checkpointing. Bandit is most useful scoped to <code>src/</code>.</p>
+<p><strong>Pre-commit hook.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.pre-commit-config.yaml</strong></pre>
+</div>
+<div class="sourceCode" id="cb21" data-filename=".pre-commit-config.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">repo</span><span class="kw">:</span><span class="at"> https://github.com/PyCQA/bandit</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rev</span><span class="kw">:</span><span class="at"> </span><span class="fl">1.8.3</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hooks</span><span class="kw">:</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> bandit</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"-c"</span><span class="kw">,</span><span class="at"> </span><span class="st">"pyproject.toml"</span><span class="kw">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>-c pyproject.toml</code> argument ensures the hook respects the <code>[tool.bandit]</code> configuration above, including the <code>exclude_dirs</code> list.</p>
+<p><strong>The pickle risk.</strong> <code>pickle.load()</code> executes arbitrary Python code embedded in the serialized file. Loading a model checkpoint from an untrusted source is equivalent to running the file author’s code with local filesystem permissions. The <code>weights_only=True</code> parameter in <code>torch.load</code> restricts deserialization to tensor data only, blocking code execution:</p>
+<div id="a1b2c3d5" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Unsafe: arbitrary code execution if the file is malicious</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># model_state = torch.load("checkpoint.pt")</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Safe: weights_only=True restricts deserialization to tensors only</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>model_state <span class="op">=</span> torch.load(<span class="st">"checkpoint.pt"</span>, weights_only<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>pickle.load(f)</code> will execute any Python code embedded in the file. Loading a Hugging Face checkpoint or a downloaded notebook model without auditing is equivalent to running the model author’s code with local permissions. Use <code>weights_only=True</code> with <code>torch.load</code>, or switch to <code>safetensors</code> for model weights.</p>
+</div>
+</div>
+</section>
+<section id="runtime-secret-management" class="level2">
+<h2 class="anchored" data-anchor-id="runtime-secret-management">Runtime Secret Management</h2>
+<p>API keys for OpenAI, Groq, AWS, and similar services must never appear in notebook source, <code>pyproject.toml</code>, or any committed file. The standard pattern is a <code>.env</code> file on disk, gitignored, loaded at runtime via <code>python-dotenv</code>.</p>
+<p><strong>Install.</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb23" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add python-dotenv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong><code>.env</code> file format</strong> (never committed — add <code>.env</code> to <code>.gitignore</code>):</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.env</strong></pre>
+</div>
+<div class="sourceCode" id="cb24" data-filename=".env"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="va">OPENAI_API_KEY</span><span class="op">=</span>sk-proj-...</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="va">GROQ_API_KEY</span><span class="op">=</span>gsk_...</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="va">AWS_ACCESS_KEY_ID</span><span class="op">=</span>AKIA...</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="va">AWS_SECRET_ACCESS_KEY</span><span class="op">=</span>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Commit a <code>.env.example</code> file alongside it with the same keys but empty values — this documents what variables are expected without exposing real credentials:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.env.example</strong></pre>
+</div>
+<div class="sourceCode" id="cb25" data-filename=".env.example"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="va">OPENAI_API_KEY</span><span class="op">=</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="va">GROQ_API_KEY</span><span class="op">=</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="va">AWS_ACCESS_KEY_ID</span><span class="op">=</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="va">AWS_SECRET_ACCESS_KEY</span><span class="op">=</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Verify that <code>.env</code> is gitignored with:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb26" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> check-ignore <span class="at">-v</span> .env</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If the command returns the path (e.g.&nbsp;<code>.gitignore:5:.env</code>), git will not track it. No output means it is not ignored.</p>
+<p><strong>Load at runtime.</strong> Call <code>load_dotenv()</code> at the top of any notebook or script that needs credentials:</p>
+<div id="b8c9d0e2" class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>load_dotenv()  <span class="co"># loads .env from the working directory</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>api_key <span class="op">=</span> os.environ[<span class="st">"OPENAI_API_KEY"</span>]  <span class="co"># raises KeyError if missing</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>os.environ["KEY"]</code> raises <code>KeyError</code> if the variable is missing — it fails loudly at startup rather than silently failing later with an unhelpful error. <code>os.getenv("KEY", "default")</code> silently falls back to a hardcoded value, which is the wrong behavior for secrets: a misconfigured environment would proceed with a wrong or empty key.</p>
+<p><strong>GitHub Actions secrets.</strong> In CI, <code>.env</code> does not exist — secrets are injected via the GitHub Actions secret store and surfaced as environment variables in the job:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Run notebook</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">OPENAI_API_KEY</span><span class="kw">:</span><span class="at"> ${{ secrets.OPENAI_API_KEY }}</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">run</span><span class="kw">:</span><span class="at"> jupyter nbconvert --to notebook --execute notebook.ipynb</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>GitHub Actions automatically masks secret values in log output — any log line containing the raw secret value is replaced with <code>***</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>.env</code> files are plaintext on disk — anyone with filesystem access can read them. They are appropriate for local development only. For shared environments, use the platform’s secret store: GitHub Actions secrets, AWS Secrets Manager, 1Password CLI, or similar.</p>
+</div>
+</div>
+</section>
+<section id="appendix-evaluating-untrusted-dependencies" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-evaluating-untrusted-dependencies">Appendix: Evaluating Untrusted Dependencies</h2>
+<p>The supply chain defenses covered above — pip-audit, socket.dev, <code>uv sync --frozen</code> — operate on packages that are <em>already in the lockfile</em>. They say nothing about whether a package should be added in the first place. In enterprise settings the question frequently arises with low-star or early-stage packages: a useful utility with 40 stars on GitHub, a specialized ML library from an unfamiliar author, a private registry package from a vendor. The following checklist structures the pre-adoption decision.</p>
+<section id="repository-health-signals" class="level3">
+<h3 class="anchored" data-anchor-id="repository-health-signals">Repository Health Signals</h3>
+<p>Star count is a weak signal in isolation — many useful enterprise utilities have few stars, and stars can be purchased. A more reliable picture comes from reading the commit and issue history:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Signal</th>
+<th>What to look for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Commit recency</td>
+<td>Last commit within 6 months for active projects; stale repos may have unpatched CVEs</td>
+</tr>
+<tr class="even">
+<td>Contributor count</td>
+<td>Single-maintainer projects carry key-person risk; check if the maintainer is responsive</td>
+</tr>
+<tr class="odd">
+<td>Issue / PR responsiveness</td>
+<td>Open bug reports unanswered for months, or closed with “won’t fix” on security issues, are red flags</td>
+</tr>
+<tr class="even">
+<td>Release cadence</td>
+<td>Erratic or sudden burst of releases after a long gap can indicate account compromise</td>
+</tr>
+<tr class="odd">
+<td>Publishing history on PyPI</td>
+<td>Visit <code>pypi.org/project/&lt;name&gt;/#history</code> — a package that published 20 releases in one week is suspicious</td>
+</tr>
+<tr class="even">
+<td>Maintainer account age</td>
+<td>New GitHub/PyPI accounts publishing high-value package names are a typosquatting signal</td>
+</tr>
+</tbody>
+</table>
+<p>For private index packages (custom <code>--extra-index-url</code>), the same checks apply to the host organization’s public presence — GitHub org creation date, number of public repos, any prior security disclosures.</p>
+</section>
+<section id="source-code-and-dependency-audit" class="level3">
+<h3 class="anchored" data-anchor-id="source-code-and-dependency-audit">Source Code and Dependency Audit</h3>
+<p>Before adding a package, read the code that runs at install time and at import time. Two specific vectors:</p>
+<p><strong>Install-time execution.</strong> <code>setup.py</code> and <code>pyproject.toml</code> build backends can execute arbitrary code during <code>pip install</code>. Inspect these files for network calls, file writes outside the package directory, or <code>subprocess</code> calls:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb29" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download the sdist without installing it</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> download <span class="at">--no-deps</span> <span class="at">--no-binary</span> :all: programasweights <span class="dt">\</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--extra-index-url</span> https://pypi.programasweights.com/simple/ <span class="dt">\</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-d</span> /tmp/paw-dist</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Unpack and inspect</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> xzf /tmp/paw-dist/programasweights-<span class="pp">*</span>.tar.gz <span class="at">-C</span> /tmp/paw-src</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">'subprocess\|urllib\|requests\|socket\|eval\|exec'</span> /tmp/paw-src/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Transitive dependencies.</strong> A small package can pull in a large dependency graph. Before committing the lockfile, review what <code>uv add</code> resolves:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb30" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dry-run: show what would be added without writing anything</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="at">--dry-run</span> programasweights <span class="dt">\</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--extra-index-url</span> https://pypi.programasweights.com/simple/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Inspect each new transitive package the same way. A two-function utility that pulls in <code>requests</code>, <code>boto3</code>, and <code>cryptography</code> as hard dependencies deserves scrutiny — the attack surface is the union of all transitive packages.</p>
+<p><strong>Runtime behavior at import.</strong> Some packages execute significant logic on <code>import</code>. After sandboxed installation (see below), run:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (sandbox)</strong></pre>
+</div>
+<div class="sourceCode" id="cb31" data-filename="$ (sandbox)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import programasweights"</span>  <span class="co"># observe: network calls? file writes?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Use a network-monitoring tool (<code>tcpdump</code>, <code>lsof</code>, or <code>strace -e trace=network</code> on Linux) to observe whether the import makes outbound connections.</p>
+</section>
+<section id="sandboxing-first-runs" class="level3">
+<h3 class="anchored" data-anchor-id="sandboxing-first-runs">Sandboxing First Runs</h3>
+<p>The first install and first import of an untrusted package should happen in an isolated environment, not on the development machine. Three escalating levels of isolation:</p>
+<p><strong>Ephemeral virtual environment.</strong> The minimum bar — keeps the package off the system Python and makes cleanup trivial:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb32" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> venv /tmp/paw-sandbox <span class="kw">&amp;&amp;</span> <span class="bu">source</span> /tmp/paw-sandbox/bin/activate</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install programasweights <span class="dt">\</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--extra-index-url</span> https://pypi.programasweights.com/simple/</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import programasweights as paw; print(paw.__version__)"</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="ex">deactivate</span> <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/paw-sandbox</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This isolates the Python environment but not the filesystem or network — a malicious install script can still write to <code>~/.ssh</code> or make outbound calls.</p>
+<p><strong>Docker container with network isolation.</strong> For packages that run install scripts or make outbound calls, use a container with an explicit network policy:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb33" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># No outbound network access during install</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="at">--network</span> none python:3.13-slim <span class="dt">\</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    pip install <span class="at">--no-index</span> <span class="at">--find-links</span> /wheels programasweights</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Or: allow network but observe it</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> python:3.13-slim sh <span class="at">-c</span> <span class="dt">\</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pip install programasweights </span><span class="dt">\</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="st">     --extra-index-url https://pypi.programasweights.com/simple/ </span><span class="dt">\</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="st">     &amp;&amp; python -c 'import programasweights'"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong><code>--no-build-isolation</code> + inspected build environment.</strong> When the package uses a non-standard build backend, <code>--no-build-isolation</code> prevents pip from creating a temporary build environment. This forces the build to use your controlled environment but also means you can intercept and inspect all build steps. Use with an audited <code>pyproject.toml</code> or <code>setup.py</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The goal is not to run every dependency in Docker forever — it is to have a reproducible record of what the package does on first install and first import before it touches production systems or CI secrets.</p>
+</div>
+</div>
+</section>
+<section id="private-pypi-index-trust" class="level3">
+<h3 class="anchored" data-anchor-id="private-pypi-index-trust">Private PyPI Index Trust</h3>
+<p>Packages served from a non-standard index (<code>--extra-index-url</code>, <code>--index-url</code>) introduce trust questions that do not apply to <code>pypi.org</code>. The threat model has two components:</p>
+<p><strong>Dependency confusion attacks.</strong> When both <code>pypi.org</code> and a private index are configured, <code>pip</code> and <code>uv</code> by default check <em>both</em> and install the highest version found on <em>either</em>. An attacker who knows the internal package name can publish a higher-versioned package with the same name to <code>pypi.org</code>, causing it to be installed instead of the private one. Mitigate by:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb34" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># uv: restrict a package to only the private index</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add programasweights <span class="dt">\</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--index</span> https://pypi.programasweights.com/simple/ <span class="dt">\</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--index-strategy</span> unsafe-first-match  <span class="co"># never fall back to PyPI for this package</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Or declare the index in <code>pyproject.toml</code> with explicit package pinning so the resolver never consults <code>pypi.org</code> for that name:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pyproject.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb35" data-filename="pyproject.toml"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[[tool.uv.index]]</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"programasweights"</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="dt">url</span> <span class="op">=</span> <span class="st">"https://pypi.programasweights.com/simple/"</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="dt">explicit</span> <span class="op">=</span> <span class="cn">true</span>   <span class="co"># only used for packages explicitly assigned to it</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="kw">[tool.uv.sources]</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="dt">programasweights</span> <span class="op">=</span> <span class="op">{ </span><span class="dt">index</span><span class="op"> =</span> <span class="st">"programasweights"</span><span class="op"> }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With <code>explicit = true</code>, <code>uv</code> will not use this index for any package except those listed under <code>[tool.uv.sources]</code>. The dependency confusion attack surface is eliminated.</p>
+<p><strong>Index server trust.</strong> A private PyPI index is a web server you do not control. Before adding it:</p>
+<ul>
+<li>Verify the domain is owned by the vendor (WHOIS, GitHub org links, documentation cross-references).</li>
+<li>Check that the index URL is <code>https://</code> — plaintext HTTP allows MITM injection of malicious packages.</li>
+<li>Confirm <code>uv.lock</code> records SHA-256 hashes for packages fetched from the private index — the same integrity guarantee that applies to <code>pypi.org</code> packages applies here.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb36" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the hash recorded in uv.lock for a private-index package</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A5</span> <span class="st">'name = "programasweights"'</span> uv.lock</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If <code>uv.lock</code> does not record hashes for the private-index package (possible with some non-standard server configurations), do not use <code>--frozen</code> in CI — the hash verification step is silently skipped for that package.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The dependency confusion attack is the highest-impact vector for private index packages. Always use <code>explicit = true</code> in <code>[tool.uv.index]</code> so the private index is never consulted for packages that should come from PyPI, and vice versa.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="appendix-recovering-from-a-leaked-secret" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-recovering-from-a-leaked-secret">Appendix: Recovering from a Leaked Secret</h2>
+<p>If a secret is committed and pushed, the steps are (1) rotate the credential immediately — before anything else — and (2) assume it was seen. GitHub indexes commit history; forks preserve deleted content; cached copies may exist in search engines or scanning tools. History rewriting does not undo exposure retroactively.</p>
+<p><strong>Rotation is the priority.</strong> Removing the secret from history without rotating first leaves the window of exposure open while history rewriting is in progress. Rotate the key, then clean up history.</p>
+<p><strong>Purging from git history.</strong> <code>git filter-repo</code> is the modern replacement for <code>BFG Repo Cleaner</code> and <code>git filter-branch</code>. It rewrites all reachable commits:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>$ (local)</strong></pre>
+</div>
+<div class="sourceCode" id="cb37" data-filename="$ (local)"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install git-filter-repo</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove a specific file from all history</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> filter-repo <span class="at">--path</span> secrets.txt <span class="at">--invert-paths</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace a specific secret value with a placeholder in all history</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> filter-repo <span class="at">--replace-text</span> <span class="op">&lt;(</span><span class="bu">echo</span> <span class="st">"sk-proj-ACTUAL_KEY==&gt;REDACTED"</span><span class="op">)</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Force-push all refs after rewrite</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">--force</span> <span class="at">--all</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">--force</span> <span class="at">--tags</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After a force-push, all collaborators must re-clone — their local history is now incompatible with the rewritten remote. Communicate this before proceeding.</p>
+<p><strong>GitHub secret scanning.</strong> GitHub’s Security tab (available free on public repositories) shows secret scanning alerts. Check it after a suspected leak to see what GitHub itself detected — this confirms whether the exposure was indexed.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Force-pushing does not immediately remove the commit from GitHub’s servers. GitHub caches commits for a period after deletion. For sensitive credentials, contact GitHub Support after the force-push to request a cache purge.</p>
+</div>
+</div>
+<hr>
+<p>■</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/particle1331\.github\.io\/ai-notebooks\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/tooling/05-mcp.html" class="pagination-link" aria-label="MCP Servers">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">MCP Servers</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../notebooks/tooling/07-rl-foundations.html" class="pagination-link" aria-label="RL1: Foundations">
+        <span class="nav-page-text">RL1: Foundations</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
