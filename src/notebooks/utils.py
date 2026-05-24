@@ -15,9 +15,7 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
-ROOT_PATH = pathlib.Path(__file__).parents[2]
-DATA_PATH = ROOT_PATH / "data"
-ARTIFACTS_PATH = ROOT_PATH / "artifacts"
+from notebooks.constants import ROOT_PATH, DATA_PATH, ARTIFACTS_PATH
 
 def init():
     DATA_PATH.mkdir(exist_ok=True)

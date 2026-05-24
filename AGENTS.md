@@ -111,6 +111,18 @@ When enhancing these utilities, maintain backward compatibility and update docst
 
 Always write temporary files to `tmp/` at the project root, not `/tmp/`. Never create temporary files elsewhere in the workspace unless meant to be committed.
 
+## External Systems & Side Effects
+
+**Ask before writing to external systems.** Any action that writes to a system outside the local filesystem — including the macOS Keychain, cloud services, APIs, databases, or environment secrets — requires explicit user confirmation before proceeding.
+
+**Clean up after tests.** When testing code that writes to an external system, always delete the test data immediately after the test completes. If a test fails partway through and cleanup cannot be guaranteed, notify the user of exactly what was written and what needs to be removed manually.
+
+Examples of external writes that require permission or cleanup:
+- Storing keys in the macOS Keychain (`set_secret`, `keyring.set_password`)
+- Making mutating API calls (POST, PUT, DELETE)
+- Writing to cloud storage (S3, GCS) or databases
+- Sending emails or messages
+
 ## Git Workflow
 
 - **Commit only when explicitly asked** by the user
@@ -132,5 +144,5 @@ Always write temporary files to `tmp/` at the project root, not `/tmp/`. Never c
 
 ---
 
-**Last Updated:** 2026-05-11
+**Last Updated:** 2026-05-25
 **Project Root:** `/Users/particle1331/code/latest/ai-notebooks`

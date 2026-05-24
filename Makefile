@@ -1,4 +1,4 @@
-.PHONY: docs uv venv requirements
+.PHONY: docs uv venv requirements secrets
 
 docs:
 	quarto preview
@@ -17,3 +17,11 @@ requirements: uv
 venv: uv
 	uv venv --python 3.13
 	uv sync
+
+secrets:
+	uv run cli/secrets.py $(filter-out $@,$(MAKECMDGOALS))
+
+# Absorb any extra words passed after 'make secrets <cmd>' so make doesn't
+# treat them as targets.
+%:
+	@:
