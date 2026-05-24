@@ -5,6 +5,8 @@ description: >
   pedagogical style. Use this agent when creating new notebook cells, reviewing
   notebook prose quality, or rewriting sections to match the established voice
   and formatting conventions. Specialized for ai-notebooks project.
+model: claude-sonnet-4.6
+thinking: medium
 tools: read, edit, write
 inheritProjectContext: true
 skills: quarto-dev, matplotlib-style

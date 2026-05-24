@@ -175,7 +175,7 @@ website:
         - section: ""
           href: notebooks/tooling/index.ipynb
           contents:
-            - text: "Runpod Setup"
+            - text: "Dev Environment Setup"
               href: notebooks/tooling/01-runpod.ipynb
             - text: "Weak Supervision"
               href: notebooks/tooling/02-weak-supervision.ipynb

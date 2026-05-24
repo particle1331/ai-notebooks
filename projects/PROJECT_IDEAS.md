@@ -6,7 +6,7 @@ Notebook and app ideas to revisit later.
 
 ## `notebooks/apps/cda/` — Coding Agent UI
 
-### Multi-user agent sessions (`08-ui4.ipynb`)
+### Multi-user agent sessions (`08-ui4.ipynb`) -- Agent Group Chat
 
 Share a running agent session across multiple connected users via Flet's `page.pubsub`.
 

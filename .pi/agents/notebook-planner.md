@@ -7,6 +7,8 @@ description: >
   Use this agent when starting a new topic, planning a notebook series, or
   deciding what content to create next. Checks existing coverage to avoid
   redundancy.
+model: claude-opus-4.6
+thinking: high
 tools: read, web_search, web_fetch
 inheritProjectContext: true
 ---

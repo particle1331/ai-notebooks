@@ -1433,7 +1433,6 @@
       "references": [],
       "title": "Week 40 | tooling/05 Security Tooling for Developers"
     },
-
     {
       "assignedTo": {
         "name": "particle1331"
@@ -1450,20 +1449,6 @@
     }
   ],
   "in-progress": [
-    {
-      "assignedTo": {
-        "name": "particle1331"
-      },
-      "creation_time": "2026-04-16T00:00:00.000Z",
-      "id": "8",
-      "category": "Prep",
-      "description": {
-        "content": "Week 01 - Prep track\n\n**Path:** prep/01\n**Title:** LLM APIs & Chat Completions",
-        "mime": "text/markdown"
-      },
-      "references": [],
-      "title": "Week 01 | prep/01 LLM APIs & Chat Completions"
-    },
     {
       "assignedTo": {
         "name": "particle1331"
@@ -1493,7 +1478,22 @@
       "title": "Week 04 | deep/04 Optimizers: SGD to AdamW"
     }
   ],
-  "testing": [],
+  "testing": [
+    {
+      "assignedTo": {
+        "name": "particle1331"
+      },
+      "creation_time": "2026-04-16T00:00:00.000Z",
+      "id": "8",
+      "category": "Prep",
+      "description": {
+        "content": "Week 01 - Prep track\n\n**Path:** prep/01\n**Title:** LLM APIs & Chat Completions",
+        "mime": "text/markdown"
+      },
+      "references": [],
+      "title": "Week 01 | prep/01 LLM APIs & Chat Completions"
+    }
+  ],
   "done": [
     {
       "assignedTo": {
