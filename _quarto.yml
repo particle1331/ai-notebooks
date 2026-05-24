@@ -239,28 +239,28 @@ website:
           contents:
             - text: "01. Flet I: Basics"
               href: notebooks/apps/01-flet.ipynb
-            - text: "03. Flet II: Declarative UI"
-              href: notebooks/apps/03-flet.ipynb
-            - text: "05. FastAPI Fundamentals"
-              href: notebooks/apps/05-fastapi.ipynb
-            - text: "06. Docker & Infrastructure"
-              href: notebooks/apps/06-docker.ipynb
-            - text: "07. Database & ORM"
-              href: notebooks/apps/07-database.ipynb
-            - text: "08. S3 & Batch Pipelines"
-              href: notebooks/apps/08-s3-pipeline.ipynb
-            - text: "09. Embeddings & Vector Search"
-              href: notebooks/apps/09-embeddings.ipynb
-            - text: "10. People Clustering"
-              href: notebooks/apps/10-clustering.ipynb
-            - text: "11. Flet ↔ FastAPI"
-              href: notebooks/apps/11-integration.ipynb
-            - text: "12. Realtime & WebSockets"
-              href: notebooks/apps/12-realtime.ipynb
-            - text: "13. Multimodal Queries"
-              href: notebooks/apps/13-multimodal.ipynb
-            - text: "14. Photo App: End-to-End"
-              href: notebooks/apps/14-photo-app.ipynb
+            - text: "02. Flet II: Declarative UI"
+              href: notebooks/apps/02-flet.ipynb
+            - text: "03. FastAPI Fundamentals"
+              href: notebooks/apps/03-fastapi.ipynb
+            - text: "04. Docker & Infrastructure"
+              href: notebooks/apps/04-docker.ipynb
+            - text: "05. Database & ORM"
+              href: notebooks/apps/05-database.ipynb
+            - text: "06. S3 & Batch Pipelines"
+              href: notebooks/apps/06-s3-pipeline.ipynb
+            - text: "07. Embeddings & Vector Search"
+              href: notebooks/apps/07-embeddings.ipynb
+            - text: "08. People Clustering"
+              href: notebooks/apps/08-clustering.ipynb
+            - text: "09. Flet ↔ FastAPI"
+              href: notebooks/apps/09-integration.ipynb
+            - text: "10. Realtime & WebSockets"
+              href: notebooks/apps/10-realtime.ipynb
+            - text: "11. Multimodal Queries"
+              href: notebooks/apps/11-multimodal.ipynb
+            - text: "12. Photo App: End-to-End"
+              href: notebooks/apps/12-photo-app.ipynb
 
         - section: "NBX: Compute Platform"
           href: notebooks/apps/nbx/index.ipynb
