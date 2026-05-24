@@ -1,5 +1,3 @@
-"""_paths.py — Project-wide path constants."""
-
 import pathlib
 
 ROOT_PATH = pathlib.Path(__file__).parents[2]

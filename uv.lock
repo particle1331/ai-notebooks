@@ -46,6 +46,7 @@ dependencies = [
     { name = "torchvision" },
     { name = "torchviz" },
     { name = "tqdm" },
+    { name = "typer" },
 ]
 
 [[package]]

@@ -41,6 +41,7 @@ dependencies = [
   "opencv-python>=4.13.0.92",
   "sentence-transformers>=5.4.1",
   "keyring>=25.7.0",
+  "typer>=0.24.1",
 ]
 
 [build-system]
