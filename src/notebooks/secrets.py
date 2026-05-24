@@ -64,26 +64,18 @@ def _get_from_dotenv(key: str, env_path: pathlib.Path) -> str | None:
 
 def _parse_keychain_dump(output: str) -> list[str]:
     """Extract account names for our service from `security dump-keychain` output."""
-    entries: list[str] = []
-    current: list[str] = []
+    import re  # noqa: PLC0415
 
-    def process_block(block: list[str]) -> None:
-        text = "\n".join(block)
-        if f'"svce"<blob>="{_KEYCHAIN_SERVICE}"' not in text:
-            return
-        for line in block:
+    entries: list[str] = []
+
+    # Split into per-entry blocks at each "keychain:" header line.
+    for block in re.split(r"(?=^keychain:)", output, flags=re.MULTILINE):
+        if f'"svce"<blob>="{_KEYCHAIN_SERVICE}"' not in block:
+            continue
+        for line in block.splitlines():
             line = line.strip()
             if line.startswith('"acct"') and '="' in line:
                 entries.append(line.split('="', 1)[1].rstrip('"'))
-
-    for line in output.splitlines():
-        if line.startswith("keychain:") and current:
-            process_block(current)
-            current = []
-        current.append(line)
-
-    if current:
-        process_block(current)
 
     return entries
 
@@ -171,6 +163,31 @@ def get_secret(
     return None
 
 
+def load_secrets(keys: list[str] | None = None, *, overwrite: bool = False) -> None:
+    """Load secrets into environment variables.
+
+    Fetches each key via `get_secret` and writes it to `os.environ`, so
+    libraries that read from the environment (e.g. the OpenAI client) pick
+    them up automatically.
+
+    Parameters
+    ----------
+    keys:
+        Secret names to load, e.g. `["OPENAI_API_KEY", "GROQ_API_KEY"]`.
+    overwrite:
+        When `False` (default) keys already present in the environment are
+        left untouched. Set to `True` to overwrite them.
+    """
+    if keys is None:
+        keys = list_secrets(verbose=False)
+
+    for key in keys:
+        if key in os.environ and not overwrite:
+            continue
+        value = get_secret(key)
+        os.environ[key] = str(value)
+
+
 def set_secret(key: str, value: str) -> None:
     """Store *key* / *value* in the macOS Keychain (macOS only).
 
@@ -200,7 +217,7 @@ def delete_secret(key: str) -> None:
     print(f"✓ Deleted '{key}' from macOS Keychain (service '{_KEYCHAIN_SERVICE}').")
 
 
-def list_secrets() -> None:
+def list_secrets(verbose=True) -> list:
     """Print all keys stored under the ai-notebooks service (macOS only)."""
     if not _IS_MACOS:
         raise RuntimeError(
@@ -216,9 +233,12 @@ def list_secrets() -> None:
     )
     entries = _parse_keychain_dump(result.stdout)
 
-    if entries:
-        print(f"Keys stored under service '{_KEYCHAIN_SERVICE}':")
-        for e in sorted(set(entries)):
-            print(f"  • {e}")
-    else:
-        print(f"No keys found under service '{_KEYCHAIN_SERVICE}'.")
+    if verbose:
+        if entries:
+            print(f"Keys stored under service '{_KEYCHAIN_SERVICE}':")
+            for e in sorted(set(entries)):
+                print(f"  • {e}")
+        else:
+            print(f"No keys found under service '{_KEYCHAIN_SERVICE}'.")
+
+    return entries
