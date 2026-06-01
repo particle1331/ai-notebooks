@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Any
 
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 import numpy as np
 
 __all__ = ["Plot", "Panel", "set_format"]
@@ -66,7 +67,7 @@ def _to_numpy(data: _ArrayLike) -> np.ndarray | None:
     return np.asarray(data)
 
 
-def _apply_style(ax: plt.Axes) -> None:
+def _apply_style(ax: Axes) -> None:
     """Apply default style to a single axes: remove top/right spines, dotted grid."""
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -110,7 +111,7 @@ class Panel:
     Access the underlying axes via ``panel.ax`` for anything not covered here.
     """
 
-    def __init__(self, ax: plt.Axes) -> None:
+    def __init__(self, ax: Axes) -> None:
         self.ax = ax
         # Accumulate scatter data lazily for regression_line / diagonal_line
         self._scatter_chunks_x: list[np.ndarray] = []
@@ -152,7 +153,9 @@ class Panel:
             No lag — the smoothed line covers the full x range.
         """
         y = _to_numpy(y)
+        assert y is not None, "y must not be None"
         x = np.arange(len(y)) if x is None else _to_numpy(x)
+        assert x is not None, "x must not be None"
 
         if smooth is not None and smooth > 1:
             # Raw trace — faded
@@ -238,7 +241,9 @@ class Panel:
         alpha: float = 0.7,
     ) -> Panel:
         """Histogram."""
-        data = _to_numpy(data).ravel()
+        data = _to_numpy(data)
+        assert data is not None, "data must not be None"
+        data = data.ravel()
         self.ax.hist(
             data, bins=bins, color=color, label=label,
             density=density, alpha=alpha,
@@ -542,7 +547,7 @@ class Plot:
         return self._panels[idx]
 
     @property
-    def axes(self) -> list[plt.Axes]:
+    def axes(self) -> list[Axes]:
         """List of all underlying matplotlib axes (flat order)."""
         return self._axes_flat
 

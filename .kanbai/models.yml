@@ -1,0 +1,5 @@
+# AI models for the kanbai chat panel.
+# Each entry maps a display handle to an env var holding the model/deployment name.
+models:
+  - handle: default
+    env_var: OPENAI_MODEL
